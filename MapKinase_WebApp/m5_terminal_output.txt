@@ -1,0 +1,405 @@
+[32mINFO[0m:     Started server process [[36m48544[0m]
+[32mINFO[0m:     Waiting for application startup.
+[32mINFO[0m:     Application startup complete.
+[32mINFO[0m:     Uvicorn running on [1mhttp://127.0.0.1:8004[0m (Press CTRL+C to quit)
+[32mINFO[0m:     127.0.0.1:64453 - "[1mGET / HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:56449 - "[1mGET /lib/bootstrap-5.3.1/bootstrap.bundle.min.js HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:57479 - "[1mGET /lib/shiny-1.5.0/shiny.js HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:57477 - "[1mGET /lib/jquery-3.6.0/jquery-3.6.0.min.js HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:50054 - "[1mGET /lib/requirejs-2.3.6/require.min.js HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:63687 - "[1mGET /lib/bootstrap-5.3.1/bootstrap.min.css HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:52440 - "[1mGET /lib/shiny-busy-indicators-1.5.0/busy-indicators.css HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:56449 - "[1mGET /lib/htmltools-fill-0.5.8.9000/fill.css HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:57477 - "[1mGET /lib/bslib-components-0.9.0.9000/components.min.js HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:52440 - "[1mGET /lib/bslib-components-0.9.0.9000/web-components.min.js HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:50054 - "[1mGET /lib/ionrangeslider-2.3.1/js/ion.rangeSlider.min.js HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:63687 - "[1mGET /lib/strftime-0.9.2/strftime-min.js HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:57479 - "[1mGET /lib/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.min.js HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:56449 - "[1mGET /lib/bootstrap-5.3.1/font.css HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:52440 - "[1mGET /lib/selectize-0.12.6/js/selectize.min.js HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:57477 - "[1mGET /lib/selectize-0.12.6/accessibility/js/selectize-plugin-a11y.min.js HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:57477 - "[1mGET /lib/bootstrap-5.3.1/fonts/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-muw.woff2 HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     127.0.0.1:57921 - "WebSocket /websocket/" [accepted]
+[32mINFO[0m:     connection open
+[32mINFO[0m:     127.0.0.1:56449 - "[1mGET /lib/shiny-busy-indicators-1.5.0/spinners/ring.svg HTTP/1.1[0m" [32m200 OK[0m
+Pathway file downloaded: hsa04010.xml
+Parsed 132 entries, 2 groups, and 169 arrows
+PTM dataset ptm_0: 6781 rows, columns: ['ER+_Est-_x-y_ER+', 'ER+_Est-_x-y_TNBC', 'ER+_x-y_TNBC', 'ER+_Est-', 'ER+', 'TNBC', 'C: redundancy', 'C: GOBP name', 'C: GOMF name', 'C: GOCC name', 'C: KEGG name', 'C: Pfam', 'C: KEGG', 'C: Regulatory site', 'C: Regulatory site function', 'C: Regulatory site process', 'C: Regulatory site protInteract', 'C: Regulatory site otherInteract', 'C: Regulatory site notes', 'C: Known site', 'C: Origin', 'T: sequence', 'T: site_id', 'T: Protein Id', 'T: Uniprot_ID', 'T: Gene_Organism', 'T: gene_symbol', 'T: prot_description', 'T: Site Position', 'T: Uniprot_site_ID', 'T: Gene_site_ID', 'T: Motif', 'T: Max Score', 'T: low_bound', 'T: high_bound', 'T: best_search_id', 'T: best_peptide_id', 'T: best_scan', 'T: numMatchingCompSites', 'T: numQuantCompSites', 'T: PhosphoSitePlus window', 'KEGG_hsa']
+Calling classify_phosphosite_function with:
+  ptm_symbol_list: [{'symbol_label_1_dict': {'symbol': '↑', 'symbol_font': 'Segoe UI Symbol', 'symbol_size': 8, 'symbol_color': (0, 0, 0), 'symbol_x_offset': -0.1, 'symbol_y_offset': -0.3, 'statement_type': 'if_or_statement', 'header_to_search': 'C: Regulatory site function', 'search_text_1': 'activity, induced', 'search_text_2': 'enzymatic activity, induced', 'search_text_3': '', 'search_text_4': ''}}, {'symbol_label_2_dict': {'symbol': 'x', 'symbol_font': 'Arial', 'symbol_size': 8, 'symbol_color': (0, 0, 0), 'symbol_x_offset': -1.2, 'symbol_y_offset': -0.6, 'statement_type': 'if_or_statement', 'header_to_search': 'C: Regulatory site function', 'search_text_1': 'activity, inhibited', 'search_text_2': 'enzymatic activity, inhibited', 'search_text_3': '', 'search_text_4': ''}}, {'symbol_label_3_dict': {'symbol': '+', 'symbol_font': 'Arial', 'symbol_size': 9, 'symbol_color': (0, 0, 0), 'symbol_x_offset': -0.1, 'symbol_y_offset': -0.8, 'statement_type': 'if_or_and_or_statement', 'header_to_search': 'C: Regulatory site function', 'search_text_1': 'activity, inhibited', 'search_text_2': 'enzymatic activity, inhibited', 'search_text_3': 'activity, induced', 'search_text_4': 'enzymatic activity, induced'}}, {'symbol_label_4_dict': {'symbol': '+', 'symbol_font': 'Arial', 'symbol_size': 9, 'symbol_color': (0, 0, 0), 'symbol_x_offset': -0.1, 'symbol_y_offset': -0.8, 'statement_type': 'if_and_notlabeled_statement', 'header_to_search': 'C: Regulatory site', 'search_text_1': '+', 'search_text_2': '', 'search_text_3': '', 'search_text_4': ''}}]
+  reg_site_col: C: Regulatory site
+  reg_function_col: C: Regulatory site function
+Classifying 6781 PTM sites with symbol list: [{'symbol_label_1_dict': {'symbol': '↑', 'symbol_font': 'Segoe UI Symbol', 'symbol_size': 8, 'symbol_color': (0, 0, 0), 'symbol_x_offset': -0.1, 'symbol_y_offset': -0.3, 'statement_type': 'if_or_statement', 'header_to_search': 'C: Regulatory site function', 'search_text_1': 'activity, induced', 'search_text_2': 'enzymatic activity, induced', 'search_text_3': '', 'search_text_4': ''}}, {'symbol_label_2_dict': {'symbol': 'x', 'symbol_font': 'Arial', 'symbol_size': 8, 'symbol_color': (0, 0, 0), 'symbol_x_offset': -1.2, 'symbol_y_offset': -0.6, 'statement_type': 'if_or_statement', 'header_to_search': 'C: Regulatory site function', 'search_text_1': 'activity, inhibited', 'search_text_2': 'enzymatic activity, inhibited', 'search_text_3': '', 'search_text_4': ''}}, {'symbol_label_3_dict': {'symbol': '+', 'symbol_font': 'Arial', 'symbol_size': 9, 'symbol_color': (0, 0, 0), 'symbol_x_offset': -0.1, 'symbol_y_offset': -0.8, 'statement_type': 'if_or_and_or_statement', 'header_to_search': 'C: Regulatory site function', 'search_text_1': 'activity, inhibited', 'search_text_2': 'enzymatic activity, inhibited', 'search_text_3': 'activity, induced', 'search_text_4': 'enzymatic activity, induced'}}, {'symbol_label_4_dict': {'symbol': '+', 'symbol_font': 'Arial', 'symbol_size': 9, 'symbol_color': (0, 0, 0), 'symbol_x_offset': -0.1, 'symbol_y_offset': -0.8, 'statement_type': 'if_and_notlabeled_statement', 'header_to_search': 'C: Regulatory site', 'search_text_1': '+', 'search_text_2': '', 'search_text_3': '', 'search_text_4': ''}}]
+PTM data columns: ['ER+_Est-_x-y_ER+', 'ER+_Est-_x-y_TNBC', 'ER+_x-y_TNBC', 'ER+_Est-', 'ER+', 'TNBC', 'C: redundancy', 'C: GOBP name', 'C: GOMF name', 'C: GOCC name', 'C: KEGG name', 'C: Pfam', 'C: KEGG', 'C: Regulatory site', 'C: Regulatory site function', 'C: Regulatory site process', 'C: Regulatory site protInteract', 'C: Regulatory site otherInteract', 'C: Regulatory site notes', 'C: Known site', 'C: Origin', 'T: sequence', 'T: site_id', 'T: Protein Id', 'T: Uniprot_ID', 'T: Gene_Organism', 'T: gene_symbol', 'T: prot_description', 'T: Site Position', 'T: Uniprot_site_ID', 'T: Gene_site_ID', 'T: Motif', 'T: Max Score', 'T: low_bound', 'T: high_bound', 'T: best_search_id', 'T: best_peptide_id', 'T: best_scan', 'T: numMatchingCompSites', 'T: numQuantCompSites', 'T: PhosphoSitePlus window', 'KEGG_hsa', 'Phosphosite_Classification']
+Classification complete. Value counts:
+Phosphosite_Classification
+none              6207
+symbol_label_4     380
+symbol_label_1     114
+symbol_label_2      62
+symbol_label_3      18
+Name: count, dtype: int64
+PathwayProcessor created
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sitesApplying PTM selection option 2: Prefer modulating phospho PTMs
+
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 2 PTM sitesApplying PTM selection option 2: Prefer modulating phospho PTMsApplying PTM selection option 2: Prefer modulating phospho PTMsFound 2 PTM sitesApplying PTM selection option 2: Prefer modulating phospho PTMsApplying PTM selection option 2: Prefer modulating phospho PTMsApplying PTM selection option 2: Prefer modulating phospho PTMs
+
+
+
+
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+
+
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 9 PTM sites
+Applying PTM selection option 2: Prefer modulating phospho PTMsFound 5 PTM sites
+
+Found 1 PTM sites
+Found 6 PTM sites
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Applying PTM selection option 2: Prefer modulating phospho PTMsFound 8 PTM sites
+
+Applying PTM selection option 2: Prefer modulating phospho PTMsFound 2 PTM sites
+
+Found 4 PTM sitesFound 6 PTM sites
+
+Found 1 PTM sitesFound 2 PTM sites
+
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Applying PTM selection option 2: Prefer modulating phospho PTMsApplying PTM selection option 2: Prefer modulating phospho PTMsApplying PTM selection option 2: Prefer modulating phospho PTMs
+
+Found 3 PTM sitesFound 1 PTM sites
+
+
+Applying PTM selection option 2: Prefer modulating phospho PTMsFound 1 PTM sitesApplying PTM selection option 2: Prefer modulating phospho PTMs
+
+
+Found 3 PTM sitesFound 1 PTM sites
+
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Applying PTM selection option 2: Prefer modulating phospho PTMsFound 1 PTM sites
+
+Found 6 PTM sites
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sitesApplying PTM selection option 2: Prefer modulating phospho PTMs
+
+Found 3 PTM sites
+Found 3 PTM sitesApplying PTM selection option 2: Prefer modulating phospho PTMsFound 1 PTM sites
+
+
+Found 1 PTM sites
+Applying PTM selection option 2: Prefer modulating phospho PTMsApplying PTM selection option 2: Prefer modulating phospho PTMs
+
+Found 1 PTM sitesFound 4 PTM sites
+
+Found 1 PTM sitesApplying PTM selection option 2: Prefer modulating phospho PTMs
+Found 5 PTM sitesApplying PTM selection option 2: Prefer modulating phospho PTMsFound 1 PTM sites
+
+
+
+Found 1 PTM sitesApplying PTM selection option 2: Prefer modulating phospho PTMsApplying PTM selection option 2: Prefer modulating phospho PTMs
+
+Applying PTM selection option 2: Prefer modulating phospho PTMsApplying PTM selection option 2: Prefer modulating phospho PTMsFound 1 PTM sites
+Applying PTM selection option 2: Prefer modulating phospho PTMsApplying PTM selection option 2: Prefer modulating phospho PTMs
+
+
+
+Found 3 PTM sites
+
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+Found 1 PTM sites
+Found 6 PTM sites
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 2 PTM sites
+Found 1 PTM sites
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sitesFound 3 PTM sites
+
+Applying PTM selection option 2: Prefer modulating phospho PTMsFound 3 PTM sites
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Applying PTM selection option 2: Prefer modulating phospho PTMsApplying PTM selection option 2: Prefer modulating phospho PTMsApplying PTM selection option 2: Prefer modulating phospho PTMs
+
+
+Found 3 PTM sitesApplying PTM selection option 2: Prefer modulating phospho PTMs
+
+Found 5 PTM sites
+
+Found 1 PTM sites
+Found 2 PTM sites
+Found 2 PTM sites
+Found 2 PTM sites
+Found 1 PTM sites
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P47712_729: shape=(859.2, 240.0), label=(854.2, 245.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 4 PTM sites
+PTM P16949_38: symbol=x, symbol_x=844.8, symbol_y=197.01000000000002, pos_key=W1
+PTM P16949_38: shape=(846.0, 197.61), label=(841.0, 195.61), centering=right
+PTM P16949_16: symbol=x, symbol_x=898.8, symbol_y=197.01000000000002, pos_key=E1
+PTM P16949_16: shape=(900.0, 197.61), label=(905.0, 195.61), centering=left
+PTM P16949_63: symbol=x, symbol_x=844.8, symbol_y=208.62, pos_key=W2
+PTM P16949_63: shape=(846.0, 209.22), label=(841.0, 211.22), centering=right
+PTM P16949_25: symbol=x, symbol_x=898.8, symbol_y=208.62, pos_key=E2
+PTM P16949_25: shape=(900.0, 209.22), label=(905.0, 211.22), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 6 PTM sites
+PTM P10636_531: shape=(859.2, 170.0), label=(854.2, 165.0), centering=right
+PTM P10636_548: shape=(873.0, 170.0), label=(873.0, 162.0), centering=center
+PTM P10636_529: shape=(886.8, 170.0), label=(891.8, 165.0), centering=left
+PTM P10636_721: shape=(900.0, 179.61), label=(905.0, 177.61), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P19838_907: symbol=↑, symbol_x=923.1, symbol_y=126.7, pos_key=N1
+PTM P19838_907: shape=(923.2, 127.0), label=(918.2, 122.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM Q9Y6K9_387: shape=(795.2, 163.0), label=(790.2, 168.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P27361_204: symbol=↑, symbol_x=772.1, symbol_y=306.7, pos_key=N1
+PTM P27361_204: shape=(772.2, 307.0), label=(767.2, 302.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+PTM P36507_394: symbol=↑, symbol_x=685.1, symbol_y=342.7, pos_key=S1
+PTM P36507_394: shape=(685.2, 343.0), label=(680.2, 348.0), centering=right
+PTM P36507_295: shape=(699.0, 343.0), label=(699.0, 353.0), centering=center
+PTM P36507_17: shape=(712.8, 343.0), label=(717.8, 348.0), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+PTM P04049_621: symbol=+, symbol_x=590.1, symbol_y=356.2, pos_key=S1
+PTM P04049_621: shape=(590.2, 357.0), label=(585.2, 362.0), centering=right
+PTM P04049_640: shape=(604.0, 357.0), label=(604.0, 367.0), centering=center
+PTM P04049_258: shape=(617.8, 357.0), label=(622.8, 362.0), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 8 PTM sites
+PTM P15056_151: symbol=+, symbol_x=576.9, symbol_y=313.81, pos_key=W1
+PTM P15056_151: shape=(577.0, 314.61), label=(572.0, 312.61), centering=right
+PTM P15056_729: symbol=↑, symbol_x=630.9, symbol_y=314.31, pos_key=E1
+PTM P15056_729: shape=(631.0, 314.61), label=(636.0, 312.61), centering=left
+PTM P15056_365: symbol=x, symbol_x=575.8, symbol_y=325.62, pos_key=W2
+PTM P15056_365: shape=(577.0, 326.22), label=(572.0, 328.22), centering=right
+PTM P15056_750: symbol=+, symbol_x=630.9, symbol_y=325.42, pos_key=E2
+PTM P15056_750: shape=(631.0, 326.22), label=(636.0, 328.22), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 4 PTM sites
+PTM P21359_2508: shape=(430.2, 346.0), label=(425.2, 341.0), centering=right
+PTM P21359_2565: shape=(457.8, 346.0), label=(462.8, 341.0), centering=left
+PTM P21359_2543: shape=(471.0, 355.61), label=(476.0, 353.61), centering=left
+PTM P21359_2817: shape=(417.0, 355.61), label=(412.0, 353.61), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P17252_226: symbol=↑, symbol_x=496.09999999999997, symbol_y=252.7, pos_key=N1
+PTM P17252_226: shape=(496.2, 253.0), label=(491.2, 248.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 2 PTM sites
+PTM P17612_339: symbol=↑, symbol_x=537.1, symbol_y=165.7, pos_key=N1
+PTM P17612_339: shape=(537.2, 166.0), label=(532.2, 161.0), centering=right
+PTM P17612_331: shape=(551.0, 166.0), label=(551.0, 158.0), centering=center
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P22694_339: shape=(537.2, 166.0), label=(532.2, 161.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM Q9Y4G8_1022: shape=(456.2, 225.0), label=(451.2, 220.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P62070_186: symbol=+, symbol_x=417.09999999999997, symbol_y=306.2, pos_key=N1
+PTM P62070_186: shape=(417.2, 307.0), label=(412.2, 302.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 6 PTM sites
+PTM Q07889_1161: symbol=+, symbol_x=355.09999999999997, symbol_y=306.2, pos_key=N1
+PTM Q07889_1161: shape=(355.2, 307.0), label=(350.2, 302.0), centering=right
+PTM Q07889_1178: symbol=+, symbol_x=368.9, symbol_y=306.2, pos_key=N2
+PTM Q07889_1178: shape=(369.0, 307.0), label=(369.0, 299.0), centering=center
+PTM Q07889_401: shape=(382.8, 307.0), label=(387.8, 302.0), centering=left
+PTM Q07889_1210: shape=(355.2, 332.0), label=(350.2, 337.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 2 PTM sites
+PTM P00533_695: symbol=+, symbol_x=229.1, symbol_y=306.2, pos_key=N1
+PTM P00533_695: shape=(229.2, 307.0), label=(224.2, 302.0), centering=right
+PTM P00533_991: symbol=+, symbol_x=242.9, symbol_y=306.2, pos_key=N2
+PTM P00533_991: shape=(243.0, 307.0), label=(243.0, 299.0), centering=center
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 9 PTM sites
+PTM P04626_701: symbol=+, symbol_x=229.1, symbol_y=306.2, pos_key=N1
+PTM P04626_701: shape=(229.2, 307.0), label=(224.2, 302.0), centering=right
+PTM P04626_1151: symbol=+, symbol_x=242.9, symbol_y=306.2, pos_key=N2
+PTM P04626_1151: shape=(243.0, 307.0), label=(243.0, 299.0), centering=center
+PTM P04626_1066: shape=(256.8, 307.0), label=(261.8, 302.0), centering=left
+PTM P04626_1100: shape=(229.2, 332.0), label=(224.2, 337.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+PTM P21860_1315: shape=(229.2, 307.0), label=(224.2, 302.0), centering=right
+PTM P21860_982: shape=(243.0, 307.0), label=(243.0, 299.0), centering=center
+PTM P21860_686: shape=(256.8, 307.0), label=(261.8, 302.0), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P54284_152: shape=(229.2, 172.0), label=(224.2, 167.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 2 PTM sites
+PTM O75676_682: shape=(847.0, 802.61), label=(842.0, 800.61), centering=right
+PTM O75676_745: shape=(901.0, 802.61), label=(906.0, 800.61), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P49137_221: shape=(847.0, 781.61), label=(842.0, 779.61), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P04637_315: symbol=+, symbol_x=923.1, symbol_y=634.2, pos_key=S1
+PTM P04637_315: shape=(923.2, 635.0), label=(918.2, 640.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 2 PTM sites
+PTM P15336_73: symbol=↑, symbol_x=923.1, symbol_y=566.7, pos_key=N1
+PTM P15336_73: shape=(923.2, 567.0), label=(918.2, 562.0), centering=right
+PTM P15336_136: shape=(950.8, 567.0), label=(955.8, 562.0), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM Q16539_182: symbol=↑, symbol_x=772.1, symbol_y=698.7, pos_key=N1
+PTM Q16539_182: shape=(772.2, 699.0), label=(767.2, 694.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+PTM P31749_124: symbol=↑, symbol_x=652.1, symbol_y=609.7, pos_key=N1
+PTM P31749_124: shape=(652.2, 610.0), label=(647.2, 605.0), centering=right
+PTM P31749_129: symbol=↑, symbol_x=665.9, symbol_y=609.7, pos_key=N2
+PTM P31749_129: shape=(666.0, 610.0), label=(666.0, 602.0), centering=center
+PTM P31749_473: symbol=+, symbol_x=679.6999999999999, symbol_y=609.2, pos_key=N3
+PTM P31749_473: shape=(679.8, 610.0), label=(684.8, 605.0), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+PTM Q7L7X3_965: shape=(589.2, 823.0), label=(584.2, 818.0), centering=right
+PTM Q7L7X3_445: shape=(616.8, 823.0), label=(621.8, 818.0), centering=left
+PTM Q7L7X3_421: shape=(589.2, 848.0), label=(584.2, 853.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 2 PTM sites
+PTM Q9Y6R4_442: shape=(589.2, 796.0), label=(584.2, 791.0), centering=right
+PTM Q9Y6R4_1251: shape=(616.8, 796.0), label=(621.8, 791.0), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 6 PTM sites
+PTM P04792_15: symbol=x, symbol_x=922.0, symbol_y=764.4, pos_key=N1
+PTM P04792_15: shape=(923.2, 765.0), label=(918.2, 760.0), centering=right
+PTM P04792_82: symbol=+, symbol_x=950.6999999999999, symbol_y=764.2, pos_key=N3
+PTM P04792_82: shape=(950.8, 765.0), label=(955.8, 760.0), centering=left
+PTM P04792_98: shape=(923.2, 790.0), label=(918.2, 795.0), centering=right
+PTM P04792_65: shape=(950.8, 790.0), label=(955.8, 795.0), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+PTM O43318_439: symbol=+, symbol_x=589.1, symbol_y=728.2, pos_key=N1
+PTM O43318_439: shape=(589.2, 729.0), label=(584.2, 724.0), centering=right
+PTM O43318_389: shape=(616.8, 729.0), label=(621.8, 724.0), centering=left
+PTM O43318_375: shape=(589.2, 754.0), label=(584.2, 759.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM Q99683_1033: symbol=x, symbol_x=588.0, symbol_y=698.4, pos_key=N1
+PTM Q99683_1033: shape=(589.2, 699.0), label=(584.2, 694.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+PTM Q9NYL2_636: shape=(589.2, 650.0), label=(584.2, 655.0), centering=right
+PTM Q9NYL2_226: shape=(616.8, 650.0), label=(621.8, 655.0), centering=left
+PTM Q9NYL2_727: shape=(630.0, 640.22), label=(635.0, 642.22), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM Q13188_316: symbol=+, symbol_x=503.09999999999997, symbol_y=608.2, pos_key=N1
+PTM Q13188_316: shape=(503.2, 609.0), label=(498.2, 604.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+PTM Q9NYJ8_524: shape=(423.0, 757.61), label=(418.0, 755.61), centering=right
+PTM Q9NYJ8_372: shape=(477.0, 757.61), label=(482.0, 755.61), centering=left
+PTM Q9NYJ8_582: shape=(423.0, 769.22), label=(418.0, 771.22), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 2 PTM sites
+PTM Q9UER7_495: shape=(464.2, 699.0), label=(459.2, 694.0), centering=right
+PTM Q9UER7_688: shape=(478.0, 699.0), label=(478.0, 691.0), centering=center
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM Q9NPH3_556: shape=(229.2, 659.0), label=(224.2, 654.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+PTM Q13153_212: symbol=+, symbol_x=503.09999999999997, symbol_y=547.2, pos_key=N1
+PTM Q13153_212: shape=(503.2, 548.0), label=(498.2, 543.0), centering=right
+PTM Q13153_219: shape=(530.8, 548.0), label=(535.8, 543.0), centering=left
+PTM Q13153_185: shape=(503.2, 573.0), label=(498.2, 578.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 2 PTM sites
+PTM Q13177_141: symbol=↑, symbol_x=503.09999999999997, symbol_y=547.7, pos_key=N1
+PTM Q13177_141: shape=(503.2, 548.0), label=(498.2, 543.0), centering=right
+PTM Q13177_58: shape=(530.8, 548.0), label=(535.8, 543.0), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 5 PTM sites
+PTM Q9Y2U5_153: shape=(589.2, 548.0), label=(584.2, 543.0), centering=right
+PTM Q9Y2U5_331: shape=(616.8, 548.0), label=(621.8, 543.0), centering=left
+PTM Q9Y2U5_164: shape=(589.2, 573.0), label=(584.2, 578.0), centering=right
+PTM Q9Y2U5_514: shape=(616.8, 573.0), label=(621.8, 578.0), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P45985_90: shape=(685.2, 483.0), label=(680.2, 478.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P46108_43: shape=(727.2, 472.0), label=(722.2, 477.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+PTM P46109_184: shape=(727.2, 472.0), label=(722.2, 477.0), centering=right
+PTM P46109_107: shape=(741.0, 472.0), label=(741.0, 482.0), centering=center
+PTM P46109_42: shape=(754.8, 472.0), label=(759.8, 477.0), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P49407_412: symbol=+, symbol_x=674.1, symbol_y=471.2, pos_key=S1
+PTM P49407_412: shape=(674.2, 472.0), label=(669.2, 477.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 5 PTM sites
+PTM P0DMV9_418: shape=(802.2, 430.0), label=(797.2, 425.0), centering=right
+PTM P0DMV9_633: shape=(816.0, 430.0), label=(816.0, 422.0), centering=center
+PTM P0DMV9_636: shape=(829.8, 430.0), label=(834.8, 425.0), centering=left
+PTM P0DMV9_631: shape=(843.0, 439.61), label=(848.0, 437.61), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 1 PTM sites
+PTM P11142_254: shape=(802.2, 430.0), label=(797.2, 425.0), centering=right
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 2 PTM sites
+PTM Q9UPT6_365: shape=(746.2, 426.0), label=(741.2, 421.0), centering=right
+PTM Q9UPT6_207: shape=(773.8, 426.0), label=(778.8, 421.0), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 6 PTM sites
+PTM P21333_1084: symbol=+, symbol_x=693.1, symbol_y=425.2, pos_key=N1
+PTM P21333_1084: shape=(693.2, 426.0), label=(688.2, 421.0), centering=right
+PTM P21333_2152: symbol=+, symbol_x=706.9, symbol_y=425.2, pos_key=N2
+PTM P21333_2152: shape=(707.0, 426.0), label=(707.0, 418.0), centering=center
+PTM P21333_1459: symbol=+, symbol_x=720.6999999999999, symbol_y=425.2, pos_key=N3
+PTM P21333_1459: shape=(720.8, 426.0), label=(725.8, 421.0), centering=left
+PTM P21333_2336: shape=(734.0, 435.61), label=(739.0, 433.61), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+PTM Q15418_380: symbol=↑, symbol_x=859.1, symbol_y=302.7, pos_key=S1
+PTM Q15418_380: shape=(859.2, 303.0), label=(854.2, 308.0), centering=right
+PTM Q15418_363: symbol=↑, symbol_x=872.9, symbol_y=302.7, pos_key=S2
+PTM Q15418_363: shape=(873.0, 303.0), label=(873.0, 313.0), centering=center
+PTM Q15418_732: shape=(886.8, 303.0), label=(891.8, 308.0), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 5 PTM sites
+PTM P51812_369: symbol=↑, symbol_x=859.1, symbol_y=302.7, pos_key=S1
+PTM P51812_369: shape=(859.2, 303.0), label=(854.2, 308.0), centering=right
+PTM P51812_227: symbol=↑, symbol_x=872.9, symbol_y=302.7, pos_key=S2
+PTM P51812_227: shape=(873.0, 303.0), label=(873.0, 313.0), centering=center
+PTM P51812_715: shape=(886.8, 303.0), label=(891.8, 308.0), centering=left
+PTM P51812_415: shape=(900.0, 293.22), label=(905.0, 295.22), centering=left
+Applying PTM selection option 2: Prefer modulating phospho PTMs
+Found 3 PTM sites
+PTM P10398_257: symbol=↑, symbol_x=590.1, symbol_y=283.7, pos_key=N1
+PTM P10398_257: shape=(590.2, 284.0), label=(585.2, 279.0), centering=right
+PTM P10398_213: shape=(604.0, 284.0), label=(604.0, 276.0), centering=center
+PTM P10398_157: shape=(617.8, 284.0), label=(622.8, 279.0), centering=left
+Skipping pathway data save to disk (skip_disk_write=True)
+Pathway JSON generated
+[32mINFO[0m:     127.0.0.1:64520 - "[1mGET /favicon.ico HTTP/1.1[0m" [31m404 Not Found[0m
+[32mINFO[0m:     127.0.0.1:64520 - "[1mGET /lib/bootstrap-5.3.1/fonts/memtYaGs126MiZpBA-UFUIcVXSCEkx2cmqvXlWqWuU6F.woff2 HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     connection closed

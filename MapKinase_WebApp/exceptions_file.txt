@@ -1,0 +1,126 @@
+# Format: proximity, condition, action, threshold, values...
+    # Condition =
+        # adjacent_x, adjacent_y    (either direction in the x/y axis)
+        # adjacent_x_east, adjacent_y_south, etc.   (one direction in the x/y axis)
+    # Action =
+        # block         (which phos circles should not appear)
+        # priority      (A new priority in the order of phos circles that appear)
+        # move_label    (move the label of a phos circle, in reference to the phos circle position)
+        # move_circle   (move phos circle, in reference to the prot box)
+    # Threshold =
+        # The distance away from the prot box of interest to any other prot box that triggers this exception
+# Format: specific, protein_id, action, values...
+# Rules under an HSA:<pathway_id> section apply only to that pathway.
+
+# Rules:
+    # Each prot box may only have one 'block' and 'priority' exception applied to it
+        # Ex: Prot box 1 can have a 'block' and 'priority' exception applied to it, but only one of each
+    # If multiple exceptions of the same type of action can be applied to one prot box, the one with more triggers takes priority
+        # Rule with 1 trigger (lower priority)
+        # proximity, adjacent_y_south, block, 50, N2
+        # Rule with 2 triggers (higher priority)
+        # proximity, adjacent_y_south && adjacent_x_west, block, 50, 40, S2
+    # If two exceptions have the same number of triggers:
+        # which ever exception is labeled later in the text will be chosen over the previous
+
+    # Each phos circle may only have one 'move_label' and 'move_circle' exception applied to it
+        # Ex: phos circle N1 can have a 'move_label' and 'move_circle' exception applied to it, but only one of each
+    # If multiple exceptions of the same type of action can be applied to one phos circle, the one with more triggers takes priority
+    # If two exceptions have the same number of triggers:
+        # which ever exception is labeled later in the text will be chosen over the previous
+
+################## EXAMPLES ####################
+
+###### Directional Examples:
+    # Block N2 if there’s a box within 50px on the x-axis AND it’s below the current box
+        # proximity, adjacent_x_south, block, 50, N2
+    # Move the label for W1 if there’s a box within 40px on the y-axis AND it’s to the left
+        # proximity, adjacent_y_west, move_label, 40, W1, -15, 10, right
+    # Phos circle example
+        # proximity, adjacent_x_west, move_circle, 40, W1, -10, 5
+
+###### Multiple Trigger Examples:
+    # Block S2 only if there’s a box within 50px below (adjacent_y_south) AND within 40px to the left (adjacent_x_west).
+        # proximity, adjacent_y_south && adjacent_x_west, block, 50, 40, S2
+    # Set a priority order if there’s a box within 30px overall (adjacent_xy) AND within 50px on the x-axis to the north (adjacent_x_north).
+        # proximity, adjacent_xy && adjacent_x_north, priority, 30, 50, W1, W2, E1, E2
+
+###### Mixing Single and Multi-Trigger Rules:
+    # Here’s an example where multiple rules might apply, but the one with more triggers takes precedence.
+        # Rule with 1 trigger (lower priority)
+        # proximity, adjacent_y_south, block, 50, N2
+        # Rule with 2 triggers (higher priority)
+        # proximity, adjacent_y_south && adjacent_x_west, block, 50, 40, S2
+    # More triggers = Higher priority
+
+###### Global specific protein rules:
+    #specific, hsa:12345, block, N2        # Block N2 for protein hsa:12345
+    #specific, hsa:12345, priority, S1, N3, W2  # Custom priority order
+    #specific, hsa:12345, label, N3, 5, 5, left  # Custom label position for N3
+
+###### HSA-specific rules:
+    #HSA:hsa04150
+    #proximity, adjacent_x, block, 30, N1  # Block N1 for adjacent boxes in hsa04150
+    #specific, hsa:67890, block, S1        # Block S1 for protein hsa:67890 in hsa04150
+    #specific, hsa:67890, label, N2, 0, 15, center  # Custom N2 label position
+
+
+
+
+############### NOTES ###############
+# W1 -> Top left corner
+    # specific, hsa:X, move_circle, W1, 0, -5
+# W2 -> Bottom left corner
+    # specific, hsa:X, move_circle, W2, 0, 5
+
+
+
+############### IMPLEMENT RULES HERE ##################
+
+##### BOX CLOSE X-AXIS WE #####
+proximity, adjacent_x_west, priority, -30, E1, E2, N3, S3, N2, S2, N1, S1
+proximity, adjacent_x_east, priority, 30, W1, W2, N1, S1, N2, S2, N3, S3
+proximity, adjacent_x_east && adjacent_x_west, priority, 30, -30, N2, S2, N1, S1, N3, S3
+
+##### BOX CLOSE MIX OF N/S and W/E #####
+#proximity, adjacent_y_south && adjacent_x_west, priority, 25, -30, N1, N2, N3, E1, E2
+#proximity, adjacent_y_south && adjacent_x_east, priority, 25, 30, N1, N2, N3, W1, W2
+#proximity, adjacent_y_north && adjacent_x_west, priority, 25, -30, S1, S2, S3, E1, E2
+#proximity, adjacent_y_north && adjacent_x_east, priority, 25, 30, S1, S2, S3, W1, W2
+
+
+##### BOX CLOSE NS #####
+    # Boxes too close to produce (N1, N2, N3) and/or (S1, S2, S3)
+proximity, adjacent_y_north, priority, 25, S1, S2, S3, E2, W2, E1, W1
+proximity, adjacent_y_south, priority, 25, N1, N2, N3, E1, W1, E2, W2
+proximity, adjacent_y_south && adjacent_y_north, priority, 30, 30, W1, E1, W2, E2
+proximity, adjacent_y_south && adjacent_y_north, move_circle, 30, 30, W1, 0, -3
+proximity, adjacent_y_south && adjacent_y_north, move_circle, 30, 30, W2, 0, 3
+proximity, adjacent_y_south && adjacent_y_north, move_circle, 30, 30, E1, 0, -3
+proximity, adjacent_y_south && adjacent_y_north, move_circle, 30, 30, E2, 0, 3
+
+    # Boxes close enough to block N2 or S2
+proximity, adjacent_y_north, block, 50, N2
+proximity, adjacent_y_south, block, 50, S2
+proximity, adjacent_y_south && adjacent_y_north, block, 70, 70, S2, N2
+
+    # Boxes close enough to move labels for N1, N3, S1, S3
+#proximity, adjacent_y_north, move_label, 70, N1, 0, -6, right
+#proximity, adjacent_y_north, move_label, 70, N3, 0, -6, left
+#proximity, adjacent_y_south, move_label, 70, S1, 0, 6, right
+#proximity, adjacent_y_south, move_label, 70, S3, 0, 6, left
+# For the four above = 4, 2 for Program / 0, 6 for Website
+
+
+#proximity, adjacent_y_south && adjacent_x_east && adjacent_y_north, priority, 10, 10, 10, W1, W2, N3, S3
+#proximity, adjacent_y_south && adjacent_x_east && adjacent_y_north, move_label, 10, 10, 10, N3, 8, -3, left
+#proximity, adjacent_y_south && adjacent_x_east && adjacent_y_north, move_label, 10, 10, 10, E2, 0, -30, right
+
+
+
+##### SPECIFIC HSA #####
+HSA:hsa04150
+specific, hsa:3551, move_circle, W1, 0, -5
+specific, hsa:3551, move_circle, W2, 0, 5
+
+
