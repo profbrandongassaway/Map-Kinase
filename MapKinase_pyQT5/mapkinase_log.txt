@@ -1,0 +1,31 @@
+2025-09-28 22:47:33,813 - INFO - Program started
+2025-09-28 22:47:38,250 - INFO - Initializing CombinedUI
+2025-09-28 22:47:38,383 - DEBUG - Set window icon to C:\Users\clayt\OneDrive - Brigham Young University\pycharm\ttk_projects\Phosmap\scripts\App.ico
+2025-09-28 22:47:38,397 - DEBUG - Added File menu with Save action
+2025-09-28 22:47:38,397 - DEBUG - Added File menu with Load action
+2025-09-28 22:47:38,402 - INFO - Initializing DataSelectionUI
+2025-09-28 22:47:39,255 - DEBUG - AddPTMSelector initialized, button size: PyQt5.QtCore.QSize(640, 480), widget size: PyQt5.QtCore.QSize(640, 480)
+2025-09-28 22:47:39,273 - DEBUG - DataSelectionUI layout initialized
+2025-09-28 22:47:39,273 - DEBUG - Populating DataSelectionUI with input_data: {'protein': None, 'ptm': [], 'visualization_settings': {}}
+2025-09-28 22:47:39,275 - DEBUG - update_data called with Qt parent: <__main__.CombinedUI object at 0x00000201F9AB6180>, Stored parent: <__main__.CombinedUI object at 0x00000201F9AB6180>
+2025-09-28 22:47:39,276 - DEBUG - Processing Protein selector with file_path: 
+2025-09-28 22:47:39,276 - WARNING - Skipping Protein selector: No file selected
+2025-09-28 22:47:39,276 - DEBUG - Processing Phosphorylation selector with file_path: 
+2025-09-28 22:47:39,276 - WARNING - Skipping Phosphorylation selector: No file selected
+2025-09-28 22:47:39,276 - WARNING - No valid data collected from any selectors
+2025-09-28 22:47:39,276 - DEBUG - Collected data: None
+2025-09-28 22:47:39,276 - DEBUG - No valid data to update
+2025-09-28 22:47:39,276 - DEBUG - Updated selected_data in CombinedUI: None
+2025-09-28 22:47:39,276 - DEBUG - Deferring VariableSetterUI update until initialization complete
+2025-09-28 22:47:39,276 - DEBUG - update_data completed
+2025-09-28 22:47:39,278 - DEBUG - Added DataSelectionUI tab
+2025-09-28 22:47:39,279 - DEBUG - VariableSetterUI initialized, instance_id: 2207522818096
+2025-09-28 22:47:52,633 - DEBUG - VariableSetterUI.update_data called, instance_id: 2207522818096, data: None
+2025-09-28 22:47:52,634 - DEBUG - Blocked signals for main_column_selector
+2025-09-28 22:47:52,634 - DEBUG - Cleared main_column_selector
+2025-09-28 22:47:52,636 - DEBUG - No valid protein main columns, set to 'No columns available', instance_id: 2207522818096
+2025-09-28 22:47:52,636 - DEBUG - Unblocked signals for main_column_selector
+2025-09-28 22:47:52,670 - DEBUG - Added VariableSetterUI tab
+2025-09-28 22:47:52,721 - DEBUG - Added KEGGConverterUI tab
+2025-09-28 22:47:52,721 - DEBUG - CombinedUI initialization completed
+2025-09-28 22:47:52,741 - INFO - Main window displayed
