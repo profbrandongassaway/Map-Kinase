@@ -1,0 +1,1082 @@
+{
+  "schema_version": 1,
+  "pathway_id": "WP1471",
+  "pathway_source": "custom",
+  "protbox_data": [
+    {
+      "protbox_id": "a2b76",
+      "x": 305.0,
+      "y": 185.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [
+        "Q9Y478"
+      ],
+      "backup_label": "PRKAB1",
+      "tooltip": "T: GOBP name: biological regulation;biosynthetic process;carboxylic acid biosynthetic process;carboxylic acid metabolic process;cell cycle arrest;cell cycle process;cell surface receptor linked signaling pathway;cellular biosynthetic process;cellular component assembly;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular ketone metabolic process;cellular lipid metabolic process;cellular macromolecule metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to hormone stimulus;cellular response to insulin stimulus;cellular response to organic substance;cellular response to peptide hormone stimulus;cellular response to stimulus;enzyme linked receptor protein signaling pathway;fatty acid biosynthetic process;fatty acid metabolic process;gene expression;insulin receptor signaling pathway;lipid biosynthetic process;lipid metabolic process;macromolecular complex assembly;macromolecular complex subunit organization;macromolecule metabolic process;macromolecule modification;membrane organization;metabolic process;mitochondrion organization;monocarboxylic acid metabolic process;negative regulation of biological process;negative regulation of cell cycle;negative regulation of cellular process;nitrogen compound metabolic process;nucleic acid metabolic process;nucleobase-containing compound metabolic process;organelle organization;organic acid biosynthetic process;organic acid metabolic process;oxoacid metabolic process;phosphate-containing compound metabolic process;phosphorus metabolic process;phosphorylation;positive regulation of biological process;positive regulation of gene expression;positive regulation of macromolecule metabolic process;positive regulation of metabolic process;primary metabolic process;protein complex assembly;protein complex subunit organization;protein heterooligomerization;protein metabolic process;protein modification process;protein oligomerization;protein phosphorylation;regulation of biological process;regulation of catalytic activity;regulation of cell cycle;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of gene expression;regulation of kinase activity;regulation of macromolecule metabolic process;regulation of metabolic process;regulation of molecular function;regulation of phosphate metabolic process;regulation of phosphorus metabolic process;regulation of phosphorylation;regulation of primary metabolic process;regulation of protein kinase activity;regulation of protein metabolic process;regulation of protein modification process;regulation of protein phosphorylation;regulation of transferase activity;response to chemical stimulus;response to endogenous stimulus;response to hormone stimulus;response to insulin stimulus;response to organic substance;response to peptide hormone stimulus;response to stimulus;RNA biosynthetic process;RNA metabolic process;signal transduction;small molecule biosynthetic process;small molecule metabolic process;transcription initiation from RNA polymerase II promoter;transcription initiation, DNA-dependent;transmembrane receptor protein tyrosine kinase signaling pathway\nT: GOMF name: AMP-activated protein kinase activity;catalytic activity;kinase activity;phosphotransferase activity, alcohol group as acceptor;protein kinase activity;protein serine/threonine kinase activity;transferase activity;transferase activity, transferring phosphorus-containing groups",
+      "tooltip_html": "<strong>T: GOBP name:</strong> biological regulation;biosynthetic process;carboxylic acid biosynthetic process;carboxylic acid metabolic process;cell cycle arrest;cell cycle process;cell surface receptor linked signaling pathway;cellular biosynthetic process;cellular component assembly;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular ketone metabolic process;cellular lipid metabolic process;cellular macromolecule metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to hormone stimulus;cellular response to insulin stimulus;cellular response to organic substance;cellular response to peptide hormone stimulus;cellular response to stimulus;enzyme linked receptor protein signaling pathway;fatty acid biosynthetic process;fatty acid metabolic process;gene expression;insulin receptor signaling pathway;lipid biosynthetic process;lipid metabolic process;macromolecular complex assembly;macromolecular complex subunit organization;macromolecule metabolic process;macromolecule modification;membrane organization;metabolic process;mitochondrion organization;monocarboxylic acid metabolic process;negative regulation of biological process;negative regulation of cell cycle;negative regulation of cellular process;nitrogen compound metabolic process;nucleic acid metabolic process;nucleobase-containing compound metabolic process;organelle organization;organic acid biosynthetic process;organic acid metabolic process;oxoacid metabolic process;phosphate-containing compound metabolic process;phosphorus metabolic process;phosphorylation;positive regulation of biological process;positive regulation of gene expression;positive regulation of macromolecule metabolic process;positive regulation of metabolic process;primary metabolic process;protein complex assembly;protein complex subunit organization;protein heterooligomerization;protein metabolic process;protein modification process;protein oligomerization;protein phosphorylation;regulation of biological process;regulation of catalytic activity;regulation of cell cycle;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of gene expression;regulation of kinase activity;regulation of macromolecule metabolic process;regulation of metabolic process;regulation of molecular function;regulation of phosphate metabolic process;regulation of phosphorus metabolic process;regulation of phosphorylation;regulation of primary metabolic process;regulation of protein kinase activity;regulation of protein metabolic process;regulation of protein modification process;regulation of protein phosphorylation;regulation of transferase activity;response to chemical stimulus;response to endogenous stimulus;response to hormone stimulus;response to insulin stimulus;response to organic substance;response to peptide hormone stimulus;response to stimulus;RNA biosynthetic process;RNA metabolic process;signal transduction;small molecule biosynthetic process;small molecule metabolic process;transcription initiation from RNA polymerase II promoter;transcription initiation, DNA-dependent;transmembrane receptor protein tyrosine kinase signaling pathway<br/><strong>T: GOMF name:</strong> AMP-activated protein kinase activity;catalytic activity;kinase activity;phosphotransferase activity, alcohol group as acceptor;protein kinase activity;protein serine/threonine kinase activity;transferase activity;transferase activity, transferring phosphorus-containing groups",
+      "ptm_overrides": {
+        "Q9Y478": {
+          "Q9Y478_108": {
+            "shape_x": 314.2,
+            "shape_y": 206.5,
+            "label_x": 309.2,
+            "label_y": 211.5,
+            "label_centering": "right",
+            "symbol_x": 314.09999999999997,
+            "symbol_y": 206.0,
+            "ptm_position": "S1"
+          },
+          "Q9Y478_187": {
+            "shape_x": 328.0,
+            "shape_y": 206.5,
+            "label_x": 328.0,
+            "label_y": 216.5,
+            "label_centering": "center",
+            "symbol_x": 328.0,
+            "symbol_y": 206.5,
+            "ptm_position": "S2"
+          },
+          "Q9Y478_40": {
+            "shape_x": 341.8,
+            "shape_y": 206.5,
+            "label_x": 346.8,
+            "label_y": 211.5,
+            "label_centering": "left",
+            "symbol_x": 341.8,
+            "symbol_y": 206.5,
+            "ptm_position": "S3"
+          },
+          "Q9Y478_24": {
+            "shape_x": 355.0,
+            "shape_y": 196.72,
+            "label_x": 360.0,
+            "label_y": 198.72,
+            "label_centering": "left",
+            "symbol_x": 355.0,
+            "symbol_y": 196.72,
+            "ptm_position": "E2"
+          }
+        }
+      }
+    },
+    {
+      "protbox_id": "ad7af",
+      "x": 385.0,
+      "y": 205.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "PRKAG3"
+    },
+    {
+      "protbox_id": "b5cc2",
+      "x": 511.0,
+      "y": 298.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "TSC2"
+    },
+    {
+      "protbox_id": "b6a44",
+      "x": 305.0,
+      "y": 165.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "PRKAB2"
+    },
+    {
+      "protbox_id": "b6c1f",
+      "x": 229.98333333333332,
+      "y": 552.9833333333333,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [
+        "O75385"
+      ],
+      "backup_label": "ULK1",
+      "tooltip": "T: GOBP name: anatomical structure morphogenesis;autophagic vacuole assembly;axon extension;biological regulation;cell communication;cell differentiation;cell differentiation in hindbrain;cell growth;cell migration;cell migration in hindbrain;cell motility;cell part morphogenesis;cell projection morphogenesis;cell projection organization;cellular component assembly;cellular component assembly at cellular level;cellular component morphogenesis;cellular component movement;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular developmental process;cellular macromolecule metabolic process;cellular membrane organization;cellular metabolic process;cellular process;cellular protein metabolic process;cellular response to external stimulus;cellular response to extracellular stimulus;cellular response to nutrient levels;cellular response to stimulus;cellular response to stress;central nervous system neuron differentiation;cerebellar granule cell differentiation;developmental cell growth;developmental growth;developmental growth involved in morphogenesis;developmental process;endocytosis;establishment of localization;growth;hindbrain radial glia guided cell migration;intracellular signal transduction;localization;locomotion;macromolecule localization;macromolecule metabolic process;macromolecule modification;membrane invagination;membrane organization;metabolic process;negative regulation of axonogenesis;negative regulation of biological process;negative regulation of cell development;negative regulation of cell differentiation;negative regulation of cell growth;negative regulation of cell projection organization;negative regulation of cellular component organization;negative regulation of cellular process;negative regulation of collateral sprouting;negative regulation of developmental growth;negative regulation of developmental process;negative regulation of growth;negative regulation of neurogenesis;neuron differentiation;neuron projection development;neuron projection morphogenesis;neuron projection regeneration;organelle assembly;organelle organization;phosphate-containing compound metabolic process;phosphorus metabolic process;phosphorylation;positive regulation of autophagy;positive regulation of biological process;positive regulation of catabolic process;positive regulation of cell communication;positive regulation of cellular catabolic process;positive regulation of cellular metabolic process;positive regulation of cellular process;positive regulation of macroautophagy;positive regulation of metabolic process;positive regulation of response to external stimulus;positive regulation of response to extracellular stimulus;positive regulation of response to nutrient levels;positive regulation of response to stimulus;primary metabolic process;protein autophosphorylation;protein localization;protein metabolic process;protein modification process;protein phosphorylation;radial glia guided migration of cerebellar granule cell;Ras protein signal transduction;receptor internalization;receptor metabolic process;receptor-mediated endocytosis;regeneration;regulation of anatomical structure morphogenesis;regulation of autophagy;regulation of axonogenesis;regulation of biological process;regulation of catabolic process;regulation of cell communication;regulation of cell development;regulation of cell differentiation;regulation of cell growth;regulation of cell morphogenesis;regulation of cell morphogenesis involved in differentiation;regulation of cell projection organization;regulation of cellular catabolic process;regulation of cellular component organization;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular response to stress;regulation of collateral sprouting;regulation of developmental growth;regulation of developmental process;regulation of extent of cell growth;regulation of growth;regulation of macroautophagy;regulation of metabolic process;regulation of multicellular organismal development;regulation of multicellular organismal process;regulation of nerve growth factor receptor signaling pathway;regulation of nervous system development;regulation of neurogenesis;regulation of neuron differentiation;regulation of neuron projection development;regulation of response to external stimulus;regulation of response to extracellular stimulus;regulation of response to nutrient levels;regulation of response to stimulus;regulation of response to stress;regulation of signal transduction;regulation of signaling;response to external stimulus;response to extracellular stimulus;response to nutrient levels;response to starvation;response to stimulus;response to stress;signal transduction;small GTPase mediated signal transduction;transport;vacuole organization;vesicle-mediated transport\nT: GOMF name: adenyl nucleotide binding;adenyl ribonucleotide binding;ATP binding;binding;catalytic activity;enzyme binding;GTPase binding;kinase activity;nucleotide binding;phosphotransferase activity, alcohol group as acceptor;protein binding;protein complex binding;protein kinase activity;protein serine/threonine kinase activity;purine nucleotide binding;purine ribonucleoside triphosphate binding;purine ribonucleotide binding;Rab GTPase binding;Ras GTPase binding;ribonucleotide binding;small GTPase binding;transferase activity;transferase activity, transferring phosphorus-containing groups",
+      "tooltip_html": "<strong>T: GOBP name:</strong> anatomical structure morphogenesis;autophagic vacuole assembly;axon extension;biological regulation;cell communication;cell differentiation;cell differentiation in hindbrain;cell growth;cell migration;cell migration in hindbrain;cell motility;cell part morphogenesis;cell projection morphogenesis;cell projection organization;cellular component assembly;cellular component assembly at cellular level;cellular component morphogenesis;cellular component movement;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular developmental process;cellular macromolecule metabolic process;cellular membrane organization;cellular metabolic process;cellular process;cellular protein metabolic process;cellular response to external stimulus;cellular response to extracellular stimulus;cellular response to nutrient levels;cellular response to stimulus;cellular response to stress;central nervous system neuron differentiation;cerebellar granule cell differentiation;developmental cell growth;developmental growth;developmental growth involved in morphogenesis;developmental process;endocytosis;establishment of localization;growth;hindbrain radial glia guided cell migration;intracellular signal transduction;localization;locomotion;macromolecule localization;macromolecule metabolic process;macromolecule modification;membrane invagination;membrane organization;metabolic process;negative regulation of axonogenesis;negative regulation of biological process;negative regulation of cell development;negative regulation of cell differentiation;negative regulation of cell growth;negative regulation of cell projection organization;negative regulation of cellular component organization;negative regulation of cellular process;negative regulation of collateral sprouting;negative regulation of developmental growth;negative regulation of developmental process;negative regulation of growth;negative regulation of neurogenesis;neuron differentiation;neuron projection development;neuron projection morphogenesis;neuron projection regeneration;organelle assembly;organelle organization;phosphate-containing compound metabolic process;phosphorus metabolic process;phosphorylation;positive regulation of autophagy;positive regulation of biological process;positive regulation of catabolic process;positive regulation of cell communication;positive regulation of cellular catabolic process;positive regulation of cellular metabolic process;positive regulation of cellular process;positive regulation of macroautophagy;positive regulation of metabolic process;positive regulation of response to external stimulus;positive regulation of response to extracellular stimulus;positive regulation of response to nutrient levels;positive regulation of response to stimulus;primary metabolic process;protein autophosphorylation;protein localization;protein metabolic process;protein modification process;protein phosphorylation;radial glia guided migration of cerebellar granule cell;Ras protein signal transduction;receptor internalization;receptor metabolic process;receptor-mediated endocytosis;regeneration;regulation of anatomical structure morphogenesis;regulation of autophagy;regulation of axonogenesis;regulation of biological process;regulation of catabolic process;regulation of cell communication;regulation of cell development;regulation of cell differentiation;regulation of cell growth;regulation of cell morphogenesis;regulation of cell morphogenesis involved in differentiation;regulation of cell projection organization;regulation of cellular catabolic process;regulation of cellular component organization;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular response to stress;regulation of collateral sprouting;regulation of developmental growth;regulation of developmental process;regulation of extent of cell growth;regulation of growth;regulation of macroautophagy;regulation of metabolic process;regulation of multicellular organismal development;regulation of multicellular organismal process;regulation of nerve growth factor receptor signaling pathway;regulation of nervous system development;regulation of neurogenesis;regulation of neuron differentiation;regulation of neuron projection development;regulation of response to external stimulus;regulation of response to extracellular stimulus;regulation of response to nutrient levels;regulation of response to stimulus;regulation of response to stress;regulation of signal transduction;regulation of signaling;response to external stimulus;response to extracellular stimulus;response to nutrient levels;response to starvation;response to stimulus;response to stress;signal transduction;small GTPase mediated signal transduction;transport;vacuole organization;vesicle-mediated transport<br/><strong>T: GOMF name:</strong> adenyl nucleotide binding;adenyl ribonucleotide binding;ATP binding;binding;catalytic activity;enzyme binding;GTPase binding;kinase activity;nucleotide binding;phosphotransferase activity, alcohol group as acceptor;protein binding;protein complex binding;protein kinase activity;protein serine/threonine kinase activity;purine nucleotide binding;purine ribonucleoside triphosphate binding;purine ribonucleotide binding;Rab GTPase binding;Ras GTPase binding;ribonucleotide binding;small GTPase binding;transferase activity;transferase activity, transferring phosphorus-containing groups",
+      "ptm_overrides": {
+        "O75385": {
+          "O75385_450": {
+            "shape_x": 239.1833333333333,
+            "shape_y": 548.9833333333333,
+            "label_x": 234.1833333333333,
+            "label_y": 543.9833333333333,
+            "label_centering": "right",
+            "symbol_x": 239.1833333333333,
+            "symbol_y": 548.9833333333333,
+            "ptm_position": "N1"
+          },
+          "O75385_660": {
+            "shape_x": 266.7833333333333,
+            "shape_y": 548.9833333333333,
+            "label_x": 271.7833333333333,
+            "label_y": 543.9833333333333,
+            "label_centering": "left",
+            "symbol_x": 266.7833333333333,
+            "symbol_y": 548.9833333333333,
+            "ptm_position": "N3"
+          },
+          "O75385_639": {
+            "shape_x": 279.98333333333335,
+            "shape_y": 558.5933333333334,
+            "label_x": 284.98333333333335,
+            "label_y": 556.5933333333334,
+            "label_centering": "left",
+            "symbol_x": 279.98333333333335,
+            "symbol_y": 558.5933333333334,
+            "ptm_position": "E1"
+          },
+          "O75385_623": {
+            "shape_x": 225.98333333333332,
+            "shape_y": 558.5933333333334,
+            "label_x": 220.98333333333332,
+            "label_y": 556.5933333333334,
+            "label_centering": "right",
+            "symbol_x": 225.98333333333332,
+            "symbol_y": 558.5933333333334,
+            "ptm_position": "W1"
+          }
+        }
+      }
+    },
+    {
+      "protbox_id": "b85c1",
+      "x": 758.0,
+      "y": 485.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "MLST8"
+    },
+    {
+      "protbox_id": "b920a",
+      "x": 82.0,
+      "y": 248.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [
+        "Q9HB90"
+      ],
+      "backup_label": "RRAGC",
+      "tooltip": "T: GOBP name: apoptosis;biological regulation;biosynthetic process;cell communication;cell death;cell growth;cellular biosynthetic process;cellular localization;cellular macromolecule biosynthetic process;cellular macromolecule localization;cellular macromolecule metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cellular protein localization;cellular response to acid;cellular response to amine stimulus;cellular response to amino acid stimulus;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to external stimulus;cellular response to extracellular stimulus;cellular response to nutrient levels;cellular response to organic nitrogen;cellular response to organic substance;cellular response to starvation;cellular response to stimulus;cellular response to stress;death;growth;intracellular signal transduction;localization;macromolecule biosynthetic process;macromolecule localization;macromolecule metabolic process;metabolic process;nitrogen compound metabolic process;nucleic acid metabolic process;nucleobase-containing compound metabolic process;positive regulation of biological process;positive regulation of cell communication;positive regulation of cellular process;positive regulation of response to stimulus;positive regulation of signal transduction;positive regulation of signaling;positive regulation of TOR signaling cascade;primary metabolic process;programmed cell death;protein localization;regulation of autophagy;regulation of biological process;regulation of catabolic process;regulation of cell communication;regulation of cellular catabolic process;regulation of cellular metabolic process;regulation of cellular process;regulation of metabolic process;regulation of response to stimulus;regulation of signal transduction;regulation of signaling;regulation of TOR signaling cascade;response to acid;response to amine stimulus;response to amino acid stimulus;response to chemical stimulus;response to endogenous stimulus;response to external stimulus;response to extracellular stimulus;response to nutrient levels;response to organic nitrogen;response to organic substance;response to starvation;response to stimulus;response to stress;RNA biosynthetic process;RNA metabolic process;RNA processing;RNA splicing;signal transduction;small GTPase mediated signal transduction;transcription, DNA-dependent\nT: GOMF name: binding;catalytic activity;cation binding;GDP binding;GTP binding;GTPase activity;guanyl nucleotide binding;guanyl ribonucleotide binding;hydrolase activity;hydrolase activity, acting on acid anhydrides;hydrolase activity, acting on acid anhydrides, in phosphorus-containing anhydrides;ion binding;magnesium ion binding;metal ion binding;nucleoside-triphosphatase activity;nucleotide binding;protein binding;protein dimerization activity;protein heterodimerization activity;purine nucleotide binding;purine ribonucleoside triphosphate binding;purine ribonucleotide binding;pyrophosphatase activity;ribonucleotide binding",
+      "tooltip_html": "<strong>T: GOBP name:</strong> apoptosis;biological regulation;biosynthetic process;cell communication;cell death;cell growth;cellular biosynthetic process;cellular localization;cellular macromolecule biosynthetic process;cellular macromolecule localization;cellular macromolecule metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cellular protein localization;cellular response to acid;cellular response to amine stimulus;cellular response to amino acid stimulus;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to external stimulus;cellular response to extracellular stimulus;cellular response to nutrient levels;cellular response to organic nitrogen;cellular response to organic substance;cellular response to starvation;cellular response to stimulus;cellular response to stress;death;growth;intracellular signal transduction;localization;macromolecule biosynthetic process;macromolecule localization;macromolecule metabolic process;metabolic process;nitrogen compound metabolic process;nucleic acid metabolic process;nucleobase-containing compound metabolic process;positive regulation of biological process;positive regulation of cell communication;positive regulation of cellular process;positive regulation of response to stimulus;positive regulation of signal transduction;positive regulation of signaling;positive regulation of TOR signaling cascade;primary metabolic process;programmed cell death;protein localization;regulation of autophagy;regulation of biological process;regulation of catabolic process;regulation of cell communication;regulation of cellular catabolic process;regulation of cellular metabolic process;regulation of cellular process;regulation of metabolic process;regulation of response to stimulus;regulation of signal transduction;regulation of signaling;regulation of TOR signaling cascade;response to acid;response to amine stimulus;response to amino acid stimulus;response to chemical stimulus;response to endogenous stimulus;response to external stimulus;response to extracellular stimulus;response to nutrient levels;response to organic nitrogen;response to organic substance;response to starvation;response to stimulus;response to stress;RNA biosynthetic process;RNA metabolic process;RNA processing;RNA splicing;signal transduction;small GTPase mediated signal transduction;transcription, DNA-dependent<br/><strong>T: GOMF name:</strong> binding;catalytic activity;cation binding;GDP binding;GTP binding;GTPase activity;guanyl nucleotide binding;guanyl ribonucleotide binding;hydrolase activity;hydrolase activity, acting on acid anhydrides;hydrolase activity, acting on acid anhydrides, in phosphorus-containing anhydrides;ion binding;magnesium ion binding;metal ion binding;nucleoside-triphosphatase activity;nucleotide binding;protein binding;protein dimerization activity;protein heterodimerization activity;purine nucleotide binding;purine ribonucleoside triphosphate binding;purine ribonucleotide binding;pyrophosphatase activity;ribonucleotide binding"
+    },
+    {
+      "protbox_id": "b95e4",
+      "x": 735.0,
+      "y": 579.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "RAC1"
+    },
+    {
+      "protbox_id": "ba77d",
+      "x": 511.0,
+      "y": 175.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "DDIT4"
+    },
+    {
+      "protbox_id": "bb287",
+      "x": 735.0,
+      "y": 599.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "CDC42"
+    },
+    {
+      "protbox_id": "bc4e4",
+      "x": 511.0,
+      "y": 375.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "RHEB"
+    },
+    {
+      "protbox_id": "bca7a",
+      "x": 385.0,
+      "y": 165.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "PRKAG1"
+    },
+    {
+      "protbox_id": "bde45",
+      "x": 678.0,
+      "y": 485.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [
+        "P42345"
+      ],
+      "backup_label": "MTOR",
+      "tooltip": "T: GOBP name: anatomical structure development;biological regulation;biosynthetic process;catabolic process;cell communication;cell cycle arrest;cell cycle process;cell development;cell growth;cell projection organization;cell surface receptor linked signaling pathway;cellular biosynthetic process;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular developmental process;cellular macromolecule metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cellular process involved in reproduction;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to external stimulus;cellular response to extracellular stimulus;cellular response to fibroblast growth factor stimulus;cellular response to growth factor stimulus;cellular response to heat;cellular response to hormone stimulus;cellular response to hypoxia;cellular response to insulin stimulus;cellular response to nutrient levels;cellular response to organic substance;cellular response to oxygen levels;cellular response to peptide hormone stimulus;cellular response to stimulus;cellular response to stress;cellular response to vascular endothelial growth factor stimulus;defense response;developmental process;developmental process involved in reproduction;DNA metabolic process;DNA recombination;DNA repair;double-strand break repair;double-strand break repair via homologous recombination;enzyme linked receptor protein signaling pathway;epidermal growth factor receptor signaling pathway;fibroblast growth factor receptor signaling pathway;gene expression;germ cell development;growth;immune response;immune system process;innate immune response;inositol lipid-mediated signaling;insulin receptor signaling pathway;intracellular signal transduction;lymphocyte costimulation;macromolecule catabolic process;macromolecule metabolic process;macromolecule modification;metabolic process;negative regulation of autophagy;negative regulation of biological process;negative regulation of catabolic process;negative regulation of cell communication;negative regulation of cell cycle;negative regulation of cell size;negative regulation of cellular catabolic process;negative regulation of cellular metabolic process;negative regulation of cellular process;negative regulation of intracellular protein transport;negative regulation of intracellular transport;negative regulation of macroautophagy;negative regulation of metabolic process;negative regulation of NFAT protein import into nucleus;negative regulation of nucleocytoplasmic transport;negative regulation of protein import into nucleus;negative regulation of protein transport;negative regulation of response to external stimulus;negative regulation of response to extracellular stimulus;negative regulation of response to nutrient levels;negative regulation of response to stimulus;negative regulation of transcription factor import into nucleus;negative regulation of transmembrane transport;negative regulation of transport;nerve growth factor receptor signaling pathway;nitrogen compound metabolic process;nucleic acid metabolic process;nucleobase-containing compound metabolic process;peptidyl-amino acid modification;peptidyl-serine modification;peptidyl-serine phosphorylation;peptidyl-threonine modification;peptidyl-threonine phosphorylation;phosphate-containing compound metabolic process;phosphatidylinositol-mediated signaling;phosphorus metabolic process;phosphorylation;positive regulation of actin filament bundle assembly;positive regulation of actin filament polymerization;positive regulation of biological process;positive regulation of biosynthetic process;positive regulation of cell activation;positive regulation of cell communication;positive regulation of cell differentiation;positive regulation of cell projection organization;positive regulation of cell proliferation;positive regulation of cellular biosynthetic process;positive regulation of cellular component organization;positive regulation of cellular metabolic process;positive regulation of cellular process;positive regulation of cellular protein metabolic process;positive regulation of cytoskeleton organization;positive regulation of developmental process;positive regulation of endothelial cell proliferation;positive regulation of epithelial cell proliferation;positive regulation of gene expression;positive regulation of immune system process;positive regulation of intracellular protein kinase cascade;positive regulation of lamellipodium assembly;positive regulation of leukocyte activation;positive regulation of lipid biosynthetic process;positive regulation of lipid metabolic process;positive regulation of lymphocyte activation;positive regulation of macromolecule biosynthetic process;positive regulation of macromolecule metabolic process;positive regulation of metabolic process;positive regulation of muscle cell differentiation;positive regulation of myotube differentiation;positive regulation of nitrogen compound metabolic process;positive regulation of nucleobase-containing compound metabolic process;positive regulation of organelle organization;positive regulation of peptidyl-tyrosine phosphorylation;positive regulation of phosphate metabolic process;positive regulation of phosphorus metabolic process;positive regulation of phosphorylation;positive regulation of protein complex assembly;positive regulation of protein kinase B signaling cascade;positive regulation of protein metabolic process;positive regulation of protein modification process;positive regulation of protein phosphorylation;positive regulation of protein polymerization;positive regulation of response to stimulus;positive regulation of RNA metabolic process;positive regulation of signal transduction;positive regulation of signaling;positive regulation of skeletal muscle cell differentiation;positive regulation of stress fiber assembly;positive regulation of striated muscle cell differentiation;positive regulation of T cell activation;positive regulation of transcription from RNA polymerase III promoter;positive regulation of transcription, DNA-dependent;positive regulation of translation;posttranscriptional regulation of gene expression;primary metabolic process;protein autophosphorylation;protein catabolic process;protein metabolic process;protein modification process;protein phosphorylation;recombinational repair;regulation of actin cytoskeleton organization;regulation of actin filament bundle assembly;regulation of actin filament length;regulation of actin filament polymerization;regulation of actin filament-based process;regulation of actin polymerization or depolymerization;regulation of anatomical structure size;regulation of autophagy;regulation of biological process;regulation of biological quality;regulation of biosynthetic process;regulation of carbohydrate biosynthetic process;regulation of carbohydrate metabolic process;regulation of carbohydrate utilization;regulation of catabolic process;regulation of catalytic activity;regulation of cell activation;regulation of cell communication;regulation of cell cycle;regulation of cell development;regulation of cell differentiation;regulation of cell projection assembly;regulation of cell projection organization;regulation of cell proliferation;regulation of cell size;regulation of cellular biosynthetic process;regulation of cellular carbohydrate metabolic process;regulation of cellular catabolic process;regulation of cellular component biogenesis;regulation of cellular component organization;regulation of cellular component size;regulation of cellular ketone metabolic process;regulation of cellular localization;regulation of cellular macromolecule biosynthetic process;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of cellular response to stress;regulation of cytoskeleton organization;regulation of developmental process;regulation of endothelial cell proliferation;regulation of epithelial cell proliferation;regulation of establishment of protein localization;regulation of fatty acid beta-oxidation;regulation of fatty acid metabolic process;regulation of fatty acid oxidation;regulation of gene expression;regulation of generation of precursor metabolites and energy;regulation of glucan biosynthetic process;regulation of glucose metabolic process;regulation of glycogen biosynthetic process;regulation of glycogen metabolic process;regulation of homeostatic process;regulation of immune system process;regulation of intracellular protein kinase cascade;regulation of intracellular protein transport;regulation of intracellular transport;regulation of ion homeostasis;regulation of kinase activity;regulation of lamellipodium assembly;regulation of leukocyte activation;regulation of lipid biosynthetic process;regulation of lipid catabolic process;regulation of lipid metabolic process;regulation of localization;regulation of lymphocyte activation;regulation of macroautophagy;regulation of macromolecule biosynthetic process;regulation of macromolecule metabolic process;regulation of metabolic process;regulation of molecular function;regulation of multicellular organismal development;regulation of multicellular organismal process;regulation of muscle cell differentiation;regulation of muscle organ development;regulation of myelination;regulation of myeloid cell differentiation;regulation of myeloid leukocyte differentiation;regulation of myotube differentiation;regulation of nervous system development;regulation of neurological system process;regulation of NFAT protein import into nucleus;regulation of nitrogen compound metabolic process;regulation of nucleobase-containing compound metabolic process;regulation of nucleocytoplasmic transport;regulation of organelle organization;regulation of osteoclast differentiation;regulation of peptidyl-tyrosine phosphorylation;regulation of phosphate metabolic process;regulation of phosphorus metabolic process;regulation of phosphorylation;regulation of polysaccharide biosynthetic process;regulation of polysaccharide metabolic process;regulation of primary metabolic process;regulation of protein complex assembly;regulation of protein import into nucleus;regulation of protein kinase activity;regulation of protein kinase B signaling cascade;regulation of protein localization;regulation of protein metabolic process;regulation of protein modification process;regulation of protein phosphorylation;regulation of protein polymerization;regulation of protein transport;regulation of response to external stimulus;regulation of response to extracellular stimulus;regulation of response to food;regulation of response to nutrient levels;regulation of response to stimulus;regulation of response to stress;regulation of RNA metabolic process;regulation of signal transduction;regulation of signaling;regulation of skeletal muscle cell differentiation;regulation of skeletal muscle fiber development;regulation of skeletal muscle tissue development;regulation of stress fiber assembly;regulation of striated muscle cell differentiation;regulation of striated muscle tissue development;regulation of system process;regulation of T cell activation;regulation of transcription factor import into nucleus;regulation of transcription from RNA polymerase III promoter;regulation of transcription, DNA-dependent;regulation of transferase activity;regulation of translation;regulation of transmembrane transport;regulation of transmission of nerve impulse;regulation of transport;reproductive process;response to abiotic stimulus;response to acid;response to amine stimulus;response to amino acid stimulus;response to chemical stimulus;response to DNA damage stimulus;response to endogenous stimulus;response to external stimulus;response to extracellular stimulus;response to fibroblast growth factor stimulus;response to growth factor stimulus;response to heat;response to hormone stimulus;response to hypoxia;response to insulin stimulus;response to nutrient;response to nutrient levels;response to organic nitrogen;response to organic substance;response to oxygen levels;response to peptide hormone stimulus;response to stimulus;response to stress;response to temperature stimulus;RNA biosynthetic process;RNA metabolic process;ruffle organization;signal transduction;T cell costimulation;TOR signaling cascade;transcription initiation from RNA polymerase II promoter;transcription initiation, DNA-dependent;transmembrane receptor protein tyrosine kinase signaling pathway;vascular endothelial growth factor receptor signaling pathway\nT: GOMF name: 5S rDNA binding;adenyl nucleotide binding;adenyl ribonucleotide binding;ATP binding;binding;catalytic activity;DNA binding;drug binding;kinase activity;nucleic acid binding;nucleotide binding;phosphoprotein binding;phosphotransferase activity, alcohol group as acceptor;protein binding;protein dimerization activity;protein kinase activity;protein serine/threonine kinase activity;purine nucleotide binding;purine ribonucleoside triphosphate binding;purine ribonucleotide binding;rDNA binding;regulatory region DNA binding;regulatory region nucleic acid binding;ribonucleoprotein binding;ribonucleotide binding;ribosome binding;RNA polymerase III regulatory region DNA binding;RNA polymerase III transcription factor binding;RNA polymerase III type 1 promoter DNA binding;RNA polymerase III type 2 promoter DNA binding;RNA polymerase III type 3 promoter DNA binding;sequence-specific DNA binding;TFIIIC-class transcription factor binding;transcription factor binding;transcription regulatory region DNA binding;transferase activity;transferase activity, transferring phosphorus-containing groups",
+      "tooltip_html": "<strong>T: GOBP name:</strong> anatomical structure development;biological regulation;biosynthetic process;catabolic process;cell communication;cell cycle arrest;cell cycle process;cell development;cell growth;cell projection organization;cell surface receptor linked signaling pathway;cellular biosynthetic process;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular developmental process;cellular macromolecule metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cellular process involved in reproduction;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to external stimulus;cellular response to extracellular stimulus;cellular response to fibroblast growth factor stimulus;cellular response to growth factor stimulus;cellular response to heat;cellular response to hormone stimulus;cellular response to hypoxia;cellular response to insulin stimulus;cellular response to nutrient levels;cellular response to organic substance;cellular response to oxygen levels;cellular response to peptide hormone stimulus;cellular response to stimulus;cellular response to stress;cellular response to vascular endothelial growth factor stimulus;defense response;developmental process;developmental process involved in reproduction;DNA metabolic process;DNA recombination;DNA repair;double-strand break repair;double-strand break repair via homologous recombination;enzyme linked receptor protein signaling pathway;epidermal growth factor receptor signaling pathway;fibroblast growth factor receptor signaling pathway;gene expression;germ cell development;growth;immune response;immune system process;innate immune response;inositol lipid-mediated signaling;insulin receptor signaling pathway;intracellular signal transduction;lymphocyte costimulation;macromolecule catabolic process;macromolecule metabolic process;macromolecule modification;metabolic process;negative regulation of autophagy;negative regulation of biological process;negative regulation of catabolic process;negative regulation of cell communication;negative regulation of cell cycle;negative regulation of cell size;negative regulation of cellular catabolic process;negative regulation of cellular metabolic process;negative regulation of cellular process;negative regulation of intracellular protein transport;negative regulation of intracellular transport;negative regulation of macroautophagy;negative regulation of metabolic process;negative regulation of NFAT protein import into nucleus;negative regulation of nucleocytoplasmic transport;negative regulation of protein import into nucleus;negative regulation of protein transport;negative regulation of response to external stimulus;negative regulation of response to extracellular stimulus;negative regulation of response to nutrient levels;negative regulation of response to stimulus;negative regulation of transcription factor import into nucleus;negative regulation of transmembrane transport;negative regulation of transport;nerve growth factor receptor signaling pathway;nitrogen compound metabolic process;nucleic acid metabolic process;nucleobase-containing compound metabolic process;peptidyl-amino acid modification;peptidyl-serine modification;peptidyl-serine phosphorylation;peptidyl-threonine modification;peptidyl-threonine phosphorylation;phosphate-containing compound metabolic process;phosphatidylinositol-mediated signaling;phosphorus metabolic process;phosphorylation;positive regulation of actin filament bundle assembly;positive regulation of actin filament polymerization;positive regulation of biological process;positive regulation of biosynthetic process;positive regulation of cell activation;positive regulation of cell communication;positive regulation of cell differentiation;positive regulation of cell projection organization;positive regulation of cell proliferation;positive regulation of cellular biosynthetic process;positive regulation of cellular component organization;positive regulation of cellular metabolic process;positive regulation of cellular process;positive regulation of cellular protein metabolic process;positive regulation of cytoskeleton organization;positive regulation of developmental process;positive regulation of endothelial cell proliferation;positive regulation of epithelial cell proliferation;positive regulation of gene expression;positive regulation of immune system process;positive regulation of intracellular protein kinase cascade;positive regulation of lamellipodium assembly;positive regulation of leukocyte activation;positive regulation of lipid biosynthetic process;positive regulation of lipid metabolic process;positive regulation of lymphocyte activation;positive regulation of macromolecule biosynthetic process;positive regulation of macromolecule metabolic process;positive regulation of metabolic process;positive regulation of muscle cell differentiation;positive regulation of myotube differentiation;positive regulation of nitrogen compound metabolic process;positive regulation of nucleobase-containing compound metabolic process;positive regulation of organelle organization;positive regulation of peptidyl-tyrosine phosphorylation;positive regulation of phosphate metabolic process;positive regulation of phosphorus metabolic process;positive regulation of phosphorylation;positive regulation of protein complex assembly;positive regulation of protein kinase B signaling cascade;positive regulation of protein metabolic process;positive regulation of protein modification process;positive regulation of protein phosphorylation;positive regulation of protein polymerization;positive regulation of response to stimulus;positive regulation of RNA metabolic process;positive regulation of signal transduction;positive regulation of signaling;positive regulation of skeletal muscle cell differentiation;positive regulation of stress fiber assembly;positive regulation of striated muscle cell differentiation;positive regulation of T cell activation;positive regulation of transcription from RNA polymerase III promoter;positive regulation of transcription, DNA-dependent;positive regulation of translation;posttranscriptional regulation of gene expression;primary metabolic process;protein autophosphorylation;protein catabolic process;protein metabolic process;protein modification process;protein phosphorylation;recombinational repair;regulation of actin cytoskeleton organization;regulation of actin filament bundle assembly;regulation of actin filament length;regulation of actin filament polymerization;regulation of actin filament-based process;regulation of actin polymerization or depolymerization;regulation of anatomical structure size;regulation of autophagy;regulation of biological process;regulation of biological quality;regulation of biosynthetic process;regulation of carbohydrate biosynthetic process;regulation of carbohydrate metabolic process;regulation of carbohydrate utilization;regulation of catabolic process;regulation of catalytic activity;regulation of cell activation;regulation of cell communication;regulation of cell cycle;regulation of cell development;regulation of cell differentiation;regulation of cell projection assembly;regulation of cell projection organization;regulation of cell proliferation;regulation of cell size;regulation of cellular biosynthetic process;regulation of cellular carbohydrate metabolic process;regulation of cellular catabolic process;regulation of cellular component biogenesis;regulation of cellular component organization;regulation of cellular component size;regulation of cellular ketone metabolic process;regulation of cellular localization;regulation of cellular macromolecule biosynthetic process;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of cellular response to stress;regulation of cytoskeleton organization;regulation of developmental process;regulation of endothelial cell proliferation;regulation of epithelial cell proliferation;regulation of establishment of protein localization;regulation of fatty acid beta-oxidation;regulation of fatty acid metabolic process;regulation of fatty acid oxidation;regulation of gene expression;regulation of generation of precursor metabolites and energy;regulation of glucan biosynthetic process;regulation of glucose metabolic process;regulation of glycogen biosynthetic process;regulation of glycogen metabolic process;regulation of homeostatic process;regulation of immune system process;regulation of intracellular protein kinase cascade;regulation of intracellular protein transport;regulation of intracellular transport;regulation of ion homeostasis;regulation of kinase activity;regulation of lamellipodium assembly;regulation of leukocyte activation;regulation of lipid biosynthetic process;regulation of lipid catabolic process;regulation of lipid metabolic process;regulation of localization;regulation of lymphocyte activation;regulation of macroautophagy;regulation of macromolecule biosynthetic process;regulation of macromolecule metabolic process;regulation of metabolic process;regulation of molecular function;regulation of multicellular organismal development;regulation of multicellular organismal process;regulation of muscle cell differentiation;regulation of muscle organ development;regulation of myelination;regulation of myeloid cell differentiation;regulation of myeloid leukocyte differentiation;regulation of myotube differentiation;regulation of nervous system development;regulation of neurological system process;regulation of NFAT protein import into nucleus;regulation of nitrogen compound metabolic process;regulation of nucleobase-containing compound metabolic process;regulation of nucleocytoplasmic transport;regulation of organelle organization;regulation of osteoclast differentiation;regulation of peptidyl-tyrosine phosphorylation;regulation of phosphate metabolic process;regulation of phosphorus metabolic process;regulation of phosphorylation;regulation of polysaccharide biosynthetic process;regulation of polysaccharide metabolic process;regulation of primary metabolic process;regulation of protein complex assembly;regulation of protein import into nucleus;regulation of protein kinase activity;regulation of protein kinase B signaling cascade;regulation of protein localization;regulation of protein metabolic process;regulation of protein modification process;regulation of protein phosphorylation;regulation of protein polymerization;regulation of protein transport;regulation of response to external stimulus;regulation of response to extracellular stimulus;regulation of response to food;regulation of response to nutrient levels;regulation of response to stimulus;regulation of response to stress;regulation of RNA metabolic process;regulation of signal transduction;regulation of signaling;regulation of skeletal muscle cell differentiation;regulation of skeletal muscle fiber development;regulation of skeletal muscle tissue development;regulation of stress fiber assembly;regulation of striated muscle cell differentiation;regulation of striated muscle tissue development;regulation of system process;regulation of T cell activation;regulation of transcription factor import into nucleus;regulation of transcription from RNA polymerase III promoter;regulation of transcription, DNA-dependent;regulation of transferase activity;regulation of translation;regulation of transmembrane transport;regulation of transmission of nerve impulse;regulation of transport;reproductive process;response to abiotic stimulus;response to acid;response to amine stimulus;response to amino acid stimulus;response to chemical stimulus;response to DNA damage stimulus;response to endogenous stimulus;response to external stimulus;response to extracellular stimulus;response to fibroblast growth factor stimulus;response to growth factor stimulus;response to heat;response to hormone stimulus;response to hypoxia;response to insulin stimulus;response to nutrient;response to nutrient levels;response to organic nitrogen;response to organic substance;response to oxygen levels;response to peptide hormone stimulus;response to stimulus;response to stress;response to temperature stimulus;RNA biosynthetic process;RNA metabolic process;ruffle organization;signal transduction;T cell costimulation;TOR signaling cascade;transcription initiation from RNA polymerase II promoter;transcription initiation, DNA-dependent;transmembrane receptor protein tyrosine kinase signaling pathway;vascular endothelial growth factor receptor signaling pathway<br/><strong>T: GOMF name:</strong> 5S rDNA binding;adenyl nucleotide binding;adenyl ribonucleotide binding;ATP binding;binding;catalytic activity;DNA binding;drug binding;kinase activity;nucleic acid binding;nucleotide binding;phosphoprotein binding;phosphotransferase activity, alcohol group as acceptor;protein binding;protein dimerization activity;protein kinase activity;protein serine/threonine kinase activity;purine nucleotide binding;purine ribonucleoside triphosphate binding;purine ribonucleotide binding;rDNA binding;regulatory region DNA binding;regulatory region nucleic acid binding;ribonucleoprotein binding;ribonucleotide binding;ribosome binding;RNA polymerase III regulatory region DNA binding;RNA polymerase III transcription factor binding;RNA polymerase III type 1 promoter DNA binding;RNA polymerase III type 2 promoter DNA binding;RNA polymerase III type 3 promoter DNA binding;sequence-specific DNA binding;TFIIIC-class transcription factor binding;transcription factor binding;transcription regulatory region DNA binding;transferase activity;transferase activity, transferring phosphorus-containing groups",
+      "ptm_overrides": {
+        "P42345": {
+          "P42345_1261": {
+            "shape_x": 687.2,
+            "shape_y": 481.5,
+            "label_x": 682.2,
+            "label_y": 476.5,
+            "label_centering": "right",
+            "symbol_x": 687.1,
+            "symbol_y": 481.5,
+            "ptm_position": "N1"
+          },
+          "P42345_2448": {
+            "shape_x": 701.0,
+            "shape_y": 481.5,
+            "label_x": 701.0,
+            "label_y": 473.5,
+            "label_centering": "center",
+            "symbol_x": 700.9,
+            "symbol_y": 481.0,
+            "ptm_position": "N2"
+          },
+          "P42345_2471": {
+            "shape_x": 714.8,
+            "shape_y": 481.5,
+            "label_x": 719.8,
+            "label_y": 476.5,
+            "label_centering": "left",
+            "symbol_x": 714.8,
+            "symbol_y": 481.5,
+            "ptm_position": "N3"
+          }
+        }
+      }
+    },
+    {
+      "protbox_id": "bdf8f",
+      "x": 47.32348804500704,
+      "y": 675.0443037974684,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [
+        "P04035"
+      ],
+      "backup_label": "HMGCR",
+      "tooltip": "T: GOBP name: aging;alcohol metabolic process;associative learning;behavior;biological regulation;biosynthetic process;cell differentiation;cellular biosynthetic process;cellular component assembly;cellular component organization;cellular component organization or biogenesis;cellular developmental process;cellular ketone metabolic process;cellular lipid metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cholesterol biosynthetic process;cholesterol metabolic process;coenzyme A metabolic process;coenzyme metabolic process;cofactor metabolic process;cognition;developmental process;heterocycle metabolic process;isoprenoid biosynthetic process;isoprenoid metabolic process;learning;learning or memory;lipid biosynthetic process;lipid metabolic process;macromolecular complex assembly;macromolecular complex subunit organization;metabolic process;multicellular organismal process;muscle cell differentiation;myoblast differentiation;negative regulation of apoptosis;negative regulation of biological process;negative regulation of catalytic activity;negative regulation of cell death;negative regulation of cellular process;negative regulation of hormone secretion;negative regulation of insulin secretion;negative regulation of insulin secretion involved in cellular response to glucose stimulus;negative regulation of kinase activity;negative regulation of MAP kinase activity;negative regulation of molecular function;negative regulation of multicellular organismal process;negative regulation of muscle cell apoptosis;negative regulation of peptide hormone secretion;negative regulation of peptide secretion;negative regulation of programmed cell death;negative regulation of protein kinase activity;negative regulation of protein serine/threonine kinase activity;negative regulation of response to external stimulus;negative regulation of response to stimulus;negative regulation of secretion;negative regulation of striated muscle cell apoptosis;negative regulation of transferase activity;negative regulation of transport;negative regulation of vasodilation;negative regulation of wound healing;neurological system process;nitrogen compound metabolic process;nucleobase-containing compound metabolic process;nucleobase-containing small molecule metabolic process;nucleoside bisphosphate metabolic process;nucleoside metabolic process;nucleoside phosphate metabolic process;nucleotide metabolic process;oxidoreduction coenzyme metabolic process;positive regulation of apoptosis;positive regulation of biological process;positive regulation of cardiac muscle cell apoptosis;positive regulation of cell communication;positive regulation of cell death;positive regulation of cell proliferation;positive regulation of cellular process;positive regulation of developmental process;positive regulation of ERK1 and ERK2 cascade;positive regulation of intracellular protein kinase cascade;positive regulation of MAPKKK cascade;positive regulation of muscle cell apoptosis;positive regulation of muscle organ development;positive regulation of programmed cell death;positive regulation of response to stimulus;positive regulation of signal transduction;positive regulation of signaling;positive regulation of skeletal muscle tissue development;positive regulation of smooth muscle cell proliferation;positive regulation of stress-activated MAPK cascade;positive regulation of stress-activated protein kinase signaling cascade;positive regulation of striated muscle cell apoptosis;positive regulation of striated muscle tissue development;primary metabolic process;protein complex assembly;protein complex subunit organization;protein oligomerization;protein tetramerization;purine nucleoside metabolic process;purine ribonucleoside metabolic process;purine-containing compound metabolic process;quinone cofactor metabolic process;regulation of apoptosis;regulation of biological process;regulation of cardiac muscle cell apoptosis;regulation of catalytic activity;regulation of cell communication;regulation of cell death;regulation of cell proliferation;regulation of cellular localization;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of cellular response to stress;regulation of developmental process;regulation of ERK1 and ERK2 cascade;regulation of homeostatic process;regulation of hormone secretion;regulation of insulin secretion;regulation of insulin secretion involved in cellular response to glucose stimulus;regulation of intracellular protein kinase cascade;regulation of kinase activity;regulation of localization;regulation of macromolecule metabolic process;regulation of MAP kinase activity;regulation of MAPKKK cascade;regulation of metabolic process;regulation of molecular function;regulation of multicellular organismal development;regulation of multicellular organismal process;regulation of muscle cell apoptosis;regulation of muscle organ development;regulation of peptide hormone secretion;regulation of peptide secretion;regulation of peptide transport;regulation of phosphate metabolic process;regulation of phosphorus metabolic process;regulation of phosphorylation;regulation of primary metabolic process;regulation of programmed cell death;regulation of protein kinase activity;regulation of protein metabolic process;regulation of protein modification process;regulation of protein phosphorylation;regulation of protein serine/threonine kinase activity;regulation of response to external stimulus;regulation of response to stimulus;regulation of response to stress;regulation of secretion;regulation of signal transduction;regulation of signaling;regulation of skeletal muscle tissue development;regulation of smooth muscle cell proliferation;regulation of stress-activated MAPK cascade;regulation of stress-activated protein kinase signaling cascade;regulation of striated muscle cell apoptosis;regulation of striated muscle tissue development;regulation of system process;regulation of transferase activity;regulation of transport;regulation of vasodilation;regulation of wound healing;response to abiotic stimulus;response to chemical stimulus;response to ethanol;response to external stimulus;response to extracellular stimulus;response to light stimulus;response to nutrient;response to nutrient levels;response to organic substance;response to radiation;response to stimulus;ribonucleoside metabolic process;small molecule metabolic process;steroid biosynthetic process;steroid metabolic process;sterol biosynthetic process;sterol metabolic process;system process;ubiquinone metabolic process;visual behavior;visual learning\nT: GOMF name: binding;catalytic activity;coenzyme binding;cofactor binding;hydroxymethylglutaryl-CoA reductase (NADPH) activity;hydroxymethylglutaryl-CoA reductase activity;NADP binding;NADPH binding;nucleotide binding;oxidoreductase activity;oxidoreductase activity, acting on CH-OH group of donors;oxidoreductase activity, acting on the CH-OH group of donors, NAD or NADP as acceptor",
+      "tooltip_html": "<strong>T: GOBP name:</strong> aging;alcohol metabolic process;associative learning;behavior;biological regulation;biosynthetic process;cell differentiation;cellular biosynthetic process;cellular component assembly;cellular component organization;cellular component organization or biogenesis;cellular developmental process;cellular ketone metabolic process;cellular lipid metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cholesterol biosynthetic process;cholesterol metabolic process;coenzyme A metabolic process;coenzyme metabolic process;cofactor metabolic process;cognition;developmental process;heterocycle metabolic process;isoprenoid biosynthetic process;isoprenoid metabolic process;learning;learning or memory;lipid biosynthetic process;lipid metabolic process;macromolecular complex assembly;macromolecular complex subunit organization;metabolic process;multicellular organismal process;muscle cell differentiation;myoblast differentiation;negative regulation of apoptosis;negative regulation of biological process;negative regulation of catalytic activity;negative regulation of cell death;negative regulation of cellular process;negative regulation of hormone secretion;negative regulation of insulin secretion;negative regulation of insulin secretion involved in cellular response to glucose stimulus;negative regulation of kinase activity;negative regulation of MAP kinase activity;negative regulation of molecular function;negative regulation of multicellular organismal process;negative regulation of muscle cell apoptosis;negative regulation of peptide hormone secretion;negative regulation of peptide secretion;negative regulation of programmed cell death;negative regulation of protein kinase activity;negative regulation of protein serine/threonine kinase activity;negative regulation of response to external stimulus;negative regulation of response to stimulus;negative regulation of secretion;negative regulation of striated muscle cell apoptosis;negative regulation of transferase activity;negative regulation of transport;negative regulation of vasodilation;negative regulation of wound healing;neurological system process;nitrogen compound metabolic process;nucleobase-containing compound metabolic process;nucleobase-containing small molecule metabolic process;nucleoside bisphosphate metabolic process;nucleoside metabolic process;nucleoside phosphate metabolic process;nucleotide metabolic process;oxidoreduction coenzyme metabolic process;positive regulation of apoptosis;positive regulation of biological process;positive regulation of cardiac muscle cell apoptosis;positive regulation of cell communication;positive regulation of cell death;positive regulation of cell proliferation;positive regulation of cellular process;positive regulation of developmental process;positive regulation of ERK1 and ERK2 cascade;positive regulation of intracellular protein kinase cascade;positive regulation of MAPKKK cascade;positive regulation of muscle cell apoptosis;positive regulation of muscle organ development;positive regulation of programmed cell death;positive regulation of response to stimulus;positive regulation of signal transduction;positive regulation of signaling;positive regulation of skeletal muscle tissue development;positive regulation of smooth muscle cell proliferation;positive regulation of stress-activated MAPK cascade;positive regulation of stress-activated protein kinase signaling cascade;positive regulation of striated muscle cell apoptosis;positive regulation of striated muscle tissue development;primary metabolic process;protein complex assembly;protein complex subunit organization;protein oligomerization;protein tetramerization;purine nucleoside metabolic process;purine ribonucleoside metabolic process;purine-containing compound metabolic process;quinone cofactor metabolic process;regulation of apoptosis;regulation of biological process;regulation of cardiac muscle cell apoptosis;regulation of catalytic activity;regulation of cell communication;regulation of cell death;regulation of cell proliferation;regulation of cellular localization;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of cellular response to stress;regulation of developmental process;regulation of ERK1 and ERK2 cascade;regulation of homeostatic process;regulation of hormone secretion;regulation of insulin secretion;regulation of insulin secretion involved in cellular response to glucose stimulus;regulation of intracellular protein kinase cascade;regulation of kinase activity;regulation of localization;regulation of macromolecule metabolic process;regulation of MAP kinase activity;regulation of MAPKKK cascade;regulation of metabolic process;regulation of molecular function;regulation of multicellular organismal development;regulation of multicellular organismal process;regulation of muscle cell apoptosis;regulation of muscle organ development;regulation of peptide hormone secretion;regulation of peptide secretion;regulation of peptide transport;regulation of phosphate metabolic process;regulation of phosphorus metabolic process;regulation of phosphorylation;regulation of primary metabolic process;regulation of programmed cell death;regulation of protein kinase activity;regulation of protein metabolic process;regulation of protein modification process;regulation of protein phosphorylation;regulation of protein serine/threonine kinase activity;regulation of response to external stimulus;regulation of response to stimulus;regulation of response to stress;regulation of secretion;regulation of signal transduction;regulation of signaling;regulation of skeletal muscle tissue development;regulation of smooth muscle cell proliferation;regulation of stress-activated MAPK cascade;regulation of stress-activated protein kinase signaling cascade;regulation of striated muscle cell apoptosis;regulation of striated muscle tissue development;regulation of system process;regulation of transferase activity;regulation of transport;regulation of vasodilation;regulation of wound healing;response to abiotic stimulus;response to chemical stimulus;response to ethanol;response to external stimulus;response to extracellular stimulus;response to light stimulus;response to nutrient;response to nutrient levels;response to organic substance;response to radiation;response to stimulus;ribonucleoside metabolic process;small molecule metabolic process;steroid biosynthetic process;steroid metabolic process;sterol biosynthetic process;sterol metabolic process;system process;ubiquinone metabolic process;visual behavior;visual learning<br/><strong>T: GOMF name:</strong> binding;catalytic activity;coenzyme binding;cofactor binding;hydroxymethylglutaryl-CoA reductase (NADPH) activity;hydroxymethylglutaryl-CoA reductase activity;NADP binding;NADPH binding;nucleotide binding;oxidoreductase activity;oxidoreductase activity, acting on CH-OH group of donors;oxidoreductase activity, acting on the CH-OH group of donors, NAD or NADP as acceptor"
+    },
+    {
+      "protbox_id": "c2adb",
+      "x": 678.0,
+      "y": 505.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "PRR5"
+    },
+    {
+      "protbox_id": "c5db8",
+      "x": 226.0,
+      "y": 483.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "RPTOR"
+    },
+    {
+      "protbox_id": "c8417",
+      "x": 82.0,
+      "y": 268.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "RRAGD"
+    },
+    {
+      "protbox_id": "ce4fa",
+      "x": 329.5,
+      "y": 577.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "RPS6KB1"
+    },
+    {
+      "protbox_id": "d442e",
+      "x": 384.0,
+      "y": 483.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "MLST8"
+    },
+    {
+      "protbox_id": "d72a2",
+      "x": 229.98333333333332,
+      "y": 592.9833333333333,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "ULK3"
+    },
+    {
+      "protbox_id": "d8661",
+      "x": 82.0,
+      "y": 228.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "RRAGB"
+    },
+    {
+      "protbox_id": "d8a19",
+      "x": 225.0,
+      "y": 185.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [
+        "P54646"
+      ],
+      "backup_label": "PRKAA2",
+      "tooltip": "T: GOBP name: alcohol metabolic process;amine transport;amino acid transmembrane transport;amino acid transport;autophagy;betaine transport;biological regulation;biosynthetic process;carbohydrate homeostasis;carboxylic acid biosynthetic process;carboxylic acid metabolic process;carboxylic acid transport;carnitine shuttle;carnitine transport;catabolic process;cation transport;cell communication;cell cycle arrest;cell cycle process;cell surface receptor linked signaling pathway;cellular biosynthetic process;cellular catabolic process;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular ketone metabolic process;cellular lipid metabolic process;cellular macromolecule metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to external stimulus;cellular response to extracellular stimulus;cellular response to glucose starvation;cellular response to hormone stimulus;cellular response to insulin stimulus;cellular response to nutrient levels;cellular response to organic substance;cellular response to peptide hormone stimulus;cellular response to starvation;cellular response to stimulus;cellular response to stress;chemical homeostasis;cholesterol biosynthetic process;cholesterol metabolic process;chromatin modification;chromatin organization;chromosome organization;covalent chromatin modification;energy derivation by oxidation of organic compounds;energy reserve metabolic process;enzyme linked receptor protein signaling pathway;establishment of localization;establishment of localization in cell;fatty acid biosynthetic process;fatty acid homeostasis;fatty acid metabolic process;fatty acid transport;gene expression;generation of precursor metabolites and energy;glucose homeostasis;histone modification;histone phosphorylation;histone-serine phosphorylation;homeostatic process;insulin receptor signaling pathway;intracellular lipid transport;intracellular transport;ion transport;lipid biosynthetic process;lipid homeostasis;lipid metabolic process;lipid transport;long-chain fatty acid transport;macromolecule metabolic process;macromolecule modification;membrane organization;metabolic process;mitochondrial transport;mitochondrion organization;monocarboxylic acid metabolic process;monocarboxylic acid transport;negative regulation of apoptosis;negative regulation of biological process;negative regulation of cell communication;negative regulation of cell cycle;negative regulation of cell death;negative regulation of cellular process;negative regulation of programmed cell death;negative regulation of response to stimulus;negative regulation of signal transduction;negative regulation of signaling;negative regulation of TOR signaling cascade;nitrogen compound metabolic process;nitrogen compound transport;nucleic acid metabolic process;nucleobase-containing compound metabolic process;organelle organization;organic acid biosynthetic process;organic acid metabolic process;organic acid transport;organic cation transport;organic substance transport;oxidation-reduction process;oxoacid metabolic process;peptidyl-amino acid modification;peptidyl-serine modification;peptidyl-serine phosphorylation;phosphate-containing compound metabolic process;phosphorus metabolic process;phosphorylation;positive regulation of autophagy;positive regulation of biological process;positive regulation of carbohydrate metabolic process;positive regulation of catabolic process;positive regulation of cellular carbohydrate metabolic process;positive regulation of cellular catabolic process;positive regulation of cellular metabolic process;positive regulation of cellular process;positive regulation of glucose metabolic process;positive regulation of glycolysis;positive regulation of macromolecule metabolic process;positive regulation of metabolic process;primary metabolic process;protein metabolic process;protein modification process;protein phosphorylation;quaternary ammonium group transport;regulation of apoptosis;regulation of autophagy;regulation of biological process;regulation of biological quality;regulation of biosynthetic process;regulation of carbohydrate catabolic process;regulation of carbohydrate metabolic process;regulation of catabolic process;regulation of cell communication;regulation of cell cycle;regulation of cell death;regulation of cellular biosynthetic process;regulation of cellular carbohydrate catabolic process;regulation of cellular carbohydrate metabolic process;regulation of cellular catabolic process;regulation of cellular ketone metabolic process;regulation of cellular macromolecule biosynthetic process;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular response to stress;regulation of circadian rhythm;regulation of energy homeostasis;regulation of fatty acid biosynthetic process;regulation of fatty acid metabolic process;regulation of gene expression;regulation of generation of precursor metabolites and energy;regulation of glucose metabolic process;regulation of glycolysis;regulation of homeostatic process;regulation of lipid biosynthetic process;regulation of lipid metabolic process;regulation of macroautophagy;regulation of macromolecule biosynthetic process;regulation of macromolecule metabolic process;regulation of metabolic process;regulation of multicellular organismal process;regulation of nitrogen compound metabolic process;regulation of nucleobase-containing compound metabolic process;regulation of primary metabolic process;regulation of programmed cell death;regulation of response to external stimulus;regulation of response to extracellular stimulus;regulation of response to nutrient levels;regulation of response to stimulus;regulation of response to stress;regulation of RNA metabolic process;regulation of signal transduction;regulation of signaling;regulation of TOR signaling cascade;regulation of transcription, DNA-dependent;response to chemical stimulus;response to endogenous stimulus;response to external stimulus;response to extracellular stimulus;response to hormone stimulus;response to insulin stimulus;response to nutrient levels;response to organic substance;response to peptide hormone stimulus;response to starvation;response to stimulus;response to stress;rhythmic process;RNA biosynthetic process;RNA metabolic process;signal transduction;small molecule biosynthetic process;small molecule metabolic process;steroid biosynthetic process;steroid metabolic process;sterol biosynthetic process;sterol metabolic process;transcription initiation from RNA polymerase II promoter;transcription initiation, DNA-dependent;transmembrane receptor protein tyrosine kinase signaling pathway;transmembrane transport;transport;Wnt receptor signaling pathway\nT: GOMF name: [acetyl-CoA carboxylase] kinase activity;[hydroxymethylglutaryl-CoA reductase (NADPH)] kinase activity;adenyl nucleotide binding;adenyl ribonucleotide binding;AMP-activated protein kinase activity;ATP binding;binding;catalytic activity;cation binding;chromatin binding;histone kinase activity;histone serine kinase activity;ion binding;kinase activity;metal ion binding;nucleotide binding;phosphotransferase activity, alcohol group as acceptor;protein kinase activity;protein serine/threonine kinase activity;protein serine/threonine/tyrosine kinase activity;purine nucleotide binding;purine ribonucleoside triphosphate binding;purine ribonucleotide binding;ribonucleotide binding;transferase activity;transferase activity, transferring phosphorus-containing groups",
+      "tooltip_html": "<strong>T: GOBP name:</strong> alcohol metabolic process;amine transport;amino acid transmembrane transport;amino acid transport;autophagy;betaine transport;biological regulation;biosynthetic process;carbohydrate homeostasis;carboxylic acid biosynthetic process;carboxylic acid metabolic process;carboxylic acid transport;carnitine shuttle;carnitine transport;catabolic process;cation transport;cell communication;cell cycle arrest;cell cycle process;cell surface receptor linked signaling pathway;cellular biosynthetic process;cellular catabolic process;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular ketone metabolic process;cellular lipid metabolic process;cellular macromolecule metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to external stimulus;cellular response to extracellular stimulus;cellular response to glucose starvation;cellular response to hormone stimulus;cellular response to insulin stimulus;cellular response to nutrient levels;cellular response to organic substance;cellular response to peptide hormone stimulus;cellular response to starvation;cellular response to stimulus;cellular response to stress;chemical homeostasis;cholesterol biosynthetic process;cholesterol metabolic process;chromatin modification;chromatin organization;chromosome organization;covalent chromatin modification;energy derivation by oxidation of organic compounds;energy reserve metabolic process;enzyme linked receptor protein signaling pathway;establishment of localization;establishment of localization in cell;fatty acid biosynthetic process;fatty acid homeostasis;fatty acid metabolic process;fatty acid transport;gene expression;generation of precursor metabolites and energy;glucose homeostasis;histone modification;histone phosphorylation;histone-serine phosphorylation;homeostatic process;insulin receptor signaling pathway;intracellular lipid transport;intracellular transport;ion transport;lipid biosynthetic process;lipid homeostasis;lipid metabolic process;lipid transport;long-chain fatty acid transport;macromolecule metabolic process;macromolecule modification;membrane organization;metabolic process;mitochondrial transport;mitochondrion organization;monocarboxylic acid metabolic process;monocarboxylic acid transport;negative regulation of apoptosis;negative regulation of biological process;negative regulation of cell communication;negative regulation of cell cycle;negative regulation of cell death;negative regulation of cellular process;negative regulation of programmed cell death;negative regulation of response to stimulus;negative regulation of signal transduction;negative regulation of signaling;negative regulation of TOR signaling cascade;nitrogen compound metabolic process;nitrogen compound transport;nucleic acid metabolic process;nucleobase-containing compound metabolic process;organelle organization;organic acid biosynthetic process;organic acid metabolic process;organic acid transport;organic cation transport;organic substance transport;oxidation-reduction process;oxoacid metabolic process;peptidyl-amino acid modification;peptidyl-serine modification;peptidyl-serine phosphorylation;phosphate-containing compound metabolic process;phosphorus metabolic process;phosphorylation;positive regulation of autophagy;positive regulation of biological process;positive regulation of carbohydrate metabolic process;positive regulation of catabolic process;positive regulation of cellular carbohydrate metabolic process;positive regulation of cellular catabolic process;positive regulation of cellular metabolic process;positive regulation of cellular process;positive regulation of glucose metabolic process;positive regulation of glycolysis;positive regulation of macromolecule metabolic process;positive regulation of metabolic process;primary metabolic process;protein metabolic process;protein modification process;protein phosphorylation;quaternary ammonium group transport;regulation of apoptosis;regulation of autophagy;regulation of biological process;regulation of biological quality;regulation of biosynthetic process;regulation of carbohydrate catabolic process;regulation of carbohydrate metabolic process;regulation of catabolic process;regulation of cell communication;regulation of cell cycle;regulation of cell death;regulation of cellular biosynthetic process;regulation of cellular carbohydrate catabolic process;regulation of cellular carbohydrate metabolic process;regulation of cellular catabolic process;regulation of cellular ketone metabolic process;regulation of cellular macromolecule biosynthetic process;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular response to stress;regulation of circadian rhythm;regulation of energy homeostasis;regulation of fatty acid biosynthetic process;regulation of fatty acid metabolic process;regulation of gene expression;regulation of generation of precursor metabolites and energy;regulation of glucose metabolic process;regulation of glycolysis;regulation of homeostatic process;regulation of lipid biosynthetic process;regulation of lipid metabolic process;regulation of macroautophagy;regulation of macromolecule biosynthetic process;regulation of macromolecule metabolic process;regulation of metabolic process;regulation of multicellular organismal process;regulation of nitrogen compound metabolic process;regulation of nucleobase-containing compound metabolic process;regulation of primary metabolic process;regulation of programmed cell death;regulation of response to external stimulus;regulation of response to extracellular stimulus;regulation of response to nutrient levels;regulation of response to stimulus;regulation of response to stress;regulation of RNA metabolic process;regulation of signal transduction;regulation of signaling;regulation of TOR signaling cascade;regulation of transcription, DNA-dependent;response to chemical stimulus;response to endogenous stimulus;response to external stimulus;response to extracellular stimulus;response to hormone stimulus;response to insulin stimulus;response to nutrient levels;response to organic substance;response to peptide hormone stimulus;response to starvation;response to stimulus;response to stress;rhythmic process;RNA biosynthetic process;RNA metabolic process;signal transduction;small molecule biosynthetic process;small molecule metabolic process;steroid biosynthetic process;steroid metabolic process;sterol biosynthetic process;sterol metabolic process;transcription initiation from RNA polymerase II promoter;transcription initiation, DNA-dependent;transmembrane receptor protein tyrosine kinase signaling pathway;transmembrane transport;transport;Wnt receptor signaling pathway<br/><strong>T: GOMF name:</strong> [acetyl-CoA carboxylase] kinase activity;[hydroxymethylglutaryl-CoA reductase (NADPH)] kinase activity;adenyl nucleotide binding;adenyl ribonucleotide binding;AMP-activated protein kinase activity;ATP binding;binding;catalytic activity;cation binding;chromatin binding;histone kinase activity;histone serine kinase activity;ion binding;kinase activity;metal ion binding;nucleotide binding;phosphotransferase activity, alcohol group as acceptor;protein kinase activity;protein serine/threonine kinase activity;protein serine/threonine/tyrosine kinase activity;purine nucleotide binding;purine ribonucleoside triphosphate binding;purine ribonucleotide binding;ribonucleotide binding;transferase activity;transferase activity, transferring phosphorus-containing groups"
+    },
+    {
+      "protbox_id": "d8a5b",
+      "x": 82.0,
+      "y": 208.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "RRAGA"
+    },
+    {
+      "protbox_id": "d8f29",
+      "x": 679.5,
+      "y": 177.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "AKT1"
+    },
+    {
+      "protbox_id": "dbfe5",
+      "x": 239.89746416758544,
+      "y": 382.39746416758544,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "FKBP1A"
+    },
+    {
+      "protbox_id": "e15c9",
+      "x": 229.98333333333332,
+      "y": 572.9833333333333,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "ULK2"
+    },
+    {
+      "protbox_id": "e189c",
+      "x": 225.0,
+      "y": 165.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [
+        "Q13131"
+      ],
+      "backup_label": "PRKAA1",
+      "tooltip": "T: GOBP name: activation of MAPK activity;alcohol metabolic process;autophagy;biological regulation;biosynthetic process;carbohydrate homeostasis;carbohydrate metabolic process;carboxylic acid biosynthetic process;carboxylic acid metabolic process;catabolic process;cell communication;cell cycle arrest;cell cycle process;cell surface receptor linked signaling pathway;cellular biosynthetic process;cellular carbohydrate metabolic process;cellular catabolic process;cellular component assembly;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular ketone metabolic process;cellular lipid metabolic process;cellular macromolecule metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to ethanol;cellular response to external stimulus;cellular response to extracellular stimulus;cellular response to glucose starvation;cellular response to hormone stimulus;cellular response to hydrogen peroxide;cellular response to hypoxia;cellular response to insulin stimulus;cellular response to nutrient levels;cellular response to organic substance;cellular response to oxidative stress;cellular response to oxygen levels;cellular response to peptide hormone stimulus;cellular response to reactive oxygen species;cellular response to starvation;cellular response to stimulus;cellular response to stress;chemical homeostasis;cholesterol biosynthetic process;cholesterol metabolic process;chromatin modification;chromatin organization;chromosome organization;cold acclimation;covalent chromatin modification;enzyme linked receptor protein signaling pathway;fatty acid biosynthetic process;fatty acid homeostasis;fatty acid metabolic process;fatty acid oxidation;gene expression;glucose homeostasis;glucose metabolic process;hexose metabolic process;histone modification;histone phosphorylation;histone-serine phosphorylation;homeostatic process;insulin receptor signaling pathway;lipid biosynthetic process;lipid homeostasis;lipid metabolic process;lipid modification;lipid oxidation;macromolecular complex assembly;macromolecular complex subunit organization;macromolecule metabolic process;macromolecule modification;metabolic process;monocarboxylic acid metabolic process;monosaccharide metabolic process;negative regulation of apoptosis;negative regulation of biological process;negative regulation of biosynthetic process;negative regulation of catabolic process;negative regulation of cell communication;negative regulation of cell cycle;negative regulation of cell death;negative regulation of cellular biosynthetic process;negative regulation of cellular metabolic process;negative regulation of cellular process;negative regulation of glucosylceramide biosynthetic process;negative regulation of lipid biosynthetic process;negative regulation of lipid catabolic process;negative regulation of lipid metabolic process;negative regulation of metabolic process;negative regulation of programmed cell death;negative regulation of response to stimulus;negative regulation of signal transduction;negative regulation of signaling;negative regulation of sphingolipid biosynthetic process;negative regulation of TOR signaling cascade;nitrogen compound metabolic process;nucleic acid metabolic process;nucleobase-containing compound metabolic process;organelle organization;organic acid biosynthetic process;organic acid metabolic process;oxidation-reduction process;oxoacid metabolic process;peptidyl-amino acid modification;peptidyl-serine modification;peptidyl-serine phosphorylation;phosphate-containing compound metabolic process;phosphorus metabolic process;phosphorylation;positive regulation of autophagy;positive regulation of biological process;positive regulation of biosynthetic process;positive regulation of carbohydrate metabolic process;positive regulation of catabolic process;positive regulation of catalytic activity;positive regulation of cell proliferation;positive regulation of cellular carbohydrate metabolic process;positive regulation of cellular catabolic process;positive regulation of cellular metabolic process;positive regulation of cellular process;positive regulation of cholesterol biosynthetic process;positive regulation of cholesterol metabolic process;positive regulation of gene expression;positive regulation of glucose metabolic process;positive regulation of glycolysis;positive regulation of kinase activity;positive regulation of lipid biosynthetic process;positive regulation of lipid metabolic process;positive regulation of macromolecule metabolic process;positive regulation of MAP kinase activity;positive regulation of metabolic process;positive regulation of molecular function;positive regulation of protein kinase activity;positive regulation of protein serine/threonine kinase activity;positive regulation of steroid biosynthetic process;positive regulation of steroid metabolic process;positive regulation of transferase activity;primary metabolic process;protein complex assembly;protein complex subunit organization;protein heterooligomerization;protein metabolic process;protein modification process;protein oligomerization;protein phosphorylation;regulation of apoptosis;regulation of autophagy;regulation of biological process;regulation of biological quality;regulation of biosynthetic process;regulation of carbohydrate catabolic process;regulation of carbohydrate metabolic process;regulation of catabolic process;regulation of catalytic activity;regulation of cell communication;regulation of cell cycle;regulation of cell death;regulation of cell proliferation;regulation of cellular biosynthetic process;regulation of cellular carbohydrate catabolic process;regulation of cellular carbohydrate metabolic process;regulation of cellular catabolic process;regulation of cellular component biogenesis;regulation of cellular macromolecule biosynthetic process;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of ceramide biosynthetic process;regulation of cholesterol biosynthetic process;regulation of cholesterol metabolic process;regulation of circadian rhythm;regulation of energy homeostasis;regulation of gene expression;regulation of generation of precursor metabolites and energy;regulation of glucose metabolic process;regulation of glucosylceramide biosynthetic process;regulation of glycolysis;regulation of homeostatic process;regulation of kinase activity;regulation of lipid biosynthetic process;regulation of lipid catabolic process;regulation of lipid metabolic process;regulation of localization;regulation of macromolecule biosynthetic process;regulation of macromolecule metabolic process;regulation of MAP kinase activity;regulation of metabolic process;regulation of molecular function;regulation of multicellular organismal process;regulation of nitrogen compound metabolic process;regulation of nucleobase-containing compound metabolic process;regulation of phosphate metabolic process;regulation of phosphorus metabolic process;regulation of phosphorylation;regulation of primary metabolic process;regulation of programmed cell death;regulation of protein kinase activity;regulation of protein metabolic process;regulation of protein modification process;regulation of protein phosphorylation;regulation of protein serine/threonine kinase activity;regulation of response to stimulus;regulation of RNA metabolic process;regulation of signal transduction;regulation of signaling;regulation of sphingolipid biosynthetic process;regulation of steroid biosynthetic process;regulation of steroid metabolic process;regulation of TOR signaling cascade;regulation of transcription, DNA-dependent;regulation of transferase activity;regulation of transport;regulation of vesicle-mediated transport;response to abiotic stimulus;response to activity;response to alkaloid;response to caffeine;response to chemical stimulus;response to cold;response to endogenous stimulus;response to ethanol;response to external stimulus;response to extracellular stimulus;response to gamma radiation;response to hormone stimulus;response to hydrogen peroxide;response to hypoxia;response to inorganic substance;response to insulin stimulus;response to ionizing radiation;response to light stimulus;response to nutrient levels;response to organic cyclic compound;response to organic substance;response to oxidative stress;response to oxygen levels;response to peptide hormone stimulus;response to purine-containing compound;response to radiation;response to reactive oxygen species;response to starvation;response to stimulus;response to stress;response to temperature stimulus;response to UV;rhythmic process;RNA biosynthetic process;RNA metabolic process;signal transduction;small molecule biosynthetic process;small molecule metabolic process;steroid biosynthetic process;steroid metabolic process;sterol biosynthetic process;sterol metabolic process;transcription initiation from RNA polymerase II promoter;transcription initiation, DNA-dependent;transmembrane receptor protein tyrosine kinase signaling pathway;Wnt receptor signaling pathway\nT: GOMF name: [acetyl-CoA carboxylase] kinase activity;[hydroxymethylglutaryl-CoA reductase (NADPH)] kinase activity;adenyl nucleotide binding;adenyl ribonucleotide binding;AMP-activated protein kinase activity;ATP binding;binding;cAMP-dependent protein kinase activity;catalytic activity;cation binding;chromatin binding;cyclic nucleotide-dependent protein kinase activity;histone kinase activity;histone serine kinase activity;ion binding;kinase activity;metal ion binding;nucleotide binding;phosphotransferase activity, alcohol group as acceptor;protein kinase activity;protein serine/threonine kinase activity;purine nucleotide binding;purine ribonucleoside triphosphate binding;purine ribonucleotide binding;ribonucleotide binding;tau-protein kinase activity;transferase activity;transferase activity, transferring phosphorus-containing groups",
+      "tooltip_html": "<strong>T: GOBP name:</strong> activation of MAPK activity;alcohol metabolic process;autophagy;biological regulation;biosynthetic process;carbohydrate homeostasis;carbohydrate metabolic process;carboxylic acid biosynthetic process;carboxylic acid metabolic process;catabolic process;cell communication;cell cycle arrest;cell cycle process;cell surface receptor linked signaling pathway;cellular biosynthetic process;cellular carbohydrate metabolic process;cellular catabolic process;cellular component assembly;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular ketone metabolic process;cellular lipid metabolic process;cellular macromolecule metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to ethanol;cellular response to external stimulus;cellular response to extracellular stimulus;cellular response to glucose starvation;cellular response to hormone stimulus;cellular response to hydrogen peroxide;cellular response to hypoxia;cellular response to insulin stimulus;cellular response to nutrient levels;cellular response to organic substance;cellular response to oxidative stress;cellular response to oxygen levels;cellular response to peptide hormone stimulus;cellular response to reactive oxygen species;cellular response to starvation;cellular response to stimulus;cellular response to stress;chemical homeostasis;cholesterol biosynthetic process;cholesterol metabolic process;chromatin modification;chromatin organization;chromosome organization;cold acclimation;covalent chromatin modification;enzyme linked receptor protein signaling pathway;fatty acid biosynthetic process;fatty acid homeostasis;fatty acid metabolic process;fatty acid oxidation;gene expression;glucose homeostasis;glucose metabolic process;hexose metabolic process;histone modification;histone phosphorylation;histone-serine phosphorylation;homeostatic process;insulin receptor signaling pathway;lipid biosynthetic process;lipid homeostasis;lipid metabolic process;lipid modification;lipid oxidation;macromolecular complex assembly;macromolecular complex subunit organization;macromolecule metabolic process;macromolecule modification;metabolic process;monocarboxylic acid metabolic process;monosaccharide metabolic process;negative regulation of apoptosis;negative regulation of biological process;negative regulation of biosynthetic process;negative regulation of catabolic process;negative regulation of cell communication;negative regulation of cell cycle;negative regulation of cell death;negative regulation of cellular biosynthetic process;negative regulation of cellular metabolic process;negative regulation of cellular process;negative regulation of glucosylceramide biosynthetic process;negative regulation of lipid biosynthetic process;negative regulation of lipid catabolic process;negative regulation of lipid metabolic process;negative regulation of metabolic process;negative regulation of programmed cell death;negative regulation of response to stimulus;negative regulation of signal transduction;negative regulation of signaling;negative regulation of sphingolipid biosynthetic process;negative regulation of TOR signaling cascade;nitrogen compound metabolic process;nucleic acid metabolic process;nucleobase-containing compound metabolic process;organelle organization;organic acid biosynthetic process;organic acid metabolic process;oxidation-reduction process;oxoacid metabolic process;peptidyl-amino acid modification;peptidyl-serine modification;peptidyl-serine phosphorylation;phosphate-containing compound metabolic process;phosphorus metabolic process;phosphorylation;positive regulation of autophagy;positive regulation of biological process;positive regulation of biosynthetic process;positive regulation of carbohydrate metabolic process;positive regulation of catabolic process;positive regulation of catalytic activity;positive regulation of cell proliferation;positive regulation of cellular carbohydrate metabolic process;positive regulation of cellular catabolic process;positive regulation of cellular metabolic process;positive regulation of cellular process;positive regulation of cholesterol biosynthetic process;positive regulation of cholesterol metabolic process;positive regulation of gene expression;positive regulation of glucose metabolic process;positive regulation of glycolysis;positive regulation of kinase activity;positive regulation of lipid biosynthetic process;positive regulation of lipid metabolic process;positive regulation of macromolecule metabolic process;positive regulation of MAP kinase activity;positive regulation of metabolic process;positive regulation of molecular function;positive regulation of protein kinase activity;positive regulation of protein serine/threonine kinase activity;positive regulation of steroid biosynthetic process;positive regulation of steroid metabolic process;positive regulation of transferase activity;primary metabolic process;protein complex assembly;protein complex subunit organization;protein heterooligomerization;protein metabolic process;protein modification process;protein oligomerization;protein phosphorylation;regulation of apoptosis;regulation of autophagy;regulation of biological process;regulation of biological quality;regulation of biosynthetic process;regulation of carbohydrate catabolic process;regulation of carbohydrate metabolic process;regulation of catabolic process;regulation of catalytic activity;regulation of cell communication;regulation of cell cycle;regulation of cell death;regulation of cell proliferation;regulation of cellular biosynthetic process;regulation of cellular carbohydrate catabolic process;regulation of cellular carbohydrate metabolic process;regulation of cellular catabolic process;regulation of cellular component biogenesis;regulation of cellular macromolecule biosynthetic process;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of ceramide biosynthetic process;regulation of cholesterol biosynthetic process;regulation of cholesterol metabolic process;regulation of circadian rhythm;regulation of energy homeostasis;regulation of gene expression;regulation of generation of precursor metabolites and energy;regulation of glucose metabolic process;regulation of glucosylceramide biosynthetic process;regulation of glycolysis;regulation of homeostatic process;regulation of kinase activity;regulation of lipid biosynthetic process;regulation of lipid catabolic process;regulation of lipid metabolic process;regulation of localization;regulation of macromolecule biosynthetic process;regulation of macromolecule metabolic process;regulation of MAP kinase activity;regulation of metabolic process;regulation of molecular function;regulation of multicellular organismal process;regulation of nitrogen compound metabolic process;regulation of nucleobase-containing compound metabolic process;regulation of phosphate metabolic process;regulation of phosphorus metabolic process;regulation of phosphorylation;regulation of primary metabolic process;regulation of programmed cell death;regulation of protein kinase activity;regulation of protein metabolic process;regulation of protein modification process;regulation of protein phosphorylation;regulation of protein serine/threonine kinase activity;regulation of response to stimulus;regulation of RNA metabolic process;regulation of signal transduction;regulation of signaling;regulation of sphingolipid biosynthetic process;regulation of steroid biosynthetic process;regulation of steroid metabolic process;regulation of TOR signaling cascade;regulation of transcription, DNA-dependent;regulation of transferase activity;regulation of transport;regulation of vesicle-mediated transport;response to abiotic stimulus;response to activity;response to alkaloid;response to caffeine;response to chemical stimulus;response to cold;response to endogenous stimulus;response to ethanol;response to external stimulus;response to extracellular stimulus;response to gamma radiation;response to hormone stimulus;response to hydrogen peroxide;response to hypoxia;response to inorganic substance;response to insulin stimulus;response to ionizing radiation;response to light stimulus;response to nutrient levels;response to organic cyclic compound;response to organic substance;response to oxidative stress;response to oxygen levels;response to peptide hormone stimulus;response to purine-containing compound;response to radiation;response to reactive oxygen species;response to starvation;response to stimulus;response to stress;response to temperature stimulus;response to UV;rhythmic process;RNA biosynthetic process;RNA metabolic process;signal transduction;small molecule biosynthetic process;small molecule metabolic process;steroid biosynthetic process;steroid metabolic process;sterol biosynthetic process;sterol metabolic process;transcription initiation from RNA polymerase II promoter;transcription initiation, DNA-dependent;transmembrane receptor protein tyrosine kinase signaling pathway;Wnt receptor signaling pathway<br/><strong>T: GOMF name:</strong> [acetyl-CoA carboxylase] kinase activity;[hydroxymethylglutaryl-CoA reductase (NADPH)] kinase activity;adenyl nucleotide binding;adenyl ribonucleotide binding;AMP-activated protein kinase activity;ATP binding;binding;cAMP-dependent protein kinase activity;catalytic activity;cation binding;chromatin binding;cyclic nucleotide-dependent protein kinase activity;histone kinase activity;histone serine kinase activity;ion binding;kinase activity;metal ion binding;nucleotide binding;phosphotransferase activity, alcohol group as acceptor;protein kinase activity;protein serine/threonine kinase activity;purine nucleotide binding;purine ribonucleoside triphosphate binding;purine ribonucleotide binding;ribonucleotide binding;tau-protein kinase activity;transferase activity;transferase activity, transferring phosphorus-containing groups",
+      "ptm_overrides": {
+        "Q13131": {
+          "Q13131_496": {
+            "shape_x": 234.2,
+            "shape_y": 161.5,
+            "label_x": 229.2,
+            "label_y": 156.5,
+            "label_centering": "right",
+            "symbol_x": 233.89999999999998,
+            "symbol_y": 161.5,
+            "ptm_position": "N1"
+          },
+          "Q13131_508": {
+            "shape_x": 248.0,
+            "shape_y": 161.5,
+            "label_x": 248.0,
+            "label_y": 153.5,
+            "label_centering": "center",
+            "symbol_x": 248.0,
+            "symbol_y": 161.5,
+            "ptm_position": "N2"
+          },
+          "Q13131_352": {
+            "shape_x": 261.8,
+            "shape_y": 161.5,
+            "label_x": 266.8,
+            "label_y": 156.5,
+            "label_centering": "left",
+            "symbol_x": 261.8,
+            "symbol_y": 161.5,
+            "ptm_position": "N3"
+          }
+        }
+      }
+    },
+    {
+      "protbox_id": "e1f1e",
+      "x": 511.0,
+      "y": 195.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "DDIT4L"
+    },
+    {
+      "protbox_id": "e69b1",
+      "x": 47.32348804500701,
+      "y": 653.9472573839669,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "IDI1"
+    },
+    {
+      "protbox_id": "e8d15",
+      "x": 405.0,
+      "y": 426.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "AKT1S1"
+    },
+    {
+      "protbox_id": "eb64a",
+      "x": 758.0,
+      "y": 505.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "PRR5L"
+    },
+    {
+      "protbox_id": "f05ab",
+      "x": 511.0,
+      "y": 278.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "TSC1"
+    },
+    {
+      "protbox_id": "f3862",
+      "x": 598.0,
+      "y": 505.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "MAPKAP1"
+    },
+    {
+      "protbox_id": "f443a",
+      "x": 634.0,
+      "y": 579.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "PRKCA"
+    },
+    {
+      "protbox_id": "f7aa5",
+      "x": 385.0,
+      "y": 185.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "PRKAG2"
+    },
+    {
+      "protbox_id": "fa7bc",
+      "x": 47.323488045007,
+      "y": 607.5337552742616,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [],
+      "backup_label": "SREPB2"
+    },
+    {
+      "protbox_id": "fae34",
+      "x": 417.0,
+      "y": 577.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [
+        "Q13541"
+      ],
+      "backup_label": "EIF4EBP1",
+      "tooltip": "T: GOBP name: anatomical structure development;biological regulation;biosynthetic process;cap-independent translational initiation;cell cycle process;cell surface receptor linked signaling pathway;cellular biosynthetic process;cellular macromolecule biosynthetic process;cellular macromolecule metabolic process;cellular metabolic process;cellular process;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to hormone stimulus;cellular response to insulin stimulus;cellular response to organic substance;cellular response to peptide hormone stimulus;cellular response to stimulus;cytoplasmic translational initiation;developmental process;enzyme linked receptor protein signaling pathway;G1/S transition of mitotic cell cycle;gene expression;insulin receptor signaling pathway;intracellular signal transduction;IRES-dependent translational initiation;lung development;macromolecule biosynthetic process;macromolecule metabolic process;metabolic process;negative regulation of biological process;negative regulation of biosynthetic process;negative regulation of cellular biosynthetic process;negative regulation of cellular component organization;negative regulation of cellular macromolecule biosynthetic process;negative regulation of cellular metabolic process;negative regulation of cellular process;negative regulation of cellular protein metabolic process;negative regulation of macromolecule biosynthetic process;negative regulation of macromolecule metabolic process;negative regulation of metabolic process;negative regulation of protein complex assembly;negative regulation of protein metabolic process;negative regulation of translation;negative regulation of translational initiation;organ development;positive regulation of biological process;positive regulation of cell cycle;positive regulation of cellular process;positive regulation of mitotic cell cycle;posttranscriptional regulation of gene expression;primary metabolic process;protein metabolic process;regulation of biological process;regulation of biosynthetic process;regulation of cell cycle;regulation of cellular biosynthetic process;regulation of cellular component biogenesis;regulation of cellular component organization;regulation of cellular macromolecule biosynthetic process;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of gene expression;regulation of macromolecule biosynthetic process;regulation of macromolecule metabolic process;regulation of metabolic process;regulation of mitotic cell cycle;regulation of primary metabolic process;regulation of protein complex assembly;regulation of protein metabolic process;regulation of translation;regulation of translational initiation;response to chemical stimulus;response to endogenous stimulus;response to ethanol;response to hormone stimulus;response to insulin stimulus;response to organic substance;response to peptide hormone stimulus;response to stimulus;signal transduction;TOR signaling cascade;translation;translational initiation;transmembrane receptor protein tyrosine kinase signaling pathway\nT: GOMF name: binding;eukaryotic initiation factor 4E binding;protein binding;translation initiation factor binding;translation regulator activity;translation repressor activity",
+      "tooltip_html": "<strong>T: GOBP name:</strong> anatomical structure development;biological regulation;biosynthetic process;cap-independent translational initiation;cell cycle process;cell surface receptor linked signaling pathway;cellular biosynthetic process;cellular macromolecule biosynthetic process;cellular macromolecule metabolic process;cellular metabolic process;cellular process;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to hormone stimulus;cellular response to insulin stimulus;cellular response to organic substance;cellular response to peptide hormone stimulus;cellular response to stimulus;cytoplasmic translational initiation;developmental process;enzyme linked receptor protein signaling pathway;G1/S transition of mitotic cell cycle;gene expression;insulin receptor signaling pathway;intracellular signal transduction;IRES-dependent translational initiation;lung development;macromolecule biosynthetic process;macromolecule metabolic process;metabolic process;negative regulation of biological process;negative regulation of biosynthetic process;negative regulation of cellular biosynthetic process;negative regulation of cellular component organization;negative regulation of cellular macromolecule biosynthetic process;negative regulation of cellular metabolic process;negative regulation of cellular process;negative regulation of cellular protein metabolic process;negative regulation of macromolecule biosynthetic process;negative regulation of macromolecule metabolic process;negative regulation of metabolic process;negative regulation of protein complex assembly;negative regulation of protein metabolic process;negative regulation of translation;negative regulation of translational initiation;organ development;positive regulation of biological process;positive regulation of cell cycle;positive regulation of cellular process;positive regulation of mitotic cell cycle;posttranscriptional regulation of gene expression;primary metabolic process;protein metabolic process;regulation of biological process;regulation of biosynthetic process;regulation of cell cycle;regulation of cellular biosynthetic process;regulation of cellular component biogenesis;regulation of cellular component organization;regulation of cellular macromolecule biosynthetic process;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of gene expression;regulation of macromolecule biosynthetic process;regulation of macromolecule metabolic process;regulation of metabolic process;regulation of mitotic cell cycle;regulation of primary metabolic process;regulation of protein complex assembly;regulation of protein metabolic process;regulation of translation;regulation of translational initiation;response to chemical stimulus;response to endogenous stimulus;response to ethanol;response to hormone stimulus;response to insulin stimulus;response to organic substance;response to peptide hormone stimulus;response to stimulus;signal transduction;TOR signaling cascade;translation;translational initiation;transmembrane receptor protein tyrosine kinase signaling pathway<br/><strong>T: GOMF name:</strong> binding;eukaryotic initiation factor 4E binding;protein binding;translation initiation factor binding;translation regulator activity;translation repressor activity",
+      "ptm_overrides": {
+        "Q13541": {
+          "Q13541_65": {
+            "shape_x": 426.2,
+            "shape_y": 573.5,
+            "label_x": 421.2,
+            "label_y": 568.5,
+            "label_centering": "right",
+            "symbol_x": 425.9,
+            "symbol_y": 573.5,
+            "ptm_position": "N1"
+          }
+        }
+      }
+    },
+    {
+      "protbox_id": "fb66f",
+      "x": 305.0,
+      "y": 483.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [
+        "P42345"
+      ],
+      "backup_label": "MTOR",
+      "tooltip": "T: GOBP name: anatomical structure development;biological regulation;biosynthetic process;catabolic process;cell communication;cell cycle arrest;cell cycle process;cell development;cell growth;cell projection organization;cell surface receptor linked signaling pathway;cellular biosynthetic process;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular developmental process;cellular macromolecule metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cellular process involved in reproduction;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to external stimulus;cellular response to extracellular stimulus;cellular response to fibroblast growth factor stimulus;cellular response to growth factor stimulus;cellular response to heat;cellular response to hormone stimulus;cellular response to hypoxia;cellular response to insulin stimulus;cellular response to nutrient levels;cellular response to organic substance;cellular response to oxygen levels;cellular response to peptide hormone stimulus;cellular response to stimulus;cellular response to stress;cellular response to vascular endothelial growth factor stimulus;defense response;developmental process;developmental process involved in reproduction;DNA metabolic process;DNA recombination;DNA repair;double-strand break repair;double-strand break repair via homologous recombination;enzyme linked receptor protein signaling pathway;epidermal growth factor receptor signaling pathway;fibroblast growth factor receptor signaling pathway;gene expression;germ cell development;growth;immune response;immune system process;innate immune response;inositol lipid-mediated signaling;insulin receptor signaling pathway;intracellular signal transduction;lymphocyte costimulation;macromolecule catabolic process;macromolecule metabolic process;macromolecule modification;metabolic process;negative regulation of autophagy;negative regulation of biological process;negative regulation of catabolic process;negative regulation of cell communication;negative regulation of cell cycle;negative regulation of cell size;negative regulation of cellular catabolic process;negative regulation of cellular metabolic process;negative regulation of cellular process;negative regulation of intracellular protein transport;negative regulation of intracellular transport;negative regulation of macroautophagy;negative regulation of metabolic process;negative regulation of NFAT protein import into nucleus;negative regulation of nucleocytoplasmic transport;negative regulation of protein import into nucleus;negative regulation of protein transport;negative regulation of response to external stimulus;negative regulation of response to extracellular stimulus;negative regulation of response to nutrient levels;negative regulation of response to stimulus;negative regulation of transcription factor import into nucleus;negative regulation of transmembrane transport;negative regulation of transport;nerve growth factor receptor signaling pathway;nitrogen compound metabolic process;nucleic acid metabolic process;nucleobase-containing compound metabolic process;peptidyl-amino acid modification;peptidyl-serine modification;peptidyl-serine phosphorylation;peptidyl-threonine modification;peptidyl-threonine phosphorylation;phosphate-containing compound metabolic process;phosphatidylinositol-mediated signaling;phosphorus metabolic process;phosphorylation;positive regulation of actin filament bundle assembly;positive regulation of actin filament polymerization;positive regulation of biological process;positive regulation of biosynthetic process;positive regulation of cell activation;positive regulation of cell communication;positive regulation of cell differentiation;positive regulation of cell projection organization;positive regulation of cell proliferation;positive regulation of cellular biosynthetic process;positive regulation of cellular component organization;positive regulation of cellular metabolic process;positive regulation of cellular process;positive regulation of cellular protein metabolic process;positive regulation of cytoskeleton organization;positive regulation of developmental process;positive regulation of endothelial cell proliferation;positive regulation of epithelial cell proliferation;positive regulation of gene expression;positive regulation of immune system process;positive regulation of intracellular protein kinase cascade;positive regulation of lamellipodium assembly;positive regulation of leukocyte activation;positive regulation of lipid biosynthetic process;positive regulation of lipid metabolic process;positive regulation of lymphocyte activation;positive regulation of macromolecule biosynthetic process;positive regulation of macromolecule metabolic process;positive regulation of metabolic process;positive regulation of muscle cell differentiation;positive regulation of myotube differentiation;positive regulation of nitrogen compound metabolic process;positive regulation of nucleobase-containing compound metabolic process;positive regulation of organelle organization;positive regulation of peptidyl-tyrosine phosphorylation;positive regulation of phosphate metabolic process;positive regulation of phosphorus metabolic process;positive regulation of phosphorylation;positive regulation of protein complex assembly;positive regulation of protein kinase B signaling cascade;positive regulation of protein metabolic process;positive regulation of protein modification process;positive regulation of protein phosphorylation;positive regulation of protein polymerization;positive regulation of response to stimulus;positive regulation of RNA metabolic process;positive regulation of signal transduction;positive regulation of signaling;positive regulation of skeletal muscle cell differentiation;positive regulation of stress fiber assembly;positive regulation of striated muscle cell differentiation;positive regulation of T cell activation;positive regulation of transcription from RNA polymerase III promoter;positive regulation of transcription, DNA-dependent;positive regulation of translation;posttranscriptional regulation of gene expression;primary metabolic process;protein autophosphorylation;protein catabolic process;protein metabolic process;protein modification process;protein phosphorylation;recombinational repair;regulation of actin cytoskeleton organization;regulation of actin filament bundle assembly;regulation of actin filament length;regulation of actin filament polymerization;regulation of actin filament-based process;regulation of actin polymerization or depolymerization;regulation of anatomical structure size;regulation of autophagy;regulation of biological process;regulation of biological quality;regulation of biosynthetic process;regulation of carbohydrate biosynthetic process;regulation of carbohydrate metabolic process;regulation of carbohydrate utilization;regulation of catabolic process;regulation of catalytic activity;regulation of cell activation;regulation of cell communication;regulation of cell cycle;regulation of cell development;regulation of cell differentiation;regulation of cell projection assembly;regulation of cell projection organization;regulation of cell proliferation;regulation of cell size;regulation of cellular biosynthetic process;regulation of cellular carbohydrate metabolic process;regulation of cellular catabolic process;regulation of cellular component biogenesis;regulation of cellular component organization;regulation of cellular component size;regulation of cellular ketone metabolic process;regulation of cellular localization;regulation of cellular macromolecule biosynthetic process;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of cellular response to stress;regulation of cytoskeleton organization;regulation of developmental process;regulation of endothelial cell proliferation;regulation of epithelial cell proliferation;regulation of establishment of protein localization;regulation of fatty acid beta-oxidation;regulation of fatty acid metabolic process;regulation of fatty acid oxidation;regulation of gene expression;regulation of generation of precursor metabolites and energy;regulation of glucan biosynthetic process;regulation of glucose metabolic process;regulation of glycogen biosynthetic process;regulation of glycogen metabolic process;regulation of homeostatic process;regulation of immune system process;regulation of intracellular protein kinase cascade;regulation of intracellular protein transport;regulation of intracellular transport;regulation of ion homeostasis;regulation of kinase activity;regulation of lamellipodium assembly;regulation of leukocyte activation;regulation of lipid biosynthetic process;regulation of lipid catabolic process;regulation of lipid metabolic process;regulation of localization;regulation of lymphocyte activation;regulation of macroautophagy;regulation of macromolecule biosynthetic process;regulation of macromolecule metabolic process;regulation of metabolic process;regulation of molecular function;regulation of multicellular organismal development;regulation of multicellular organismal process;regulation of muscle cell differentiation;regulation of muscle organ development;regulation of myelination;regulation of myeloid cell differentiation;regulation of myeloid leukocyte differentiation;regulation of myotube differentiation;regulation of nervous system development;regulation of neurological system process;regulation of NFAT protein import into nucleus;regulation of nitrogen compound metabolic process;regulation of nucleobase-containing compound metabolic process;regulation of nucleocytoplasmic transport;regulation of organelle organization;regulation of osteoclast differentiation;regulation of peptidyl-tyrosine phosphorylation;regulation of phosphate metabolic process;regulation of phosphorus metabolic process;regulation of phosphorylation;regulation of polysaccharide biosynthetic process;regulation of polysaccharide metabolic process;regulation of primary metabolic process;regulation of protein complex assembly;regulation of protein import into nucleus;regulation of protein kinase activity;regulation of protein kinase B signaling cascade;regulation of protein localization;regulation of protein metabolic process;regulation of protein modification process;regulation of protein phosphorylation;regulation of protein polymerization;regulation of protein transport;regulation of response to external stimulus;regulation of response to extracellular stimulus;regulation of response to food;regulation of response to nutrient levels;regulation of response to stimulus;regulation of response to stress;regulation of RNA metabolic process;regulation of signal transduction;regulation of signaling;regulation of skeletal muscle cell differentiation;regulation of skeletal muscle fiber development;regulation of skeletal muscle tissue development;regulation of stress fiber assembly;regulation of striated muscle cell differentiation;regulation of striated muscle tissue development;regulation of system process;regulation of T cell activation;regulation of transcription factor import into nucleus;regulation of transcription from RNA polymerase III promoter;regulation of transcription, DNA-dependent;regulation of transferase activity;regulation of translation;regulation of transmembrane transport;regulation of transmission of nerve impulse;regulation of transport;reproductive process;response to abiotic stimulus;response to acid;response to amine stimulus;response to amino acid stimulus;response to chemical stimulus;response to DNA damage stimulus;response to endogenous stimulus;response to external stimulus;response to extracellular stimulus;response to fibroblast growth factor stimulus;response to growth factor stimulus;response to heat;response to hormone stimulus;response to hypoxia;response to insulin stimulus;response to nutrient;response to nutrient levels;response to organic nitrogen;response to organic substance;response to oxygen levels;response to peptide hormone stimulus;response to stimulus;response to stress;response to temperature stimulus;RNA biosynthetic process;RNA metabolic process;ruffle organization;signal transduction;T cell costimulation;TOR signaling cascade;transcription initiation from RNA polymerase II promoter;transcription initiation, DNA-dependent;transmembrane receptor protein tyrosine kinase signaling pathway;vascular endothelial growth factor receptor signaling pathway\nT: GOMF name: 5S rDNA binding;adenyl nucleotide binding;adenyl ribonucleotide binding;ATP binding;binding;catalytic activity;DNA binding;drug binding;kinase activity;nucleic acid binding;nucleotide binding;phosphoprotein binding;phosphotransferase activity, alcohol group as acceptor;protein binding;protein dimerization activity;protein kinase activity;protein serine/threonine kinase activity;purine nucleotide binding;purine ribonucleoside triphosphate binding;purine ribonucleotide binding;rDNA binding;regulatory region DNA binding;regulatory region nucleic acid binding;ribonucleoprotein binding;ribonucleotide binding;ribosome binding;RNA polymerase III regulatory region DNA binding;RNA polymerase III transcription factor binding;RNA polymerase III type 1 promoter DNA binding;RNA polymerase III type 2 promoter DNA binding;RNA polymerase III type 3 promoter DNA binding;sequence-specific DNA binding;TFIIIC-class transcription factor binding;transcription factor binding;transcription regulatory region DNA binding;transferase activity;transferase activity, transferring phosphorus-containing groups",
+      "tooltip_html": "<strong>T: GOBP name:</strong> anatomical structure development;biological regulation;biosynthetic process;catabolic process;cell communication;cell cycle arrest;cell cycle process;cell development;cell growth;cell projection organization;cell surface receptor linked signaling pathway;cellular biosynthetic process;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular developmental process;cellular macromolecule metabolic process;cellular metabolic process;cellular nitrogen compound metabolic process;cellular process;cellular process involved in reproduction;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to endogenous stimulus;cellular response to external stimulus;cellular response to extracellular stimulus;cellular response to fibroblast growth factor stimulus;cellular response to growth factor stimulus;cellular response to heat;cellular response to hormone stimulus;cellular response to hypoxia;cellular response to insulin stimulus;cellular response to nutrient levels;cellular response to organic substance;cellular response to oxygen levels;cellular response to peptide hormone stimulus;cellular response to stimulus;cellular response to stress;cellular response to vascular endothelial growth factor stimulus;defense response;developmental process;developmental process involved in reproduction;DNA metabolic process;DNA recombination;DNA repair;double-strand break repair;double-strand break repair via homologous recombination;enzyme linked receptor protein signaling pathway;epidermal growth factor receptor signaling pathway;fibroblast growth factor receptor signaling pathway;gene expression;germ cell development;growth;immune response;immune system process;innate immune response;inositol lipid-mediated signaling;insulin receptor signaling pathway;intracellular signal transduction;lymphocyte costimulation;macromolecule catabolic process;macromolecule metabolic process;macromolecule modification;metabolic process;negative regulation of autophagy;negative regulation of biological process;negative regulation of catabolic process;negative regulation of cell communication;negative regulation of cell cycle;negative regulation of cell size;negative regulation of cellular catabolic process;negative regulation of cellular metabolic process;negative regulation of cellular process;negative regulation of intracellular protein transport;negative regulation of intracellular transport;negative regulation of macroautophagy;negative regulation of metabolic process;negative regulation of NFAT protein import into nucleus;negative regulation of nucleocytoplasmic transport;negative regulation of protein import into nucleus;negative regulation of protein transport;negative regulation of response to external stimulus;negative regulation of response to extracellular stimulus;negative regulation of response to nutrient levels;negative regulation of response to stimulus;negative regulation of transcription factor import into nucleus;negative regulation of transmembrane transport;negative regulation of transport;nerve growth factor receptor signaling pathway;nitrogen compound metabolic process;nucleic acid metabolic process;nucleobase-containing compound metabolic process;peptidyl-amino acid modification;peptidyl-serine modification;peptidyl-serine phosphorylation;peptidyl-threonine modification;peptidyl-threonine phosphorylation;phosphate-containing compound metabolic process;phosphatidylinositol-mediated signaling;phosphorus metabolic process;phosphorylation;positive regulation of actin filament bundle assembly;positive regulation of actin filament polymerization;positive regulation of biological process;positive regulation of biosynthetic process;positive regulation of cell activation;positive regulation of cell communication;positive regulation of cell differentiation;positive regulation of cell projection organization;positive regulation of cell proliferation;positive regulation of cellular biosynthetic process;positive regulation of cellular component organization;positive regulation of cellular metabolic process;positive regulation of cellular process;positive regulation of cellular protein metabolic process;positive regulation of cytoskeleton organization;positive regulation of developmental process;positive regulation of endothelial cell proliferation;positive regulation of epithelial cell proliferation;positive regulation of gene expression;positive regulation of immune system process;positive regulation of intracellular protein kinase cascade;positive regulation of lamellipodium assembly;positive regulation of leukocyte activation;positive regulation of lipid biosynthetic process;positive regulation of lipid metabolic process;positive regulation of lymphocyte activation;positive regulation of macromolecule biosynthetic process;positive regulation of macromolecule metabolic process;positive regulation of metabolic process;positive regulation of muscle cell differentiation;positive regulation of myotube differentiation;positive regulation of nitrogen compound metabolic process;positive regulation of nucleobase-containing compound metabolic process;positive regulation of organelle organization;positive regulation of peptidyl-tyrosine phosphorylation;positive regulation of phosphate metabolic process;positive regulation of phosphorus metabolic process;positive regulation of phosphorylation;positive regulation of protein complex assembly;positive regulation of protein kinase B signaling cascade;positive regulation of protein metabolic process;positive regulation of protein modification process;positive regulation of protein phosphorylation;positive regulation of protein polymerization;positive regulation of response to stimulus;positive regulation of RNA metabolic process;positive regulation of signal transduction;positive regulation of signaling;positive regulation of skeletal muscle cell differentiation;positive regulation of stress fiber assembly;positive regulation of striated muscle cell differentiation;positive regulation of T cell activation;positive regulation of transcription from RNA polymerase III promoter;positive regulation of transcription, DNA-dependent;positive regulation of translation;posttranscriptional regulation of gene expression;primary metabolic process;protein autophosphorylation;protein catabolic process;protein metabolic process;protein modification process;protein phosphorylation;recombinational repair;regulation of actin cytoskeleton organization;regulation of actin filament bundle assembly;regulation of actin filament length;regulation of actin filament polymerization;regulation of actin filament-based process;regulation of actin polymerization or depolymerization;regulation of anatomical structure size;regulation of autophagy;regulation of biological process;regulation of biological quality;regulation of biosynthetic process;regulation of carbohydrate biosynthetic process;regulation of carbohydrate metabolic process;regulation of carbohydrate utilization;regulation of catabolic process;regulation of catalytic activity;regulation of cell activation;regulation of cell communication;regulation of cell cycle;regulation of cell development;regulation of cell differentiation;regulation of cell projection assembly;regulation of cell projection organization;regulation of cell proliferation;regulation of cell size;regulation of cellular biosynthetic process;regulation of cellular carbohydrate metabolic process;regulation of cellular catabolic process;regulation of cellular component biogenesis;regulation of cellular component organization;regulation of cellular component size;regulation of cellular ketone metabolic process;regulation of cellular localization;regulation of cellular macromolecule biosynthetic process;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of cellular response to stress;regulation of cytoskeleton organization;regulation of developmental process;regulation of endothelial cell proliferation;regulation of epithelial cell proliferation;regulation of establishment of protein localization;regulation of fatty acid beta-oxidation;regulation of fatty acid metabolic process;regulation of fatty acid oxidation;regulation of gene expression;regulation of generation of precursor metabolites and energy;regulation of glucan biosynthetic process;regulation of glucose metabolic process;regulation of glycogen biosynthetic process;regulation of glycogen metabolic process;regulation of homeostatic process;regulation of immune system process;regulation of intracellular protein kinase cascade;regulation of intracellular protein transport;regulation of intracellular transport;regulation of ion homeostasis;regulation of kinase activity;regulation of lamellipodium assembly;regulation of leukocyte activation;regulation of lipid biosynthetic process;regulation of lipid catabolic process;regulation of lipid metabolic process;regulation of localization;regulation of lymphocyte activation;regulation of macroautophagy;regulation of macromolecule biosynthetic process;regulation of macromolecule metabolic process;regulation of metabolic process;regulation of molecular function;regulation of multicellular organismal development;regulation of multicellular organismal process;regulation of muscle cell differentiation;regulation of muscle organ development;regulation of myelination;regulation of myeloid cell differentiation;regulation of myeloid leukocyte differentiation;regulation of myotube differentiation;regulation of nervous system development;regulation of neurological system process;regulation of NFAT protein import into nucleus;regulation of nitrogen compound metabolic process;regulation of nucleobase-containing compound metabolic process;regulation of nucleocytoplasmic transport;regulation of organelle organization;regulation of osteoclast differentiation;regulation of peptidyl-tyrosine phosphorylation;regulation of phosphate metabolic process;regulation of phosphorus metabolic process;regulation of phosphorylation;regulation of polysaccharide biosynthetic process;regulation of polysaccharide metabolic process;regulation of primary metabolic process;regulation of protein complex assembly;regulation of protein import into nucleus;regulation of protein kinase activity;regulation of protein kinase B signaling cascade;regulation of protein localization;regulation of protein metabolic process;regulation of protein modification process;regulation of protein phosphorylation;regulation of protein polymerization;regulation of protein transport;regulation of response to external stimulus;regulation of response to extracellular stimulus;regulation of response to food;regulation of response to nutrient levels;regulation of response to stimulus;regulation of response to stress;regulation of RNA metabolic process;regulation of signal transduction;regulation of signaling;regulation of skeletal muscle cell differentiation;regulation of skeletal muscle fiber development;regulation of skeletal muscle tissue development;regulation of stress fiber assembly;regulation of striated muscle cell differentiation;regulation of striated muscle tissue development;regulation of system process;regulation of T cell activation;regulation of transcription factor import into nucleus;regulation of transcription from RNA polymerase III promoter;regulation of transcription, DNA-dependent;regulation of transferase activity;regulation of translation;regulation of transmembrane transport;regulation of transmission of nerve impulse;regulation of transport;reproductive process;response to abiotic stimulus;response to acid;response to amine stimulus;response to amino acid stimulus;response to chemical stimulus;response to DNA damage stimulus;response to endogenous stimulus;response to external stimulus;response to extracellular stimulus;response to fibroblast growth factor stimulus;response to growth factor stimulus;response to heat;response to hormone stimulus;response to hypoxia;response to insulin stimulus;response to nutrient;response to nutrient levels;response to organic nitrogen;response to organic substance;response to oxygen levels;response to peptide hormone stimulus;response to stimulus;response to stress;response to temperature stimulus;RNA biosynthetic process;RNA metabolic process;ruffle organization;signal transduction;T cell costimulation;TOR signaling cascade;transcription initiation from RNA polymerase II promoter;transcription initiation, DNA-dependent;transmembrane receptor protein tyrosine kinase signaling pathway;vascular endothelial growth factor receptor signaling pathway<br/><strong>T: GOMF name:</strong> 5S rDNA binding;adenyl nucleotide binding;adenyl ribonucleotide binding;ATP binding;binding;catalytic activity;DNA binding;drug binding;kinase activity;nucleic acid binding;nucleotide binding;phosphoprotein binding;phosphotransferase activity, alcohol group as acceptor;protein binding;protein dimerization activity;protein kinase activity;protein serine/threonine kinase activity;purine nucleotide binding;purine ribonucleoside triphosphate binding;purine ribonucleotide binding;rDNA binding;regulatory region DNA binding;regulatory region nucleic acid binding;ribonucleoprotein binding;ribonucleotide binding;ribosome binding;RNA polymerase III regulatory region DNA binding;RNA polymerase III transcription factor binding;RNA polymerase III type 1 promoter DNA binding;RNA polymerase III type 2 promoter DNA binding;RNA polymerase III type 3 promoter DNA binding;sequence-specific DNA binding;TFIIIC-class transcription factor binding;transcription factor binding;transcription regulatory region DNA binding;transferase activity;transferase activity, transferring phosphorus-containing groups",
+      "ptm_overrides": {
+        "P42345": {
+          "P42345_1261": {
+            "shape_x": 314.2,
+            "shape_y": 479.5,
+            "label_x": 309.2,
+            "label_y": 474.5,
+            "label_centering": "right",
+            "symbol_x": 314.09999999999997,
+            "symbol_y": 479.5,
+            "ptm_position": "N1"
+          },
+          "P42345_2448": {
+            "shape_x": 328.0,
+            "shape_y": 479.5,
+            "label_x": 328.0,
+            "label_y": 471.5,
+            "label_centering": "center",
+            "symbol_x": 327.9,
+            "symbol_y": 479.0,
+            "ptm_position": "N2"
+          },
+          "P42345_2471": {
+            "shape_x": 341.8,
+            "shape_y": 479.5,
+            "label_x": 346.8,
+            "label_y": 474.5,
+            "label_centering": "left",
+            "symbol_x": 341.8,
+            "symbol_y": 479.5,
+            "ptm_position": "N3"
+          }
+        }
+      }
+    },
+    {
+      "protbox_id": "fca51",
+      "x": 598.0,
+      "y": 485.5,
+      "width": 46.0,
+      "height": 17.0,
+      "proteins": [
+        "Q6R327"
+      ],
+      "backup_label": "RICTOR",
+      "tooltip": "T: GOBP name: actin cytoskeleton organization;actin cytoskeleton reorganization;actin filament-based process;biological regulation;cell surface receptor linked signaling pathway;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular macromolecule metabolic process;cellular metabolic process;cellular process;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to fibroblast growth factor stimulus;cellular response to growth factor stimulus;cellular response to organic substance;cellular response to stimulus;cellular response to vascular endothelial growth factor stimulus;cytoskeleton organization;defense response;developmental process;embryo development;enzyme linked receptor protein signaling pathway;epidermal growth factor receptor signaling pathway;fibroblast growth factor receptor signaling pathway;immune response;immune system process;innate immune response;inositol lipid-mediated signaling;intracellular signal transduction;lymphocyte costimulation;macromolecule metabolic process;macromolecule modification;metabolic process;nerve growth factor receptor signaling pathway;organelle organization;peptidyl-amino acid modification;peptidyl-serine modification;peptidyl-serine phosphorylation;phosphate-containing compound metabolic process;phosphatidylinositol-mediated signaling;phosphorus metabolic process;phosphorylation;positive regulation of actin filament polymerization;positive regulation of biological process;positive regulation of cell activation;positive regulation of cell communication;positive regulation of cell proliferation;positive regulation of cellular component organization;positive regulation of cellular metabolic process;positive regulation of cellular process;positive regulation of cellular protein metabolic process;positive regulation of cytoskeleton organization;positive regulation of endothelial cell proliferation;positive regulation of epithelial cell proliferation;positive regulation of immune system process;positive regulation of intracellular protein kinase cascade;positive regulation of leukocyte activation;positive regulation of lymphocyte activation;positive regulation of macromolecule metabolic process;positive regulation of metabolic process;positive regulation of organelle organization;positive regulation of peptidyl-tyrosine phosphorylation;positive regulation of phosphate metabolic process;positive regulation of phosphorus metabolic process;positive regulation of phosphorylation;positive regulation of protein complex assembly;positive regulation of protein kinase B signaling cascade;positive regulation of protein metabolic process;positive regulation of protein modification process;positive regulation of protein phosphorylation;positive regulation of protein polymerization;positive regulation of response to stimulus;positive regulation of signal transduction;positive regulation of signaling;positive regulation of T cell activation;positive regulation of TOR signaling cascade;primary metabolic process;protein metabolic process;protein modification process;protein phosphorylation;regulation of actin cytoskeleton organization;regulation of actin filament length;regulation of actin filament polymerization;regulation of actin filament-based process;regulation of actin polymerization or depolymerization;regulation of anatomical structure size;regulation of biological process;regulation of biological quality;regulation of cell activation;regulation of cell communication;regulation of cell proliferation;regulation of cellular component biogenesis;regulation of cellular component organization;regulation of cellular component size;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of cytoskeleton organization;regulation of endothelial cell proliferation;regulation of epithelial cell proliferation;regulation of immune system process;regulation of intracellular protein kinase cascade;regulation of leukocyte activation;regulation of lymphocyte activation;regulation of macromolecule metabolic process;regulation of metabolic process;regulation of organelle organization;regulation of peptidyl-tyrosine phosphorylation;regulation of phosphate metabolic process;regulation of phosphorus metabolic process;regulation of phosphorylation;regulation of primary metabolic process;regulation of protein complex assembly;regulation of protein kinase B signaling cascade;regulation of protein metabolic process;regulation of protein modification process;regulation of protein phosphorylation;regulation of protein polymerization;regulation of response to stimulus;regulation of signal transduction;regulation of signaling;regulation of T cell activation;regulation of TOR signaling cascade;response to chemical stimulus;response to endogenous stimulus;response to fibroblast growth factor stimulus;response to growth factor stimulus;response to organic substance;response to stimulus;response to stress;signal transduction;T cell costimulation;TOR signaling cascade;transmembrane receptor protein tyrosine kinase signaling pathway;vascular endothelial growth factor receptor signaling pathway\nT: GOMF name: binding;enzyme binding;kinase binding;protein binding;protein kinase binding;ribonucleoprotein binding;ribosome binding",
+      "tooltip_html": "<strong>T: GOBP name:</strong> actin cytoskeleton organization;actin cytoskeleton reorganization;actin filament-based process;biological regulation;cell surface receptor linked signaling pathway;cellular component organization;cellular component organization at cellular level;cellular component organization or biogenesis;cellular component organization or biogenesis at cellular level;cellular macromolecule metabolic process;cellular metabolic process;cellular process;cellular protein metabolic process;cellular response to chemical stimulus;cellular response to fibroblast growth factor stimulus;cellular response to growth factor stimulus;cellular response to organic substance;cellular response to stimulus;cellular response to vascular endothelial growth factor stimulus;cytoskeleton organization;defense response;developmental process;embryo development;enzyme linked receptor protein signaling pathway;epidermal growth factor receptor signaling pathway;fibroblast growth factor receptor signaling pathway;immune response;immune system process;innate immune response;inositol lipid-mediated signaling;intracellular signal transduction;lymphocyte costimulation;macromolecule metabolic process;macromolecule modification;metabolic process;nerve growth factor receptor signaling pathway;organelle organization;peptidyl-amino acid modification;peptidyl-serine modification;peptidyl-serine phosphorylation;phosphate-containing compound metabolic process;phosphatidylinositol-mediated signaling;phosphorus metabolic process;phosphorylation;positive regulation of actin filament polymerization;positive regulation of biological process;positive regulation of cell activation;positive regulation of cell communication;positive regulation of cell proliferation;positive regulation of cellular component organization;positive regulation of cellular metabolic process;positive regulation of cellular process;positive regulation of cellular protein metabolic process;positive regulation of cytoskeleton organization;positive regulation of endothelial cell proliferation;positive regulation of epithelial cell proliferation;positive regulation of immune system process;positive regulation of intracellular protein kinase cascade;positive regulation of leukocyte activation;positive regulation of lymphocyte activation;positive regulation of macromolecule metabolic process;positive regulation of metabolic process;positive regulation of organelle organization;positive regulation of peptidyl-tyrosine phosphorylation;positive regulation of phosphate metabolic process;positive regulation of phosphorus metabolic process;positive regulation of phosphorylation;positive regulation of protein complex assembly;positive regulation of protein kinase B signaling cascade;positive regulation of protein metabolic process;positive regulation of protein modification process;positive regulation of protein phosphorylation;positive regulation of protein polymerization;positive regulation of response to stimulus;positive regulation of signal transduction;positive regulation of signaling;positive regulation of T cell activation;positive regulation of TOR signaling cascade;primary metabolic process;protein metabolic process;protein modification process;protein phosphorylation;regulation of actin cytoskeleton organization;regulation of actin filament length;regulation of actin filament polymerization;regulation of actin filament-based process;regulation of actin polymerization or depolymerization;regulation of anatomical structure size;regulation of biological process;regulation of biological quality;regulation of cell activation;regulation of cell communication;regulation of cell proliferation;regulation of cellular component biogenesis;regulation of cellular component organization;regulation of cellular component size;regulation of cellular metabolic process;regulation of cellular process;regulation of cellular protein metabolic process;regulation of cytoskeleton organization;regulation of endothelial cell proliferation;regulation of epithelial cell proliferation;regulation of immune system process;regulation of intracellular protein kinase cascade;regulation of leukocyte activation;regulation of lymphocyte activation;regulation of macromolecule metabolic process;regulation of metabolic process;regulation of organelle organization;regulation of peptidyl-tyrosine phosphorylation;regulation of phosphate metabolic process;regulation of phosphorus metabolic process;regulation of phosphorylation;regulation of primary metabolic process;regulation of protein complex assembly;regulation of protein kinase B signaling cascade;regulation of protein metabolic process;regulation of protein modification process;regulation of protein phosphorylation;regulation of protein polymerization;regulation of response to stimulus;regulation of signal transduction;regulation of signaling;regulation of T cell activation;regulation of TOR signaling cascade;response to chemical stimulus;response to endogenous stimulus;response to fibroblast growth factor stimulus;response to growth factor stimulus;response to organic substance;response to stimulus;response to stress;signal transduction;T cell costimulation;TOR signaling cascade;transmembrane receptor protein tyrosine kinase signaling pathway;vascular endothelial growth factor receptor signaling pathway<br/><strong>T: GOMF name:</strong> binding;enzyme binding;kinase binding;protein binding;protein kinase binding;ribonucleoprotein binding;ribosome binding",
+      "ptm_overrides": {
+        "Q6R327": {
+          "Q6R327_1135": {
+            "shape_x": 607.2,
+            "shape_y": 481.5,
+            "label_x": 602.2,
+            "label_y": 476.5,
+            "label_centering": "right",
+            "symbol_x": 607.1,
+            "symbol_y": 481.5,
+            "ptm_position": "N1"
+          },
+          "Q6R327_1103": {
+            "shape_x": 634.8,
+            "shape_y": 481.5,
+            "label_x": 639.8,
+            "label_y": 476.5,
+            "label_centering": "left",
+            "symbol_x": 634.8,
+            "symbol_y": 481.5,
+            "ptm_position": "N3"
+          },
+          "Q6R327_1370": {
+            "shape_x": 648.0,
+            "shape_y": 491.11,
+            "label_x": 653.0,
+            "label_y": 489.11,
+            "label_centering": "left",
+            "symbol_x": 648.0,
+            "symbol_y": 491.11,
+            "ptm_position": "E1"
+          },
+          "Q6R327_21": {
+            "shape_x": 594.0,
+            "shape_y": 491.11,
+            "label_x": 589.0,
+            "label_y": 489.11,
+            "label_centering": "right",
+            "symbol_x": 594.0,
+            "symbol_y": 491.11,
+            "ptm_position": "W1"
+          },
+          "Q6R327_1388": {
+            "shape_x": null,
+            "shape_y": null,
+            "label_x": null,
+            "label_y": null,
+            "label_centering": null,
+            "symbol_x": null,
+            "symbol_y": null,
+            "ptm_position": ""
+          },
+          "Q6R327_1592": {
+            "shape_x": null,
+            "shape_y": null,
+            "label_x": null,
+            "label_y": null,
+            "label_centering": null,
+            "symbol_x": null,
+            "symbol_y": null,
+            "ptm_position": ""
+          },
+          "Q6R327_1174": {
+            "shape_x": null,
+            "shape_y": null,
+            "label_x": null,
+            "label_y": null,
+            "label_centering": null,
+            "symbol_x": null,
+            "symbol_y": null,
+            "ptm_position": ""
+          }
+        }
+      }
+    }
+  ],
+  "compound_data": [
+    {
+      "compound_id": "fae21",
+      "x": 247.89746416758544,
+      "y": 360.89746416758544,
+      "width": 8.0,
+      "height": 8.0,
+      "kegg_compound": "Rapamycin",
+      "label": "Rapamycin",
+      "fgcolor": "#0000ff",
+      "bgcolor": "#FFFFFF",
+      "graphics_type": "",
+      "link": ""
+    }
+  ],
+  "text_data": [
+    {
+      "text_id": "cf883",
+      "x": 106.0,
+      "y": 674.0,
+      "width": 153.0,
+      "height": 20.0,
+      "text_style": {},
+      "bgcolor": "transparent",
+      "fgcolor": "#14961e",
+      "border_color": "#14961e",
+      "label": "Ribosome biogenesis",
+      "graphics_type": "None",
+      "border_width": 1,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "d2206",
+      "x": 644.0,
+      "y": 44.0,
+      "width": 117.0,
+      "height": 20.0,
+      "text_style": {},
+      "bgcolor": "transparent",
+      "fgcolor": "#14961e",
+      "border_color": "#14961e",
+      "label": "Insulin signaling",
+      "graphics_type": "RoundedRectangle",
+      "border_width": 1,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "da03b",
+      "x": 30.32348804500704,
+      "y": 724.1772151898733,
+      "width": 80.0,
+      "height": 20.0,
+      "text_style": {},
+      "bgcolor": "transparent",
+      "fgcolor": "#14961e",
+      "border_color": "#14961e",
+      "label": "Myelination",
+      "graphics_type": "None",
+      "border_width": 1,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "df0d6",
+      "x": 294.0,
+      "y": 692.0,
+      "width": 117.0,
+      "height": 20.0,
+      "text_style": {},
+      "bgcolor": "transparent",
+      "fgcolor": "#14961e",
+      "border_color": "#14961e",
+      "label": "Insulin signaling",
+      "graphics_type": "RoundedRectangle",
+      "border_width": 1,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "e498c",
+      "x": 372.13569576490926,
+      "y": 654.0,
+      "width": 135.0,
+      "height": 20.0,
+      "text_style": {},
+      "bgcolor": "transparent",
+      "fgcolor": "#14961e",
+      "border_color": "#14961e",
+      "label": "mRNA translation",
+      "graphics_type": "RoundedRectangle",
+      "border_width": 1,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "f08aa",
+      "x": 728.3333333333334,
+      "y": 697.6666666666667,
+      "width": 123.0,
+      "height": 20.0,
+      "text_style": {},
+      "bgcolor": "transparent",
+      "fgcolor": "#14961e",
+      "border_color": "#14961e",
+      "label": "Actin Organization",
+      "graphics_type": "None",
+      "border_width": 1,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "f367a",
+      "x": 225.0,
+      "y": 643.0,
+      "width": 117.0,
+      "height": 20.0,
+      "text_style": {},
+      "bgcolor": "transparent",
+      "fgcolor": "#14961e",
+      "border_color": "#14961e",
+      "label": "Autophagy",
+      "graphics_type": "None",
+      "border_width": 1,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "f96db",
+      "x": 551.3333333333334,
+      "y": 698.6666666666667,
+      "width": 143.0,
+      "height": 20.0,
+      "text_style": {},
+      "bgcolor": "transparent",
+      "fgcolor": "#14961e",
+      "border_color": "#14961e",
+      "label": "Cytoskeletal dynamics",
+      "graphics_type": "None",
+      "border_width": 1,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "a68e5",
+      "x": 139.28699830589463,
+      "y": 65.62839820082999,
+      "width": 57.627702238569974,
+      "height": 11.983542097677386,
+      "text_style": {
+        "fontSize": 9.0,
+        "vertical": "center"
+      },
+      "bgcolor": "transparent",
+      "fgcolor": "#000000",
+      "border_color": "transparent",
+      "label": "Amino acids",
+      "graphics_type": "label",
+      "border_width": 0,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "bb893",
+      "x": 166.30760749724368,
+      "y": 451.2050716648291,
+      "width": 80.0,
+      "height": 20.0,
+      "text_style": {
+        "fontSize": 16.0,
+        "bold": true,
+        "vertical": "center"
+      },
+      "bgcolor": "transparent",
+      "fgcolor": "#000000",
+      "border_color": "transparent",
+      "label": "mTORC1",
+      "graphics_type": "label",
+      "border_width": 0,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "c74e0",
+      "x": 560.6659316427786,
+      "y": 452.3076074972437,
+      "width": 80.0,
+      "height": 20.0,
+      "text_style": {
+        "fontSize": 16.0,
+        "bold": true,
+        "vertical": "center"
+      },
+      "bgcolor": "transparent",
+      "fgcolor": "#000000",
+      "border_color": "transparent",
+      "label": "mTORC2",
+      "graphics_type": "label",
+      "border_width": 0,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "e2f2a",
+      "x": 246.0,
+      "y": 145.0,
+      "width": 80.0,
+      "height": 20.0,
+      "text_style": {
+        "fontSize": 10.0,
+        "vertical": "center"
+      },
+      "bgcolor": "transparent",
+      "fgcolor": "#000000",
+      "border_color": "transparent",
+      "label": "AMPK",
+      "graphics_type": "label",
+      "border_width": 0,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "e8d52",
+      "x": 494.0,
+      "y": 48.0,
+      "width": 80.0,
+      "height": 20.0,
+      "text_style": {
+        "fontSize": 12.0,
+        "bold": true,
+        "vertical": "center"
+      },
+      "bgcolor": "transparent",
+      "fgcolor": "#660066",
+      "border_color": "transparent",
+      "label": "Hypoxia",
+      "graphics_type": "label",
+      "border_width": 0,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "f04e6",
+      "x": 808.0,
+      "y": 657.0,
+      "width": 80.0,
+      "height": 20.0,
+      "text_style": {
+        "fontSize": 12.0,
+        "bold": true,
+        "vertical": "center"
+      },
+      "bgcolor": "transparent",
+      "fgcolor": "#660066",
+      "border_color": "transparent",
+      "label": "Survival",
+      "graphics_type": "label",
+      "border_width": 0,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "fc626",
+      "x": 276.0,
+      "y": 47.0,
+      "width": 104.0,
+      "height": 20.0,
+      "text_style": {
+        "fontSize": 12.0,
+        "bold": true,
+        "vertical": "center"
+      },
+      "bgcolor": "transparent",
+      "fgcolor": "#660066",
+      "border_color": "transparent",
+      "label": "high AMP:ATP",
+      "graphics_type": "label",
+      "border_width": 0,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "ea169",
+      "x": 139.28699830589437,
+      "y": 138.0597014925373,
+      "width": 57.62770223856998,
+      "height": 13.008897664297038,
+      "text_style": {
+        "fontSize": 9.0,
+        "vertical": "center"
+      },
+      "bgcolor": "transparent",
+      "fgcolor": "#000000",
+      "border_color": "transparent",
+      "label": "Amino acids",
+      "graphics_type": "label",
+      "border_width": 0,
+      "is_background": false,
+      "shape_type": "",
+      "link": ""
+    },
+    {
+      "text_id": "c0250",
+      "x": 14.705882352941103,
+      "y": 102.94117647058829,
+      "width": 886.5546218487395,
+      "height": 660.7142857142856,
+      "text_style": {
+        "fontSize": 12.0,
+        "vertical": "center"
+      },
+      "bgcolor": "transparent",
+      "fgcolor": "#c0c0c0",
+      "border_color": "#c0c0c0",
+      "graphics_type": "RoundedRectangle",
+      "border_width": 3.0,
+      "is_background": true,
+      "shape_type": "rounded",
+      "link": ""
+    },
+    {
+      "text_id": "c0250_double",
+      "x": 9.705882352941103,
+      "y": 97.94117647058829,
+      "width": 896.5546218487395,
+      "height": 670.7142857142856,
+      "text_style": {
+        "fontSize": 12.0,
+        "vertical": "center"
+      },
+      "bgcolor": "transparent",
+      "fgcolor": "#c0c0c0",
+      "border_color": "#c0c0c0",
+      "graphics_type": "RoundedRectangle",
+      "border_width": 3.0,
+      "is_background": true,
+      "shape_type": "rounded",
+      "link": ""
+    },
+    {
+      "text_id": "e0c82",
+      "x": 175.86565656565662,
+      "y": 88.98508898508896,
+      "width": 11.033333333333333,
+      "height": 27.02789802789806,
+      "text_style": {
+        "fontSize": 10.0,
+        "vertical": "center"
+      },
+      "bgcolor": "transparent",
+      "fgcolor": "#000000",
+      "border_color": "#000000",
+      "graphics_type": "Rectangle",
+      "border_width": 1,
+      "is_background": false,
+      "shape_type": "rect",
+      "link": ""
+    },
+    {
+      "text_id": "b0a99",
+      "x": 148.86565656565665,
+      "y": 88.98508898508898,
+      "width": 11.033333333333346,
+      "height": 27.02789802789807,
+      "text_style": {
+        "fontSize": 10.0,
+        "vertical": "center"
+      },
+      "bgcolor": "transparent",
+      "fgcolor": "#000000",
+      "border_color": "#000000",
+      "graphics_type": "Rectangle",
+      "border_width": 1,
+      "is_background": false,
+      "shape_type": "rect",
+      "link": ""
+    }
+  ],
+  "arrows": [
+    {
+      "protbox_id_1": "fa7bc",
+      "protbox_id_2": "e69b1",
+      "protbox_id_1_side": "South",
+      "protbox_id_2_side": "North",
+      "line": "arrow",
+      "type": "interaction",
+      "control_points": []
+    }
+  ],
+  "groups": []
+}

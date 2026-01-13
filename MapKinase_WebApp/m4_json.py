@@ -6,8 +6,9 @@ from datetime import datetime
 from collections import defaultdict
 import json
 import html
+from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from factory import get_pathway_api
+from MapKinase_WebApp.a1_factory import get_pathway_api
 
 def calculate_angle(x1, y1, x2, y2):
     return np.arctan2(y2 - y1, x2 - x1)
@@ -75,13 +76,22 @@ def parse_exceptions_file(file_path='exceptions_file.txt'):
         'hsa_specific': {}
     }
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-        base_dir = os.path.join(sys._MEIPASS, 'Scripts')
+        candidate_dirs = [
+            os.path.join(sys._MEIPASS, 'MapKinase_WebApp'),
+            os.path.join(sys._MEIPASS, 'Scripts'),
+            sys._MEIPASS,
+        ]
     else:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-    full_path = os.path.join(base_dir, file_path)
+        candidate_dirs = [os.path.dirname(os.path.abspath(__file__))]
+    full_path = None
+    for base_dir in candidate_dirs:
+        candidate = os.path.join(base_dir, file_path)
+        if os.path.exists(candidate):
+            full_path = candidate
+            break
     try:
-        if not os.path.exists(full_path):
-            print(f"Exceptions file not found at {full_path}")
+        if not full_path:
+            print(f"Exceptions file not found (searched: {candidate_dirs})")
             return exceptions
         with open(full_path, 'r') as f:
             current_hsa = None
@@ -294,7 +304,10 @@ class PathwayProcessor:
         self.protein_data_map = {}  # Initialize protein_data_map
         self.current_proteins = {}  # Initialize current_proteins
         for dataset_id, dataset in self.ptm_datasets.items():
-            dataset['data'] = pd.read_csv(dataset['file_path'], sep="\t")
+            if 'dataframe' in dataset and isinstance(dataset['dataframe'], pd.DataFrame):
+                dataset['data'] = dataset['dataframe'].copy()
+            else:
+                dataset['data'] = pd.read_csv(dataset['file_path'], sep="\t")
             print(f"PTM dataset {dataset_id}: {len(dataset['data'])} rows, columns: {dataset['data'].columns.tolist()}")
             symbol_list = dataset.get('ptm_symbol_list', [])
             reg_site_col = dataset.get('modulation_column', 'C: Regulatory site')
@@ -366,9 +379,14 @@ class PathwayProcessor:
                     for fc_col in self.fold_change_columns:
                         fold_change = self.proteomic_data.loc[
                             self.proteomic_data[self.hsa_id_column] == protein, fc_col].values
-                        if len(fold_change) > 0 and abs(fold_change[0]) > max_fold_change:
-                            max_fold_change = abs(fold_change[0])
-                            selected_protein = protein
+                        if len(fold_change) > 0:
+                            try:
+                                fc_val = float(fold_change[0])
+                            except (TypeError, ValueError):
+                                fc_val = None
+                            if fc_val is not None and abs(fc_val) > max_fold_change:
+                                max_fold_change = abs(fc_val)
+                                selected_protein = protein
                 if not selected_protein:
                     selected_protein = valid_proteins[0]
             else:
@@ -409,12 +427,17 @@ class PathwayProcessor:
             combined_ptms = combined_ptms.dropna(subset=['dataset_id'])
         if combined_ptms.empty:
             return combined_ptms
+        # Normalize fold-change columns to numeric
+        fc_cols = [col[1] for dataset in self.ptm_datasets.values() for col in dataset['main_columns']]
+        for fc in fc_cols:
+            if fc in combined_ptms.columns:
+                combined_ptms[fc] = pd.to_numeric(combined_ptms[fc], errors='coerce')
         try:
             if self.ptm_selection_option == 1:
                 print("Applying PTM selection option 1: Highest absolute fold change")
                 combined_ptms = combined_ptms.sort_values(
-                    by=[col[1] for dataset in self.ptm_datasets.values() for col in dataset['main_columns']],
-                    key=lambda x: x.abs(),
+                    by=fc_cols,
+                    key=lambda x: pd.to_numeric(x, errors="coerce").abs(),
                     ascending=False
                 )
             elif self.ptm_selection_option == 2:
@@ -423,10 +446,17 @@ class PathwayProcessor:
                     try:
                         dataset_id = row['dataset_id']
                         dataset = self.ptm_datasets[dataset_id]
-                        fold_change = row[dataset['main_columns'][0][1]]
-                        is_modulating = row['is_modulating']
-                        is_phospho = row['is_phospho']
-                        return (-is_phospho, -is_modulating, -abs(fold_change) if not pd.isna(fold_change) else 0)
+                        fold_change = row.get(dataset['main_columns'][0][1], 0)
+                        if pd.isna(fold_change):
+                            fold_change = 0.0
+                        try:
+                            fold_change = float(fold_change)
+                        except (TypeError, ValueError):
+                            fold_change = 0.0
+                        is_modulating_val = row.get('is_modulating')
+                        is_modulating = bool(is_modulating_val is True or is_modulating_val == '+' or str(is_modulating_val).lower() == 'true')
+                        is_phospho = bool(row.get('is_phospho'))
+                        return (-is_phospho, -is_modulating, -abs(fold_change))
                     except (KeyError, TypeError) as e:
                         print(f"Error in sort_key for row {row}: {e}")
                         return (0, 0, 0)
@@ -440,8 +470,8 @@ class PathwayProcessor:
                     (~combined_ptms['is_phospho'])
                 ]
                 combined_ptms = combined_ptms.sort_values(
-                    by=[col[1] for dataset in self.ptm_datasets.values() for col in dataset['main_columns']],
-                    key=lambda x: x.abs(),
+                    by=fc_cols,
+                    key=lambda x: pd.to_numeric(x, errors="coerce").abs(),
                     ascending=False
                 )
             print(f"Found {len(combined_ptms)} PTM sites")
@@ -479,6 +509,7 @@ class PathwayProcessor:
                         'show_multi_protein_indicator': self.settings.get('show_multi_protein_indicator', True),
                         'show_arrows': self.settings.get('show_arrows', True),
                         'show_text_boxes': self.settings.get('show_text_boxes', True),
+                        'debug_mode': self.settings.get('debug_mode', False),
                         'negative_color': self.settings.get('negative_color', (255, 0, 0)),
                         'positive_color': self.settings.get('positive_color', (0, 0, 255)),
                         'max_negative': self.settings.get('max_negative', -2),
@@ -490,7 +521,8 @@ class PathwayProcessor:
                         'ptm_label_size': self.settings.get('ptm_label_size', 10),
                         'ptm_circle_radius': self.settings.get('ptm_circle_radius', 5),
                         'ptm_circle_spacing': self.settings.get('ptm_circle_spacing', 4),
-                        'protein_tooltip_columns': self.settings.get('protein_tooltip_columns', ['Gene Symbol', 'Uniprot_ID'])
+                        'protein_tooltip_columns': self.settings.get('protein_tooltip_columns', ['Gene Symbol', 'Uniprot_ID']),
+                        'protein_file_path': self.settings.get('protein_file_path', '')
                     },
                     'data': {
                         'protein': {
@@ -504,7 +536,7 @@ class PathwayProcessor:
                         'ptm': [
                             {
                                 'type': dataset['type'],
-                                'file_path': dataset['file_path'],
+                                'file_path': dataset.get('file_path', ''),
                                 'uniprot_column': dataset['uniprot_column'],
                                 'site_column': dataset['site_column'],
                                 'shape': dataset['shape'],
@@ -523,23 +555,203 @@ class PathwayProcessor:
                 'compound_data' : [],
                 'text_data' : []
             }
+            def _find_entry_by_id(entry_id):
+                for entry in entries:
+                    if str(entry.get('id')) == str(entry_id):
+                        return entry
+                return None
+
             for group in groups:
+                members = []
+                protbox_ids = set()
+                component_ids = group.get('components') or group.get('protbox_ids') or []
+                for comp_id in component_ids:
+                    entry = _find_entry_by_id(comp_id)
+                    if not entry:
+                        continue
+                    entry_type = entry.get('type')
+                    if entry_type == 'prot_box':
+                        members.append({'type': 'prot-box', 'id': comp_id})
+                        protbox_ids.add(str(comp_id))
+                    elif entry_type == 'compound':
+                        members.append({'type': 'compound', 'id': comp_id})
+                    elif entry_type in {'map', 'label', 'text'} or entry.get('graphics_type') in {'roundrectangle', 'label'} or entry.get('shape_type'):
+                        members.append({'type': 'text-box', 'id': comp_id})
                 group_entry = {
                     'group_id': group['id'],
-                    'protbox_ids': group.get('protbox_ids', [])
+                    'members': members,
+                    'protbox_ids': list(protbox_ids)
                 }
+                if members and str(self.settings.get('pathway_source', 'kegg')).lower() == 'kegg':
+                    group_entry['show_box'] = True
+                    group_entry['box_padding'] = 10
+                    group_entry['box_radius'] = 8
                 json_data['groups'].append(group_entry)
+
+            binding_edges = []
+            if str(self.settings.get('pathway_source', 'kegg')).lower() == 'kegg':
+                filtered_arrows = []
+                for arrow in arrows:
+                    if arrow.get('binding') or str(arrow.get('type', '')).lower() == 'binding/association':
+                        entry1_id = arrow.get('entry1')
+                        entry2_id = arrow.get('entry2')
+                        if entry1_id and entry2_id:
+                            binding_edges.append((str(entry1_id), str(entry2_id)))
+                        continue
+                    filtered_arrows.append(arrow)
+                arrows = filtered_arrows
+            if binding_edges:
+                neighbors = defaultdict(set)
+                for a_id, b_id in binding_edges:
+                    neighbors[a_id].add(b_id)
+                    neighbors[b_id].add(a_id)
+                existing_ids = {str(g.get('group_id')) for g in json_data.get('groups', []) if isinstance(g, dict)}
+                for hub_id, linked in neighbors.items():
+                    if len(linked) < 2:
+                        continue
+                    hub_entry = _find_entry_by_id(hub_id)
+                    if not hub_entry or hub_entry.get('type') != 'prot_box':
+                        continue
+                    members = []
+                    protbox_ids = set()
+                    for pid in [hub_id] + sorted(linked):
+                        entry = _find_entry_by_id(pid)
+                        if not entry or entry.get('type') != 'prot_box':
+                            continue
+                        members.append({'type': 'prot-box', 'id': pid})
+                        protbox_ids.add(str(pid))
+                    if len(members) < 2:
+                        continue
+                    group_id = f"bind_assoc_{hub_id}"
+                    if group_id in existing_ids:
+                        continue
+                    json_data['groups'].append(
+                        {
+                            'group_id': group_id,
+                            'members': members,
+                            'protbox_ids': list(protbox_ids),
+                            'show_box': True,
+                            'box_padding': 10,
+                            'box_radius': 8,
+                            'anchor_member': hub_id,
+                        }
+                    )
+                    existing_ids.add(group_id)
             prot_entries = [e for e in entries if e.get('type') == 'prot_box']
+            prot_ids = {e.get("id") for e in prot_entries}
             opposite_side = {'East': 'West', 'West': 'East', 'North': 'South', 'South': 'North'}
+            is_kegg = str(self.settings.get('pathway_source', 'kegg')).lower() == 'kegg'
+            def _entry_center(entry):
+                if not entry:
+                    return None, None
+                x_val = entry.get("x", 0)
+                y_val = entry.get("y", 0)
+                if is_kegg:
+                    return x_val, y_val
+                return x_val + entry.get("width", 0) / 2, y_val + entry.get("height", 0) / 2
+
+            def _shorten_end(start_x, start_y, end_x, end_y, amount):
+                dx = end_x - start_x
+                dy = end_y - start_y
+                dist = (dx ** 2 + dy ** 2) ** 0.5
+                if dist <= 0:
+                    return end_x, end_y
+                return end_x - dx / dist * amount, end_y - dy / dist * amount
+
+            def _shorten_start(start_x, start_y, end_x, end_y, amount):
+                dx = end_x - start_x
+                dy = end_y - start_y
+                dist = (dx ** 2 + dy ** 2) ** 0.5
+                if dist <= 0:
+                    return start_x, start_y
+                return start_x + dx / dist * amount, start_y + dy / dist * amount
             for arrow in arrows:
-                entry1 = find_entry_or_group(arrow['entry1'], entries, groups)
-                entry2 = find_entry_or_group(arrow['entry2'], entries, groups)
-                if not (entry1 and entry2) or entry1.get('type') != 'prot_box' or entry2.get('type') != 'prot_box':
+                entry1_id = arrow.get("entry1")
+                entry2_id = arrow.get("entry2")
+                entry1 = find_entry_or_group(entry1_id, entries, groups) if entry1_id else None
+                entry2 = find_entry_or_group(entry2_id, entries, groups) if entry2_id else None
+                entry1_is_protbox = bool(entry1 and entry1.get("id") in prot_ids)
+                entry2_is_protbox = bool(entry2 and entry2.get("id") in prot_ids)
+                entry1_is_compound = bool(entry1 and entry1.get("type") == "compound")
+                entry2_is_compound = bool(entry2 and entry2.get("type") == "compound")
+                center1_x, center1_y = _entry_center(entry1)
+                center2_x, center2_y = _entry_center(entry2)
+                # If exactly one endpoint is a protbox, attach to the protbox handle and use coords for the other end.
+                if entry1 and entry2 and entry1_is_protbox != entry2_is_protbox:
+                    dx = (center2_x or 0) - (center1_x or 0)
+                    dy = (center2_y or 0) - (center1_y or 0)
+                    angle = calculate_angle(center1_x or 0, center1_y or 0, center2_x or 0, center2_y or 0)
+                    primary_out_old = determine_arrow_side(angle)
+                    primary_out = map_side(primary_out_old)
+                    side_out = primary_out
+                    angle_rev = np.arctan2(-dy, -dx)
+                    primary_in_old = determine_arrow_side(angle_rev)
+                    primary_in = map_side(primary_in_old)
+                    side_in = primary_in
+                    arrow_entry = {
+                        'line': arrow.get('line', 'arrow'),
+                        'type': arrow.get('type', ''),
+                        'control_points': arrow.get('control_points', []),
+                        'connector_type': arrow.get('connector_type', ''),
+                    }
+                    if entry1_is_protbox:
+                        arrow_entry['protbox_id_1'] = entry1_id
+                        arrow_entry['protbox_id_1_side'] = side_out
+                        if center2_x is not None and center2_y is not None:
+                            end_x, end_y = center2_x, center2_y
+                            if entry2_is_compound:
+                                end_x, end_y = _shorten_end(center1_x or 0, center1_y or 0, end_x, end_y, 10)
+                            arrow_entry['x2'] = end_x
+                            arrow_entry['y2'] = end_y
+                    else:
+                        arrow_entry['protbox_id_2'] = entry2_id
+                        arrow_entry['protbox_id_2_side'] = side_in
+                        if center1_x is not None and center1_y is not None:
+                            start_x, start_y = center1_x, center1_y
+                            if entry1_is_compound:
+                                start_x, start_y = _shorten_start(start_x, start_y, center2_x or 0, center2_y or 0, 10)
+                            arrow_entry['x1'] = start_x
+                            arrow_entry['y1'] = start_y
+                    json_data['arrows'].append(arrow_entry)
                     continue
-                center1_x = entry1['x'] + entry1['width'] / 2
-                center1_y = entry1['y'] + entry1['height'] / 2
-                center2_x = entry2['x'] + entry2['width'] / 2
-                center2_y = entry2['y'] + entry2['height'] / 2
+                # Fallback: if either endpoint is not a protbox, use provided coords or derive from entry centers
+                if not (entry1 and entry2 and entry1_is_protbox and entry2_is_protbox):
+                    x1 = arrow.get("x1")
+                    y1 = arrow.get("y1")
+                    x2 = arrow.get("x2")
+                    y2 = arrow.get("y2")
+                    if (x1 is None or y1 is None) and center1_x is not None and center1_y is not None:
+                        x1 = center1_x
+                        y1 = center1_y
+                    if (x2 is None or y2 is None) and center2_x is not None and center2_y is not None:
+                        x2 = center2_x
+                        y2 = center2_y
+                    if x1 is not None and y1 is not None and x2 is not None and y2 is not None:
+                        if entry1_is_compound:
+                            x1, y1 = _shorten_start(x1, y1, x2, y2, 10)
+                        if entry2_is_compound:
+                            x2, y2 = _shorten_end(x1, y1, x2, y2, 10)
+                        json_data['arrows'].append(
+                            {
+                                'x1': x1,
+                                'y1': y1,
+                                'x2': x2,
+                                'y2': y2,
+                                'line': arrow.get('line', 'arrow'),
+                                'type': arrow.get('type', ''),
+                                'control_points': arrow.get('control_points', []),
+                                'connector_type': arrow.get('connector_type', ''),
+                            }
+                        )
+                    continue
+                if center1_x is None:
+                    center1_x = entry1['x'] + entry1['width'] / 2
+                if center1_y is None:
+                    center1_y = entry1['y'] + entry1['height'] / 2
+                if center2_x is None:
+                    center2_x = entry2['x'] + entry2['width'] / 2
+                if center2_y is None:
+                    center2_y = entry2['y'] + entry2['height'] / 2
                 dx = center2_x - center1_x
                 dy = center2_y - center1_y
                 angle = calculate_angle(center1_x, center1_y, center2_x, center2_y)
@@ -560,9 +772,146 @@ class PathwayProcessor:
                     'protbox_id_1_side': side_out,
                     'protbox_id_2_side': side_in,
                     'line': arrow['line'],
-                    'type': arrow['type']
+                    'type': arrow['type'],
+                    'control_points': arrow.get('control_points', []),
+                    'connector_type': arrow.get('connector_type', ''),
                 }
                 json_data['arrows'].append(arrow_entry)
+            if json_data.get('groups') and json_data.get('arrows'):
+                entry_map = {str(entry.get('id')): entry for entry in entries if entry.get('type') == 'prot_box'}
+                group_members = {}
+                group_anchor = {}
+                for group in json_data.get('groups', []):
+                    if not isinstance(group, dict):
+                        continue
+                    if not group.get('show_box'):
+                        continue
+                    gid = str(group.get('group_id'))
+                    prot_ids = []
+                    if isinstance(group.get('protbox_ids'), list):
+                        prot_ids.extend([str(pid) for pid in group.get('protbox_ids') if pid is not None])
+                    if (not prot_ids) and isinstance(group.get('members'), list):
+                        for member in group.get('members'):
+                            if isinstance(member, dict) and member.get('type') == 'prot-box' and member.get('id') is not None:
+                                prot_ids.append(str(member.get('id')))
+                    prot_ids = [pid for pid in prot_ids if pid in entry_map]
+                    if len(prot_ids) < 2:
+                        continue
+                    group_members[gid] = sorted(set(prot_ids))
+                    if group.get('anchor_member') is not None:
+                        group_anchor[gid] = str(group.get('anchor_member'))
+                if group_members:
+                    membership = defaultdict(set)
+                    for gid, ids in group_members.items():
+                        for pid in ids:
+                            membership[pid].add(gid)
+
+                    def _entry_center(entry):
+                        if not entry:
+                            return None, None
+                        return (
+                            entry.get('x', 0) + entry.get('width', 0) / 2,
+                            entry.get('y', 0) + entry.get('height', 0) / 2,
+                        )
+
+                    def _pick_representative(gid, target_id):
+                        anchor = group_anchor.get(gid)
+                        if anchor and anchor in group_members.get(gid, []):
+                            return anchor
+                        target_entry = entry_map.get(str(target_id))
+                        tx, ty = _entry_center(target_entry)
+                        best_id = None
+                        best_dist = None
+                        for pid in group_members.get(gid, []):
+                            entry = entry_map.get(pid)
+                            cx, cy = _entry_center(entry)
+                            if cx is None or cy is None or tx is None or ty is None:
+                                continue
+                            dist = (cx - tx) ** 2 + (cy - ty) ** 2
+                            if best_dist is None or dist < best_dist:
+                                best_dist = dist
+                                best_id = pid
+                        return best_id or (group_members.get(gid, []) or [None])[0]
+
+                    def _make_arrow_entry(pid1, pid2, template):
+                        entry1 = entry_map.get(str(pid1))
+                        entry2 = entry_map.get(str(pid2))
+                        if not entry1 or not entry2:
+                            return None
+                        center1_x = entry1['x'] + entry1['width'] / 2
+                        center1_y = entry1['y'] + entry1['height'] / 2
+                        center2_x = entry2['x'] + entry2['width'] / 2
+                        center2_y = entry2['y'] + entry2['height'] / 2
+                        dx = center2_x - center1_x
+                        dy = center2_y - center1_y
+                        angle = calculate_angle(center1_x, center1_y, center2_x, center2_y)
+                        primary_out = map_side(determine_arrow_side(angle))
+                        angle_rev = np.arctan2(-dy, -dx)
+                        primary_in = map_side(determine_arrow_side(angle_rev))
+                        return {
+                            'protbox_id_1': pid1,
+                            'protbox_id_2': pid2,
+                            'protbox_id_1_side': primary_out,
+                            'protbox_id_2_side': primary_in,
+                            'line': template.get('line', 'arrow'),
+                            'type': template.get('type', ''),
+                            'control_points': [],
+                            'connector_type': template.get('connector_type', ''),
+                        }
+
+                    group_links = {}
+                    for idx, arrow in enumerate(list(json_data.get('arrows', []))):
+                        pid1 = arrow.get('protbox_id_1')
+                        pid2 = arrow.get('protbox_id_2')
+                        if pid1 is None or pid2 is None:
+                            continue
+                        pid1 = str(pid1)
+                        pid2 = str(pid2)
+                        line = arrow.get('line', 'arrow')
+                        rel_type = arrow.get('type', '')
+                        if pid1 in membership:
+                            for gid in membership[pid1]:
+                                if pid2 in group_members.get(gid, []):
+                                    continue
+                                key = (gid, pid2, 'out', line, rel_type)
+                                entry = group_links.setdefault(key, {'members': set(), 'indices': [], 'template': arrow})
+                                entry['members'].add(pid1)
+                                entry['indices'].append(idx)
+                        if pid2 in membership:
+                            for gid in membership[pid2]:
+                                if pid1 in group_members.get(gid, []):
+                                    continue
+                                key = (gid, pid1, 'in', line, rel_type)
+                                entry = group_links.setdefault(key, {'members': set(), 'indices': [], 'template': arrow})
+                                entry['members'].add(pid2)
+                                entry['indices'].append(idx)
+
+                    remove_indices = set()
+                    collapsed_arrows = []
+                    for key, info in group_links.items():
+                        gid, external_id, direction, line, rel_type = key
+                        group_ids = set(group_members.get(gid, []))
+                        if not group_ids or info['members'] != group_ids:
+                            continue
+                        indices = info['indices']
+                        if not indices:
+                            continue
+                        if any(idx in remove_indices for idx in indices):
+                            continue
+                        representative = _pick_representative(gid, external_id)
+                        if not representative:
+                            continue
+                        if direction == 'out':
+                            new_arrow = _make_arrow_entry(representative, external_id, info['template'])
+                        else:
+                            new_arrow = _make_arrow_entry(external_id, representative, info['template'])
+                        if new_arrow:
+                            collapsed_arrows.append(new_arrow)
+                        remove_indices.update(indices)
+                    if remove_indices:
+                        kept = [a for idx, a in enumerate(json_data['arrows']) if idx not in remove_indices]
+                        kept.extend(collapsed_arrows)
+                        json_data['arrows'] = kept
             # Populate protein_data_map for all entries first
             for entry in entries:
                 entry_type = entry.get("type", "")
@@ -575,7 +924,8 @@ class PathwayProcessor:
                     'y': entry["y"],
                     'width': entry["width"],
                     'height': entry["height"],
-                    'first_name': entry.get("first_name", entry["name"].split(",")[0].strip())
+                    'first_name': entry.get("first_name", entry["name"].split(",")[0].strip()),
+                    'label': entry.get("label") or entry.get("backup_label") or entry.get("first_name"),
                 }
             protbox_protein_cache = {}
             all_uniprot_ids = set()
@@ -605,6 +955,7 @@ class PathwayProcessor:
                     'valid_protein_dicts': valid_protein_dicts,
                     'uniprot_ids': uniprot_ids
                 }
+            # Prefetch PTM summaries once after collecting all UniProt IDs
             self._prefetch_ptm_summaries(all_uniprot_ids)
             # Process protein boxes
             for entry in entries:
@@ -616,6 +967,7 @@ class PathwayProcessor:
                 protbox_ptm_overrides = {}
                 valid_protein_dicts = list(cache_payload.get('valid_protein_dicts', []))
                 uniprot_ids = list(cache_payload.get('uniprot_ids', []))
+                use_original_size = bool(self.settings.get("use_original_protbox_size", False))
                 if valid_protein_dicts:
                     # Determine the chosen (highest priority) protein
                     chosen_protein = self.choose_protein(proteins)
@@ -648,28 +1000,56 @@ class PathwayProcessor:
                     self.current_proteins[entry["id"]] = {'protein': fallback_protein, 'uniprot_id': None, 'annotations': []}
                     protein_entry = self.process_protein_box(entry["id"], {'protein': fallback_protein, 'uniprot_id': None, 'annotations': []}, proximities, protein_to_entry_ids, exceptions)
                     json_data['protein_data'][f"unknown_{entry['id']}"] = protein_entry
+                is_kegg = str(self.settings.get("pathway_source", "kegg")).lower() == "kegg"
+                center_x = entry["x"] if is_kegg else entry["x"] + entry["width"] / 2
+                center_y = entry["y"] if is_kegg else entry["y"] + entry["height"] / 2
                 protbox_entry = {
                     'protbox_id': entry["id"],
                     'proteins': uniprot_ids,
-                    'backup_label': self.protein_data_map[entry["id"]]['first_name'],
-                    'x': entry["x"],
-                    'y': entry["y"],
-                    'width': 46,
-                    'height': 17
+                    'backup_label': self.protein_data_map[entry["id"]]['first_name']
                 }
+                if use_original_size:
+                    width_val = entry["width"]
+                    height_val = entry["height"]
+                else:
+                    width_val = 46
+                    height_val = 17
+                protbox_entry.update({
+                    'x': center_x - width_val / 2,
+                    'y': center_y - height_val / 2,
+                    'width': width_val,
+                    'height': height_val,
+                })
+                # Attach tooltip from the primary protein if available
+                if uniprot_ids:
+                    primary = uniprot_ids[0]
+                    primary_payload = json_data['protein_data'].get(primary, {})
+                    protbox_entry['tooltip'] = primary_payload.get('tooltip', '')
+                    protbox_entry['tooltip_html'] = primary_payload.get('tooltip_html', '')
                 if protbox_ptm_overrides:
                     protbox_entry['ptm_overrides'] = protbox_ptm_overrides
                 json_data['protbox_data'].append(protbox_entry)
             for entry in entries:
                 if entry.get('type') == 'compound':
+                    # Normalize compound size to a small fixed circle-like footprint, but keep the original center.
+                    pathway_source = str(self.settings.get('pathway_source', 'kegg')).lower()
+                    # KEGG graphics x/y are already centers; WikiPathways entries store top-left, so adjust accordingly.
+                    if pathway_source == 'kegg':
+                        center_x = entry['x']
+                        center_y = entry['y']
+                    else:
+                        center_x = entry['x'] + entry['width'] / 2
+                        center_y = entry['y'] + entry['height'] / 2
+                    # Match KEGG default compound size (8x8 circle); viewer treats x/y as center
+                    default_size = 8
                     compound = {
                         'compound_id': entry['id'],  # KGML numeric id
                         'kegg_compound': entry['name'],  # e.g., 'cpd:C00165'
                         'label': entry.get('first_name', ''),  # usually the C-number in MAPK
-                        'x': entry['x'],
-                        'y': entry['y'],
-                        'width': entry['width'],
-                        'height': entry['height'],
+                        'x': center_x,
+                        'y': center_y,
+                        'width': default_size,
+                        'height': default_size,
                         'fgcolor': entry.get('fgcolor', '#000000'),
                         'bgcolor': entry.get('bgcolor', '#FFFFFF'),
                         'graphics_type': entry.get('graphics_type', ''),  # likely 'circle'
@@ -677,22 +1057,44 @@ class PathwayProcessor:
                     }
                     json_data['compound_data'].append(compound)
             for entry in entries:
-                if entry.get('type') == 'map' or entry.get('graphics_type') == 'roundrectangle':
+                entry_type = entry.get('type')
+                gfx_type = entry.get('graphics_type')
+                has_shape = bool(entry.get('shape_type'))
+                if entry_type in {'map', 'label', 'text'} or gfx_type in {'roundrectangle', 'label'} or has_shape:
                     label = entry.get('first_name', '')
                     # Optionally strip 'TITLE:' prefix if present
                     if label.upper().startswith('TITLE:'):
                         label = label.split(':', 1)[1].strip()
 
+                    bgcolor = entry.get('bgcolor', '#FFFFFF')
+                    # Make default white backgrounds transparent so labels appear see-through
+                    if isinstance(bgcolor, str) and bgcolor.lower().lstrip('#') in {'ffffff', 'fff'}:
+                        bgcolor = 'transparent'
+                    border_color = entry.get('border_color', 'transparent') or 'transparent'
+                    border_width = entry.get('border_width', 0) or 0
+                    is_kegg = str(self.settings.get('pathway_source', 'kegg')).lower() == 'kegg'
+                    width = entry.get('width', 0)
+                    height = entry.get('height', 0)
+                    x_val = entry.get('x', 0)
+                    y_val = entry.get('y', 0)
+                    if is_kegg:
+                        x_val = x_val - (width / 2)
+                        y_val = y_val - (height / 2)
                     text_item = {
                         'text_id': entry['id'],
                         'label': label,
-                        'x': entry['x'],
-                        'y': entry['y'],
-                        'width': entry['width'],
-                        'height': entry['height'],
+                        'x': x_val,
+                        'y': y_val,
+                        'width': width,
+                        'height': height,
                         'fgcolor': entry.get('fgcolor', '#000000'),
-                        'bgcolor': entry.get('bgcolor', '#FFFFFF'),
+                        'bgcolor': bgcolor,
                         'graphics_type': entry.get('graphics_type', ''),  # often 'roundrectangle'
+                        'text_style': entry.get('text_style', {}),
+                        'border_color': border_color,
+                        'border_width': border_width,
+                        'is_background': entry.get('is_background', False),
+                        'shape_type': entry.get('shape_type', ''),
                         'link': entry.get('link', '')
                     }
                     json_data['text_data'].append(text_item)
@@ -723,10 +1125,18 @@ class PathwayProcessor:
     def process_protein_box(self, entry_id, protein_dict, proximities, protein_to_entry_ids, exceptions):
         try:
             entry_data = self.protein_data_map[entry_id]
-            x = entry_data['x']
-            y = entry_data['y']
-            width = entry_data['width']
-            height = entry_data['height']
+            use_original_size = bool(self.settings.get("use_original_protbox_size", False))
+            is_kegg = str(self.settings.get("pathway_source", "kegg")).lower() == "kegg"
+            center_x = entry_data['x'] if is_kegg else entry_data['x'] + entry_data['width'] / 2
+            center_y = entry_data['y'] if is_kegg else entry_data['y'] + entry_data['height'] / 2
+            if use_original_size:
+                width = entry_data['width']
+                height = entry_data['height']
+            else:
+                width = 46
+                height = 17
+            x = center_x - width / 2
+            y = center_y - height / 2
             proteins = entry_data['proteins']
             protein = protein_dict['protein']
             uniprot_id = protein_dict['uniprot_id']
@@ -738,6 +1148,8 @@ class PathwayProcessor:
                 'label_color': [0, 0, 0],
                 'transcriptomic_color': [],
                 'annotations': ','.join(f'"{ann}"' for ann in annotations if ann),
+                'tooltip': '',
+                'tooltip_html': '',
                 'PTMs': {}
             }
             for idx, fc_col in enumerate(self.fold_change_columns, 1):
@@ -766,6 +1178,27 @@ class PathwayProcessor:
             else:
                 gene_name = entry_data['first_name'].split(",")[0].strip()
                 protein_entry['label'] = gene_name
+            # Build protein tooltip from configured columns (skip blanks)
+            tooltip_plain_lines = []
+            tooltip_html_lines = []
+            if protein_in_data:
+                mask = self.proteomic_data[self.hsa_id_column] == protein
+                for col in self.protein_tooltip_columns:
+                    label = str(col)
+                    val_series = self.proteomic_data.loc[mask, col] if col in self.proteomic_data.columns else []
+                    value = ''
+                    if len(val_series) > 0:
+                        cell = val_series.values[0]
+                        if cell is not None and not pd.isna(cell):
+                            value = str(cell)
+                    if str(value).strip() == '':
+                        continue
+                    tooltip_plain_lines.append(f"{label}: {value}")
+                    safe_label = html.escape(label)
+                    safe_value = html.escape(value)
+                    tooltip_html_lines.append(f"<strong>{safe_label}:</strong> {safe_value}")
+            protein_entry['tooltip'] = '\n'.join(tooltip_plain_lines)
+            protein_entry['tooltip_html'] = '<br/>'.join(tooltip_html_lines)
             if protein == 'MAPK1' or 'MAPK1' in proteins:
                 print(
                     f"Entry {entry_id}: Proteins = {proteins}, Chosen = {protein}, UniProt = {uniprot_id}, Valid = {valid_proteins}")
@@ -906,6 +1339,8 @@ class PathwayProcessor:
                             else:
                                 print(f"Warning: Tooltip column {col} not found in PTM dataset {dataset_id}")
                                 value = ''
+                            if value.strip() == '':
+                                continue  # skip empty values entirely
                             tooltip_plain_lines.append(f"{label}: {value}")
                             safe_label = html.escape(label)
                             safe_value = html.escape(value)
@@ -1119,6 +1554,8 @@ class PathwayProcessor:
                     value = str(row[col])
                 else:
                     value = ''
+                if value.strip() == '':
+                    continue
                 tooltip_plain_lines.append(f"{label}: {value}")
                 safe_label = html.escape(label)
                 safe_value = html.escape(value)
@@ -1185,22 +1622,108 @@ class PathwayProcessor:
             catalog[uniprot_id] = protein_entry
         return catalog
 
-def generate_pathway_json(pathway_id, data, settings, skip_disk_write=False):
+def generate_pathway_json(pathway_id, data, settings, skip_disk_write=False, debug_write=False):
     try:
-        proteomic_data = pd.read_csv(data['protein']['file_path'], sep="\t")
+        # Debug logging: capture what enters m4
+        if debug_write:
+            try:
+                base_dir = Path(__file__).resolve().parent
+                debug_in_path = base_dir / "loaded_pathway_m4.txt"
+                with debug_in_path.open("w", encoding="utf-8") as fh:
+                    json.dump(
+                        {
+                            "pathway_id": pathway_id,
+                            "settings": settings,
+                            "data_keys": list(data.keys()) if isinstance(data, dict) else None,
+                        },
+                        fh,
+                        indent=2,
+                        default=str,
+                    )
+            except Exception as log_exc:  # pragma: no cover - debug helper
+                print(f"Debug log (m4 input) failed: {log_exc}")
+
+        def _load_df(entry):
+            if entry is None:
+                return None
+            if isinstance(entry, pd.DataFrame):
+                return entry.copy()
+            headers = entry.get('data_headers')
+            rows = entry.get('data_rows')
+            if headers is not None and rows is not None:
+                try:
+                    return pd.DataFrame(rows, columns=headers)
+                except Exception:
+                    pass
+            file_path = entry.get('file_path')
+            if file_path:
+                return pd.read_csv(file_path, sep="\t")
+            return None
+
+        proteomic_data = _load_df(data['protein'])
+        if proteomic_data is None:
+            raise RuntimeError("No protein data provided.")
+
         ptm_datasets = data['ptm']
-        settings['protein_file_path'] = data['protein']['file_path']
+        settings['protein_file_path'] = data['protein'].get('file_path', '')
         settings['main_columns'] = data['protein']['main_columns']
         settings['protein_tooltip_columns'] = data['protein'].get('tooltip_columns', ['Gene Symbol', 'Uniprot_ID'])
         pathway_api = get_pathway_api(settings.get('pathway_source', 'kegg'))
-        pathway_file = pathway_api.download_pathway_data(pathway_id)
+        species_hint = settings.get("_species_full_name") or settings.get("species")
+        pathway_file = pathway_api.download_pathway_data(pathway_id, species_hint=species_hint)
         print(f"Pathway file downloaded: {pathway_file}")
         entries, groups, arrows = pathway_api.parse_pathway(pathway_file)
         print(f"Parsed {len(entries)} entries, {len(groups)} groups, and {len(arrows)} arrows")
-        processor = PathwayProcessor(entries, proteomic_data, ptm_datasets, settings)
+        # Debug: capture what we got from the pathway API (a1_factory output)
+        if debug_write:
+            try:
+                base_dir = Path(__file__).resolve().parent
+                debug_in_path = base_dir / "loaded_pathway_m4.txt"
+                with debug_in_path.open("w", encoding="utf-8") as fh:
+                    json.dump(
+                        {
+                            "pathway_id": pathway_id,
+                            "pathway_source": settings.get("pathway_source"),
+                            "api": type(pathway_api).__name__,
+                            "pathway_file": pathway_file,
+                            "counts": {"entries": len(entries), "groups": len(groups), "arrows": len(arrows)},
+                            "entries": entries,
+                            "groups": groups,
+                            "arrows": arrows,
+                        },
+                        fh,
+                        indent=2,
+                        default=str,
+                    )
+            except Exception as log_exc:  # pragma: no cover - debug helper
+                print(f"Debug log (m4 input after parse) failed: {log_exc}")
+
+        loaded_ptm = []
+        for dataset in ptm_datasets:
+            df = _load_df(dataset)
+            if df is None:
+                raise RuntimeError(f"No PTM data provided for dataset {dataset.get('type', 'PTM')}")
+            ds = dict(dataset)
+            ds['dataframe'] = df
+            if 'file_path' not in ds:
+                ds['file_path'] = dataset.get('file_path', '')
+            loaded_ptm.append(ds)
+
+        processor = PathwayProcessor(entries, proteomic_data, loaded_ptm, settings)
         print("PathwayProcessor created")
-        json_data = processor.process_pathway(entries, groups, arrows, proteomic_data, ptm_datasets, skip_disk_write=skip_disk_write)
+        json_data = processor.process_pathway(entries, groups, arrows, proteomic_data, loaded_ptm, skip_disk_write=skip_disk_write)
         print("Pathway JSON generated")
+
+        # Debug logging: capture what m4 returns (consumed by m5/m3)
+        if debug_write:
+            try:
+                base_dir = Path(__file__).resolve().parent
+                debug_out_path = base_dir / "loaded_pathway_m3.txt"
+                with debug_out_path.open("w", encoding="utf-8") as fh:
+                    json.dump(json_data, fh, indent=2, default=str)
+            except Exception as log_exc:  # pragma: no cover - debug helper
+                print(f"Debug log (m4 output) failed: {log_exc}")
+
         return json_data
     except Exception as e:
         print(f"Error: {e}")
@@ -1218,6 +1741,7 @@ DEFAULT_SETTINGS = {
     'show_multi_protein_indicator': True,
     'show_arrows': True,
     'show_text_boxes': True,
+    'debug_mode': False,
     'negative_color': (179, 21, 41),
     'positive_color': (16, 101, 171),
     'max_negative': -2,
@@ -1229,7 +1753,8 @@ DEFAULT_SETTINGS = {
     'ptm_label_size': 6,
     'ptm_circle_radius': 5,
     'ptm_circle_spacing': 4,
-    'protein_tooltip_columns': ['Gene Symbol', 'Uniprot_ID', 'ER+_Est-_x-y_TNBC']
+    'protein_tooltip_columns': ['Gene Symbol', 'Uniprot_ID', 'ER+_Est-_x-y_TNBC'],
+    'use_original_protbox_size': False
 }
 
 DEFAULT_DATA = {
@@ -1261,7 +1786,7 @@ DEFAULT_DATA = {
                         "symbol_size": 8,
                         "symbol_color": (0, 0, 0),
                         "symbol_x_offset": -0.1,
-                        "symbol_y_offset": -0.3,   # was -1
+                        "symbol_y_offset": -0.5,   # was -0.3
                         "statement_type": "if_or_statement",
                         "header_to_search": "C: Regulatory site function",
                         "search_text_1": "activity, induced",
@@ -1276,8 +1801,8 @@ DEFAULT_DATA = {
                         "symbol_font": "Arial",
                         "symbol_size": 8,
                         "symbol_color": (0, 0, 0),
-                        "symbol_x_offset": -1.2,
-                        "symbol_y_offset": -0.6,   # was -1
+                        "symbol_x_offset": -0.3,    #-1.2
+                        "symbol_y_offset": 0,   # was -1
                         "statement_type": "if_or_statement",
                         "header_to_search": "C: Regulatory site function",
                         "search_text_1": "activity, inhibited",
@@ -1293,7 +1818,7 @@ DEFAULT_DATA = {
                         "symbol_size": 9,
                         "symbol_color": (0, 0, 0),
                         "symbol_x_offset": -0.1,
-                        "symbol_y_offset": -0.8,
+                        "symbol_y_offset": 0,
                         "statement_type": "if_or_and_or_statement",
                         "header_to_search": "C: Regulatory site function",
                         "search_text_1": "activity, inhibited",
@@ -1309,9 +1834,9 @@ DEFAULT_DATA = {
                         "symbol_size": 9,
                         "symbol_color": (0, 0, 0),
                         "symbol_x_offset": -0.1,
-                        "symbol_y_offset": -0.8,
+                        "symbol_y_offset": 0,
                         "statement_type": "if_and_notlabeled_statement",
-                        "header_to_search": "C: Regulatory site",
+                        "header_to_search": "PSP: regulatory_site",
                         "search_text_1": "+",
                         "search_text_2": "",
                         "search_text_3": "",
@@ -1324,7 +1849,7 @@ DEFAULT_DATA = {
 }
 
 
-def get_default_json(data_override=None, settings_override=None, skip_disk_write=False):
+def get_default_json(data_override=None, settings_override=None, skip_disk_write=False, debug_write=False):
     """Return the JSON pathway data using the DEFAULT_DATA and DEFAULT_SETTINGS.
 
     Optional overrides may be supplied to change the DEFAULT_DATA or DEFAULT_SETTINGS
@@ -1334,6 +1859,7 @@ def get_default_json(data_override=None, settings_override=None, skip_disk_write
         data_override (dict|None): partial dict to merge on top of DEFAULT_DATA
         settings_override (dict|None): partial dict to merge on top of DEFAULT_SETTINGS
         skip_disk_write (bool): if True, avoid writing intermediate/output files to disk
+        debug_write (bool): if True, write debug snapshot files for m4/m3 handoff
 
     Returns:
         dict: generated pathway JSON (or a minimal fallback structure on error)
@@ -1351,7 +1877,13 @@ def get_default_json(data_override=None, settings_override=None, skip_disk_write
             data[k] = v
 
     try:
-        json_data = generate_pathway_json(settings.get('pathway_id', 'hsa04010'), data, settings, skip_disk_write=skip_disk_write)
+        json_data = generate_pathway_json(
+            settings.get('pathway_id', 'hsa04010'),
+            data,
+            settings,
+            skip_disk_write=skip_disk_write,
+            debug_write=debug_write,
+        )
         if json_data is None:
             raise RuntimeError('generate_pathway_json returned None')
         return json_data
