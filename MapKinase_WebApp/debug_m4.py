@@ -1,4 +1,4 @@
-from m4_json import get_default_json, DEFAULT_DATA
+from MapKinase_WebApp.m4_json import get_default_json, DEFAULT_DATA
 import json, traceback
 
 try:

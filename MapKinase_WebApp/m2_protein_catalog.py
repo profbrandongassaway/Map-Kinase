@@ -6,10 +6,37 @@ from typing import Any, Dict, Optional
 
 import pandas as pd
 
-from m4_json import DEFAULT_DATA, DEFAULT_SETTINGS, PathwayProcessor
+from MapKinase_WebApp.m4_json import DEFAULT_DATA, DEFAULT_SETTINGS, PathwayProcessor
 
 CATALOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cache")
 GLOBAL_PROTEIN_CATALOG_PATH = os.path.join(CATALOG_DIR, "global_protein_catalog.json")
+
+
+def _detect_sep(path: str) -> str:
+    ext = os.path.splitext(path)[1].lower()
+    return "," if ext == ".csv" else "\t"
+
+
+def _load_dataframe(entry: Any) -> Optional[pd.DataFrame]:
+    if entry is None:
+        return None
+    if isinstance(entry, pd.DataFrame):
+        return entry.copy()
+    if isinstance(entry, dict):
+        headers = entry.get("data_headers")
+        rows = entry.get("data_rows")
+        if headers is not None and rows is not None:
+            try:
+                return pd.DataFrame(rows, columns=headers)
+            except Exception:
+                pass
+        path = entry.get("file_path")
+        if path:
+            try:
+                return pd.read_csv(path, sep=_detect_sep(path))
+            except Exception:
+                return None
+    return None
 
 
 def _deep_merge(base: Dict[str, Any], override: Optional[Dict[str, Any]]) -> Dict[str, Any]:
@@ -38,8 +65,14 @@ def build_global_protein_catalog(
         settings.update(settings_override)
 
     protein_cfg = data_cfg["protein"]
-    proteomic_data = pd.read_csv(protein_cfg["file_path"], sep="\t")
-    ptm_datasets = copy.deepcopy(data_cfg["ptm"])
+    proteomic_data = _load_dataframe(protein_cfg)
+    ptm_datasets = []
+    for dataset in data_cfg["ptm"]:
+        df = _load_dataframe(dataset)
+        ds_copy = copy.deepcopy(dataset)
+        if df is not None:
+            ds_copy["dataframe"] = df
+        ptm_datasets.append(ds_copy)
 
     processor = PathwayProcessor([], proteomic_data, ptm_datasets, settings)
     catalog = processor.build_full_protein_catalog()

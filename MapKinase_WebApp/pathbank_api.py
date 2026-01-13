@@ -3,7 +3,7 @@ from PIL import Image
 import io
 import os
 import pybiopax
-from base_api import BasePathwayAPI
+from MapKinase_WebApp.a1_base_api import BasePathwayAPI
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPM
 
@@ -13,7 +13,7 @@ class PathBankAPI(BasePathwayAPI):
         self.pathway_commons_base_url = "http://www.pathwaycommons.org/pc2"
         self.pathbank_base_url = "https://pathbank.org"
 
-    def download_pathway_data(self, pathway_id):
+    def download_pathway_data(self, pathway_id, species_hint=None):
         """Download BioPAX file for the given PathBank pathway ID from Pathway Commons."""
         try:
             # Construct Pathway Commons BioPAX URL for PathBank pathway
