@@ -1,10 +1,13 @@
+import csv
+import io
 import os
 import re
-import requests
+import sys
 import xml.etree.ElementTree as ET
-from PIL import Image
-import io
 from pathlib import Path
+
+import requests
+from PIL import Image
 from MapKinase_WebApp.a1_base_api import BasePathwayAPI
 from pywikipathways import get_pathway, get_pathway_info
 from MapKinase_WebApp.d3_entrez_to_uniprot import entrez_to_uniprot, ensembl_to_uniprot
@@ -25,8 +28,134 @@ def _extract_species_from_gpml(gpml_content: str) -> str:
         return ""
     return ""
 
+_ID_MAPPING_CACHE: dict[str, dict | None] = {}
+
+
+def _resolve_id_mapping_table(species_code: str) -> Path | None:
+    if not species_code:
+        return None
+    target = f"{species_code.lower()}_id_mapping_table.txt"
+    base_dir = Path(__file__).resolve().parent
+    ann_dirs = [base_dir / "annotation_files"]
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        ann_dirs.extend([
+            Path(sys._MEIPASS) / "MapKinase_WebApp" / "annotation_files",
+            Path(sys._MEIPASS) / "annotation_files",
+        ])
+    for ann_dir in ann_dirs:
+        if not ann_dir.exists():
+            continue
+        for path in ann_dir.iterdir():
+            if path.is_file() and path.name.lower() == target:
+                return path
+    return None
+
+
+def _load_id_mapping_table(species_code: str) -> dict | None:
+    key = (species_code or "").strip().lower()
+    if not key:
+        return None
+    if key in _ID_MAPPING_CACHE:
+        return _ID_MAPPING_CACHE[key]
+    path = _resolve_id_mapping_table(key)
+    if path is None:
+        _ID_MAPPING_CACHE[key] = None
+        return None
+    try:
+        with path.open("r", encoding="utf-8", errors="replace", newline="") as fh:
+            reader = csv.DictReader(fh, delimiter="\t")
+            raw_fieldnames = reader.fieldnames or []
+            cleaned_fieldnames = [
+                f.lstrip("\ufeff").strip() if f else "" for f in raw_fieldnames
+            ]
+            reader.fieldnames = cleaned_fieldnames
+            fieldnames = [f for f in cleaned_fieldnames if f]
+            if not fieldnames:
+                _ID_MAPPING_CACHE[key] = None
+                return None
+            uniprot_col = fieldnames[0]
+            for col in fieldnames:
+                if "uniprot" in col.lower():
+                    uniprot_col = col
+                    break
+            columns = {col.lower(): col for col in fieldnames}
+            index: dict[str, dict[str, str]] = {col_key: {} for col_key in columns}
+            rows: list[tuple[str, dict[str, str]]] = []
+            for row in reader:
+                if not isinstance(row, dict):
+                    continue
+                uni = (row.get(uniprot_col) or "").strip()
+                if not uni or uni.lower() == "na":
+                    continue
+                rows.append((uni, row))
+                for col_key, col_name in columns.items():
+                    if col_name == uniprot_col:
+                        continue
+                    cell = (row.get(col_name) or "").strip()
+                    if not cell or cell.lower() == "na":
+                        continue
+                    for token in re.split(r"[;,\s]+", cell):
+                        tok = token.strip()
+                        if not tok or tok.lower() == "na":
+                            continue
+                        index[col_key].setdefault(tok, uni)
+            mapping = {
+                "path": path,
+                "uniprot_col": uniprot_col,
+                "columns": columns,
+                "index": index,
+                "rows": rows,
+            }
+            _ID_MAPPING_CACHE[key] = mapping
+            print(f"Loaded ID mapping table: {path.name}")
+            return mapping
+    except Exception as exc:
+        print(f"Warning: failed to load ID mapping table '{path}': {exc}")
+    _ID_MAPPING_CACHE[key] = None
+    return None
+
+
+def _lookup_uniprot_from_table(mapping: dict, db: str, xid: str) -> str | None:
+    if not mapping or not db or not xid:
+        return None
+    db_key = db.strip().lower()
+    xid_clean = xid.strip()
+    if "uniprot" in db_key:
+        return xid_clean or None
+    columns = mapping.get("columns") or {}
+    candidate_keys = [db_key]
+    if db_key == "ensembl" and xid_clean:
+        xid_upper = xid_clean.upper()
+        if xid_upper.startswith("ENST"):
+            candidate_keys.insert(0, "ensembl_transcript")
+        elif xid_upper.startswith("ENSP"):
+            candidate_keys.insert(0, "ensembl_protein")
+        elif xid_upper.startswith("ENSG"):
+            candidate_keys.insert(0, "ensembl_gene")
+    for key in candidate_keys:
+        col = columns.get(key)
+        if not col:
+            continue
+        index = mapping.get("index", {}).get(key, {})
+        if xid_clean in index:
+            return index[xid_clean]
+        try:
+            pattern = re.compile(rf"(?<!\w){re.escape(xid_clean)}(?!\w)")
+        except re.error:
+            return None
+        for uni, row in mapping.get("rows", []):
+            cell = (row.get(col) or "").strip()
+            if not cell or cell.lower() == "na":
+                continue
+            if pattern.search(cell):
+                return uni
+    return None
+
 
 class WikiPathwaysAPI(BasePathwayAPI):
+    def __init__(self):
+        self.species_code: str | None = None
+
     def download_pathway_data(self, pathway_id, species_hint=None):
         base_dir = Path(__file__).resolve().parent.parent / "stored_pathways" / "wikipathways"
         if species_hint:
@@ -518,8 +647,33 @@ class WikiPathwaysAPI(BasePathwayAPI):
                     if entry:
                         entries.append(entry)
 
-            # Map Entrez/Ensembl IDs to UniProt IDs when possible (batch using helper)
-            if entrez_ids or ensembl_ids:
+            # Map IDs to UniProt using a local mapping table when available, otherwise fall back to UniProt API.
+            mapping = None
+            species_code = (getattr(self, "species_code", None) or "").strip()
+            if species_code:
+                mapping = _load_id_mapping_table(species_code)
+            if mapping:
+                try:
+                    for entry in entries:
+                        xref = entry.get("xref") or {}
+                        db = str(xref.get("Database", "")).strip()
+                        xid = str(xref.get("ID", "")).strip()
+                        if not db or not xid:
+                            continue
+                        uni = _lookup_uniprot_from_table(mapping, db, xid)
+                        if not uni:
+                            continue
+                        entry.setdefault("xref", {})["UniProt"] = uni
+                        entry["uniprot_id"] = uni
+                        # Normalize the primary identifier to UniProt to align with KEGG-style processing
+                        entry.setdefault("label", entry.get("name", ""))
+                        entry.setdefault("backup_label", entry.get("name", ""))
+                        entry["name"] = uni
+                        # Keep display-friendly first_name for fallback labels
+                        entry["first_name"] = entry.get("backup_label") or entry.get("label") or entry.get("first_name") or uni
+                except Exception as map_exc:
+                    print(f"Warning: failed to map IDs via mapping table: {map_exc}")
+            elif entrez_ids or ensembl_ids:
                 id_to_uniprot: dict[str, str] = {}
                 id_db_map: dict[str, str] = {}  # track which DB each id belongs to
                 try:

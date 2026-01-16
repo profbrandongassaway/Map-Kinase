@@ -1,9 +1,15 @@
 import copy
 import json
+import math
 import os
 from pathlib import Path
 from typing import Optional
 from shiny import App, ui, render, reactive
+
+try:
+    import numpy as _np
+except Exception:
+    _np = None
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = SCRIPT_DIR / "output" / "testing_file_001"
@@ -75,6 +81,32 @@ def _clone_json(payload):
             return payload
 
 
+def _sanitize_json_payload(value):
+    if value is None:
+        return None
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, (str, int, bool)):
+        return value
+    if isinstance(value, dict):
+        return {k: _sanitize_json_payload(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple, set)):
+        return [_sanitize_json_payload(v) for v in value]
+    if _np is not None and isinstance(value, _np.generic):
+        return _sanitize_json_payload(value.item())
+    if isinstance(value, Path):
+        return str(value)
+    return value
+
+
+def _safe_json_dumps(payload):
+    try:
+        return json.dumps(payload, ensure_ascii=True, allow_nan=False)
+    except (TypeError, ValueError):
+        cleaned = _sanitize_json_payload(payload)
+        return json.dumps(cleaned, ensure_ascii=True, allow_nan=False)
+
+
 def _build_blank_canvas(catalog_info=None):
     base = {
         'general_data': {'settings': {'show_arrows': True, 'show_text_boxes': True}},
@@ -141,8 +173,8 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
         canvas_width_style = f"{max_x}px"
         canvas_height_style = f"{max_y}px"
     # Embed the full JSON (including any 'kegg_bg_image' and preview settings) for the client
-    data_script = f"""<script type="application/json" id="pathway-data">{json.dumps(json_data)}</script>"""
-    catalog_script = f"""<script type="application/json" id="global-protein-catalog">{json.dumps(catalog_data)}</script>"""
+    data_script = f"""<script type="application/json" id="pathway-data">{_safe_json_dumps(json_data)}</script>"""
+    catalog_script = f"""<script type="application/json" id="global-protein-catalog">{_safe_json_dumps(catalog_data)}</script>"""
     svg_js = f"""
         <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.2.0/svg.min.js"></script>
     <script>
@@ -269,7 +301,15 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
               }}
               return null;
             }};
-            let data = JSON.parse(document.getElementById('pathway-data').textContent);
+            let data = null;
+            try {{
+                data = JSON.parse(document.getElementById('pathway-data').textContent);
+            }} catch (parseErr) {{
+                console.error('m3: failed to parse pathway JSON', parseErr);
+                const dbg = document.getElementById('debug_json');
+                if (dbg) dbg.textContent = 'Client init error: failed to parse pathway JSON (' + (parseErr?.message || parseErr) + ')';
+                return;
+            }}
             try {{
                 const persistKey = data && data._bookmark_key;
                 if (persistKey) {{
@@ -524,7 +564,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 const firstId = normalizeProtboxId(matches[0]?.protbox_id);
                 return firstId === normalizeProtboxId(protboxId);
             }};
-            const arrowIdPattern = /^arrow_(\d+)$/;
+            const arrowIdPattern = /^arrow_(\\d+)$/;
             const parseArrowIndex = (arrowId) => {{
                 if (typeof arrowId !== 'string') return null;
                 const match = arrowIdPattern.exec(arrowId);
@@ -639,6 +679,14 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 const num = Number(raw);
                 return Number.isFinite(num) ? num : null;
             }};
+            const parseOutlineFoldChange = (entity, idx = activeFcIndex) => {{
+                if (!entity) return null;
+                const key = `outline_fold_change_${{idx}}`;
+                const raw = entity[key];
+                if (raw === null || raw === undefined) return null;
+                const num = Number(raw);
+                return Number.isFinite(num) ? num : null;
+            }};
             const gradientConfig = (() => {{
                 const normalizeColor = (arr, fallback) => {{
                     if (!Array.isArray(arr) || arr.length !== 3) return fallback;
@@ -657,6 +705,14 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     maxNeg: negLimit === 0 ? -2 : negLimit,
                     maxPos: posLimit === 0 ? 2 : posLimit,
                 }};
+            }})();
+            const protOutlineWidth = (() => {{
+                const raw = Number(pickSettingValue('prot_outline_width', 1));
+                return Number.isFinite(raw) && raw >= 0 ? raw : 1;
+            }})();
+            const ptmOutlineWidth = (() => {{
+                const raw = Number(pickSettingValue('ptm_outline_width', 1));
+                return Number.isFinite(raw) && raw >= 0 ? raw : 1;
             }})();
             const gradientColorFromFold = (foldValue) => {{
                 if (!Number.isFinite(foldValue)) return defaultGray;
@@ -678,6 +734,13 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     return gradientColorFromFold(foldVal);
                 }}
                 return toRgbString(entity && entity[`fc_color_${{idx}}`]);
+            }};
+            const entityOutlineColor = (entity, idx = activeFcIndex) => {{
+                const foldVal = parseOutlineFoldChange(entity, idx);
+                if (foldVal !== null) {{
+                    return gradientColorFromFold(foldVal);
+                }}
+                return toRgbString(entity && entity[`outline_color_${{idx}}`], 'black');
             }};
             const trackableMoveTypes = new Set(['prot-box','ptm-shape','ptm-label','ptm-symbol','compound','text-box','figure-key','arrow','arrow-start','arrow-end']);
             const toCoordinateNumber = (value, fallback = 0) => {{
@@ -1296,6 +1359,42 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             const clearTooltipContent = () => {{
                 if (!tooltip) return;
                 tooltip.innerHTML = '';
+            }};
+            const resolveTooltipFromPoint = (clientX, clientY) => {{
+                const stack = document.elementsFromPoint ? document.elementsFromPoint(clientX, clientY) : [document.elementFromPoint(clientX, clientY)];
+                for (const el of stack) {{
+                    if (!el || !el.getAttribute) continue;
+                    let node = el;
+                    while (node && node !== draw.node) {{
+                        if (!node.getAttribute) break;
+                        const dtype = node.getAttribute('data-type') || '';
+                        if (dtype.startsWith('group-')) break;
+                        const htmlTip = node.getAttribute('data-tooltip-html');
+                        const tip = htmlTip || node.getAttribute('data-tooltip');
+                        if (tip) {{
+                            return {{ tip, useHtml: !!htmlTip }};
+                        }}
+                        node = node.parentNode;
+                    }}
+                }}
+                return null;
+            }};
+            const updateTooltipFromEvent = (evt) => {{
+                if (!evt || (typeof evt.buttons === 'number' && evt.buttons > 0)) return false;
+                const point = evt && evt.touches && evt.touches[0] ? evt.touches[0] : evt;
+                if (!point) return false;
+                const info = resolveTooltipFromPoint(point.clientX, point.clientY);
+                if (!info || !info.tip) {{
+                    tooltip.style.display = 'none';
+                    clearTooltipContent();
+                    return false;
+                }}
+                const pos = toContainerPosition(evt);
+                setTooltipContent(info.tip, info.useHtml);
+                tooltip.style.display = 'block';
+                tooltip.style.left = `${{pos.x + tooltipOffsetX}}px`;
+                tooltip.style.top = `${{pos.y + tooltipOffsetY}}px`;
+                return true;
             }};
             const elementGroups = {{}};
             const selectionMap = new Map();
@@ -2494,6 +2593,19 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     element.stroke({{ color: 'black', width: 1 }});
                 }} else if (type === 'ptm-label') {{
                     element.stroke({{ color: 'none' }});
+                }} else if (type === 'prot-box') {{
+                    const pb = protBoxes.find(p => p.protbox_id === id);
+                    const selected = currentSelected[id] || pb?.selected_uniprot || pb?.proteins?.[0] || '';
+                    const prot = (selected && proteinData[selected]) ? proteinData[selected] : {{}};
+                    element.stroke({{ color: entityOutlineColor(prot), width: protOutlineWidth }});
+                }} else if (type === 'ptm-shape') {{
+                    const parsed = parsePtmElementId(id);
+                    let ptm = null;
+                    if (parsed && parsed.uniprot && parsed.ptmKey) {{
+                        const prot = proteinData[parsed.uniprot] || {{}};
+                        ptm = (prot.PTMs && prot.PTMs[parsed.ptmKey]) ? prot.PTMs[parsed.ptmKey] : null;
+                    }}
+                    element.stroke({{ color: entityOutlineColor(ptm), width: ptmOutlineWidth }});
                 }} else {{
                     element.stroke({{ color: 'black', width: 1 }});
                 }}
@@ -2885,9 +2997,22 @@ function rebuildGroupIndexes() {{
             }}
             function ensureGroupVisual(groupId) {{
                 if (groupVisuals[groupId]) return groupVisuals[groupId];
-                const box = groupOverlay.rect(10, 10).fill('none').stroke({{ color: '#666', width: 1, dasharray: '5,5' }}).attr({{ 'data-type': 'group-box', 'data-group-id': groupId }}).hide();
+                const box = groupOverlay.rect(10, 10)
+                    .fill('none')
+                    .stroke({{ color: '#666', width: 1, dasharray: '5,5' }})
+                    .attr({{ 'data-type': 'group-box', 'data-group-id': groupId, 'pointer-events': 'visibleStroke' }})
+                    .hide();
                 const hit = groupOverlay.rect(10, 10).fill({{ color: '#fff', opacity: 0.001 }}).stroke({{ color: 'transparent', width: 0 }}).attr({{ 'data-type': 'group-hit', 'data-group-id': groupId }}).hide();
                 const label = groupOverlay.text('Group Edit').font({{ size: 10, family: 'Arial', anchor: 'start' }}).fill('#2c7be5').attr({{ 'data-type': 'group-label', 'data-group-id': groupId }}).hide();
+                box.node.addEventListener('dblclick', evt => {{
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    selectElement(box, 'group', groupId, null);
+                    enterGroupEditMode(groupId);
+                }});
+                box.node.addEventListener('mousedown', evt => evt.stopPropagation());
+                box.node.addEventListener('click', evt => evt.stopPropagation());
+                makeDraggable(box, 'group', groupId);
                 hit.node.addEventListener('dblclick', evt => {{
                     evt.preventDefault();
                     evt.stopPropagation();
@@ -2896,6 +3021,18 @@ function rebuildGroupIndexes() {{
                 }});
                 hit.node.addEventListener('mousedown', evt => evt.stopPropagation());
                 hit.node.addEventListener('click', evt => evt.stopPropagation());
+                const refreshHitTooltip = (evt) => {{
+                    if (!updateTooltipFromEvent(evt)) {{
+                        tooltip.style.display = 'none';
+                        clearTooltipContent();
+                    }}
+                }};
+                hit.node.addEventListener('mouseenter', refreshHitTooltip);
+                hit.node.addEventListener('mousemove', refreshHitTooltip);
+                hit.node.addEventListener('mouseleave', () => {{
+                    tooltip.style.display = 'none';
+                    clearTooltipContent();
+                }});
                 makeDraggable(hit, 'group', groupId);
                 groupVisuals[groupId] = {{ box, hit, label }};
                 return groupVisuals[groupId];
@@ -5923,11 +6060,12 @@ function rebuildGroupIndexes() {{
                 const radius = settings.ptm_circle_radius || 5;
                 const shape = (ptm.shape || 'circle').toLowerCase();
                 const ptmFill = entityColor(ptm);
+                const ptmOutline = entityOutlineColor(ptm);
                 let shapeObj;
                 if (shape === 'circle') {{
-                    shapeObj = protboxGroup.circle(radius * 2).cx(newX).cy(newY).fill(ptmFill).stroke({{ color: 'black', width: 1 }});
+                    shapeObj = protboxGroup.circle(radius * 2).cx(newX).cy(newY).fill(ptmFill).stroke({{ color: ptmOutline, width: ptmOutlineWidth }});
                 }} else {{
-                    shapeObj = protboxGroup.rect(radius * 2, radius * 2).move(newX - radius, newY - radius).fill(ptmFill).stroke({{ color: 'black', width: 1 }});
+                    shapeObj = protboxGroup.rect(radius * 2, radius * 2).move(newX - radius, newY - radius).fill(ptmFill).stroke({{ color: ptmOutline, width: ptmOutlineWidth }});
                 }}
                 const shapeId = ptmElementId(protboxId, uniprot, ptmKey, 'shape');
                 shapeObj.attr({{
@@ -6106,8 +6244,9 @@ function rebuildGroupIndexes() {{
                     let labelColor = protein.label_color || [0, 0, 0];
                     elementGroups[id] = [];
                     const fillRgb = entityColor(protein);
+                    const outlineRgb = entityOutlineColor(protein);
                     const labelRgb = Array.isArray(labelColor) && labelColor.length === 3 && labelColor.every(c => typeof c === 'number' && c >= 0 && c <= 255) ? `rgb(${{labelColor.join(',')}})` : 'black';
-                    const rect = protboxGroup.rect(width, height).move(x, yPos).fill(fillRgb).stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': id, 'data-type': 'prot-box', 'data-tooltip': (pb && pb.tooltip) || (protein && protein.tooltip) || '' }});
+                    const rect = protboxGroup.rect(width, height).move(x, yPos).fill(fillRgb).stroke({{ color: outlineRgb, width: protOutlineWidth }}).attr({{ 'data-id': id, 'data-type': 'prot-box', 'data-tooltip': (pb && pb.tooltip) || (protein && protein.tooltip) || '' }});
                     // Tooltip handlers for prot-box
                     rect.node.addEventListener('mouseenter', e => {{
                         const tip = rect.attr('data-tooltip') || '';
@@ -6157,9 +6296,10 @@ function rebuildGroupIndexes() {{
                             const adjPtmY = Math.round(ptmY * boxYStretch);
                             const radius = settings.ptm_circle_radius || 5;
                             const ptmFill = entityColor(ptm);
+                            const ptmOutline = entityOutlineColor(ptm);
                             const shapeObj = shape === 'circle'
-                                ? protboxGroup.circle(radius * 2).cx(ptmX).cy(adjPtmY).fill(ptmFill).stroke({{ color: 'black', width: 1 }})
-                                : protboxGroup.rect(radius * 2, radius * 2).move(ptmX - radius, adjPtmY - radius).fill(ptmFill).stroke({{ color: 'black', width: 1 }});
+                                ? protboxGroup.circle(radius * 2).cx(ptmX).cy(adjPtmY).fill(ptmFill).stroke({{ color: ptmOutline, width: ptmOutlineWidth }})
+                                : protboxGroup.rect(radius * 2, radius * 2).move(ptmX - radius, adjPtmY - radius).fill(ptmFill).stroke({{ color: ptmOutline, width: ptmOutlineWidth }});
                             shapeObj.attr({{
                                 'data-id': ptmElementId(id, selectedUniprot, ptm_key, 'shape'),
                                 'data-type': 'ptm-shape',
@@ -6975,8 +7115,10 @@ function rebuildGroupIndexes() {{
                 const newLabel = debugMode ? String(protboxId) : (newProtein.label || pb.backup_label || 'Unknown');
                 const newLabelColor = newProtein.label_color || [0, 0, 0];
                 const fillRgb = entityColor(newProtein);
+                const outlineRgb = entityOutlineColor(newProtein);
                 const labelRgb = Array.isArray(newLabelColor) && newLabelColor.length === 3 ? `rgb(${{newLabelColor.join(',')}})` : 'black';
                 rect.fill(fillRgb);
+                rect.stroke({{ color: outlineRgb, width: protOutlineWidth }});
                 text.text(newLabel).fill(labelRgb);
                 const ptmTypes = ['ptm-shape', 'ptm-label', 'ptm-symbol'];
                 const toRemove = elementGroups[protboxId].filter(el => ptmTypes.includes(el.element.attr('data-type')));
@@ -7007,9 +7149,10 @@ function rebuildGroupIndexes() {{
                     const shape = (ptm.shape || 'circle').toLowerCase();
                     const radius = settings.ptm_circle_radius || 5;
                     const ptmFill = entityColor(ptm);
+                    const ptmOutline = entityOutlineColor(ptm);
                     const shapeObj = shape === 'circle'
-                        ? protboxGroup.circle(radius * 2).cx(adjusted_ptmX).cy(adjusted_ptmY).fill(ptmFill).stroke({{ color: 'black', width: 1 }})
-                        : protboxGroup.rect(radius * 2, radius * 2).move(adjusted_ptmX - radius, adjusted_ptmY - radius).fill(ptmFill).stroke({{ color: 'black', width: 1 }});
+                        ? protboxGroup.circle(radius * 2).cx(adjusted_ptmX).cy(adjusted_ptmY).fill(ptmFill).stroke({{ color: ptmOutline, width: ptmOutlineWidth }})
+                        : protboxGroup.rect(radius * 2, radius * 2).move(adjusted_ptmX - radius, adjusted_ptmY - radius).fill(ptmFill).stroke({{ color: ptmOutline, width: ptmOutlineWidth }});
                     const ptm_pos = override?.ptm_position || ptm.ptm_position || '';
                     if (ptm_pos) {{
                         shapeObj.attr({{ 'data-pos-key': ptm_pos }});
