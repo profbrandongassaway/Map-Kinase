@@ -1,5 +1,6 @@
 import csv
 import os
+import re
 from typing import Dict, List, Tuple
 
 
@@ -8,6 +9,13 @@ def _clean_header(header: str, idx: int) -> str:
     if idx == 0:
         h = h.lstrip("\ufeff")
     return h.strip()
+
+def _normalize_fc_suffix(header: str) -> str:
+    cleaned = (header or "").strip()
+    if ":" in cleaned:
+        cleaned = cleaned.split(":", 1)[1]
+    cleaned = re.sub(r"\s+", " ", cleaned.strip())
+    return cleaned.lower()
 
 
 class ProteinValidationResult:
@@ -40,8 +48,10 @@ def validate_protein_file(file_path: str) -> ProteinValidationResult:
       - Col0: Uniprot ID (required values)
       - Col1: Gene Symbol (required values)
       - Col2+: Comparison columns must start with "C:" (at least one required)
+      - Optional outline comparison columns start with "O:" and must match a "C:" header
       - Optional tooltip columns start with "T:"
       - Comparison cells must be numeric (float/int) and non-empty
+      - Outline comparison cells must be numeric (float/int) or "NA"
       - Uniprot/GeneSymbol/Comparison cells required on every row
       - Only .txt (tab-delimited) or .csv files are allowed
     Returns a ProteinValidationResult with validity, errors, and summary counts.
@@ -55,6 +65,7 @@ def validate_protein_file(file_path: str) -> ProteinValidationResult:
     delimiter = _detect_delimiter(file_path)
     errors: List[str] = []
     comparison_col_indexes: List[int] = []
+    outline_col_indexes: List[int] = []
     tooltip_col_indexes: List[int] = []
     row_count = 0
 
@@ -76,13 +87,27 @@ def validate_protein_file(file_path: str) -> ProteinValidationResult:
                     continue
                 if header_clean.lower().startswith("c:"):
                     comparison_col_indexes.append(idx)
+                elif header_clean.lower().startswith("o:"):
+                    outline_col_indexes.append(idx)
                 elif header_clean.lower().startswith("t:"):
                     tooltip_col_indexes.append(idx)
                 else:
-                    errors.append(f"Invalid header in column {idx + 1}: '{header_clean}'. Comparison headers must start with 'C:' and tooltip headers with 'T:'.")
+                    errors.append(
+                        f"Invalid header in column {idx + 1}: '{header_clean}'. "
+                        "Comparison headers must start with 'C:', outline headers with 'O:', and tooltip headers with 'T:'."
+                    )
 
             if not comparison_col_indexes:
                 errors.append("At least one Comparison column (header starting with 'C:') is required (third column or later).")
+            comparison_headers = [_clean_header(headers[idx], idx) for idx in comparison_col_indexes]
+            comparison_suffixes = {_normalize_fc_suffix(h) for h in comparison_headers if _normalize_fc_suffix(h)}
+            for idx in outline_col_indexes:
+                outline_header = _clean_header(headers[idx], idx)
+                outline_suffix = _normalize_fc_suffix(outline_header)
+                if outline_suffix and outline_suffix not in comparison_suffixes:
+                    errors.append(
+                        f"Outline header '{outline_header}' must match a Comparison header (C:) with the same label."
+                    )
 
             for row_idx, row in enumerate(reader, start=2):  # 1-based with header at row 1
                 row_count += 1
@@ -104,6 +129,14 @@ def validate_protein_file(file_path: str) -> ProteinValidationResult:
                         float(cell)
                     except ValueError:
                         errors.append(f"Row {row_idx}, Column {c_idx + 1} (Comparison) must be numeric. Found '{cell}'.")
+                for o_idx in outline_col_indexes:
+                    cell = (row[o_idx] or "").strip()
+                    if not cell or cell.strip().lower() == "na":
+                        continue
+                    try:
+                        float(cell)
+                    except ValueError:
+                        errors.append(f"Row {row_idx}, Column {o_idx + 1} (Outline) must be numeric or NA. Found '{cell}'.")
                 # Tooltip columns: values optional, no validation needed
 
                 if len(errors) >= 200:
@@ -132,8 +165,10 @@ def validate_ptm_file(file_path: str, required_comparisons: List[str]) -> PTMVal
       - Col0: Uniprot ID (required values)
       - Col1: Site Position (required, positive int)
       - Col2+: Comparison columns must start with "C:" (at least one required)
+      - Optional outline comparison columns start with "O:" and must match a "C:" header
       - Optional tooltip columns start with "T:"
       - Comparison cells must be numeric (float/int) and non-empty
+      - Outline comparison cells must be numeric (float/int) or "NA"
       - Site position must be an integer > 0
       - Uniprot/Site/Comparison cells required on every row
       - File must be .txt (tab) or .csv
@@ -148,6 +183,7 @@ def validate_ptm_file(file_path: str, required_comparisons: List[str]) -> PTMVal
     delimiter = _detect_delimiter(file_path)
     errors: List[str] = []
     comparison_col_indexes: List[int] = []
+    outline_col_indexes: List[int] = []
     tooltip_col_indexes: List[int] = []
     row_count = 0
 
@@ -169,10 +205,15 @@ def validate_ptm_file(file_path: str, required_comparisons: List[str]) -> PTMVal
                     continue
                 if header_clean.lower().startswith("c:"):
                     comparison_col_indexes.append(idx)
+                elif header_clean.lower().startswith("o:"):
+                    outline_col_indexes.append(idx)
                 elif header_clean.lower().startswith("t:"):
                     tooltip_col_indexes.append(idx)
                 else:
-                    errors.append(f"Invalid header in column {idx + 1}: '{header_clean}'. Comparison headers must start with 'C:' and tooltip headers with 'T:'.")
+                    errors.append(
+                        f"Invalid header in column {idx + 1}: '{header_clean}'. "
+                        "Comparison headers must start with 'C:', outline headers with 'O:', and tooltip headers with 'T:'."
+                    )
 
             if not comparison_col_indexes:
                 errors.append("At least one Comparison column (header starting with 'C:') is required (third column or later).")
@@ -180,6 +221,15 @@ def validate_ptm_file(file_path: str, required_comparisons: List[str]) -> PTMVal
             missing = [c for c in required_comparisons if c not in [_clean_header(headers[idx], idx) for idx in comparison_col_indexes]]
             if missing:
                 errors.append(f"Missing Comparison columns present in protein file: {', '.join(missing)}.")
+            comparison_headers = [_clean_header(headers[idx], idx) for idx in comparison_col_indexes]
+            comparison_suffixes = {_normalize_fc_suffix(h) for h in comparison_headers if _normalize_fc_suffix(h)}
+            for idx in outline_col_indexes:
+                outline_header = _clean_header(headers[idx], idx)
+                outline_suffix = _normalize_fc_suffix(outline_header)
+                if outline_suffix and outline_suffix not in comparison_suffixes:
+                    errors.append(
+                        f"Outline header '{outline_header}' must match a Comparison header (C:) with the same label."
+                    )
 
             for row_idx, row in enumerate(reader, start=2):
                 row_count += 1
@@ -207,6 +257,14 @@ def validate_ptm_file(file_path: str, required_comparisons: List[str]) -> PTMVal
                         float(cell)
                     except ValueError:
                         errors.append(f"Row {row_idx}, Column {c_idx + 1} (Comparison) must be numeric. Found '{cell}'.")
+                for o_idx in outline_col_indexes:
+                    cell = (row[o_idx] or "").strip()
+                    if not cell or cell.strip().lower() == "na":
+                        continue
+                    try:
+                        float(cell)
+                    except ValueError:
+                        errors.append(f"Row {row_idx}, Column {o_idx + 1} (Outline) must be numeric or NA. Found '{cell}'.")
                 if len(errors) >= 200:
                     errors.append("Stopped after 200 errors; fix these issues and retry.")
                     break

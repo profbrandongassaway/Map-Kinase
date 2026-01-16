@@ -16,6 +16,12 @@ MapKinase is a Python Shiny web app for visualizing proteomics, PTM modification
 4. `python MapKinase_WebApp\m5_main_ui.py`
 5. Open `http://127.0.0.1:8004`
 
+## Required PSP annotations
+To run the PTM annotation features properly, download the PhosphoSitePlus datasets from `https://www.phosphosite.org/staticDownloads` and place the compressed files (do not unzip) in `MapKinase_WebApp\annotation_files\`:
+- `Phosphorylation_site_dataset.gz`
+- `Regulatory_sites.gz`
+- `Kinase_Substrate_Dataset.gz`
+
 ### Optional desktop window
 If you want the app to open in a native window (pywebview):
 ```

@@ -938,6 +938,12 @@ def collect_settings(input, cfg: Dict[str, Any]) -> Dict[str, Any]:  # type: ign
     overrides["ptm_label_size"] = DEFAULT_SETTINGS["ptm_label_size"]
     overrides["ptm_circle_radius"] = DEFAULT_SETTINGS["ptm_circle_radius"]
     overrides["ptm_circle_spacing"] = DEFAULT_SETTINGS["ptm_circle_spacing"]
+    overrides["prot_outline_width"] = _to_float(
+        _get_input_value(input, "settings_prot_outline_width"), DEFAULT_SETTINGS.get("prot_outline_width", 1)
+    )
+    overrides["ptm_outline_width"] = _to_float(
+        _get_input_value(input, "settings_ptm_outline_width"), DEFAULT_SETTINGS.get("ptm_outline_width", 1)
+    )
     overrides["protein_tooltip_columns"] = list(DEFAULT_SETTINGS["protein_tooltip_columns"])
     overrides["include_psp_tooltips"] = bool(_get_input_value(input, "settings_include_psp_tooltips"))
     overrides["species"] = species_label
@@ -1009,6 +1015,8 @@ def _gradient_color_from_fold(
         fold = float(fold_value)
     except (TypeError, ValueError):
         return [128, 128, 128]
+    if not math.isfinite(fold):
+        return [128, 128, 128]
     neg = [int(v) for v in negative_color][:3]
     pos = [int(v) for v in positive_color][:3]
     neg_limit = abs(max_negative) if max_negative else 1.0
@@ -1020,6 +1028,26 @@ def _gradient_color_from_fold(
         return [int((1 - t) * white[i] + t * neg[i]) for i in range(3)]
     t = min(fold / pos_limit, 1.0)
     return [int((1 - t) * white[i] + t * pos[i]) for i in range(3)]
+
+def _normalize_fc_suffix(header: str) -> str:
+    value = str(header or "").strip()
+    if ":" in value:
+        value = value.split(":", 1)[1]
+    return re.sub(r"\s+", " ", value.strip()).lower()
+
+def _outline_column_map(headers: Sequence[str]) -> Dict[str, str]:
+    mapping: Dict[str, str] = {}
+    for col in headers or []:
+        col_str = str(col)
+        if col_str.strip().lower().startswith("o:"):
+            key = _normalize_fc_suffix(col_str)
+            if key:
+                mapping[key] = col_str
+    return mapping
+
+def _resolve_outline_columns(main_columns: Sequence[str], headers: Sequence[str]) -> List[Optional[str]]:
+    outline_map = _outline_column_map(headers)
+    return [outline_map.get(_normalize_fc_suffix(col)) for col in main_columns or []]
 
 
 CUSTOM_STYLES = ui.tags.style(
@@ -2119,6 +2147,20 @@ app_ui = ui.page_fluid(
                         value=DEFAULT_SETTINGS["ptm_max_display"],
                         min=0,
                     ),
+                    ui.input_numeric(
+                        "settings_prot_outline_width",
+                        "Protbox Outline Width",
+                        value=DEFAULT_SETTINGS.get("prot_outline_width", 1),
+                        min=0,
+                        step=0.25,
+                    ),
+                    ui.input_numeric(
+                        "settings_ptm_outline_width",
+                        "PTM Outline Width",
+                        value=DEFAULT_SETTINGS.get("ptm_outline_width", 1),
+                        min=0,
+                        step=0.25,
+                    ),
                     ui.input_checkbox(
                         "settings_use_original_protbox_size",
                         "Use original protbox size (for PTM placement)",
@@ -2623,6 +2665,7 @@ def server(input, output, session):  # type: ignore[override]
             protein_data["headers"] = prot_headers
         prot_main = [h for h in prot_headers if h.startswith("C:")]
         prot_tooltips = [h for h in prot_headers if h.startswith("T:")]
+        prot_outline = _resolve_outline_columns(prot_main, prot_headers)
 
         # PTM columns
         ptm_headers = list(ptm_data.get("headers") or []) if ptm_data else []
@@ -2656,6 +2699,8 @@ def server(input, output, session):  # type: ignore[override]
                 ptm_data["rows"] = padded_rows
                 ptm_data["headers"] = ptm_headers
             ptm_main = [(h, h) for h in ptm_headers if h.startswith("C:")]
+            ptm_main_cols = [col for col, _ in ptm_main]
+            ptm_outline = _resolve_outline_columns(ptm_main_cols, ptm_headers)
             ptm_tooltips = [h for h in ptm_headers if h.startswith("T:")]
             ptm_entries = [
                 {
@@ -2666,6 +2711,7 @@ def server(input, output, session):  # type: ignore[override]
                     "site_column": ptm_site,
                     "shape": shape_choice,
                     "main_columns": ptm_main,
+                    "outline_columns": ptm_outline,
                     "modulation_column": modulation_col,
                     "tooltip_columns": ptm_tooltips,
                     "ptm_symbol_list": ptm_symbol_list,
@@ -2700,6 +2746,7 @@ def server(input, output, session):  # type: ignore[override]
                 "kegg_column": prot_kegg,
                 "gene_column": prot_gene,
                 "main_columns": prot_main,
+                "outline_columns": prot_outline,
                 "tooltip_columns": prot_tooltips,
             },
             "ptm": ptm_entries,
@@ -3107,6 +3154,7 @@ def server(input, output, session):  # type: ignore[override]
                         "- The second column must contain PTM site positions. The header name does not matter, and all values must be positive integers.\n"
                         "- The third column is the first (and required) comparison column. Its header must start with C: and may include any descriptive text (e.g., C: TNBC vs ER+). All values must be numeric (integer or float, positive or negative).\n"
                         "- Additional comparison columns may appear after the third column. These headers must start with C:, and every row must contain a numeric value.\n"
+                        "- Optional outline comparison columns may be included after the required columns. These headers must start with O: and match a C: header label (e.g., O: TNBC vs ER+). Values must be numeric or NA (NA keeps the outline black).\n"
                         "- Optional tooltip columns may be included after the required columns. These headers must start with T: (e.g., T: GOCC). Tooltip values are optional and may be blank.",
                         style="margin-top:10px; font-size:11px; color:#444; white-space:pre-line;",
                     ),
@@ -3147,6 +3195,7 @@ def server(input, output, session):  # type: ignore[override]
                         "- The second column must contain gene symbols. The header name does not matter, and all rows must be populated.\n"
                         "- The third column is the first (and required) comparison column. Its header must start with C: and may include any descriptive text (e.g., C: TNBC vs ER+). All values must be numeric (integer or float, positive or negative).\n"
                         "- Any additional comparison columns may appear after the third column. These columns must also have headers starting with C: and contain only numeric values.\n"
+                        "- Optional outline comparison columns may be included after the required columns. These headers must start with O: and match a C: header label (e.g., O: TNBC vs ER+). Values must be numeric or NA (NA keeps the outline black).\n"
                         "- Optional tooltip columns may be included after the required columns. These headers must start with T: (e.g., T: GOCC). Tooltip values are optional and may be blank.",
                         style="margin-top:10px; font-size:11px; color:#444; white-space:pre-line;",
                     ),
@@ -3258,6 +3307,7 @@ def server(input, output, session):  # type: ignore[override]
         web_sort_col = reactive.Value("pathway") if prefix == "web" else None
         web_sort_dir = reactive.Value("asc") if prefix == "web" else None
         web_selected_label = reactive.Value("")
+        web_selected_id = reactive.Value("") if prefix == "web" else None
         web_filter_options = reactive.Value(list(WEB_PATHWAY_SOURCES)) if prefix == "web" else None
         web_filter_selected = reactive.Value(list(WEB_PATHWAY_SOURCES)) if prefix == "web" else None
         web_filter_tick = reactive.Value(0) if prefix == "web" else None
@@ -3327,6 +3377,9 @@ def server(input, output, session):  # type: ignore[override]
             ptm_headers = ptm_cfg.get("data_headers") or []
             ptm_rows = ptm_cfg.get("data_rows") or []
             ptm_main = [col for col, _ in (ptm_cfg.get("main_columns") or [])]
+            prot_main = prot_cfg.get("main_columns") or [h for h in prot_headers if h.startswith("C:")]
+            prot_outline = prot_cfg.get("outline_columns") or _resolve_outline_columns(prot_main, prot_headers)
+            ptm_outline = ptm_cfg.get("outline_columns") or _resolve_outline_columns(ptm_main, ptm_headers)
             prot_label_map: Dict[str, str] = {}
             if prot_headers:
                 for uid, row_map in prot_row_map.items():
@@ -3335,11 +3388,13 @@ def server(input, output, session):  # type: ignore[override]
             ctx = {
                 "prot_headers": prot_headers,
                 "prot_rows_by_uniprot": prot_row_map,
-                "protein_main_columns": prot_cfg.get("main_columns") or [],
+                "protein_main_columns": prot_main,
+                "protein_outline_columns": prot_outline,
                 "protein_tooltips": prot_cfg.get("tooltip_columns") or [],
                 "ptm_headers": ptm_headers,
                 "ptm_rows": ptm_rows,
                 "ptm_main_columns": ptm_main,
+                "ptm_outline_columns": ptm_outline,
                 "ptm_tooltips": ptm_cfg.get("tooltip_columns") or [],
                 "ptm_shape": ptm_cfg.get("shape", "Circle"),
                 "ptm_type": ptm_cfg.get("type", "ptm_0"),
@@ -3378,6 +3433,8 @@ def server(input, output, session):  # type: ignore[override]
                 base_radius = max(1, base_radius - 1)
             general_settings["ptm_circle_radius"] = base_radius
             general_settings["ptm_circle_spacing"] = settings_override.get("ptm_circle_spacing", DEFAULT_SETTINGS["ptm_circle_spacing"])
+            general_settings["prot_outline_width"] = settings_override.get("prot_outline_width", DEFAULT_SETTINGS.get("prot_outline_width", 1))
+            general_settings["ptm_outline_width"] = settings_override.get("ptm_outline_width", DEFAULT_SETTINGS.get("ptm_outline_width", 1))
             general_settings["negative_color"] = color_override["negative_color"]
             general_settings["positive_color"] = color_override["positive_color"]
             general_settings["max_negative"] = color_override["max_negative"]
@@ -3444,6 +3501,7 @@ def server(input, output, session):  # type: ignore[override]
             pos = settings_override.get("positive_color", DEFAULT_SETTINGS["positive_color"])
             max_neg = settings_override.get("max_negative", DEFAULT_SETTINGS["max_negative"])
             max_pos = settings_override.get("max_positive", DEFAULT_SETTINGS["max_positive"])
+            outline_cols = ctx.get("protein_outline_columns", [])
             for idx, col in enumerate(ctx.get("protein_main_columns", []), 1):
                 raw = protein_row.get(col, "")
                 try:
@@ -3452,9 +3510,19 @@ def server(input, output, session):  # type: ignore[override]
                     fc_val = None
                 entry[f"fold_change_{idx}"] = fc_val
                 entry[f"fc_color_{idx}"] = _gradient_color_from_fold(fc_val, neg, pos, max_neg, max_pos)
+                outline_col = outline_cols[idx - 1] if idx - 1 < len(outline_cols) else None
+                outline_raw = protein_row.get(outline_col, "") if outline_col else ""
+                try:
+                    outline_val = float(outline_raw)
+                except (TypeError, ValueError):
+                    outline_val = None
+                entry[f"outline_fold_change_{idx}"] = outline_val
+                entry[f"outline_color_{idx}"] = _gradient_color_from_fold(outline_val, neg, pos, max_neg, max_pos) if outline_val is not None else [0, 0, 0]
             if not ctx.get("protein_main_columns"):
                 entry["fold_change_1"] = None
                 entry["fc_color_1"] = [128, 128, 128]
+                entry["outline_fold_change_1"] = None
+                entry["outline_color_1"] = [0, 0, 0]
             return entry
 
         def _make_ptm_entry(
@@ -3498,6 +3566,8 @@ def server(input, output, session):  # type: ignore[override]
                 "ptm_type": ctx.get("ptm_type", "ptm_0"),
                 "uniprot_id": row_map.get(ctx.get("ptm_headers", [None, None])[0] if ctx.get("ptm_headers") else "", ""),
                 "fc_color_1": [128, 128, 128],
+                "outline_color_1": [0, 0, 0],
+                "outline_fold_change_1": None,
                 "label": display_label or str(row_map.get(ctx.get("ptm_headers", [None, None])[1] if ctx.get("ptm_headers") else "", "") or ""),
                 "label_color": [0, 0, 0],
                 "symbol_type": symbol_class,
@@ -3518,6 +3588,7 @@ def server(input, output, session):  # type: ignore[override]
                 "symbol_x": float(shape_x),
                 "symbol_y": float(shape_y),
             }
+            outline_cols = ctx.get("ptm_outline_columns", [])
             for idx, col in enumerate(ctx.get("ptm_main_columns", []), 1):
                 raw = row_map.get(col, "")
                 try:
@@ -3525,7 +3596,15 @@ def server(input, output, session):  # type: ignore[override]
                 except (TypeError, ValueError):
                     fc_val = None
                 payload[f"fold_change_{idx}"] = fc_val
-            payload[f"fc_color_{idx}"] = _gradient_color_from_fold(fc_val, neg, pos, max_neg, max_pos)
+                payload[f"fc_color_{idx}"] = _gradient_color_from_fold(fc_val, neg, pos, max_neg, max_pos)
+                outline_col = outline_cols[idx - 1] if idx - 1 < len(outline_cols) else None
+                outline_raw = row_map.get(outline_col, "") if outline_col else ""
+                try:
+                    outline_val = float(outline_raw)
+                except (TypeError, ValueError):
+                    outline_val = None
+                payload[f"outline_fold_change_{idx}"] = outline_val
+                payload[f"outline_color_{idx}"] = _gradient_color_from_fold(outline_val, neg, pos, max_neg, max_pos) if outline_val is not None else [0, 0, 0]
             return payload
 
         def _first_fc_value(row_map: Dict[str, Any], columns: List[str]) -> Optional[float]:
@@ -3810,6 +3889,18 @@ def server(input, output, session):  # type: ignore[override]
                 state["json"].set(None)
                 state["status"].set("Select a WikiPathways entry, then click Load Pathway.")
                 return
+            if cfg.get("key") == "web":
+                selected_id = ""
+                if web_selected_id is not None:
+                    try:
+                        selected_id = web_selected_id.get() or ""
+                    except Exception:
+                        selected_id = ""
+                current_id = str(settings_override.get("pathway_id") or "").strip()
+                if not selected_id or not current_id or selected_id.strip().lower() != current_id.lower():
+                    state["json"].set(None)
+                    state["status"].set("Select a pathway from the table, then click Load Pathway.")
+                    return
             if is_ks_bookmark:
                 ctx = _ks_context()
                 if ctx.get("protein_main_columns"):
@@ -3908,6 +3999,8 @@ def server(input, output, session):  # type: ignore[override]
                 base_radius = settings_override.get("ptm_circle_radius", DEFAULT_SETTINGS["ptm_circle_radius"])
                 merged_settings["ptm_circle_radius"] = max(1, base_radius)
                 merged_settings["ptm_circle_spacing"] = settings_override.get("ptm_circle_spacing", DEFAULT_SETTINGS["ptm_circle_spacing"])
+                merged_settings["prot_outline_width"] = settings_override.get("prot_outline_width", DEFAULT_SETTINGS.get("prot_outline_width", 1))
+                merged_settings["ptm_outline_width"] = settings_override.get("ptm_outline_width", DEFAULT_SETTINGS.get("ptm_outline_width", 1))
                 merged_settings["main_columns"] = settings_override.get("main_columns", [])
                 merged_settings["protein_tooltip_columns"] = settings_override.get("protein_tooltip_columns", DEFAULT_SETTINGS.get("protein_tooltip_columns", []))
                 merged_settings["species"] = settings_override.get("species")
@@ -4553,6 +4646,8 @@ def server(input, output, session):  # type: ignore[override]
                     name_val = selection.get("name") or ""
                 if value:
                     session.send_input_message(_prefixed_id(prefix, "pathway_id"), {"value": value})
+                    if web_selected_id is not None and cfg.get("key") == "web":
+                        web_selected_id.set(str(value))
                 if source_val and cfg.get("key") == "web":
                     session.send_input_message(_prefixed_id(prefix, "pathway_source_choice"), {"value": source_val})
                 if cfg.get("key") == "web":
@@ -4564,6 +4659,19 @@ def server(input, output, session):  # type: ignore[override]
                     if web_selected_label is not None:
                         web_selected_label.set(label)
                 state["status"].set("Pathway selected. Click Load Pathway to load with current settings.")
+
+            if cfg.get("key") == "web":
+                @reactive.Effect
+                @reactive.event(getattr(input, _prefixed_id(prefix, "pathway_id")))
+                def _sync_web_selection_input():
+                    current = (str(_get_input_value(input, _prefixed_id(prefix, "pathway_id"))) or "").strip()
+                    selected = web_selected_id.get() if web_selected_id is not None else ""
+                    if selected and current and selected.strip().lower() == current.lower():
+                        return
+                    if web_selected_id is not None:
+                        web_selected_id.set("")
+                    if web_selected_label is not None:
+                        web_selected_label.set("")
 
             if cfg.get("key") == "web":
                 @reactive.Effect

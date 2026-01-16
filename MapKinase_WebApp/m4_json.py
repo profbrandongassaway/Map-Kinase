@@ -2,6 +2,7 @@ import sys
 import pandas as pd
 import numpy as np
 import os
+import re
 from datetime import datetime
 from collections import defaultdict
 import json
@@ -69,6 +70,34 @@ def adjust_arrow_endpoint(x, y, width, height, side):
     elif side == 'bottom':
         return x + width / 2, y - 16
     return x + width / 2, y + height / 2
+
+def _normalize_fc_suffix(header: str) -> str:
+    value = str(header or "").strip()
+    if ":" in value:
+        value = value.split(":", 1)[1]
+    value = re.sub(r"\s+", " ", value.strip())
+    return value.lower()
+
+def _outline_column_lookup(headers):
+    outline_map = {}
+    header_list = headers if headers is not None else []
+    for col in header_list:
+        if not isinstance(col, str):
+            continue
+        if col.strip().lower().startswith("o:"):
+            key = _normalize_fc_suffix(col)
+            if key:
+                outline_map[key] = col
+    return outline_map
+
+def _resolve_outline_columns(fold_change_columns, headers):
+    outline_map = _outline_column_lookup(headers)
+    resolved = []
+    fc_list = fold_change_columns if fold_change_columns is not None else []
+    for col in fc_list:
+        key = _normalize_fc_suffix(col)
+        resolved.append(outline_map.get(key))
+    return resolved
 
 def parse_exceptions_file(file_path='exceptions_file.txt'):
     exceptions = {
@@ -309,6 +338,13 @@ class PathwayProcessor:
             else:
                 dataset['data'] = pd.read_csv(dataset['file_path'], sep="\t")
             print(f"PTM dataset {dataset_id}: {len(dataset['data'])} rows, columns: {dataset['data'].columns.tolist()}")
+            main_cols = []
+            for col in dataset.get('main_columns', []):
+                if isinstance(col, (list, tuple)) and len(col) > 1:
+                    main_cols.append(str(col[1]))
+                else:
+                    main_cols.append(str(col))
+            dataset['outline_columns'] = _resolve_outline_columns(main_cols, dataset['data'].columns)
             symbol_list = dataset.get('ptm_symbol_list', [])
             reg_site_col = dataset.get('modulation_column', 'C: Regulatory site')
             reg_function_col = dataset.get('tooltip_columns', ['C: Regulatory site function'])[0]
@@ -333,6 +369,7 @@ class PathwayProcessor:
         self.protein_selection_option = settings.get('protein_selection_option', 2)
         self.ptm_selection_option = settings.get('ptm_selection_option', 2)
         self.fold_change_columns = settings.get('main_columns', ['ER+_Est-_x-y_TNBC'])
+        self.outline_columns = _resolve_outline_columns(self.fold_change_columns, self.proteomic_data.columns)
         self.hsa_id_column = settings.get('hsa_id_column', 'KEGG_hsa')
         self.prot_uniprot_column = settings.get('prot_uniprot_column', 'Uniprot_ID')
         self.gene_name_column = settings.get('gene_name_column', 'Gene Symbol')
@@ -521,6 +558,8 @@ class PathwayProcessor:
                         'ptm_label_size': self.settings.get('ptm_label_size', 10),
                         'ptm_circle_radius': self.settings.get('ptm_circle_radius', 5),
                         'ptm_circle_spacing': self.settings.get('ptm_circle_spacing', 4),
+                        'prot_outline_width': self.settings.get('prot_outline_width', 1),
+                        'ptm_outline_width': self.settings.get('ptm_outline_width', 1),
                         'protein_tooltip_columns': self.settings.get('protein_tooltip_columns', ['Gene Symbol', 'Uniprot_ID']),
                         'protein_file_path': self.settings.get('protein_file_path', '')
                     },
@@ -1155,10 +1194,13 @@ class PathwayProcessor:
             for idx, fc_col in enumerate(self.fold_change_columns, 1):
                 protein_entry[f'fc_color_{idx}'] = [128, 128, 128]
                 protein_entry[f'fold_change_{idx}'] = None
+                protein_entry[f'outline_color_{idx}'] = [0, 0, 0]
+                protein_entry[f'outline_fold_change_{idx}'] = None
             if protein_in_data:
                 gene_name = self.proteomic_data.loc[
                     self.proteomic_data[self.hsa_id_column] == protein, self.gene_name_column].values[0]
                 protein_entry['label'] = gene_name
+                outline_cols = self.outline_columns or []
                 for idx, fc_col in enumerate(self.fold_change_columns, 1):
                     fold_change = self.proteomic_data.loc[
                         self.proteomic_data[self.hsa_id_column] == protein, fc_col].values
@@ -1175,6 +1217,19 @@ class PathwayProcessor:
                             protein_entry[f'fc_color_{idx}'] = self.get_color(fc_value)
                         else:
                             protein_entry[f'fc_color_{idx}'] = [128, 128, 128]
+                    outline_col = outline_cols[idx - 1] if idx - 1 < len(outline_cols) else None
+                    outline_value = None
+                    if outline_col and outline_col in self.proteomic_data.columns:
+                        outline_vals = self.proteomic_data.loc[
+                            self.proteomic_data[self.hsa_id_column] == protein, outline_col
+                        ].values
+                        if len(outline_vals) > 0:
+                            outline_value = self._safe_float(outline_vals[0])
+                    protein_entry[f'outline_fold_change_{idx}'] = outline_value
+                    if outline_value is not None:
+                        protein_entry[f'outline_color_{idx}'] = self.get_color(outline_value)
+                    else:
+                        protein_entry[f'outline_color_{idx}'] = [0, 0, 0]
             else:
                 gene_name = entry_data['first_name'].split(",")[0].strip()
                 protein_entry['label'] = gene_name
@@ -1347,9 +1402,12 @@ class PathwayProcessor:
                             tooltip_html_lines.append(f"<strong>{safe_label}:</strong> {safe_value}")
                         ptm_entry['tooltip'] = '\n'.join(tooltip_plain_lines)
                         ptm_entry['tooltip_html'] = '<br/>'.join(tooltip_html_lines)
+                        outline_cols = dataset.get('outline_columns') or []
                         for idx, (_, fc_col) in enumerate(dataset['main_columns'], 1):
                             ptm_entry.setdefault(f'fc_color_{idx}', [128, 128, 128])
                             ptm_entry[f'fold_change_{idx}'] = None
+                            ptm_entry.setdefault(f'outline_color_{idx}', [0, 0, 0])
+                            ptm_entry[f'outline_fold_change_{idx}'] = None
                             ptm_fold_change = row.get(fc_col)
                             fc_value = None
                             if ptm_fold_change is not None and not pd.isna(ptm_fold_change):
@@ -1360,6 +1418,11 @@ class PathwayProcessor:
                             ptm_entry[f'fold_change_{idx}'] = fc_value
                             if fc_value is not None:
                                 ptm_entry[f'fc_color_{idx}'] = self.get_color(fc_value)
+                            outline_col = outline_cols[idx - 1] if idx - 1 < len(outline_cols) else None
+                            outline_value = self._safe_float(row.get(outline_col)) if outline_col else None
+                            ptm_entry[f'outline_fold_change_{idx}'] = outline_value
+                            if outline_value is not None:
+                                ptm_entry[f'outline_color_{idx}'] = self.get_color(outline_value)
 
                         if visualize:
                             pos_key = available_positions[i]
@@ -1562,13 +1625,21 @@ class PathwayProcessor:
                 tooltip_html_lines.append(f"<strong>{safe_label}:</strong> {safe_value}")
             ptm_entry['tooltip'] = '\n'.join(tooltip_plain_lines)
             ptm_entry['tooltip_html'] = '<br/>'.join(tooltip_html_lines)
+            outline_cols = dataset.get('outline_columns') or []
             for idx, (_, fc_col) in enumerate(dataset.get('main_columns', []), 1):
                 ptm_entry.setdefault(f'fc_color_{idx}', [128, 128, 128])
                 ptm_entry[f'fold_change_{idx}'] = None
+                ptm_entry.setdefault(f'outline_color_{idx}', [0, 0, 0])
+                ptm_entry[f'outline_fold_change_{idx}'] = None
                 fc_value = self._safe_float(row.get(fc_col))
                 ptm_entry[f'fold_change_{idx}'] = fc_value
                 if fc_value is not None:
                     ptm_entry[f'fc_color_{idx}'] = self.get_color(fc_value)
+                outline_col = outline_cols[idx - 1] if idx - 1 < len(outline_cols) else None
+                outline_value = self._safe_float(row.get(outline_col)) if outline_col else None
+                ptm_entry[f'outline_fold_change_{idx}'] = outline_value
+                if outline_value is not None:
+                    ptm_entry[f'outline_color_{idx}'] = self.get_color(outline_value)
             symbol_type = ptm_entry['symbol_type']
             if symbol_type and str(symbol_type).lower() != 'none':
                 symbol_dict = next(
@@ -1612,13 +1683,21 @@ class PathwayProcessor:
                 'annotations': ','.join(f'\"{ann}\"' for ann in annotations if ann),
                 'PTMs': self._build_ptm_summary(uniprot_id)
             }
+            outline_cols = self.outline_columns or []
             for idx, fc_col in enumerate(self.fold_change_columns, 1):
                 protein_entry[f'fc_color_{idx}'] = [128, 128, 128]
                 protein_entry[f'fold_change_{idx}'] = None
+                protein_entry[f'outline_color_{idx}'] = [0, 0, 0]
+                protein_entry[f'outline_fold_change_{idx}'] = None
                 fc_value = self._safe_float(row.get(fc_col))
                 protein_entry[f'fold_change_{idx}'] = fc_value
                 if fc_value is not None:
                     protein_entry[f'fc_color_{idx}'] = self.get_color(fc_value)
+                outline_col = outline_cols[idx - 1] if idx - 1 < len(outline_cols) else None
+                outline_value = self._safe_float(row.get(outline_col)) if outline_col else None
+                protein_entry[f'outline_fold_change_{idx}'] = outline_value
+                if outline_value is not None:
+                    protein_entry[f'outline_color_{idx}'] = self.get_color(outline_value)
             catalog[uniprot_id] = protein_entry
         return catalog
 
@@ -1669,6 +1748,9 @@ def generate_pathway_json(pathway_id, data, settings, skip_disk_write=False, deb
         settings['main_columns'] = data['protein']['main_columns']
         settings['protein_tooltip_columns'] = data['protein'].get('tooltip_columns', ['Gene Symbol', 'Uniprot_ID'])
         pathway_api = get_pathway_api(settings.get('pathway_source', 'kegg'))
+        species_code = settings.get("species_code") or ""
+        if species_code:
+            setattr(pathway_api, "species_code", species_code)
         species_hint = settings.get("_species_full_name") or settings.get("species")
         pathway_file = pathway_api.download_pathway_data(pathway_id, species_hint=species_hint)
         print(f"Pathway file downloaded: {pathway_file}")
@@ -1753,6 +1835,8 @@ DEFAULT_SETTINGS = {
     'ptm_label_size': 6,
     'ptm_circle_radius': 5,
     'ptm_circle_spacing': 4,
+    'prot_outline_width': 1,
+    'ptm_outline_width': 1,
     'protein_tooltip_columns': ['Gene Symbol', 'Uniprot_ID', 'ER+_Est-_x-y_TNBC'],
     'use_original_protbox_size': False
 }
