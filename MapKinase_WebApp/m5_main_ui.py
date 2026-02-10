@@ -12,7 +12,11 @@ import csv
 import asyncio
 import html
 import math
+from argparse import Namespace
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
+
+import pandas as pd
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
@@ -28,6 +32,15 @@ from MapKinase_WebApp.m1_file_processor import validate_protein_file, validate_p
 from MapKinase_WebApp.d2_psp_regulatorysites import load_regulatory_sites, annotate_ptm_dataset
 from MapKinase_WebApp.d2_psp_kinasesubstrates import load_kinase_substrate_map, annotate_ptm_dataset_with_kinases
 from MapKinase_WebApp.d1_transfer_kegg_annotations import load_kegg_map, annotate_protein_with_kegg
+from MapKinase_WebApp.m6_rank_pathways import (
+    build_gene_to_uniprot_map,
+    build_protein_lookup,
+    compute_single_protein_scores,
+    load_kegg_index,
+    parse_weights,
+    rank_all_pathways,
+    resolve_node_scores,
+)
 
 from MapKinase_WebApp.m3_svg_viewer import create_pathway_svg, _build_blank_canvas
 
@@ -55,6 +68,8 @@ DISPLAY_TYPE_CHOICES = sorted({
 })
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+INDEX_FILES_DIR = os.path.join(BASE_DIR, "index_files")
+ANNOTATION_FILES_DIR = os.path.join(BASE_DIR, "annotation_files")
 
 
 def _resolve_kegg_pathways_file() -> str:
@@ -2300,6 +2315,238 @@ def server(input, output, session):  # type: ignore[override]
     kegg_cache: Dict[str, Dict[str, str]] = {}
     protein_kegg_warning = reactive.Value("")
     ks_index = reactive.Value(_empty_ks_index())
+    pathway_score_cache = reactive.Value(
+        {
+            "status": "Pathway scoring pending.",
+            "species_code": "",
+            "index_file": "",
+            "index_files": {},
+            "fc_columns": [],
+            "selected_fc": "",
+            "results_by_fc": {},
+            "updated_at": 0.0,
+        }
+    )
+
+    def _clear_pathway_scores(status: str = "Pathway scoring pending.") -> None:
+        pathway_score_cache.set(
+            {
+                "status": status,
+                "species_code": "",
+                "index_file": "",
+                "index_files": {},
+                "fc_columns": [],
+                "selected_fc": "",
+                "results_by_fc": {},
+                "updated_at": time.time(),
+            }
+        )
+
+    def _dataset_to_df(dataset: Optional[Dict[str, Any]]) -> pd.DataFrame:
+        if not dataset:
+            return pd.DataFrame()
+        headers = list(dataset.get("headers") or [])
+        rows = list(dataset.get("rows") or [])
+        if not headers:
+            return pd.DataFrame()
+        if not rows:
+            return pd.DataFrame(columns=headers)
+        normalized_rows: List[List[str]] = []
+        width = len(headers)
+        for row in rows:
+            vals = list(row)
+            if len(vals) < width:
+                vals.extend([""] * (width - len(vals)))
+            elif len(vals) > width:
+                vals = vals[:width]
+            normalized_rows.append(vals)
+        return pd.DataFrame(normalized_rows, columns=headers, dtype=str)
+
+    def _resolve_kegg_index_file_for_species(species_code: str) -> str:
+        code = (species_code or "").strip().lower()
+        if not code:
+            return ""
+        candidates = [
+            os.path.join(INDEX_FILES_DIR, f"kegg_index_{code}.json"),
+            os.path.join(INDEX_FILES_DIR, f"{code}_kegg_index.json"),
+            os.path.join(INDEX_FILES_DIR, f"kegg_index_{code}_v1.json"),
+        ]
+        for path in candidates:
+            if os.path.exists(path):
+                return path
+        # Final fallback: if there is only one KEGG index file, use it.
+        try:
+            all_index_files = [
+                os.path.join(INDEX_FILES_DIR, name)
+                for name in os.listdir(INDEX_FILES_DIR)
+                if name.lower().startswith("kegg_index_") and name.lower().endswith(".json")
+            ]
+            if len(all_index_files) == 1:
+                return all_index_files[0]
+        except Exception:
+            pass
+        return ""
+
+    def _resolve_wikipathways_index_file_for_species(species_code: str) -> str:
+        code = (species_code or "").strip().lower()
+        if not code:
+            return ""
+        candidates = [
+            os.path.join(INDEX_FILES_DIR, f"wikipathways_index_{code}.json"),
+            os.path.join(INDEX_FILES_DIR, f"{code}_wikipathways_index.json"),
+            os.path.join(INDEX_FILES_DIR, f"wikipathways_index_{code}_v1.json"),
+        ]
+        for path in candidates:
+            if os.path.exists(path):
+                return path
+        # Final fallback: if there is only one WikiPathways index file, use it.
+        try:
+            all_index_files = [
+                os.path.join(INDEX_FILES_DIR, name)
+                for name in os.listdir(INDEX_FILES_DIR)
+                if name.lower().startswith("wikipathways_index_") and name.lower().endswith(".json")
+            ]
+            if len(all_index_files) == 1:
+                return all_index_files[0]
+        except Exception:
+            pass
+        return ""
+
+    def _resolve_gene_to_uniprot_file_for_species(species_code: str) -> str:
+        code = (species_code or "").strip().lower()
+        if not code:
+            return ""
+        candidates = [
+            os.path.join(ANNOTATION_FILES_DIR, f"{code}_id_mapping_table.txt"),
+            os.path.join(ANNOTATION_FILES_DIR, f"{code}_mapping_table.txt"),
+        ]
+        for path in candidates:
+            if os.path.exists(path):
+                return path
+        return ""
+
+    def _refresh_pathway_scores(selected_fc: Optional[str] = None) -> None:
+        with reactive.isolate():
+            protein_ok = bool(protein_validation.get().get("valid"))
+            protein_data = protein_dataset.get()
+            ptm_ok = bool(ptm_validation.get().get("valid"))
+            ptm_data = ptm_dataset.get() if ptm_ok else None
+            species_choice, species_info = _resolve_species(_get_input_value(input, "input_species"))
+            current_mode = _current_mode()
+
+        if not protein_ok or not protein_data:
+            _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
+            return
+
+        species_code = (species_info.get("code") or "").strip().lower()
+        kegg_index_file = _resolve_kegg_index_file_for_species(species_code)
+        wikipathways_index_file = _resolve_wikipathways_index_file_for_species(species_code)
+        if not kegg_index_file and not wikipathways_index_file:
+            _clear_pathway_scores(f"No pathway index files found for species '{species_code}' in index_files.")
+            return
+
+        prot_df = _dataset_to_df(protein_data)
+        site_df = _dataset_to_df(ptm_data) if ptm_data else None
+        if prot_df.empty:
+            _clear_pathway_scores("Protein dataset is empty after parsing; pathway scoring skipped.")
+            return
+
+        fc_columns = [c for c in list(prot_df.columns) if str(c).startswith("C:")]
+        if not fc_columns:
+            _clear_pathway_scores("No protein main columns (C:) were found for pathway scoring.")
+            return
+
+        if selected_fc and selected_fc in fc_columns:
+            ordered_fc_cols = [selected_fc] + [c for c in fc_columns if c != selected_fc]
+        else:
+            ordered_fc_cols = list(fc_columns)
+
+        try:
+            weights = parse_weights(None)
+            gene_map_file = _resolve_gene_to_uniprot_file_for_species(species_code)
+            gene_map = build_gene_to_uniprot_map(Path(gene_map_file)) if gene_map_file else {}
+            index_sources: List[Tuple[str, Dict[str, Any], str]] = []
+            if kegg_index_file:
+                index_sources.append(("kegg", load_kegg_index(Path(kegg_index_file)), kegg_index_file))
+            if wikipathways_index_file:
+                index_sources.append(("wikipathways", load_kegg_index(Path(wikipathways_index_file)), wikipathways_index_file))
+
+            results_by_fc: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = {}
+            site_headers = list(site_df.columns) if site_df is not None and not site_df.empty else []
+            site_uniprot_col = site_headers[0] if len(site_headers) >= 1 else None
+            site_key_cols = f"{site_headers[0]},{site_headers[1]}" if len(site_headers) >= 2 else None
+
+            for fc_col in ordered_fc_cols:
+                site_fc_col = fc_col if site_df is not None and fc_col in site_headers else None
+                args_ns = Namespace(
+                    protein_id_col=str(prot_df.columns[0]) if len(prot_df.columns) > 0 else "Uniprot_ID",
+                    p_col_prot=None,
+                    fc_col_prot=fc_col,
+                    p_col_phospho=None,
+                    fc_col_phospho=None,
+                    p_col_site=None,
+                    fc_col_site=site_fc_col,
+                    site_uniprot_col=site_uniprot_col,
+                    site_key_col="site_key",
+                    site_key_cols=site_key_cols,
+                    reg_annot_col="PSP: regulatory_site",
+                    locprob_col=None,
+                    locprob_min=0.75,
+                )
+                protein_scores = compute_single_protein_scores(
+                    protein_df=prot_df,
+                    site_df=site_df,
+                    args=args_ns,
+                    weights=weights,
+                )
+                protein_lookup = build_protein_lookup(protein_scores)
+                source_maps: Dict[str, Dict[str, Dict[str, Any]]] = {}
+                for source_key, source_index, _source_file in index_sources:
+                    node_state = resolve_node_scores(
+                        index_nodes=source_index.get("nodes", {}),
+                        protein_lookup=protein_lookup,
+                        gene_to_uniprot=gene_map,
+                    )
+                    ranked = rank_all_pathways(
+                        kegg_index=source_index,
+                        node_state=node_state,
+                        weights=weights,
+                        max_pathways=None,
+                        pathway_source=source_key,
+                    )
+                    per_pathway: Dict[str, Dict[str, Any]] = {}
+                    for row in ranked:
+                        pid = str(row.get("pathway_id", "")).strip().lower()
+                        if pid:
+                            per_pathway[pid] = row
+                    source_maps[source_key] = per_pathway
+                results_by_fc[fc_col] = source_maps
+
+            index_files_obj: Dict[str, str] = {}
+            if kegg_index_file:
+                index_files_obj["kegg"] = kegg_index_file
+            if wikipathways_index_file:
+                index_files_obj["wikipathways"] = wikipathways_index_file
+            source_label = ", ".join(sorted(index_files_obj.keys())) if index_files_obj else "none"
+
+            pathway_score_cache.set(
+                {
+                    "status": (
+                        f"Pathway scoring complete ({len(ordered_fc_cols)} main columns, "
+                        f"sources={source_label}, mode={current_mode})."
+                    ),
+                    "species_code": species_code,
+                    "index_file": kegg_index_file or wikipathways_index_file or "",
+                    "index_files": index_files_obj,
+                    "fc_columns": ordered_fc_cols,
+                    "selected_fc": ordered_fc_cols[0] if ordered_fc_cols else "",
+                    "results_by_fc": results_by_fc,
+                    "updated_at": time.time(),
+                }
+            )
+        except Exception as exc:
+            print(f"Warning: pathway scoring failed: {exc}")
+            _clear_pathway_scores(f"Pathway scoring failed: {exc}")
 
     def _active_bookmark() -> str:
         active = _get_input_value(input, "bookmark_selector")
@@ -2567,6 +2814,7 @@ def server(input, output, session):  # type: ignore[override]
             protein_dataset.set(None)
             ptm_dataset.set(None)
             nav_lock_status.set("Demo mode: sample files missing. Navigation locked.")
+            _clear_pathway_scores("Demo datasets missing; pathway scoring unavailable.")
             return
 
         try:
@@ -2577,6 +2825,7 @@ def server(input, output, session):  # type: ignore[override]
                 protein_dataset.set(None)
                 ptm_dataset.set(None)
                 nav_lock_status.set("Demo mode: sample protein validation failed.")
+                _clear_pathway_scores("Demo protein validation failed; pathway scoring unavailable.")
                 return
 
             species_choice, species_info = _resolve_species(_get_input_value(input, "input_species"))
@@ -2610,6 +2859,7 @@ def server(input, output, session):  # type: ignore[override]
                 ptm_validation.set({"status": "Demo PTM file failed validation.", "errors": ptm_result.errors, "valid": False})
                 ptm_dataset.set(None)
                 nav_lock_status.set("Demo mode: sample PTM validation failed.")
+                _refresh_pathway_scores()
                 return
 
             demo_ptm_payload = _load_dataset(SAMPLE_PTM_FILE)
@@ -2631,6 +2881,7 @@ def server(input, output, session):  # type: ignore[override]
             })
             _write_debug_dump("user_ptm_dataset_debug.txt", demo_ptm_payload)
             _update_ks_index()
+            _refresh_pathway_scores()
             nav_lock_status.set("Demo mode: sample datasets loaded. Navigation unlocked.")
             print("Demo mode: sample protein/PTM loaded successfully.")
         except Exception as exc:
@@ -2642,6 +2893,7 @@ def server(input, output, session):  # type: ignore[override]
             protein_dataset.set(None)
             ptm_dataset.set(None)
             nav_lock_status.set("Demo mode: sample datasets failed to load.")
+            _clear_pathway_scores("Demo datasets failed to load; pathway scoring unavailable.")
 
     def collect_data_override() -> Dict[str, Any]:  # type: ignore[override]
         mode = _get_input_value(input, "input_mode") or "user"
@@ -2775,6 +3027,7 @@ def server(input, output, session):  # type: ignore[override]
         if str((_get_input_value(input, "input_mode") or "user")).lower() == "demo":
             protein_validation.set({"status": "Demo mode uses bundled sample files; switch to User mode to upload.", "errors": [], "valid": False, "comparisons": []})
             protein_kegg_warning.set("")
+            _clear_pathway_scores("Demo mode active in User upload handler; pathway scoring deferred.")
             return
         upload = input.input_protein_upload()
         if not upload:
@@ -2784,6 +3037,7 @@ def server(input, output, session):  # type: ignore[override]
             _write_debug_dump("user_protein_dataset_debug.txt", {"info": "No dataset loaded"})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
+            _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
             return
         file_info = upload[0]
         protein_validation.set({"status": "Processing protein upload...", "errors": [], "valid": False, "comparisons": []})
@@ -2797,6 +3051,7 @@ def server(input, output, session):  # type: ignore[override]
             _write_debug_dump("user_protein_dataset_debug.txt", {"info": "No dataset loaded"})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
+            _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
             return
         result = validate_protein_file(datapath)
         if not result.valid:
@@ -2807,6 +3062,7 @@ def server(input, output, session):  # type: ignore[override]
             _write_debug_dump("user_protein_dataset_debug.txt", {"errors": result.errors})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
+            _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
             return
 
         status = (
@@ -2839,6 +3095,7 @@ def server(input, output, session):  # type: ignore[override]
         protein_dataset_path.set(datapath)
         _write_debug_dump("user_protein_dataset_debug.txt", dataset_payload)
         ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
+        _refresh_pathway_scores()
 
     @output
     @render.text
@@ -2892,6 +3149,7 @@ def server(input, output, session):  # type: ignore[override]
         if not protein_validation.get().get("valid"):
             ptm_validation.set({"status": "Upload a valid protein file first.", "errors": ["Protein file not validated yet."], "valid": False})
             _update_ks_index(reset=True)
+            _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
             return
         upload = input.input_ptm_upload()
         if not upload:
@@ -2900,6 +3158,7 @@ def server(input, output, session):  # type: ignore[override]
             ptm_dataset_path.set(None)
             _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "No dataset loaded"})
             _update_ks_index(reset=True)
+            _refresh_pathway_scores()
             return
         file_info = upload[0]
         datapath = getattr(file_info, "datapath", None)
@@ -2911,6 +3170,7 @@ def server(input, output, session):  # type: ignore[override]
             ptm_dataset_path.set(None)
             _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "No dataset loaded"})
             _update_ks_index(reset=True)
+            _refresh_pathway_scores()
             return
         protein_comparisons = protein_validation.get().get("comparisons") or []
         result = validate_ptm_file(datapath, protein_comparisons)
@@ -2932,12 +3192,14 @@ def server(input, output, session):  # type: ignore[override]
             ptm_dataset_path.set(datapath)
             _write_debug_dump("user_ptm_dataset_debug.txt", dataset_payload)
             _update_ks_index()
+            _refresh_pathway_scores()
         else:
             ptm_validation.set({"status": "PTM file failed validation. See errors below.", "errors": result.errors, "valid": False})
             ptm_dataset.set(None)
             ptm_dataset_path.set(None)
             _write_debug_dump("user_ptm_dataset_debug.txt", {"errors": result.errors})
             _update_ks_index(reset=True)
+            _refresh_pathway_scores()
 
     @reactive.Effect
     @reactive.event(input.bookmark_selector, input.input_mode, input.input_protein_upload, input.input_ptm_upload)
@@ -2976,6 +3238,7 @@ def server(input, output, session):  # type: ignore[override]
                 protein_validation.set({"status": "Demo mode failed to load sample protein.", "errors": [str(exc)], "valid": False, "comparisons": []})
                 ptm_validation.set({"status": "Demo mode failed to load sample PTM.", "errors": [str(exc)], "valid": False})
                 nav_lock_status.set("Demo mode: sample datasets failed to load.")
+                _clear_pathway_scores("Demo datasets failed to load; pathway scoring unavailable.")
         else:
             protein_dataset.set(None)
             ptm_dataset.set(None)
@@ -2984,6 +3247,15 @@ def server(input, output, session):  # type: ignore[override]
             ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
             nav_lock_status.set("User mode: upload valid Protein file to unlock other tabs. PTM optional.")
             _update_ks_index(reset=True)
+            _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
+
+    @reactive.Effect
+    @reactive.event(input.input_species)
+    def _refresh_scores_for_species():
+        with reactive.isolate():
+            protein_ok = bool(protein_validation.get().get("valid"))
+        if protein_ok:
+            _refresh_pathway_scores()
 
     @reactive.Effect
     @reactive.event(input.settings_gradient_preset)
@@ -4692,15 +4964,30 @@ def server(input, output, session):  # type: ignore[override]
                 def _handle_web_sort():
                     payload = _get_input_value(input, _prefixed_id(prefix, "pathway_table_sort")) or {}
                     col = str(payload.get("col") or "").lower()
-                    if col not in {"source", "pathway"}:
+                    if col not in {
+                        "source",
+                        "pathway",
+                        "final_score",
+                        "connection_score",
+                        "node_mass",
+                        "scored_node_count",
+                        "reg_node_count",
+                    }:
                         return
+                    numeric_cols = {
+                        "final_score",
+                        "connection_score",
+                        "node_mass",
+                        "scored_node_count",
+                        "reg_node_count",
+                    }
                     current_col = web_sort_col.get()
                     current_dir = web_sort_dir.get()
                     if col == current_col:
                         web_sort_dir.set("desc" if current_dir == "asc" else "asc")
                     else:
                         web_sort_col.set(col)
-                        web_sort_dir.set("asc")
+                        web_sort_dir.set("desc" if col in numeric_cols else "asc")
 
             if cfg.get("key") == "web":
                 @reactive.Effect
@@ -4753,15 +5040,52 @@ def server(input, output, session):  # type: ignore[override]
                     if web_filter_tick is not None:
                         # Depend on tick so table refreshes when checkboxes change
                         _ = web_filter_tick.get()
+                    fc_choices = _fc_choices()
+                    fc_idx = state["fc_index"].get() or 1
+                    if fc_idx < 1 or fc_idx > len(fc_choices):
+                        fc_idx = 1
+                    selected_fc = fc_choices[fc_idx - 1] if fc_choices and fc_idx >= 1 else ""
+                    score_cache = pathway_score_cache.get() or {}
+                    results_by_fc = score_cache.get("results_by_fc", {}) if isinstance(score_cache, dict) else {}
+                    selected_score_bundle = results_by_fc.get(selected_fc, {}) if isinstance(results_by_fc, dict) else {}
+                    if not selected_score_bundle and isinstance(results_by_fc, dict):
+                        # Fallback to first available scoring result
+                        for _, value in results_by_fc.items():
+                            if isinstance(value, dict):
+                                selected_score_bundle = value
+                                break
+                    source_score_maps: Dict[str, Dict[str, Dict[str, Any]]] = {"kegg": {}, "wikipathways": {}}
+                    if isinstance(selected_score_bundle, dict):
+                        for source_key in ("kegg", "wikipathways"):
+                            source_obj = selected_score_bundle.get(source_key)
+                            if isinstance(source_obj, dict):
+                                source_score_maps[source_key] = source_obj
+                        # Backward compatibility: legacy flat KEGG-only map.
+                        if not source_score_maps["kegg"] and not source_score_maps["wikipathways"]:
+                            maybe_pathway_id = next(iter(selected_score_bundle.keys()), "")
+                            maybe_row = selected_score_bundle.get(maybe_pathway_id) if maybe_pathway_id else None
+                            if isinstance(maybe_row, dict) and "final_score" in maybe_row:
+                                source_score_maps["kegg"] = selected_score_bundle
                     species_key, species_info = _resolve_species(_get_input_value(input, "input_species"))
                     species_label = species_info.get("label") or species_key
                     species_full = species_info.get("species") or species_label
                     options = _load_wikipathways_catalog(species_label, fallback=species_full)
                     species_code = species_info.get("code", "")
-                    kegg_rows: List[Dict[str, str]] = []
+                    kegg_rows: List[Dict[str, Any]] = []
                     for opt in KEGG_PATHWAY_OPTIONS:
                         species_id = f"{species_code}{opt['digits']}"
-                        kegg_rows.append({"id": species_id, "pathway": opt["name"], "source": "KEGG"})
+                        kegg_rows.append(
+                            {
+                                "id": species_id,
+                                "pathway": opt["name"],
+                                "source": "KEGG",
+                                "final_score": None,
+                                "connection_score": None,
+                                "node_mass": None,
+                                "scored_node_count": None,
+                                "reg_node_count": None,
+                            }
+                        )
                     wp_rows: List[Dict[str, str]] = []
                     if not options:
                         if not kegg_rows:
@@ -4773,12 +5097,17 @@ def server(input, output, session):  # type: ignore[override]
                                 "pathway": str(opt.get("name") or "").strip(),
                                 "source": "WikiPathways",
                                 "species": str(opt.get("species") or ""),
+                                "final_score": None,
+                                "connection_score": None,
+                                "node_mass": None,
+                                "scored_node_count": None,
+                                "reg_node_count": None,
                             }
                             for opt in options
                             if opt.get("id") and opt.get("name")
                         ]
                     query = (str(_get_input_value(input, _prefixed_id(prefix, "pathway_id"))) or "").strip()
-                    combined_rows: List[Dict[str, str]] = []
+                    combined_rows: List[Dict[str, Any]] = []
                     pattern = None
                     if query:
                         try:
@@ -4789,7 +5118,7 @@ def server(input, output, session):  # type: ignore[override]
                         search_target = f"{opt['id']} | {opt['pathway']} | {opt.get('species', '')} | {opt['source']}"
                         if pattern and not pattern.search(search_target):
                             continue
-                        combined_rows.append({"id": opt["id"], "pathway": opt["pathway"], "source": opt["source"]})
+                        combined_rows.append(dict(opt))
                     for opt in kegg_rows:
                         search_target = f"{opt['id']} | {opt['pathway']} | {opt['source']}"
                         if pattern and not pattern.search(search_target):
@@ -4819,24 +5148,68 @@ def server(input, output, session):  # type: ignore[override]
                     if selected_sources:
                         selected_lower = {s.lower() for s in selected_sources}
                         combined_rows = [row for row in combined_rows if str(row.get("source", "")).lower() in selected_lower]
+
+                    if isinstance(source_score_maps, dict):
+                        for row in combined_rows:
+                            source_key = str(row.get("source", "")).strip().lower()
+                            pid = str(row.get("id", "")).strip().lower()
+                            source_map = source_score_maps.get(source_key, {})
+                            score_entry = source_map.get(pid) if isinstance(source_map, dict) else None
+                            if not isinstance(score_entry, dict):
+                                continue
+                            row["final_score"] = score_entry.get("final_score")
+                            row["connection_score"] = score_entry.get("connection_score")
+                            row["node_mass"] = score_entry.get("node_mass")
+                            row["scored_node_count"] = score_entry.get("scored_node_count")
+                            row["reg_node_count"] = score_entry.get("reg_node_count")
                     if not combined_rows:
                         return ui.div({"class": "pathway-search-empty"}, "No pathways matched your search.")
                     sort_col = (web_sort_col.get() or "pathway") if web_sort_col else "pathway"
                     sort_dir = (web_sort_dir.get() or "asc") if web_sort_dir else "asc"
-                    reverse = sort_dir == "desc"
-                    if sort_col == "source":
-                        combined_rows.sort(
-                            key=lambda r: (
-                                str(r.get("source", "")).lower(),
-                                str(r.get("pathway", "")).lower(),
-                            ),
-                            reverse=reverse,
-                        )
+                    sort_field_map = {
+                        "source": "source",
+                        "pathway": "pathway",
+                        "final_score": "final_score",
+                        "connection_score": "connection_score",
+                        "node_mass": "node_mass",
+                        "scored_node_count": "scored_node_count",
+                        "reg_node_count": "reg_node_count",
+                    }
+                    field = sort_field_map.get(sort_col, "pathway")
+                    numeric_fields = {
+                        "final_score",
+                        "connection_score",
+                        "node_mass",
+                        "scored_node_count",
+                        "reg_node_count",
+                    }
+                    if field in numeric_fields:
+                        ascending = sort_dir == "asc"
+
+                        def _numeric_sort_key(row: Dict[str, Any]) -> Tuple[int, float, str]:
+                            raw_val = row.get(field)
+                            parsed_val: Optional[float] = None
+                            if raw_val not in (None, ""):
+                                try:
+                                    parsed_val = float(raw_val)
+                                except (TypeError, ValueError):
+                                    parsed_val = None
+                            if parsed_val is None:
+                                # Asc: missing first. Desc: missing last.
+                                missing_rank = 0 if ascending else 1
+                                sort_val = 0.0
+                            else:
+                                missing_rank = 1 if ascending else 0
+                                sort_val = parsed_val if ascending else -parsed_val
+                            return (missing_rank, sort_val, str(row.get("pathway", "")).lower())
+
+                        combined_rows.sort(key=_numeric_sort_key)
                     else:
+                        reverse = sort_dir == "desc"
                         combined_rows.sort(
                             key=lambda r: (
+                                str(r.get(field, "")).lower(),
                                 str(r.get("pathway", "")).lower(),
-                                str(r.get("source", "")).lower(),
                             ),
                             reverse=reverse,
                         )
@@ -4852,6 +5225,14 @@ def server(input, output, session):  # type: ignore[override]
                                 label = f"{label} | {name_val}"
                             web_selected_label.set(label)
                             break
+                    def _fmt_metric(raw: Any, digits: int = 4) -> str:
+                        if raw in (None, "", False):
+                            return ""
+                        try:
+                            return f"{float(raw):.{digits}g}"
+                        except (TypeError, ValueError):
+                            return str(raw)
+
                     table_rows: List[Any] = []
                     for entry in combined_rows:
                         classes = []
@@ -4877,10 +5258,28 @@ def server(input, output, session):  # type: ignore[override]
                                     ui.tags.div(entry["pathway"]),
                                     ui.tags.small({"style": "color:#6b7280;"}, entry["id"]),
                                 ),
+                                ui.tags.td(_fmt_metric(entry.get("final_score"), 5)),
+                                ui.tags.td(_fmt_metric(entry.get("connection_score"), 5)),
+                                ui.tags.td(_fmt_metric(entry.get("node_mass"), 4)),
+                                ui.tags.td(
+                                    ""
+                                    if entry.get("scored_node_count") is None
+                                    else str(entry.get("scored_node_count"))
+                                ),
+                                ui.tags.td(
+                                    ""
+                                    if entry.get("reg_node_count") is None
+                                    else str(entry.get("reg_node_count"))
+                                ),
                             )
                         )
                     source_arrow = "▲" if sort_col == "source" and sort_dir == "asc" else ("▼" if sort_col == "source" else "")
                     pathway_arrow = "▲" if sort_col == "pathway" and sort_dir == "asc" else ("▼" if sort_col == "pathway" else "")
+                    score_arrow = "▲" if sort_col == "final_score" and sort_dir == "asc" else ("▼" if sort_col == "final_score" else "")
+                    conn_arrow = "▲" if sort_col == "connection_score" and sort_dir == "asc" else ("▼" if sort_col == "connection_score" else "")
+                    mass_arrow = "▲" if sort_col == "node_mass" and sort_dir == "asc" else ("▼" if sort_col == "node_mass" else "")
+                    scored_arrow = "▲" if sort_col == "scored_node_count" and sort_dir == "asc" else ("▼" if sort_col == "scored_node_count" else "")
+                    reg_arrow = "▲" if sort_col == "reg_node_count" and sort_dir == "asc" else ("▼" if sort_col == "reg_node_count" else "")
                     table = ui.tags.table(
                         {"class": "table table-sm table-hover pathway-table"},
                         ui.tags.thead(
@@ -4894,6 +5293,31 @@ def server(input, output, session):  # type: ignore[override]
                                     {"style": "cursor:pointer;", "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'pathway', ts:Date.now()}}, {{priority:'event'}});"},
                                     ui.tags.span("Pathway"),
                                     ui.tags.span(f" {pathway_arrow}" if pathway_arrow else ""),
+                                ),
+                                ui.tags.th(
+                                    {"style": "cursor:pointer;", "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'final_score', ts:Date.now()}}, {{priority:'event'}});"},
+                                    ui.tags.span("Final"),
+                                    ui.tags.span(f" {score_arrow}" if score_arrow else ""),
+                                ),
+                                ui.tags.th(
+                                    {"style": "cursor:pointer;", "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'connection_score', ts:Date.now()}}, {{priority:'event'}});"},
+                                    ui.tags.span("Conn"),
+                                    ui.tags.span(f" {conn_arrow}" if conn_arrow else ""),
+                                ),
+                                ui.tags.th(
+                                    {"style": "cursor:pointer;", "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'node_mass', ts:Date.now()}}, {{priority:'event'}});"},
+                                    ui.tags.span("Mass"),
+                                    ui.tags.span(f" {mass_arrow}" if mass_arrow else ""),
+                                ),
+                                ui.tags.th(
+                                    {"style": "cursor:pointer;", "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'scored_node_count', ts:Date.now()}}, {{priority:'event'}});"},
+                                    ui.tags.span("Scored"),
+                                    ui.tags.span(f" {scored_arrow}" if scored_arrow else ""),
+                                ),
+                                ui.tags.th(
+                                    {"style": "cursor:pointer;", "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'reg_node_count', ts:Date.now()}}, {{priority:'event'}});"},
+                                    ui.tags.span("Reg"),
+                                    ui.tags.span(f" {reg_arrow}" if reg_arrow else ""),
                                 ),
                             )
                         ),
