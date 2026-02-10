@@ -71,6 +71,20 @@ def _resolve_kegg_pathways_file() -> str:
     return candidates[0]
 
 
+def _resolve_species_ref_file() -> str:
+    candidates = [os.path.join(BASE_DIR, "species_ref_list.csv")]
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        candidates.extend([
+            os.path.join(sys._MEIPASS, "MapKinase_WebApp", "species_ref_list.csv"),
+            os.path.join(sys._MEIPASS, "species_ref_list.csv"),
+        ])
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    print(f"Warning: species_ref_list.csv not found (searched: {candidates})")
+    return candidates[0]
+
+
 KEGG_PATHWAYS_FILE = _resolve_kegg_pathways_file()
 KEGG_PATHWAY_MAX_MATCHES = 12
 WIKIPATHWAYS_MAX_MATCHES = 25
@@ -85,9 +99,9 @@ JSON_PREVIEW_FILE = os.path.join(JSON_PREVIEW_DIR, "latest_preview.json")
 CUSTOM_LAYOUT_EXPORT_FILE = os.path.join(JSON_PREVIEW_DIR, "custom_pathway_export.json")
 RESOURCE_ROOT = getattr(sys, "_MEIPASS", PARENT_DIR)
 SAMPLE_DATA_DIR = os.path.join(RESOURCE_ROOT, "sample_input_files")
-SAMPLE_PROTEIN_FILE = os.path.join(SAMPLE_DATA_DIR, "853paz_Prot_mapk.csv")
-SAMPLE_PTM_FILE = os.path.join(SAMPLE_DATA_DIR, "853paz_Phos_mapk.csv")
-SPECIES_REF_PATH = os.path.join(BASE_DIR, "species_ref_list.csv")
+SAMPLE_PROTEIN_FILE = os.path.join(SAMPLE_DATA_DIR, "mapk_prot_examplefile.csv")
+SAMPLE_PTM_FILE = os.path.join(SAMPLE_DATA_DIR, "mapk_phos_examplefile.csv")
+SPECIES_REF_PATH = _resolve_species_ref_file()
 UPLOAD_ACCEPT_TYPES = [
     ".txt",
     ".tsv",
@@ -103,6 +117,7 @@ TERMINAL_LOG_FILE = os.environ.get(
     "M5_TERMINAL_LOG_FILE", os.path.join(BASE_DIR, "m5_terminal_output.txt")
 )
 MANUAL_BUILD_ONLY = True
+GUI_POPUP = True
 debug_var = False
 
 def _load_species_choices() -> Dict[str, Dict[str, str]]:
@@ -203,8 +218,6 @@ def _env_var_truthy(name: str, default: bool = False) -> bool:
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
-
-LAUNCH_DESKTOP_GUI = _env_var_truthy("M5_DESKTOP_GUI", default=False)
 
 BUILD_GLOBAL_CATALOG_ON_STARTUP = _env_var_truthy(
     "M5_BUILD_GLOBAL_CATALOG_ON_STARTUP",
@@ -5343,7 +5356,7 @@ def _launch_desktop_window(url: str):
 
 
 if __name__ == "__main__":
-    if LAUNCH_DESKTOP_GUI:
+    if GUI_POPUP:
         server_thread = threading.Thread(target=_run_uvicorn_app, daemon=True)
         server_thread.start()
         time.sleep(1.2)
