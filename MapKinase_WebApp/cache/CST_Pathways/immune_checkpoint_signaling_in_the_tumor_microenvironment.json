@@ -1,0 +1,1416 @@
+{
+  "pathway_name": "Immune Checkpoint Signaling in the Tumor Microenvironment",
+  "pathway_url": "https://www.cellsignal.com/pathways/immune-checkpoint-signaling-pathway",
+  "source_sections": [
+    "Immunology/Inflammation",
+    "Immuno-oncology",
+    "Avoiding Immune Destruction"
+  ],
+  "protein_modules": [
+    {
+      "label": "Stat1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=stat1&site-search-type=Products",
+      "phosphositeplus_id": "1048",
+      "phosphositeplus_ids": [
+        "1048"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=1048",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1048"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1048",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1048&showAllSites=true",
+          "gene_symbol": "STAT1",
+          "uniprot_id": "P42224",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P42224",
+          "protein_name": "Signal transducer and transcription activator that mediates cellular responses to interferons (IFNs), cytokine KITLG/SCF and other cytokines and other growth factors. Following type I IFN (IFN-alpha and IFN-beta) binding to cell surface receptors, signaling via protein kinases leads to activation of Jak kinases (TYK2 and JAK1) and to tyrosine phosphorylation of STAT1 and STAT2. The phosphorylated STATs dimerize and associate with ISGF3G/IRF-9 to form a complex termed ISGF3 transcription factor, that enters the nucleus. ISGF3 binds to the IFN stimulated response element (ISRE) to activate the transcription of IFN-stimulated genes (ISG), which drive the cell in an antiviral state. In response to type II IFN (IFN-gamma), STAT1 is tyrosine- and serine-phosphorylated. It then forms a homodimer termed IFN-gamma-activated factor (GAF), migrates into the nucleus and binds to the IFN gamma activated sequence (GAS) to drive the expression of the target genes, inducing a cellular antiviral state. Becomes activated in response to KITLG/SCF and KIT signaling. May mediate cellular responses to activated FGFR1, FGFR2, FGFR3 and FGFR4. Belongs to the transcription factor STAT family. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P42224 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "DNA-binding; Transcription factor",
+            "Chromosomal Location of human Ortholog": "2q32.2",
+            "Cellular Component": "chromatin; cytoplasm; cytosol; ISGF3 complex; nucleoplasm; nucleus; perinuclear region of cytoplasm; protein-containing complex; RNA polymerase II transcription regulator complex",
+            "Molecular Function": "DNA binding; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; double-stranded DNA binding; enzyme binding; histone acetyltransferase binding; histone binding; identical protein binding; promoter-specific chromatin binding; protein binding; protein homodimerization activity; RNA polymerase II cis-regulatory region sequence-specific DNA binding; RNA polymerase II core promoter sequence-specific DNA binding; RNA polymerase II transcription regulatory region sequence-specific DNA binding; transcription coactivator binding; transcription corepressor binding; tumor necrosis factor receptor binding; ubiquitin-like protein ligase binding",
+            "Biological Process": "cell surface receptor signaling pathway via JAK-STAT; cell surface receptor signaling pathway via STAT; cellular response to interferon-beta; cellular response to type II interferon; defense response; defense response to virus; endothelial cell migration; interleukin-27-mediated signaling pathway; interleukin-7-mediated signaling pathway; interleukin-9-mediated signaling pathway; metanephric mesenchymal cell differentiation; metanephric mesenchymal cell proliferation involved in metanephros development; negative regulation by virus of viral protein levels in host cell; negative regulation of angiogenesis; negative regulation of canonical NF-kappaB signal transduction; negative regulation of developmental process; negative regulation of endothelial cell proliferation; negative regulation of mesenchymal to epithelial transition involved in metanephros morphogenesis; negative regulation of metanephric nephron tubule epithelial cell differentiation; negative regulation of transcription by RNA polymerase II; positive regulation of defense response to virus by host; positive regulation of DNA-templated transcription; positive regulation of erythrocyte differentiation; positive regulation of interferon-alpha production; positive regulation of mesenchymal cell proliferation; positive regulation of transcription by RNA polymerase II; regulation of apoptotic process; regulation of cell population proliferation; regulation of DNA-templated transcription; regulation of transcription by RNA polymerase II; renal tubule development; response to interferon-beta; response to peptide hormone; response to type II interferon; signal transduction; tumor necrosis factor-mediated signaling pathway; type I interferon-mediated signaling pathway; type II interferon-mediated signaling pathway",
+            "Disease": "Immunodeficiency 31a ; Immunodeficiency 31b ; Immunodeficiency 31c",
+            "Reference #": "P42224 (UniProtKB)",
+            "Alt. Names/Synonyms": "CANDF7; DKFZp686B04100; IMD31A; IMD31B; IMD31C; ISGF-3; signal transducer and activator of transcription 1; signal transducer and activator of transcription 1, 91kD; signal transducer and activator of transcription 1, 91kDa; Signal transducer and activator of transcription 1-alpha/beta; signal transducer and activator of transcription-1; STAT1; STAT91; Transcription factor ISGF-3 components p91/p84",
+            "Gene Symbols": "STAT1",
+            "Molecular weight": "87,335 Da",
+            "Basal Isoelectric point": "5.74 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | Growth And Differentiation Control by MAPKs | IL6 Signaling | Inhibition of Apoptosis | Regulation of P38 MAPKs",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1BF5 1YVL 2KA6 3WWT 7NUF 8D3F 8YYU 8YYV | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P42224"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P42224"
+      ],
+      "psp_gene_symbols": [
+        "STAT1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Stat3",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=stat3&site-search-type=Products",
+      "phosphositeplus_id": "1050",
+      "phosphositeplus_ids": [
+        "1050"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=1050",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1050"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1050",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1050&showAllSites=true",
+          "gene_symbol": "STAT3",
+          "uniprot_id": "P40763",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P40763",
+          "protein_name": "Signal transducer and transcription activator that mediates cellular responses to interleukins, KITLG/SCF, LEP and other growth factors. Once activated, recruits coactivators, such as NCOA1 or MED1, to the promoter region of the target gene. May mediate cellular responses to activated FGFR1, FGFR2, FGFR3 and FGFR4. Binds to the interleukin-6 (IL-6)-responsive elements identified in the promoters of various acute-phase protein genes. Activated by IL31 through IL31RA. Acts as a regulator of inflammatory response by regulating differentiation of naive CD4(+) T-cells into T-helper Th17 or regulatory T-cells (Treg): deacetylation and oxidation of lysine residues by LOXL3, leads to disrupt STAT3 dimerization and inhibit its transcription activity. Involved in cell cycle regulation by inducing the expression of key genes for the progression from G1 to S phase, such as CCND1. Mediates the effects of LEP on melanocortin production, body energy homeostasis and lactation. May play an apoptotic role by transctivating BIRC5 expression under LEP activation. Cytoplasmic STAT3 represses macroautophagy by inhibiting EIF2AK2/PKR activity. Plays a crucial role in basal beta cell functions, such as regulation of insulin secretion. Belongs to the transcription factor STAT family. Heart, brain, placenta, lung, liver, skeletal muscle, kidney and pancreas. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P40763 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "DNA-binding; Motility/polarity/chemotaxis; Nuclear receptor co-regulator; Transcription factor",
+            "Chromosomal Location of human Ortholog": "17q21.2",
+            "Cellular Component": "chromatin; cytoplasm; cytosol; glutamatergic synapse; mitochondrial inner membrane; nucleoplasm; nucleus; plasma membrane; postsynaptic density; protein-containing complex; RNA polymerase II transcription regulator complex; Schaffer collateral - CA1 synapse; transcription regulator complex",
+            "Molecular Function": "CCR5 chemokine receptor binding; chromatin DNA binding; DNA binding; DNA-binding transcription activator activity, RNA polymerase II-specific; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; DNA-binding transcription factor binding; identical protein binding; lncRNA binding; nuclear glucocorticoid receptor binding; nuclear receptor activity; primary miRNA binding; protein binding; protein dimerization activity; protein homodimerization activity; protein kinase binding; protein phosphatase binding; protein sequestering activity; RNA binding; RNA polymerase II cis-regulatory region sequence-specific DNA binding; RNA polymerase II-specific DNA-binding transcription factor binding; RNA sequestering activity; sequence-specific DNA binding; signaling adaptor activity; signaling receptor binding; transcription cis-regulatory region binding",
+            "Biological Process": "acute-phase response; astrocyte differentiation; cell differentiation; cell surface receptor signaling pathway via JAK-STAT; cell surface receptor signaling pathway via STAT; cellular response to hormone stimulus; cellular response to interleukin-17; cellular response to leptin stimulus; ciliary neurotrophic factor-mediated signaling pathway; cytokine-mediated signaling pathway; defense response; eating behavior; endoplasmic reticulum unfolded protein response; energy homeostasis; eye photoreceptor cell differentiation; glucose homeostasis; growth hormone receptor signaling pathway; growth hormone receptor signaling pathway via JAK-STAT; immune response; inflammatory response; interleukin-10-mediated signaling pathway; interleukin-11-mediated signaling pathway; interleukin-15-mediated signaling pathway; interleukin-2-mediated signaling pathway; interleukin-23-mediated signaling pathway; interleukin-6-mediated signaling pathway; interleukin-9-mediated signaling pathway; intracellular receptor signaling pathway; leptin-mediated signaling pathway; leukemia inhibitory factor signaling pathway; modulation of chemical synaptic transmission; negative regulation of autophagy; negative regulation of canonical NF-kappaB signal transduction; negative regulation of cytokine production involved in inflammatory response; negative regulation of gene expression; negative regulation of hydrogen peroxide biosynthetic process; negative regulation of inflammatory response; negative regulation of inflammatory response to wounding; negative regulation of intrinsic apoptotic signaling pathway; negative regulation of neuron apoptotic process; negative regulation of primary miRNA processing; negative regulation of transcription by RNA polymerase II; nervous system development; phosphatidylinositol 3-kinase/protein kinase B signal transduction; plasma cell differentiation; positive regulation of angiogenesis; positive regulation of ATP biosynthetic process; positive regulation of canonical NF-kappaB signal transduction; positive regulation of cell migration; positive regulation of cell population proliferation; positive regulation of cytokine production involved in inflammatory response; positive regulation of DNA-templated transcription; positive regulation of erythrocyte differentiation; positive regulation of extracellular matrix disassembly; positive regulation of gene expression; positive regulation of growth factor dependent skeletal muscle satellite cell proliferation; positive regulation of inflammatory response; positive regulation of interleukin-1 beta production; positive regulation of interleukin-10 production; positive regulation of interleukin-6 production; positive regulation of interleukin-8 production; positive regulation of miRNA transcription; positive regulation of multicellular organismal process; positive regulation of Notch signaling pathway; positive regulation of phagocytosis; positive regulation of transcription by RNA polymerase II; positive regulation of tumor necrosis factor production; positive regulation of vascular endothelial cell proliferation; positive regulation of vascular endothelial growth factor production; postsynapse to nucleus signaling pathway; protein import into nucleus; radial glial cell differentiation; regulation of cell cycle; regulation of cell population proliferation; regulation of cellular response to hypoxia; regulation of cytokine production; regulation of DNA-templated transcription; regulation of feeding behavior; regulation of mitochondrial membrane permeability; regulation of transcription by RNA polymerase II; response to cytokine; response to estradiol; response to ethanol; response to hypoxia; response to ischemia; response to leptin; response to peptide hormone; signal transduction; T-helper 17 cell lineage commitment; T-helper 17 type immune response; temperature homeostasis; transforming growth factor beta receptor signaling pathway",
+            "Disease": "Autoimmune Disease, Multisystem, Infantile-onset ; Hyper-ige Recurrent Infection Syndrome, Autosomal Dominant",
+            "Reference #": "P40763 (UniProtKB)",
+            "Alt. Names/Synonyms": "Acute-phase response factor; ADMIO; ADMIO1; APRF; DNA-binding protein APRF; FLJ20882; HIES; MGC16063; Signal transducer and activator of transcription 3; signal transducer and activator of transcription 3 (acute-phase response factor); STAT3",
+            "Gene Symbols": "STAT3",
+            "Molecular weight": "88,068 Da",
+            "Basal Isoelectric point": "5.94 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | Growth And Differentiation Control by MAPKs | IL6 Signaling | Inhibition of Apoptosis | Microtubule Dynamics | SAPK/JNK Signaling Cascades",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 5AX3 5U5S 6NJS 6NUQ 6QHD 6TLC | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | NURSA | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P40763"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P40763"
+      ],
+      "psp_gene_symbols": [
+        "STAT3"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Galectin-9",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=galectin-9&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "B7-H3",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=B7-H3&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "B7-H4",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=B7-H4&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "GITRL",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=gitrl&site-search-type=Products",
+      "phosphositeplus_id": "2645;2672",
+      "phosphositeplus_ids": [
+        "2645",
+        "2672"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=2645",
+        "https://www.phosphosite.org/proteinAction.action?id=2672"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "2645",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2645&showAllSites=true",
+          "gene_symbol": "GIT1",
+          "uniprot_id": "Q9Y2X7",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9Y2X7",
+          "protein_name": "GTPase-activating protein for the ADP ribosylation factor family. May serve as a scaffold to bring together molecules to form signaling modules controlling vesicle trafficking, adhesion and cytoskeletal organization. Increases the speed of cell migration, as well as the size and rate of formation of protrusions, possibly by targeting PAK1 to adhesions and the leading edge of lamellipodia. Sequesters inactive non-tyrosine-phosphorylated paxillin in cytoplasmic complexes. Involved in the regulation of cytokinesis; the function may involve ENTR1 and PTPN13. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9Y2X7 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "GAP; GAP, ARF; Motility/polarity/chemotaxis",
+            "Chromosomal Location of human Ortholog": "17q11.2",
+            "Cellular Component": "calyx of Held; centrosome; cytoplasm; cytosol; dendrite; endosome; excitatory synapse; focal adhesion; GABA-ergic synapse; glutamatergic synapse; growth cone; inhibitory synapse; lamellipodium; mitotic spindle pole; neuron projection; postsynapse; postsynaptic density; presynapse; presynaptic active zone; protein-containing complex; spindle pole; synapse",
+            "Molecular Function": "gamma-tubulin binding; GTPase activator activity; identical protein binding; metal ion binding; protein binding; protein phosphatase binding; protein transporter activity; protein tyrosine kinase binding; protein-containing complex binding; scaffold protein binding; small GTPase binding; structural constituent of postsynaptic specialization; zinc ion binding",
+            "Biological Process": "brain development; cell redox homeostasis; cellular response to epidermal growth factor stimulus; cellular response to lipopolysaccharide; intramembranous ossification; locomotory behavior; maintenance of postsynaptic specialization structure; motor learning; negative regulation of ARF protein signal transduction; negative regulation of glycolytic process; negative regulation of inflammatory response to wounding; negative regulation of interleukin-1 beta production; neuron development; neurotransmitter receptor localization to postsynaptic specialization membrane; positive regulation of AMPA glutamate receptor clustering; positive regulation of microtubule nucleation; positive regulation of receptor catabolic process; regulation of ARF protein signal transduction; regulation of cytokinesis; regulation of G protein-coupled receptor signaling pathway; regulation of synaptic vesicle exocytosis; synaptic vesicle recycling",
+            "Reference #": "Q9Y2X7 (UniProtKB)",
+            "Alt. Names/Synonyms": "ARF GAP GIT1; ARF GTPase-activating protein GIT1; CAT-1; CAT1; Cool-associated and tyrosine-phosphorylated protein 1; G protein-coupled receptor kinase interacting ArfGAP 1; G protein-coupled receptor kinase interactor 1; G protein-coupled receptor kinase-interactor 1; GIT ArfGAP 1; GIT1; GRK-interacting protein 1",
+            "Gene Symbols": "GIT1",
+            "Molecular weight": "84,341 Da",
+            "Basal Isoelectric point": "6.33 Predict pI for various phosphorylation states",
+            "CST Pathways": "Actin Dynamics",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "2672",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2672&showAllSites=true",
+          "gene_symbol": "GIT2",
+          "uniprot_id": "Q14161",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q14161",
+          "protein_name": "GTPase-activating protein for the ADP ribosylation factor family. 11 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q14161 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "GAP; GAP, ARF; Motility/polarity/chemotaxis",
+            "Chromosomal Location of human Ortholog": "12q24.11",
+            "Cellular Component": "nucleoplasm; presynapse; synapse",
+            "Molecular Function": "GTPase activator activity; metal ion binding; protein binding; small GTPase binding; zinc ion binding",
+            "Biological Process": "brain development; regulation of ARF protein signal transduction; regulation of G protein-coupled receptor signaling pathway; synaptic vesicle recycling",
+            "Reference #": "Q14161 (UniProtKB)",
+            "Alt. Names/Synonyms": "ARF GAP GIT2; ARF GTPase-activating protein GIT2; CAT-2; CAT2; cool-associated, tyrosine phosphorylated protein 2; Cool-interacting tyrosine-phosphorylated protein 2; DKFZp686G01261; G protein-coupled receptor kinase interacting ArfGAP 2; G protein-coupled receptor kinase interactor 2; G protein-coupled receptor kinase-interactor 2; GIT ArfGAP 2; GIT2; GRK-interacting protein 2; KIAA0148; MGC760; Paxillin kinase linker; PKL",
+            "Gene Symbols": "GIT2",
+            "Molecular weight": "84,543 Da",
+            "Basal Isoelectric point": "6.78 Predict pI for various phosphorylation states",
+            "CST Pathways": "Actin Dynamics",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q9Y2X7",
+        "Q14161"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q9Y2X7",
+        "https://www.uniprot.org/uniprot/Q14161"
+      ],
+      "psp_gene_symbols": [
+        "GIT1",
+        "GIT2"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "ICOSL",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=icosl&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "OX40L",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=ox40L&site-search-type=Products",
+      "phosphositeplus_id": "15857",
+      "phosphositeplus_ids": [
+        "15857"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=15857",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=15857"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "15857",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=15857&showAllSites=true",
+          "gene_symbol": "ORAI1",
+          "uniprot_id": "Q96D31",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q96D31",
+          "protein_name": "Ca(2+) release-activated Ca(2+) (CRAC) channel subunit which mediates Ca(2+) influx following depletion of intracellular Ca(2+) stores and channel activation by the Ca(2+) sensor, STIM1. CRAC channels are the main pathway for Ca(2+) influx in T-cells and promote the immune response to pathogens by activating the transcription factor NFAT. Belongs to the Orai family. 2 alternative initiation human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q96D31 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Channel, calcium; Membrane protein, integral; Membrane protein, multi-pass",
+            "Chromosomal Location of human Ortholog": "12q24.31",
+            "Cellular Component": "basolateral plasma membrane; calcium channel complex; cell periphery; membrane; membrane raft; plasma membrane; plasma membrane raft",
+            "Molecular Function": "calcium channel activity; calmodulin binding; identical protein binding; protein binding; store-operated calcium channel activity",
+            "Biological Process": "adaptive immune response; calcineurin-NFAT signaling cascade; calcium ion transmembrane transport; calcium ion transport; calcium-ion regulated exocytosis; calcium-mediated signaling; immune system process; monoatomic ion transmembrane transport; monoatomic ion transport; phospholipase C-activating G protein-coupled receptor signaling pathway; positive regulation of adenylate cyclase activity; positive regulation of calcium ion transport; regulation of calcium ion transport; store-operated calcium entry",
+            "Disease": "Immunodeficiency 9 ; Myopathy, Tubular Aggregate, 2",
+            "Reference #": "Q96D31 (UniProtKB)",
+            "Alt. Names/Synonyms": "Calcium release-activated calcium channel protein 1; calcium release-activated calcium modulator 1; CRACM1; CRCM1; FLJ14466; IMD9; ORAI calcium release-activated calcium modulator 1; ORAI1; ORAT1; Protein orai-1; TAM2; TMEM142A; Transmembrane protein 142A",
+            "Gene Symbols": "ORAI1",
+            "Molecular weight": "32,668 Da",
+            "Basal Isoelectric point": "8.45 Predict pI for various phosphorylation states",
+            "CST Pathways": "B Cell Receptor Signaling | T Cell Receptor Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2MAK 4EHQ | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q96D31"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q96D31"
+      ],
+      "psp_gene_symbols": [
+        "ORAI1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "MHC",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=mhc&site-search-type=Products",
+      "phosphositeplus_id": "14588",
+      "phosphositeplus_ids": [
+        "14588"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=14588",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=14588"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "14588",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=14588&showAllSites=true",
+          "gene_symbol": "METTL1",
+          "uniprot_id": "Q9UBP6",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9UBP6",
+          "protein_name": "Methyltransferase that mediates the formation of N(7)-methylguanine in a subset of RNA species, such as tRNAs, mRNAs and microRNAs (miRNAs). Catalyzes the formation of N(7)-methylguanine at position 46 (m7G46) in tRNA. Also acts as a methyltransferase for a subset of internal N(7)-methylguanine in mRNAs. Internal N(7)-methylguanine methylation of mRNAs regulates translation. Also methylates a specific subset of miRNAs, such as let-7. N(7)-methylguanine methylation of let-7 miRNA promotes let-7 miRNA processing by disrupting an inhibitory secondary structure within the primary miRNA transcript (pri-miRNA). Acts as a regulator of embryonic stem cell self-renewal and differentiation. Belongs to the class I-like SAM-binding methyltransferase superfamily. TrmB family. Ubiquitous. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9UBP6 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 2.1.1.33; Methyltransferase; RNA processing",
+            "Chromosomal Location of human Ortholog": "12q14.1",
+            "Cellular Component": "nucleoplasm; nucleus; tRNA (m7G46) methyltransferase complex; tRNA methyltransferase complex",
+            "Molecular Function": "internal mRNA (guanine-N7-)-methyltransferase activity; methyltransferase activity; protein binding; RNA binding; transferase activity; tRNA (guanine(46)-N7)-methyltransferase activity; tRNA binding",
+            "Biological Process": "cellular response to stress; methylation; RNA (guanine-N7)-methylation; tRNA (guanine-N7)-methylation; tRNA methylation; tRNA modification; tRNA processing; tRNA stabilization",
+            "Reference #": "Q9UBP6 (UniProtKB)",
+            "Alt. Names/Synonyms": "C12orf1; D1075-like gene product; FLJ95748; methyltransferase like 1; methyltransferase-like 1; Methyltransferase-like protein 1; METTL1; miRNA (guanine-N(7)-)-methyltransferase; mRNA (guanine-N(7)-)-methyltransferase; TRM8; TRMB; TRMT8; tRNA (guanine(46)-N(7))-methyltransferase; tRNA (guanine-N(7)-)-methyltransferase; tRNA(m7G46)-methyltransferase; YDL201w",
+            "Gene Symbols": "METTL1",
+            "Molecular weight": "31,471 Da",
+            "Basal Isoelectric point": "7.19 Predict pI for various phosphorylation states",
+            "CST Pathways": "Growth And Differentiation Control by MAPKs",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 3CKK 7OGJ 7PL1 7U20 8CTH 8CTI 8D58 8D59 8D5B 8D9K 8D9L 8EG0 8H0N | ENZYME | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q9UBP6"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q9UBP6"
+      ],
+      "psp_gene_symbols": [
+        "METTL1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "TIM-3",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=Tim-3&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "VISTA",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=vista&site-search-type=Products",
+      "phosphositeplus_id": "7520;19162",
+      "phosphositeplus_ids": [
+        "7520",
+        "19162"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=7520",
+        "https://www.phosphosite.org/proteinAction.action?id=19162"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "7520",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=7520&showAllSites=true",
+          "gene_symbol": "CDH5",
+          "uniprot_id": "P33151",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P33151",
+          "protein_name": "Cadherins are calcium-dependent cell adhesion proteins. They preferentially interact with themselves in a homophilic manner in connecting cells; cadherins may thus contribute to the sorting of heterogeneous cell types. This cadherin may play a important role in endothelial cell biology through control of the cohesion and organization of the intercellular junctions. It associates with alpha-catenin forming a link to the cytoskeleton. Acts in concert with KRIT1 and MPP5 to establish and maintain correct endothelial cell polarity and vascular lumen. These effects are mediated by recruitment and activation of the Par polarity complex and RAP1B. Required for activation of PRKCZ and for the localization of phosphorylated PRKCZ, PARD3, TIAM1 and RAP1B to the cell junction. Endothelial tissues and brain. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P33151 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Cell adhesion; Membrane protein, integral; Motility/polarity/chemotaxis",
+            "Chromosomal Location of human Ortholog": "16q21",
+            "Cellular Component": "adherens junction; bicellular tight junction; catenin complex; cell junction; cell periphery; cell surface; cell-cell junction; cytoplasm; external side of plasma membrane; membrane; plasma membrane",
+            "Molecular Function": "beta-catenin binding; BMP receptor binding; cadherin binding; calcium ion binding; cell-cell adhesion mediator activity; fibrinogen binding; metal ion binding; protein binding; protein phosphatase binding; protein tyrosine kinase binding; signaling receptor binding; signaling receptor complex adaptor activity; transmembrane transporter binding; vascular endothelial growth factor receptor 2 binding",
+            "Biological Process": "adherens junction organization; bicellular tight junction assembly; blood vessel endothelial cell migration; calcium-dependent cell-cell adhesion; cell adhesion; cell migration; cell migration involved in sprouting angiogenesis; cell morphogenesis; cell surface receptor signaling pathway; cell-cell adhesion; cell-cell adhesion mediated by cadherin; cell-cell junction assembly; endothelial cell morphogenesis; homophilic cell-cell adhesion; intracellular calcium ion homeostasis; maintenance of blood-brain barrier; negative regulation of endothelial cell apoptotic process; negative regulation of inflammatory response; negative regulation of microtubule polymerization; positive regulation of angiogenesis; positive regulation of BMP signaling pathway; positive regulation of cell migration; positive regulation of establishment of endothelial barrier; positive regulation of gene expression; positive regulation of intracellular signal transduction; positive regulation of protein-containing complex assembly; protein localization to bicellular tight junction; regulation of establishment of cell polarity; regulation of vascular permeability; transforming growth factor beta receptor signaling pathway",
+            "Reference #": "P33151 (UniProtKB)",
+            "Alt. Names/Synonyms": "7B4; 7B4 antigen; CADH5; cadherin 5; cadherin 5, type 2 (vascular endothelium); cadherin 5, type 2, VE-cadherin (vascular epithelium); Cadherin-5; CD144; cd144 antigen; CDH5; endothelial-specific cadherin; FLJ17376; Vascular endothelial cadherin; VE-cadherin",
+            "Gene Symbols": "CDH5",
+            "Molecular weight": "87,528 Da",
+            "Basal Isoelectric point": "5.22 Predict pI for various phosphorylation states",
+            "CST Pathways": "Adherens Junction Dynamics",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "19162",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=19162&showAllSites=true",
+          "gene_symbol": "PCDH12",
+          "uniprot_id": "Q9NPG4",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9NPG4",
+          "protein_name": "Cellular adhesion molecule that may play an important role in cell-cell interactions at interendothelial junctions. Acts as a regulator of cell migration, probably via increasing cell-cell adhesion. Promotes homotypic calcium-dependent aggregation and adhesion and clusters at intercellular junctions. Unable to bind to catenins, weakly associates with the cytoskeleton. Expressed in highly vascularized tissues including the heart and placenta, but most tissues contain a low level of expression (PubMed:11063261). Prominent expression in the spleen (PubMed:11063261). Present in villous and extravillous trophoblast (at protein level) (PubMed:21402705). Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9NPG4 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Membrane protein, integral",
+            "Chromosomal Location of human Ortholog": "5q31.3",
+            "Cellular Component": "anchoring junction; cell-cell junction; extracellular region; membrane; plasma membrane",
+            "Molecular Function": "calcium ion binding; cell adhesion molecule binding",
+            "Biological Process": "calcium-dependent cell-cell adhesion; cell adhesion; homophilic cell-cell adhesion; neuron recognition",
+            "Disease": "Microcephaly, Seizures, Spasticity, And Brain Calcifications",
+            "Reference #": "Q9NPG4 (UniProtKB)",
+            "Alt. Names/Synonyms": "DMJDS1; PCD12; PCDH12; protocadherin 12; Protocadherin-12; Protocadherin-12, secreted form; Vascular cadherin-2; vascular endothelial cadherin 2; Vascular endothelial cadherin-2; VE-cad-2; VE-cadherin 2; VE-cadherin-2; VECAD2",
+            "Gene Symbols": "PCDH12",
+            "Molecular weight": "128,995 Da",
+            "Basal Isoelectric point": "5.13 Predict pI for various phosphorylation states",
+            "CST Pathways": "Adherens Junction Dynamics",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P33151",
+        "Q9NPG4"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P33151",
+        "https://www.uniprot.org/uniprot/Q9NPG4"
+      ],
+      "psp_gene_symbols": [
+        "CDH5",
+        "PCDH12"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "PD-1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=PD-1&site-search-type=Products",
+      "phosphositeplus_id": "7830",
+      "phosphositeplus_ids": [
+        "7830"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=7830",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=7830"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "7830",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=7830&showAllSites=true",
+          "gene_symbol": "PCNA",
+          "uniprot_id": "P12004",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P12004",
+          "protein_name": "Auxiliary protein of DNA polymerase delta and is involved in the control of eukaryotic DNA replication by increasing the polymerase's processibility during elongation of the leading strand. Induces a robust stimulatory effect on the 3'-5' exonuclease and 3'-phosphodiesterase, but not apurinic-apyrimidinic (AP) endonuclease, APEX2 activities. Has to be loaded onto DNA in order to be able to stimulate APEX2. Plays a key role in DNA damage response (DDR) by being conveniently positioned at the replication fork to coordinate DNA replication with DNA repair and DNA damage tolerance pathways. Acts as a loading platform to recruit DDR proteins that allow completion of DNA replication after DNA damage and promote postreplication repair: Monoubiquitinated PCNA leads to recruitment of translesion (TLS) polymerases, while 'Lys-63'-linked polyubiquitination of PCNA is involved in error-free pathway and employs recombination mechanisms to synthesize across the lesion. Belongs to the PCNA family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P12004 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Cell cycle regulation; DNA replication",
+            "Chromosomal Location of human Ortholog": "20p12.3",
+            "Cellular Component": "centrosome; chromatin; cyclin-dependent protein kinase holoenzyme complex; nuclear lamina; nuclear replication fork; nucleoplasm; nucleus; PCNA complex; PCNA-p21 complex; replication fork; replisome",
+            "Molecular Function": "chromatin binding; damaged DNA binding; dinucleotide insertion or deletion binding; DNA binding; DNA polymerase binding; DNA polymerase processivity factor activity; enzyme binding; histone acetyltransferase binding; identical protein binding; MutLalpha complex binding; nuclear estrogen receptor binding; protein binding; protein-containing complex binding; purine-specific mismatch base pair DNA N-glycosylase activity; receptor tyrosine kinase binding",
+            "Biological Process": "cellular response to hydrogen peroxide; cellular response to UV; chromatin organization; DNA damage response; DNA repair; DNA repair-dependent chromatin remodeling; DNA replication; epithelial cell differentiation; estrous cycle; heart development; leading strand elongation; liver regeneration; mismatch repair; mitotic DNA replication; mitotic telomere maintenance via semi-conservative replication; positive regulation of DNA repair; positive regulation of DNA replication; regulation of DNA replication; replication fork processing; response to cadmium ion; response to dexamethasone; response to estradiol; response to L-glutamate; response to lipid; response to oxidative stress; translesion synthesis",
+            "Disease": "Ataxia-telangiectasia-like Disorder 2",
+            "Reference #": "P12004 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATLD2; Cyclin; DNA polymerase delta auxiliary protein; MGC8367; PCNA; Proliferating cell nuclear antigen",
+            "Gene Symbols": "PCNA",
+            "Molecular weight": "28,769 Da",
+            "Basal Isoelectric point": "4.57 Predict pI for various phosphorylation states",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1AXC 1U76 1U7B 1UL1 1VYJ 1VYM 1W60 2ZVK 2ZVL 2ZVM 3JA9 3P87 3TBL 3VKX 3WGW 4D2G 4RJF 4ZTD 5E0T 5E0U 5E0V 5IY4 5L7C 5MAV 5MLO 5MLW 5MOM 5YCO 5YD8 6CBI 6EHT 6FCM 6FCN 6GIS 6GWS 6HVO 6K3A 6QC0 6QCG 6S1M 6S1N 6S1O 6TNY 6TNZ 6VVO 7EFA 7KQ0 7KQ1 7M5L 7M5M 7M5N 7NV0 7NV1 7QNZ 7QO1 8B8T 8COB 8E84 8F5Q 8GCJ 8GL9 8GLA 8UI7 8UI8 8UI9 8UII 8UMT 8UMU 8UMY 8UN0 8YJH 8YJL 8YJQ 8YJR 8YJS 8YJU 8YJV 8YJW 8YJZ 9B8S 9B8T 9CG4 9CHM 9CMA 9EOA 9F6D 9F6E 9F6F 9GY0 9NE6 9NE7 9NE8 9NE9 9NEA | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P12004"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P12004"
+      ],
+      "psp_gene_symbols": [
+        "PCNA"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "4-1BB",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=4-1bb&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "CD28",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=cd28&site-search-type=Products",
+      "phosphositeplus_id": "3982",
+      "phosphositeplus_ids": [
+        "3982"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=3982",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=3982"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "3982",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=3982&showAllSites=true",
+          "gene_symbol": "CD28",
+          "uniprot_id": "P10747",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P10747",
+          "protein_name": "Involved in T-cell activation, the induction of cell proliferation and cytokine production and promotion of T-cell survival. Enhances the production of IL4 and IL10 in T-cells in conjunction with TCR/CD3 ligation and CD40L costimulation. Isoform 3 enhances CD40L-mediated activation of NF-kappa-B and kinases MAPK8 and PAK2 in T-cells. Expressed in T-cells and plasma cells, but not in less mature B-cells. 7 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P10747 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Cell surface; Membrane protein, integral",
+            "Chromosomal Location of human Ortholog": "2q33.2",
+            "Cellular Component": "cell surface; cytosol; external side of plasma membrane; immunological synapse; membrane; plasma membrane; protein complex involved in cell adhesion",
+            "Molecular Function": "coreceptor activity; identical protein binding; protein binding; protein kinase binding; transmembrane signaling receptor activity",
+            "Biological Process": "cell surface receptor signaling pathway; humoral immune response; immune response; immune system process; negative regulation of apoptotic process; negative regulation of gene expression; positive regulation of cytokine production; positive regulation of gene expression; positive regulation of interleukin-10 production; positive regulation of interleukin-2 production; positive regulation of interleukin-4 production; positive regulation of mitotic nuclear division; positive regulation of T cell activation; positive regulation of T cell proliferation; positive regulation of T cell receptor signaling pathway; positive regulation of translation; positive regulation of viral genome replication; regulation of T cell proliferation; regulatory T cell differentiation; T cell activation; T cell costimulation; T cell receptor signaling pathway",
+            "Disease": "Immunodeficiency 123 With Hpv-related Verrucosis",
+            "Reference #": "P10747 (UniProtKB)",
+            "Alt. Names/Synonyms": "CD28; CD28 antigen; CD28 molecule; MGC138290; T-cell-specific surface glycoprotein CD28; TP44",
+            "Gene Symbols": "CD28",
+            "Molecular weight": "25,066 Da",
+            "Basal Isoelectric point": "9.46 Predict pI for various phosphorylation states",
+            "CST Pathways": "T Cell Receptor Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1YJD 3WA4 5AUL 5GJH 5GJI 6O8D 7PPN 7VU5 8S6Z 8W2V | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P10747"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P10747"
+      ],
+      "psp_gene_symbols": [
+        "CD28"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "GITR",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=gitr&site-search-type=Products",
+      "phosphositeplus_id": "2645;2672",
+      "phosphositeplus_ids": [
+        "2645",
+        "2672"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=2645",
+        "https://www.phosphosite.org/proteinAction.action?id=2672"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "2645",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2645&showAllSites=true",
+          "gene_symbol": "GIT1",
+          "uniprot_id": "Q9Y2X7",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9Y2X7",
+          "protein_name": "GTPase-activating protein for the ADP ribosylation factor family. May serve as a scaffold to bring together molecules to form signaling modules controlling vesicle trafficking, adhesion and cytoskeletal organization. Increases the speed of cell migration, as well as the size and rate of formation of protrusions, possibly by targeting PAK1 to adhesions and the leading edge of lamellipodia. Sequesters inactive non-tyrosine-phosphorylated paxillin in cytoplasmic complexes. Involved in the regulation of cytokinesis; the function may involve ENTR1 and PTPN13. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9Y2X7 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "GAP; GAP, ARF; Motility/polarity/chemotaxis",
+            "Chromosomal Location of human Ortholog": "17q11.2",
+            "Cellular Component": "calyx of Held; centrosome; cytoplasm; cytosol; dendrite; endosome; excitatory synapse; focal adhesion; GABA-ergic synapse; glutamatergic synapse; growth cone; inhibitory synapse; lamellipodium; mitotic spindle pole; neuron projection; postsynapse; postsynaptic density; presynapse; presynaptic active zone; protein-containing complex; spindle pole; synapse",
+            "Molecular Function": "gamma-tubulin binding; GTPase activator activity; identical protein binding; metal ion binding; protein binding; protein phosphatase binding; protein transporter activity; protein tyrosine kinase binding; protein-containing complex binding; scaffold protein binding; small GTPase binding; structural constituent of postsynaptic specialization; zinc ion binding",
+            "Biological Process": "brain development; cell redox homeostasis; cellular response to epidermal growth factor stimulus; cellular response to lipopolysaccharide; intramembranous ossification; locomotory behavior; maintenance of postsynaptic specialization structure; motor learning; negative regulation of ARF protein signal transduction; negative regulation of glycolytic process; negative regulation of inflammatory response to wounding; negative regulation of interleukin-1 beta production; neuron development; neurotransmitter receptor localization to postsynaptic specialization membrane; positive regulation of AMPA glutamate receptor clustering; positive regulation of microtubule nucleation; positive regulation of receptor catabolic process; regulation of ARF protein signal transduction; regulation of cytokinesis; regulation of G protein-coupled receptor signaling pathway; regulation of synaptic vesicle exocytosis; synaptic vesicle recycling",
+            "Reference #": "Q9Y2X7 (UniProtKB)",
+            "Alt. Names/Synonyms": "ARF GAP GIT1; ARF GTPase-activating protein GIT1; CAT-1; CAT1; Cool-associated and tyrosine-phosphorylated protein 1; G protein-coupled receptor kinase interacting ArfGAP 1; G protein-coupled receptor kinase interactor 1; G protein-coupled receptor kinase-interactor 1; GIT ArfGAP 1; GIT1; GRK-interacting protein 1",
+            "Gene Symbols": "GIT1",
+            "Molecular weight": "84,341 Da",
+            "Basal Isoelectric point": "6.33 Predict pI for various phosphorylation states",
+            "CST Pathways": "Actin Dynamics",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "2672",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2672&showAllSites=true",
+          "gene_symbol": "GIT2",
+          "uniprot_id": "Q14161",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q14161",
+          "protein_name": "GTPase-activating protein for the ADP ribosylation factor family. 11 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q14161 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "GAP; GAP, ARF; Motility/polarity/chemotaxis",
+            "Chromosomal Location of human Ortholog": "12q24.11",
+            "Cellular Component": "nucleoplasm; presynapse; synapse",
+            "Molecular Function": "GTPase activator activity; metal ion binding; protein binding; small GTPase binding; zinc ion binding",
+            "Biological Process": "brain development; regulation of ARF protein signal transduction; regulation of G protein-coupled receptor signaling pathway; synaptic vesicle recycling",
+            "Reference #": "Q14161 (UniProtKB)",
+            "Alt. Names/Synonyms": "ARF GAP GIT2; ARF GTPase-activating protein GIT2; CAT-2; CAT2; cool-associated, tyrosine phosphorylated protein 2; Cool-interacting tyrosine-phosphorylated protein 2; DKFZp686G01261; G protein-coupled receptor kinase interacting ArfGAP 2; G protein-coupled receptor kinase interactor 2; G protein-coupled receptor kinase-interactor 2; GIT ArfGAP 2; GIT2; GRK-interacting protein 2; KIAA0148; MGC760; Paxillin kinase linker; PKL",
+            "Gene Symbols": "GIT2",
+            "Molecular weight": "84,543 Da",
+            "Basal Isoelectric point": "6.78 Predict pI for various phosphorylation states",
+            "CST Pathways": "Actin Dynamics",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q9Y2X7",
+        "Q14161"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q9Y2X7",
+        "https://www.uniprot.org/uniprot/Q14161"
+      ],
+      "psp_gene_symbols": [
+        "GIT1",
+        "GIT2"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "ICOS",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=icos&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "TCR",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=TCR&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "CD4",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=CD4&site-search-type=Products",
+      "phosphositeplus_id": "4873",
+      "phosphositeplus_ids": [
+        "4873"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=4873",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=4873"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "4873",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=4873&showAllSites=true",
+          "gene_symbol": "CD4",
+          "uniprot_id": "P01730",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P01730",
+          "protein_name": "Integral membrane glycoprotein that plays an essential role in the immune response and serves multiple functions in responses against both external and internal offenses. In T-cells, functions primarily as a coreceptor for MHC class II molecule:peptide complex. The antigens presented by class II peptides are derived from extracellular proteins while class I peptides are derived from cytosolic proteins. Interacts simultaneously with the T-cell receptor (TCR) and the MHC class II presented by antigen presenting cells (APCs). In turn, recruits the Src kinase LCK to the vicinity of the TCR-CD3 complex. LCK then initiates different intracellular signaling pathways by phosphorylating various substrates ultimately leading to lymphokine production, motility, adhesion and activation of T-helper cells. In other cells such as macrophages or NK cells, plays a role in differentiation/activation, cytokine expression and cell migration in a TCR/LCK-independent pathway. Participates in the development of T-helper cells in the thymus and triggers the differentiation of monocytes into functional mature macrophages. (Microbial infection) Primary receptor for human immunodeficiency virus-1 (HIV-1). Down-regulated by HIV-1 Vpu. Acts as a receptor for Human Herpes virus 7/HHV-7. Highly expressed in T-helper cells. The presence of CD4 is a hallmark of T-helper cells which are specialized in the activation and growth of cytotoxic T-cells, regulation of B cells, or activation of phagocytes. CD4 is also present in other immune cells such as macrophages, dendritic cells or NK cells. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P01730 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Cell surface; Membrane protein, integral",
+            "Chromosomal Location of human Ortholog": "12p13.31",
+            "Cellular Component": "cell surface; clathrin-coated endocytic vesicle membrane; early endosome; endoplasmic reticulum lumen; endoplasmic reticulum membrane; external side of plasma membrane; extracellular space; membrane; membrane raft; plasma membrane; T cell receptor complex",
+            "Molecular Function": "coreceptor activity; enzyme binding; extracellular matrix structural constituent; identical protein binding; immunoglobulin binding; interleukin-16 binding; interleukin-16 receptor activity; lipid binding; MHC class II protein binding; MHC class II protein complex binding; protein binding; protein homodimerization activity; protein kinase binding; protein tyrosine kinase binding; signaling receptor activity; signaling receptor binding; transmembrane signaling receptor activity; virus receptor activity; zinc ion binding",
+            "Biological Process": "adaptive immune response; cell adhesion; cell surface receptor protein tyrosine kinase signaling pathway; cell surface receptor signaling pathway; cellular response to granulocyte macrophage colony-stimulating factor stimulus; cellular response to ionomycin; enzyme-linked receptor protein signaling pathway; helper T cell enhancement of adaptive immune response; immune response; immune system process; interleukin-15-mediated signaling pathway; leukocyte chemotaxis; macrophage differentiation; maintenance of protein location in cell; positive regulation of calcium ion transport into cytosol; positive regulation of immune system process; positive regulation of inflammatory response; positive regulation of interleukin-2 production; positive regulation of monocyte differentiation; positive regulation of multicellular organismal process; positive regulation of T cell proliferation; regulation of T cell activation; response to estradiol; response to ethanol; response to methamphetamine hydrochloride; response to vitamin D; signal transduction; symbiont entry into host cell; T cell activation; T cell differentiation; T cell receptor signaling pathway; T cell selection",
+            "Disease": "Immunodeficiency 79 ; Okt4 Epitope Deficiency",
+            "Reference #": "P01730 (UniProtKB)",
+            "Alt. Names/Synonyms": "CD4; CD4 antigen (p55); CD4 molecule; CD4 receptor; CD4mut; T-cell surface antigen T4/Leu-3; T-cell surface glycoprotein CD4",
+            "Gene Symbols": "CD4",
+            "Molecular weight": "51,111 Da",
+            "Basal Isoelectric point": "9.6 Predict pI for various phosphorylation states",
+            "CST Pathways": "T Cell Receptor Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1CDH 1CDI 1CDJ 1CDU 1CDY 1G9M 1G9N 1GC1 1JL4 1OPN 1OPT 1OPW 1Q68 1RZJ 1RZK 1WBR 1WIO 1WIP 1WIQ 2B4C 2JKR 2JKT 2KLU 2NXY 2NXZ 2NY0 2NY1 2NY2 2NY3 2NY4 2NY5 2NY6 2QAD 3B71 3CD4 3J70 3JCB 3JCC 3JWD 3JWO 3LQA 3O2D 3S4S 3S5L 3T0E 4H8W 4JM2 4P9H 4Q6I 4R2G 4R4H 4RQS 5A7X 5A8H 5CAY 5THR 5U1F 5VN3 6CM3 6EDU 6L1Y 6MEO 6MET 6OPN 6OPO 6OPP 6OPQ 6QH6 6QH7 6U0L 6U0N 6URI 6X5B 6X5C 7T0O 7T0R 7TXD 8D5C 8FYJ 8W90 8Z7N 9D8Y 9D90 9D98 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P01730"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P01730"
+      ],
+      "psp_gene_symbols": [
+        "CD4"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "IL-4",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=IL-4&site-search-type=Products",
+      "phosphositeplus_id": "22975;4520",
+      "phosphositeplus_ids": [
+        "22975",
+        "4520"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=22975",
+        "https://www.phosphosite.org/proteinAction.action?id=4520"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "22975",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=22975&showAllSites=true",
+          "gene_symbol": "IL1R2",
+          "uniprot_id": "P27930",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P27930",
+          "protein_name": "Non-signaling receptor for IL1A, IL1B and IL1RN. Reduces IL1B activities. Serves as a decoy receptor by competetive binding to IL1B and preventing its binding to IL1R1. Also modulates cellular response through non-signaling association with IL1RAP after binding to IL1B. IL1R2 (membrane and secreted forms) preferentially binds IL1B and poorly IL1A and IL1RN. The secreted IL1R2 recruits secreted IL1RAP with high affinity; this complex formation may be the dominant mechanism for neutralization of IL1B by secreted/soluble receptors. Belongs to the interleukin-1 receptor family. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P27930 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Membrane protein, integral",
+            "Chromosomal Location of human Ortholog": "2q11.2",
+            "Cellular Component": "cell surface; cytoplasm; extracellular region; plasma membrane",
+            "Molecular Function": "interleukin-1 binding; interleukin-1 receptor activity; interleukin-1, type II, blocking receptor activity; protein binding",
+            "Biological Process": "cell surface receptor signaling pathway; cytokine-mediated signaling pathway; immune response; monocyte differentiation; negative regulation of inflammatory response; negative regulation of interleukin-1 alpha production; negative regulation of interleukin-1 beta production; negative regulation of interleukin-1-mediated signaling pathway",
+            "Reference #": "P27930 (UniProtKB)",
+            "Alt. Names/Synonyms": "antigen CDw121b; CD121 antigen-like family member B; CD121b; CDw121b; IL-1 type II receptor; IL-1R-2; IL-1R-beta; IL-1RB; IL-1RT-2; IL-1RT2; IL1R2; IL1R2c; IL1RB; interleukin 1 receptor type 2; interleukin 1 receptor type II variant 3; interleukin 1 receptor, type II; Interleukin-1 receptor beta; Interleukin-1 receptor type 2; Interleukin-1 receptor type 2, membrane form; Interleukin-1 receptor type 2, soluble form; Interleukin-1 receptor type II; MGC47725; mIL-1R2; mIL-1RII; sIL-1R2; sIL-1RII; type II interleukin-1 receptor, beta",
+            "Gene Symbols": "IL1R2",
+            "Molecular weight": "45,421 Da",
+            "Basal Isoelectric point": "8.03 Predict pI for various phosphorylation states",
+            "CST Pathways": "NF-kB Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "4520",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=4520&showAllSites=true",
+          "gene_symbol": "IL1R1",
+          "uniprot_id": "P14778",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P14778",
+          "protein_name": "Receptor for IL1A, IL1B and IL1RN. After binding to interleukin-1 associates with the coreceptor IL1RAP to form the high affinity interleukin-1 receptor complex which mediates interleukin-1-dependent activation of NF-kappa-B, MAPK and other pathways. Signaling involves the recruitment of adapter molecules such as TOLLIP, MYD88, and IRAK1 or IRAK2 via the respective TIR domains of the receptor/coreceptor subunits. Binds ligands with comparable affinity and binding of antagonist IL1RN prevents association with IL1RAP to form a signaling complex. Involved in IL1B-mediated costimulation of IFNG production from T-helper 1 (Th1) cells. Belongs to the interleukin-1 receptor family. Expressed in T-helper cell subsets. Preferentially expressed in T-helper 1 (Th1) cells. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P14778 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 2.7.11.25; Membrane protein, integral; Receptor, cytokine",
+            "Chromosomal Location of human Ortholog": "2q11.2-q12.1",
+            "Cellular Component": "cell surface; external side of plasma membrane; extracellular region; extracellular space; membrane; plasma membrane",
+            "Molecular Function": "cytokine receptor activity; hydrolase activity; interleukin-1 binding; interleukin-1 receptor activity; interleukin-1, type I, activating receptor activity; NAD+ nucleosidase activity, cyclic ADP-ribose generating; platelet-derived growth factor receptor binding; protease binding; protein binding; transmembrane signaling receptor activity",
+            "Biological Process": "cell surface receptor signaling pathway; immune response; inflammatory response; interleukin-1-mediated signaling pathway; microglial cell activation involved in immune response; negative regulation of inflammatory response; negative regulation of interleukin-1-mediated signaling pathway; positive regulation of canonical NF-kappaB signal transduction; positive regulation of inflammatory response; positive regulation of MAPK cascade; positive regulation of phosphatidylinositol 3-kinase/protein kinase B signal transduction; positive regulation of platelet-derived growth factor receptor signaling pathway; positive regulation of T-helper 1 cell cytokine production; positive regulation of type II interferon production; regulation of inflammatory response; response to interleukin-1; signal transduction; smooth muscle adaptation",
+            "Disease": "Chronic Recurrent Multifocal Osteomyelitis 3",
+            "Reference #": "P14778 (UniProtKB)",
+            "Alt. Names/Synonyms": "antigen CD121a; CD121 antigen-like family member A; CD121A; D2S1473; IL-1R-1; IL-1R-alpha; IL-1RA; IL-1RT-1; IL-1RT1; IL1R; IL1R1; IL1RA; IL1RT1; interleukin 1 receptor alpha, type I; interleukin 1 receptor type 1; interleukin 1 receptor, type I; interleukin receptor 1; Interleukin-1 receptor alpha; Interleukin-1 receptor type 1; Interleukin-1 receptor type 1, membrane form; Interleukin-1 receptor type 1, soluble form; Interleukin-1 receptor type I; mIL-1R1; mIL-1RI; p80; sIL-1R1; sIL-1RI",
+            "Gene Symbols": "IL1R1",
+            "Molecular weight": "65,402 Da",
+            "Basal Isoelectric point": "8 Predict pI for various phosphorylation states",
+            "CST Pathways": "NF-kB Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1G0Y 1IRA 1ITB 4DEP 4GAF | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P27930",
+        "P14778"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P27930",
+        "https://www.uniprot.org/uniprot/P14778"
+      ],
+      "psp_gene_symbols": [
+        "IL1R2",
+        "IL1R1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "IL-13",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=IL-13&site-search-type=Products",
+      "phosphositeplus_id": "2445",
+      "phosphositeplus_ids": [
+        "2445"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=2445",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=2445"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "2445",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2445&showAllSites=true",
+          "gene_symbol": "IKBKG",
+          "uniprot_id": "Q9Y6K9",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9Y6K9",
+          "protein_name": "Regulatory subunit of the IKK core complex which phosphorylates inhibitors of NF-kappa-B thus leading to the dissociation of the inhibitor/NF-kappa-B complex and ultimately the degradation of the inhibitor. Its binding to scaffolding polyubiquitin seems to play a role in IKK activation by multiple signaling receptor pathways. However, the specific type of polyubiquitin recognized upon cell stimulation (either 'Lys-63'-linked or linear polyubiquitin) and its functional importance is reported conflictingly. Also considered to be a mediator for TAX activation of NF-kappa-B. Could be implicated in NF-kappa-B-mediated protection from cytokine toxicity. Essential for viral activation of IRF3. Involved in TLR3- and IFIH1-mediated antiviral innate response; this function requires 'Lys-27'-linked polyubiquitination. Heart, brain, placenta, lung, liver, skeletal muscle, kidney and pancreas. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9Y6K9 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Adaptor/scaffold; Protein kinase, regulatory subunit",
+            "Chromosomal Location of human Ortholog": "Xq28",
+            "Cellular Component": "cytoplasm; cytosol; IkappaB kinase complex; mitotic spindle; nucleoplasm; nucleus; protein-containing complex; spindle pole; ubiquitin ligase complex",
+            "Molecular Function": "identical protein binding; K63-linked polyubiquitin modification-dependent protein binding; linear polyubiquitin binding; metal ion binding; polyubiquitin modification-dependent protein binding; protein binding; protein domain specific binding; protein heterodimerization activity; protein homodimerization activity; signaling adaptor activity; transferrin receptor binding; ubiquitin protein ligase binding; zinc ion binding",
+            "Biological Process": "anoikis; apoptotic process; canonical NF-kappaB signal transduction; defense response to bacterium; DNA damage response; establishment of vesicle localization; immune response; inflammatory response; innate immune response; negative regulation of endoplasmic reticulum stress-induced intrinsic apoptotic signaling pathway; positive regulation of canonical NF-kappaB signal transduction; positive regulation of gene expression; positive regulation of macroautophagy; positive regulation of T cell receptor signaling pathway; positive regulation of transcription by RNA polymerase II; positive regulation of ubiquitin-dependent protein catabolic process; protein-containing complex assembly; response to virus; T cell receptor signaling pathway",
+            "Disease": "Autoinflammatory Disease, Systemic, X-linked ; Ectodermal Dysplasia, Hypohidrotic, With Immune Deficiency ; Immunodeficiency 33 ; Incontinentia Pigmenti",
+            "Reference #": "Q9Y6K9 (UniProtKB)",
+            "Alt. Names/Synonyms": "AMCBX1; EDAID1; FIP-3; FIP3; Fip3p; I-kappa-B kinase subunit gamma; IkB kinase gamma subunit; IkB kinase subunit gamma; IkB kinase-associated protein 1; IKBKG; IKK-gamma; IKKAP1; IKKG; IMD33; incontinentia pigmenti; inhibitor of kappa light polypeptide gene enhancer in B-cells, kinase gamma; inhibitor of nuclear factor kappa B kinase regulatory subunit gamma; inhibitor of nuclear factor kappa B kinase subunit gamma; Inhibitor of nuclear factor kappa-B kinase subunit gamma; IP; IP1; IP2; IPD2; NEMO; NF-kappa-B essential modifier; NF-kappa-B essential modulator; NFkappaB essential modulator; ZC2HC9",
+            "Gene Symbols": "IKBKG",
+            "Molecular weight": "48,198 Da",
+            "Basal Isoelectric point": "5.56 Predict pI for various phosphorylation states",
+            "CST Pathways": "Apoptosis Regulation | B Cell Receptor Signaling | Death Receptor Signaling | Inhibition of Apoptosis | Insulin Receptor Signaling | NF-kB Signaling | T Cell Receptor Signaling | Toll-Like Receptor Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2JVX 2JVY 3BRT 3BRV 3CL3 3FX0 4BWN 5AAY 5LDE 6MI3 6MI4 6XX0 6YEK 7T2U 7TV4 8U7C 9AZJ | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q9Y6K9"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q9Y6K9"
+      ],
+      "psp_gene_symbols": [
+        "IKBKG"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "IL-6",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=IL-6&site-search-type=Products",
+      "phosphositeplus_id": "18622",
+      "phosphositeplus_ids": [
+        "18622"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=18622",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=18622"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "18622",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=18622&showAllSites=true",
+          "gene_symbol": "IL6",
+          "uniprot_id": "P05231",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P05231",
+          "protein_name": "Cytokine with a wide variety of biological functions. It is a potent inducer of the acute phase response. Plays an essential role in the final differentiation of B-cells into Ig-secreting cells Involved in lymphocyte and monocyte differentiation. Acts on B-cells, T-cells, hepatocytes, hematopoietic progenitor cells and cells of the CNS. Required for the generation of T(H)17 cells. Also acts as a myokine. It is discharged into the bloodstream after muscle contraction and acts to increase the breakdown of fats and to improve insulin resistance. It induces myeloma and plasmacytoma growth and induces nerve cells differentiation. Belongs to the IL-6 superfamily. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P05231 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Secreted; Secreted, signal peptide",
+            "Chromosomal Location of human Ortholog": "7p15.3",
+            "Cellular Component": "endoplasmic reticulum lumen; extracellular region; extracellular space; interleukin-6 receptor complex; plasma membrane",
+            "Molecular Function": "cytokine activity; growth factor activity; identical protein binding; interleukin-6 receptor binding; protein binding",
+            "Biological Process": "acute-phase response; autocrine signaling; cell differentiation; cell surface receptor signaling pathway via JAK-STAT; cell surface receptor signaling pathway via STAT; cellular response to hydrogen peroxide; cellular response to lipopolysaccharide; cellular response to virus; cytokine-mediated signaling pathway; defense response to Gram-negative bacterium; defense response to Gram-positive bacterium; defense response to virus; endocrine pancreas development; germinal center B cell differentiation; glucagon secretion; glucose homeostasis; hepatic immune response; hepatocyte proliferation; humoral immune response; immune response; inflammatory response; inflammatory response to wounding; interleukin-6-mediated signaling pathway; liver regeneration; maintenance of blood-brain barrier; monocyte chemotaxis; negative regulation of apoptotic process; negative regulation of bone resorption; negative regulation of cell population proliferation; negative regulation of chemokine production; negative regulation of collagen biosynthetic process; negative regulation of cytokine-mediated signaling pathway; negative regulation of fat cell differentiation; negative regulation of fat cell proliferation; negative regulation of interleukin-1-mediated signaling pathway; negative regulation of lipid storage; negative regulation of neurogenesis; negative regulation of primary miRNA processing; neuron cellular homeostasis; neuron projection development; neutrophil apoptotic process; neutrophil mediated immunity; paracrine signaling; platelet activation; positive regulation of acute inflammatory response; positive regulation of apoptotic DNA fragmentation; positive regulation of apoptotic process; positive regulation of B cell activation; positive regulation of cell population proliferation; positive regulation of chemokine production; positive regulation of cytokine production involved in inflammatory response; positive regulation of DNA-templated transcription; positive regulation of epithelial to mesenchymal transition; positive regulation of extracellular matrix disassembly; positive regulation of gene expression; positive regulation of glial cell proliferation; positive regulation of immunoglobulin production; positive regulation of interleukin-1 beta production; positive regulation of interleukin-10 production; positive regulation of interleukin-17 production; positive regulation of interleukin-21 production; positive regulation of interleukin-6 production; positive regulation of interleukin-8 production; positive regulation of leukocyte adhesion to vascular endothelial cell; positive regulation of leukocyte chemotaxis; positive regulation of lymphocyte activation; positive regulation of MAPK cascade; positive regulation of miRNA transcription; positive regulation of neuroinflammatory response; positive regulation of osteoblast differentiation; positive regulation of peptidyl-serine phosphorylation; positive regulation of peptidyl-tyrosine phosphorylation; positive regulation of platelet aggregation; positive regulation of receptor signaling pathway via JAK-STAT; positive regulation of receptor signaling pathway via STAT; positive regulation of smooth muscle cell proliferation; positive regulation of T cell proliferation; positive regulation of T-helper 2 cell cytokine production; positive regulation of transcription by RNA polymerase II; positive regulation of translation; positive regulation of tumor necrosis factor production; positive regulation of type B pancreatic cell apoptotic process; positive regulation of vascular endothelial growth factor production; regulation of angiogenesis; regulation of astrocyte activation; regulation of glucagon secretion; regulation of insulin secretion; regulation of microglial cell activation; regulation of neuroinflammatory response; regulation of protein transport; regulation of vascular endothelial growth factor production; response to activity; response to glucocorticoid; response to peptidoglycan; T follicular helper cell differentiation; T-helper 17 cell lineage commitment; vascular endothelial growth factor production",
+            "Disease": "Arteriovenous Malformations Of The Brain ; Diabetes Mellitus, Insulin-dependent ; Diabetes Mellitus, Noninsulin-dependent ; Inflammatory Bowel Disease 1 ; Kaposi Sarcoma, Susceptibility To ; Rheumatoid Arthritis, Systemic Juvenile",
+            "Reference #": "P05231 (UniProtKB)",
+            "Alt. Names/Synonyms": "B cell stimulatory factor-2; B-cell differentiation factor; B-cell stimulatory factor 2; BSF-2; BSF2; CDF; CTL differentiation factor; HGF; HSF; Hybridoma growth factor; IFN-beta-2; IFNB2; IL-6; IL6; Interferon beta-2; interleukin 6; interleukin 6 (interferon, beta 2); interleukin BSF-2; Interleukin-6",
+            "Gene Symbols": "IL6",
+            "Molecular weight": "23,718 Da",
+            "Basal Isoelectric point": "6.17 Predict pI for various phosphorylation states",
+            "CST Pathways": "IL6 Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1ALU 1IL6 1N2Q 1P9M 2IL6 4CNI 4J4L 4NI7 4NI9 4O9H 4ZS7 5FUC 8D82 8QY5 8QY6 8YWQ 8YWR | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P05231"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P05231"
+      ],
+      "psp_gene_symbols": [
+        "IL6"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "IL-10",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=IL-10&site-search-type=Products",
+      "phosphositeplus_id": "2445",
+      "phosphositeplus_ids": [
+        "2445"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=2445",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=2445"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "2445",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2445&showAllSites=true",
+          "gene_symbol": "IKBKG",
+          "uniprot_id": "Q9Y6K9",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9Y6K9",
+          "protein_name": "Regulatory subunit of the IKK core complex which phosphorylates inhibitors of NF-kappa-B thus leading to the dissociation of the inhibitor/NF-kappa-B complex and ultimately the degradation of the inhibitor. Its binding to scaffolding polyubiquitin seems to play a role in IKK activation by multiple signaling receptor pathways. However, the specific type of polyubiquitin recognized upon cell stimulation (either 'Lys-63'-linked or linear polyubiquitin) and its functional importance is reported conflictingly. Also considered to be a mediator for TAX activation of NF-kappa-B. Could be implicated in NF-kappa-B-mediated protection from cytokine toxicity. Essential for viral activation of IRF3. Involved in TLR3- and IFIH1-mediated antiviral innate response; this function requires 'Lys-27'-linked polyubiquitination. Heart, brain, placenta, lung, liver, skeletal muscle, kidney and pancreas. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9Y6K9 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Adaptor/scaffold; Protein kinase, regulatory subunit",
+            "Chromosomal Location of human Ortholog": "Xq28",
+            "Cellular Component": "cytoplasm; cytosol; IkappaB kinase complex; mitotic spindle; nucleoplasm; nucleus; protein-containing complex; spindle pole; ubiquitin ligase complex",
+            "Molecular Function": "identical protein binding; K63-linked polyubiquitin modification-dependent protein binding; linear polyubiquitin binding; metal ion binding; polyubiquitin modification-dependent protein binding; protein binding; protein domain specific binding; protein heterodimerization activity; protein homodimerization activity; signaling adaptor activity; transferrin receptor binding; ubiquitin protein ligase binding; zinc ion binding",
+            "Biological Process": "anoikis; apoptotic process; canonical NF-kappaB signal transduction; defense response to bacterium; DNA damage response; establishment of vesicle localization; immune response; inflammatory response; innate immune response; negative regulation of endoplasmic reticulum stress-induced intrinsic apoptotic signaling pathway; positive regulation of canonical NF-kappaB signal transduction; positive regulation of gene expression; positive regulation of macroautophagy; positive regulation of T cell receptor signaling pathway; positive regulation of transcription by RNA polymerase II; positive regulation of ubiquitin-dependent protein catabolic process; protein-containing complex assembly; response to virus; T cell receptor signaling pathway",
+            "Disease": "Autoinflammatory Disease, Systemic, X-linked ; Ectodermal Dysplasia, Hypohidrotic, With Immune Deficiency ; Immunodeficiency 33 ; Incontinentia Pigmenti",
+            "Reference #": "Q9Y6K9 (UniProtKB)",
+            "Alt. Names/Synonyms": "AMCBX1; EDAID1; FIP-3; FIP3; Fip3p; I-kappa-B kinase subunit gamma; IkB kinase gamma subunit; IkB kinase subunit gamma; IkB kinase-associated protein 1; IKBKG; IKK-gamma; IKKAP1; IKKG; IMD33; incontinentia pigmenti; inhibitor of kappa light polypeptide gene enhancer in B-cells, kinase gamma; inhibitor of nuclear factor kappa B kinase regulatory subunit gamma; inhibitor of nuclear factor kappa B kinase subunit gamma; Inhibitor of nuclear factor kappa-B kinase subunit gamma; IP; IP1; IP2; IPD2; NEMO; NF-kappa-B essential modifier; NF-kappa-B essential modulator; NFkappaB essential modulator; ZC2HC9",
+            "Gene Symbols": "IKBKG",
+            "Molecular weight": "48,198 Da",
+            "Basal Isoelectric point": "5.56 Predict pI for various phosphorylation states",
+            "CST Pathways": "Apoptosis Regulation | B Cell Receptor Signaling | Death Receptor Signaling | Inhibition of Apoptosis | Insulin Receptor Signaling | NF-kB Signaling | T Cell Receptor Signaling | Toll-Like Receptor Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2JVX 2JVY 3BRT 3BRV 3CL3 3FX0 4BWN 5AAY 5LDE 6MI3 6MI4 6XX0 6YEK 7T2U 7TV4 8U7C 9AZJ | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q9Y6K9"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q9Y6K9"
+      ],
+      "psp_gene_symbols": [
+        "IKBKG"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "CCL22",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=ccl22&site-search-type=Products",
+      "phosphositeplus_id": "1435",
+      "phosphositeplus_ids": [
+        "1435"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=1435",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1435"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1435",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1435&showAllSites=true",
+          "gene_symbol": "CBL",
+          "uniprot_id": "P22681",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P22681",
+          "protein_name": "Adapter protein that functions as a negative regulator of many signaling pathways that are triggered by activation of cell surface receptors. Acts as an E3 ubiquitin-protein ligase, which accepts ubiquitin from specific E2 ubiquitin-conjugating enzymes, and then transfers it to substrates promoting their degradation by the proteasome. Recognizes activated receptor tyrosine kinases, including KIT, FLT1, FGFR1, FGFR2, PDGFRA, PDGFRB, EGFR, CSF1R, EPHA8 and KDR and terminates signaling. Recognizes membrane-bound HCK, SRC and other kinases of the SRC family and mediates their ubiquitination and degradation. Participates in signal transduction in hematopoietic cells. Plays an important role in the regulation of osteoblast differentiation and apoptosis. Essential for osteoclastic bone resorption. The 'Tyr-731' phosphorylated form induces the activation and recruitment of phosphatidylinositol 3-kinase to the cell membrane in a signaling pathway that is critical for osteoclast function. May be functionally coupled with the E2 ubiquitin-protein ligase UB2D3. In association with CBLB, required for proper feedback inhibition of ciliary platelet-derived growth factor receptor-alpha (PDGFRA) signaling pathway via ubiquitination and internalization of PDGFRA. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P22681 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Adaptor/scaffold; EC 6.3.2.-; EC 6.3.2.19; Ligase; Motility/polarity/chemotaxis; Oncoprotein; Ubiquitin conjugating system; Ubiquitin ligase",
+            "Chromosomal Location of human Ortholog": "11q23.3",
+            "Cellular Component": "axon; cilium; cytoplasm; cytosol; flotillin complex; focal adhesion; Golgi apparatus; growth cone; membrane raft; perinuclear region of cytoplasm; plasma membrane",
+            "Molecular Function": "calcium ion binding; ephrin receptor binding; metal ion binding; phosphatidylinositol 3-kinase regulatory subunit binding; phosphotyrosine residue binding; protein binding; protein kinase binding; protein tyrosine kinase binding; receptor tyrosine kinase binding; SH3 domain binding; transferase activity; ubiquitin protein ligase activity; ubiquitin-protein transferase activity; zinc ion binding",
+            "Biological Process": "cell surface receptor signaling pathway; cellular response to hypoxia; cellular response to nerve growth factor stimulus; cellular response to platelet-derived growth factor stimulus; cytokine-mediated signaling pathway; DNA damage response; male gonad development; mast cell degranulation; negative regulation of apoptotic process; negative regulation of epidermal growth factor receptor signaling pathway; negative regulation of T cell activation; negative regulation of T cell receptor signaling pathway; positive regulation of epidermal growth factor receptor signaling pathway; positive regulation of phosphatidylinositol 3-kinase/protein kinase B signal transduction; positive regulation of receptor-mediated endocytosis; protein autoubiquitination; protein K63-linked ubiquitination; protein monoubiquitination; protein polyubiquitination; protein stabilization; protein ubiquitination; regulation of intracellular signal transduction; regulation of platelet-derived growth factor receptor-alpha signaling pathway; regulation of signaling; response to activity; response to ethanol; response to gamma radiation; response to starvation; response to testosterone; signal transduction; symbiont entry into host cell; ubiquitin-dependent endocytosis; ubiquitin-dependent protein catabolic process",
+            "Disease": "Juvenile Myelomonocytic Leukemia ; Noonan Syndrome-like Disorder With Or Without Juvenile Myelomonocytic Leukemia",
+            "Reference #": "P22681 (UniProtKB)",
+            "Alt. Names/Synonyms": "C-CBL; Cas-Br-M (murine) ecotropic retroviral transforming sequence; Casitas B-lineage lymphoma proto-oncogene; CBL; Cbl proto-oncogene; Cbl proto-oncogene, E3 ubiquitin protein ligase; CBL2; E3 ubiquitin-protein ligase CBL; FRA11B; fragile site, folic acid type, rare, fra(11)(q23.3); NSLL; oncogene CBL2; Proto-oncogene c-Cbl; RING finger protein 55; RING-type E3 ubiquitin transferase CBL; RNF55; Signal transduction protein CBL",
+            "Gene Symbols": "CBL",
+            "Molecular weight": "99,633 Da",
+            "Basal Isoelectric point": "6.1 Predict pI for various phosphorylation states",
+            "CST Pathways": "B Cell Receptor Signaling | ErbB/HER Signaling | Insulin Receptor Signaling | T Cell Receptor Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1B47 1FBV 1YVH 2CBL 2JUJ 2K4D 2OO9 2Y1M 2Y1N 3BUM 3BUN 3BUO 3BUW 3BUX 3OB1 3OB2 3PLF 4A49 4A4B 4A4C 4GPL 5HKW 5HKX 5HKY 5HKZ 5HL0 5J3X 5O76 6O02 6O03 6XAR 7SIY 9ERZ | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P22681"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P22681"
+      ],
+      "psp_gene_symbols": [
+        "CBL"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "FoxP3",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=FoxP3&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "Arginase",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=arginase&site-search-type=Products",
+      "phosphositeplus_id": "1285570",
+      "phosphositeplus_ids": [
+        "1285570"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=1285570",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1285570"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1285570",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1285570&showAllSites=true",
+          "gene_symbol": "ARF6",
+          "uniprot_id": "P62330",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P62330",
+          "protein_name": "GTP-binding protein involved in protein trafficking that regulates endocytic recycling and cytoskeleton remodeling. Required for normal completion of mitotic cytokinesis. Plays a role in the reorganization of the actin cytoskeleton and the formation of stress fibers. Involved in the regulation of dendritic spine development, contributing to the regulation of dendritic branching and filopodia extension. Plays an important role in membrane trafficking, during junctional remodeling and epithelial polarization. Regulates surface levels of adherens junction proteins such as CDH1. Required for NTRK1 sorting to the recycling pathway from early endosomes. (Microbial infection) Functions as an allosteric activator of the cholera toxin catalytic subunit, an ADP-ribosyltransferase. Belongs to the small GTPase superfamily. Arf family. Ubiquitous, with higher levels in heart, substantia nigra, and kidney. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P62330 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "G protein, monomeric; G protein, monomeric, ARF; Motility/polarity/chemotaxis",
+            "Chromosomal Location of human Ortholog": "14q21.3",
+            "Cellular Component": "cell cortex; cleavage furrow; cytoplasm; cytosol; early endosome; early endosome membrane; endocytic vesicle; endosome; endosome membrane; filopodium membrane; Flemming body; glutamatergic synapse; Golgi apparatus; membrane; midbody; plasma membrane; postsynapse; presynapse; recycling endosome; recycling endosome membrane; ruffle",
+            "Molecular Function": "G protein activity; GDP binding; GTP binding; GTPase activity; hydrolase activity; nucleotide binding; protein binding; signaling adaptor activity; thioesterase binding",
+            "Biological Process": "cell adhesion; cell differentiation; cell division; cellular response to nerve growth factor stimulus; cortical actin cytoskeleton organization; endocytic recycling; intracellular protein transport; maintenance of postsynaptic density structure; negative regulation of dendrite development; negative regulation of protein localization to cell surface; negative regulation of receptor-mediated endocytosis; nervous system development; positive regulation of actin filament polymerization; positive regulation of focal adhesion disassembly; positive regulation of keratinocyte migration; positive regulation of mitotic cytokinetic process; positive regulation of neuron projection development; positive regulation of protein localization to plasma membrane; positive regulation of protein secretion; protein localization to cell surface; protein localization to cleavage furrow; protein localization to endosome; protein localization to plasma membrane; protein transport; regulation of dendritic spine development; regulation of filopodium assembly; regulation of neuron projection development; regulation of presynapse assembly; regulation of Rac protein signal transduction; ruffle assembly; synaptic vesicle endocytosis; vesicle-mediated transport",
+            "Reference #": "P62330 (UniProtKB)",
+            "Alt. Names/Synonyms": "ADP ribosylation factor 6; ADP-ribosylation factor 6; ARF6; DKFZp564M0264",
+            "Gene Symbols": "ARF6",
+            "Molecular weight": "20,082 Da",
+            "Basal Isoelectric point": "9.04 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 1E0S 2A5D 2A5F 2A5G 2BAO 2BAU 2J5X 2W83 3LVQ 3LVR 3N5C 3PCR 4FME 4KAX 6BBP 6BBQ 6PAU 7RK3 7XRD | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P62330"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P62330"
+      ],
+      "psp_gene_symbols": [
+        "ARF6"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Jak",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=jak&site-search-type=Products",
+      "phosphositeplus_id": "887;611;612",
+      "phosphositeplus_ids": [
+        "887",
+        "611",
+        "612"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=887",
+        "https://www.phosphosite.org/proteinAction.action?id=611",
+        "https://www.phosphosite.org/proteinAction.action?id=612"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "887",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=887&showAllSites=true",
+          "gene_symbol": "JAK1",
+          "uniprot_id": "P23458",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P23458",
+          "protein_name": "Tyrosine kinase of the non-receptor type, involved in the IFN-alpha/beta/gamma signal pathway. Kinase partner for the interleukin (IL)-2 receptor as well as interleukin (IL)-10 receptor. Belongs to the protein kinase superfamily. Tyr protein kinase family. JAK subfamily. Expressed at higher levels in primary colon tumors than in normal colon tissue. The expression level in metastatic colon tumors is comparable to the expression level in normal colon tissue. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P23458 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 2.7.10.2; Jak family; Kinase, protein; Protein kinase, TK; Protein kinase, tyrosine (non-receptor); TK group",
+            "Chromosomal Location of human Ortholog": "1p31.3",
+            "Cellular Component": "cytoplasm; cytoplasmic side of plasma membrane; cytosol; endomembrane system; endoplasmic reticulum lumen; endosome; extrinsic component of cytoplasmic side of plasma membrane; membrane; nucleus; plasma membrane",
+            "Molecular Function": "ATP binding; CCR5 chemokine receptor binding; growth hormone receptor binding; kinase activity; metal ion binding; non-membrane spanning protein tyrosine kinase activity; nucleotide binding; protein binding; protein kinase activity; protein phosphatase binding; protein tyrosine kinase activity; transferase activity; ubiquitin protein ligase binding",
+            "Biological Process": "cell differentiation; cell surface receptor signaling pathway via JAK-STAT; cellular response to interleukin-7; ciliary neurotrophic factor-mediated signaling pathway; cytokine-mediated signaling pathway; growth hormone receptor signaling pathway via JAK-STAT; interleukin-10-mediated signaling pathway; interleukin-11-mediated signaling pathway; interleukin-15-mediated signaling pathway; interleukin-2-mediated signaling pathway; interleukin-4-mediated signaling pathway; interleukin-5-mediated signaling pathway; interleukin-6-mediated signaling pathway; interleukin-7-mediated signaling pathway; interleukin-9-mediated signaling pathway; intracellular signal transduction; leukemia inhibitory factor signaling pathway; positive regulation of homotypic cell-cell adhesion; positive regulation of protein localization to nucleus; positive regulation of sprouting angiogenesis; protein localization to cell-cell junction; protein phosphorylation; regulation of cell-cell adhesion; regulation of multicellular organismal process; response to antibiotic; T-helper 17 cell lineage commitment; type I interferon-mediated signaling pathway; type II interferon-mediated signaling pathway",
+            "Disease": "Autoinflammation, Immune Dysregulation, And Eosinophilia",
+            "Reference #": "P23458 (UniProtKB)",
+            "Alt. Names/Synonyms": "AIIDE; JAK-1; JAK1; JAK1A; JAK1B; Janus kinase 1; Janus kinase 1 (a protein tyrosine kinase); JTK3; Tyrosine-protein kinase JAK1",
+            "Gene Symbols": "JAK1",
+            "Molecular weight": "133,277 Da",
+            "Basal Isoelectric point": "7.48 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | IL6 Signaling | Inhibition of Apoptosis | PI3K/Akt Signaling | Tyrosine Kinases & Substrates",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | CCLE | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 3EYG 3EYH 4E4L 4E4N 4E5W 4EHZ 4EI4 4FK6 4GS0 4I5C 4IVB 4IVC 4IVD 4K6Z 4K77 4L00 4L01 5E1E 5HX8 5IXD 5IXI 5KHW 5KHX 5L04 5WO4 6AAH 6BBU 6C7Y 6DBN 6ELR 6GGH 6HZU 6N77 6N78 6N79 6N7A 6N7B 6N7C 6N7D 6RSB 6RSC 6RSD 6RSE 6RSH 6SM8 6SMB 6TPE 6TPF 6W8L 8EXJ | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "611",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=611&showAllSites=true",
+          "gene_symbol": "JAK2",
+          "uniprot_id": "O60674",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O60674",
+          "protein_name": "Non-receptor tyrosine kinase involved in various processes such as cell growth, development, differentiation or histone modifications. Mediates essential signaling events in both innate and adaptive immunity. In the cytoplasm, plays a pivotal role in signal transduction via its association with type I receptors such as growth hormone (GHR), prolactin (PRLR), leptin (LEPR), erythropoietin (EPOR), thrombopoietin (THPO); or type II receptors including IFN-alpha, IFN-beta, IFN-gamma and multiple interleukins. Following ligand-binding to cell surface receptors, phosphorylates specific tyrosine residues on the cytoplasmic tails of the receptor, creating docking sites for STATs proteins. Subsequently, phosphorylates the STATs proteins once they are recruited to the receptor. Phosphorylated STATs then form homodimer or heterodimers and translocate to the nucleus to activate gene transcription. For example, cell stimulation with erythropoietin (EPO) during erythropoiesis leads to JAK2 autophosphorylation, activation, and its association with erythropoietin receptor (EPOR) that becomes phosphorylated in its cytoplasmic domain. Then, STAT5 (STAT5A or STAT5B) is recruited, phosphorylated and activated by JAK2. Once activated, dimerized STAT5 translocates into the nucleus and promotes the transcription of several essential genes involved in the modulation of erythropoiesis. Part of a signaling cascade that is activated by increased cellular retinol and that leads to the activation of STAT5 (STAT5A or STAT5B). In addition, JAK2 mediates angiotensin-2-induced ARHGEF1 phosphorylation. Plays a role in cell cycle by phosphorylating CDKN1B. Cooperates with TEC through reciprocal phosphorylation to mediate cytokine-driven activation of FOS transcription. In the nucleus, plays a key role in chromatin by specifically mediating phosphorylation of 'Tyr-41' of histone H3 (H3Y41ph), a specific tag that promotes exclusion of CBX5 (HP1 alpha) from chromatin. Belongs to the protein kinase superfamily. Tyr protein kinase family. JAK subfamily. Ubiquitously expressed throughout most tissues. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O60674 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 2.7.10.2; Jak family; Kinase, protein; Oncoprotein; Protein kinase, TK; Protein kinase, tyrosine (non-receptor); TK group",
+            "Chromosomal Location of human Ortholog": "9p24.1",
+            "Cellular Component": "caveola; chromatin; cytoplasm; cytoplasmic side of plasma membrane; cytosol; endomembrane system; endosome; endosome lumen; euchromatin; extrinsic component of cytoplasmic side of plasma membrane; extrinsic component of plasma membrane; glutamatergic synapse; membrane; membrane raft; nucleoplasm; nucleus; plasma membrane; postsynapse",
+            "Molecular Function": "acetylcholine receptor binding; ATP binding; growth hormone receptor binding; heme binding; histone binding; histone H3Y41 kinase activity; identical protein binding; insulin receptor substrate binding; interleukin-12 receptor binding; kinase activity; metal ion binding; non-membrane spanning protein tyrosine kinase activity; nucleotide binding; peptide hormone receptor binding; phosphatidylinositol 3-kinase binding; protein binding; protein kinase activity; protein kinase binding; protein tyrosine kinase activity; SH2 domain binding; signaling receptor activator activity; signaling receptor binding; transferase activity; type 1 angiotensin receptor binding",
+            "Biological Process": "actin filament polymerization; activation of Janus kinase activity; adaptive immune response; apoptotic process; axon regeneration; cell adhesion; cell differentiation; cell surface receptor signaling pathway via JAK-STAT; chromatin organization; chromatin remodeling; ciliary neurotrophic factor-mediated signaling pathway; collagen-activated signaling pathway; cytokine-mediated signaling pathway; defense response to symbiont; enzyme-linked receptor protein signaling pathway; erythrocyte differentiation; erythropoietin-mediated signaling pathway; extrinsic apoptotic signaling pathway; granulocyte-macrophage colony-stimulating factor signaling pathway; growth hormone receptor signaling pathway; growth hormone receptor signaling pathway via JAK-STAT; hormone-mediated signaling pathway; immune system process; innate immune response; interleukin-12-mediated signaling pathway; interleukin-23-mediated signaling pathway; interleukin-3-mediated signaling pathway; interleukin-35-mediated signaling pathway; interleukin-5-mediated signaling pathway; interleukin-6-mediated signaling pathway; intracellular signal transduction; intrinsic apoptotic signaling pathway in response to oxidative stress; leukemia inhibitory factor signaling pathway; lipopolysaccharide-mediated signaling pathway; mammary gland epithelium development; mesoderm development; microglial cell activation; modulation of chemical synaptic transmission; negative regulation of apoptotic process; negative regulation of cardiac muscle cell apoptotic process; negative regulation of cell population proliferation; negative regulation of cell-cell adhesion; negative regulation of cytokine production involved in inflammatory response; negative regulation of neuron apoptotic process; negative regulation of protein localization to chromatin; nuclear receptor-mediated mineralocorticoid signaling pathway; platelet-derived growth factor receptor signaling pathway; positive regulation of apoptotic process; positive regulation of cell activation; positive regulation of cell differentiation; positive regulation of cell migration; positive regulation of cell population proliferation; positive regulation of cell-substrate adhesion; positive regulation of cold-induced thermogenesis; positive regulation of cytokine production; positive regulation of cytosolic calcium ion concentration; positive regulation of epithelial cell apoptotic process; positive regulation of growth factor dependent skeletal muscle satellite cell proliferation; positive regulation of growth hormone receptor signaling pathway; positive regulation of insulin secretion; positive regulation of interleukin-1 beta production; positive regulation of intracellular signal transduction; positive regulation of leukocyte proliferation; positive regulation of MAPK cascade; positive regulation of MHC class II biosynthetic process; positive regulation of nitric oxide biosynthetic process; positive regulation of phosphatidylinositol 3-kinase/protein kinase B signal transduction; positive regulation of platelet activation; positive regulation of platelet aggregation; positive regulation of protein import into nucleus; positive regulation of SMAD protein signal transduction; positive regulation of T cell proliferation; positive regulation of transcription by RNA polymerase II; positive regulation of tumor necrosis factor production; positive regulation of tyrosine phosphorylation of STAT protein; positive regulation of vascular associated smooth muscle cell proliferation; post-embryonic hemopoiesis; post-translational protein modification; protein autophosphorylation; regulation of alpha-beta T cell activation; regulation of apoptotic process; regulation of cell-cell adhesion; regulation of inflammatory response; regulation of nitric oxide biosynthetic process; regulation of postsynapse to nucleus signaling pathway; regulation of receptor signaling pathway via JAK-STAT; response to antibiotic; response to hydroperoxide; response to interleukin-12; response to oxidative stress; response to tumor necrosis factor; signal transduction; thrombopoietin-mediated signaling pathway; tumor necrosis factor-mediated signaling pathway; type II interferon-mediated signaling pathway",
+            "Disease": "Budd-chiari Syndrome ; Erythrocytosis, Familial, 1 ; Leukemia, Acute Myeloid ; Myelofibrosis ; Polycythemia Vera ; Thrombocythemia 3",
+            "Reference #": "O60674 (UniProtKB)",
+            "Alt. Names/Synonyms": "JAK-2; JAK2; Janus kinase 2; Janus kinase 2 (a protein tyrosine kinase); JTK10; Tyrosine-protein kinase JAK2",
+            "Gene Symbols": "JAK2",
+            "Molecular weight": "130,674 Da",
+            "Basal Isoelectric point": "6.82 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | IL6 Signaling | Inhibition of Apoptosis | Tyrosine Kinases & Substrates",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 2B7A 2W1I 2XA4 3E62 3E63 3E64 3FUP 3IO7 3IOK 3JY9 3KCK 3KRR 3LPB 3Q32 3RVG 3TJC 3TJD 3UGC 3ZMM 4AQC 4BBE 4BBF 4C61 4C62 4D0W 4D0X 4D1S 4E4M 4E6D 4E6Q 4F08 4F09 4FVP 4FVQ 4FVR 4GFM 4GMY 4HGE 4IVA 4JI9 4JIA 4P7E 4YTC 4YTF 4YTH 4YTI 4Z32 4ZIM 5AEP 5CF4 5CF5 5CF6 5CF8 5HEZ 5I4N 5L3A 5TQ3 5TQ4 5TQ5 5TQ6 5TQ7 5TQ8 5USY 5USZ 5UT0 5UT1 5UT2 5UT3 5UT4 5UT5 5UT6 5WEV 5WIJ 5WIK 5WIL 5WIM 5WIN 6AAJ 6BBV 6BRW 6BS0 6BSS 6D2I 6DRW 6E2P 6E2Q 6G3C 6M9H 6OAV 6OBB 6OBF 6OBL 6OCC 6TPD 6VGL 6VN8 6VNB 6VNC 6VNE 6VNF 6VNG 6VNH 6VNI 6VNJ 6VNK 6VNL 6VNM 6VS3 6VSN 6WTN 6WTO 6WTP 6WTQ 6X8E 6XJK 7F7W 7JYO 7JYQ 7LL4 7LL5 7Q7I 7Q7K 7Q7L 7Q7W 7REE 7RN6 7SZW 7T0P 7T1T 7TEU 7UYW 8B8N 8B8U 8B99 8B9E 8B9H 8BA2 8BA3 8BA4 8BAB 8BAK 8BM2 8BPV 8BPW 8BX6 8BX9 8BXC 8BXH 8C08 8C09 8C0A 8EX0 8EX1 8EX2 8EXK 8EYA 8EYB 8F88 8G6Z 8G8O 8G8X | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "612",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=612&showAllSites=true",
+          "gene_symbol": "JAK3",
+          "uniprot_id": "P52333",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P52333",
+          "protein_name": "Non-receptor tyrosine kinase involved in various processes such as cell growth, development, or differentiation. Mediates essential signaling events in both innate and adaptive immunity and plays a crucial role in hematopoiesis during T-cells development. In the cytoplasm, plays a pivotal role in signal transduction via its association with type I receptors sharing the common subunit gamma such as IL2R, IL4R, IL7R, IL9R, IL15R and IL21R. Following ligand binding to cell surface receptors, phosphorylates specific tyrosine residues on the cytoplasmic tails of the receptor, creating docking sites for STATs proteins. Subsequently, phosphorylates the STATs proteins once they are recruited to the receptor. Phosphorylated STATs then form homodimer or heterodimers and translocate to the nucleus to activate gene transcription. For example, upon IL2R activation by IL2, JAK1 and JAK3 molecules bind to IL2R beta (IL2RB) and gamma chain (IL2RG) subunits inducing the tyrosine phosphorylation of both receptor subunits on their cytoplasmic domain. Then, STAT5A AND STAT5B are recruited, phosphorylated and activated by JAK1 and JAK3. Once activated, dimerized STAT5 translocates to the nucleus and promotes the transcription of specific target genes in a cytokine-specific fashion. Belongs to the protein kinase superfamily. Tyr protein kinase family. JAK subfamily. In NK cells and an NK-like cell line but not in resting T-cells or in other tissues. The S-form is more commonly seen in hematopoietic lines, whereas the B-form is detected in cells both of hematopoietic and epithelial origins. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P52333 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 2.7.10.2; Jak family; Kinase, protein; Protein kinase, TK; Protein kinase, tyrosine (non-receptor); TK group",
+            "Chromosomal Location of human Ortholog": "19p13.11",
+            "Cellular Component": "cytoplasm; cytoplasmic side of plasma membrane; cytosol; endomembrane system; endosome; extrinsic component of cytoplasmic side of plasma membrane; extrinsic component of plasma membrane; membrane; plasma membrane",
+            "Molecular Function": "ATP binding; growth hormone receptor binding; kinase activity; non-membrane spanning protein tyrosine kinase activity; nucleotide binding; protein binding; protein kinase activity; protein phosphatase binding; protein tyrosine kinase activity; transferase activity",
+            "Biological Process": "adaptive immune response; B cell differentiation; cell differentiation; cell surface receptor signaling pathway via JAK-STAT; cytokine-mediated signaling pathway; enzyme-linked receptor protein signaling pathway; growth hormone receptor signaling pathway via JAK-STAT; immune system process; innate immune response; interleukin-15-mediated signaling pathway; interleukin-2-mediated signaling pathway; interleukin-4-mediated signaling pathway; interleukin-7-mediated signaling pathway; interleukin-9-mediated signaling pathway; intracellular signal transduction; negative regulation of dendritic cell cytokine production; negative regulation of glycoprotein biosynthetic process; negative regulation of interleukin-10 production; negative regulation of interleukin-12 production; negative regulation of T cell activation; negative regulation of T-helper 1 cell differentiation; negative regulation of T-helper 17 cell lineage commitment; negative regulation of thymocyte apoptotic process; regulation of alpha-beta T cell activation; regulation of apoptotic process; regulation of leukocyte cell-cell adhesion; regulation of receptor signaling pathway via JAK-STAT; regulation of T cell apoptotic process; response to interleukin-15; response to interleukin-2; response to interleukin-4; response to interleukin-9; T cell homeostasis; tyrosine phosphorylation of STAT protein",
+            "Disease": "Severe Combined Immunodeficiency, Autosomal Recessive, T Cell-negative, B Cell-positive, Nk Cell-negative",
+            "Reference #": "P52333 (UniProtKB)",
+            "Alt. Names/Synonyms": "JAK-3; JAK3; JAK3_HUMAN; JAKL; Janus kinase 3; Janus kinase 3 (a protein tyrosine kinase, leukocyte); L-JAK; Leukocyte janus kinase; LJAK; Tyrosine-protein kinase JAK3",
+            "Gene Symbols": "JAK3",
+            "Molecular weight": "125,099 Da",
+            "Basal Isoelectric point": "6.77 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | IL6 Signaling | Inhibition of Apoptosis | Tyrosine Kinases & Substrates",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 1YVJ 3LXK 3LXL 3PJC 3ZC6 3ZEP 4HVD 4HVG 4HVH 4HVI 4I6Q 4QPS 4QT1 4RIO 4V0G 4Z16 5LWM 5LWN 5TOZ 5TTS 5TTU 5TTV 5VO6 5W86 5WFJ 6AAK 6DA4 6DB3 6DB4 6DUD 6GL9 6GLA 6GLB 6HZV 6NY4 7APF 7APG 7C3N 7UYV 8EXM | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P23458",
+        "O60674",
+        "P52333"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P23458",
+        "https://www.uniprot.org/uniprot/O60674",
+        "https://www.uniprot.org/uniprot/P52333"
+      ],
+      "psp_gene_symbols": [
+        "JAK1",
+        "JAK2",
+        "JAK3"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Akt",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=akt&site-search-type=Products",
+      "phosphositeplus_id": "570;669;670",
+      "phosphositeplus_ids": [
+        "570",
+        "669",
+        "670"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=570",
+        "https://www.phosphosite.org/proteinAction.action?id=669",
+        "https://www.phosphosite.org/proteinAction.action?id=670"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "570",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=570&showAllSites=true",
+          "gene_symbol": "AKT1",
+          "uniprot_id": "P31749",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P31749",
+          "protein_name": "an oncogenic AGC kinase that plays a critical role in regulating many processes including cell survival, metabolism, proliferation, growth and angiogenesis. Over 160 protein substrates are known including many that regulate transcription, metabolism, apoptosis, cell cycle, and growth. The activation of phosphatidylinositol 3-kinase alpha (PIK3CA) at the plasma membrane generates phosphatidylinositol 3,4,5-trisphosphate (PIP3), which binds to the PH domain of Akt, inducing its translocation to the plasma membrane. Dual phosphorylation is required for its activation. T308 is phosphorylated by PDK1 in the PI3 kinase pathway, and S473 is phosphorylated by mTOR in the mTORC2 pathway. The 'Lys-63'-linked ubiquitination of AKT1 by TRAF6 is important for its translocation to the plasma membrane, phosphorylation, and activation. When Akt is fully phosphorylated it translocates into the nucleus, undergoes 'Lys-48'-polyubiquitination catalyzed by TTC3, leading to its proteosomal degradation. Hyperactive or overexpressed in a number of cancers including breast, prostate, lung, pancreatic, liver, ovarian and colorectal. Two alternatively-spliced human isoforms have been described. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P31749 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "AGC group; AKT family; EC 2.7.11.1; Kinase, protein; Oncoprotein; Protein kinase, AGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "14q32.33",
+            "Cellular Component": "cell cortex; cell-cell junction; ciliary basal body; cytoplasm; cytosol; glutamatergic synapse; lamellipodium; membrane; mitochondrial intermembrane space; mitochondrion; nucleoplasm; nucleus; plasma membrane; postsynapse; protein-containing complex; spindle; vesicle",
+            "Molecular Function": "14-3-3 protein binding; ATP binding; calmodulin binding; enzyme binding; identical protein binding; kinase activity; kinase binding; nitric-oxide synthase regulator activity; nucleotide binding; phosphatidylinositol-3,4,5-trisphosphate binding; phosphatidylinositol-3,4-bisphosphate binding; potassium channel activator activity; protein binding; protein homodimerization activity; protein kinase activity; protein kinase binding; protein serine kinase activity; protein serine/threonine kinase activity; protein serine/threonine kinase inhibitor activity; protein serine/threonine/tyrosine kinase activity; TORC2 complex binding; transferase activity",
+            "Biological Process": "activation-induced cell death of T cells; anoikis; apoptotic process; behavioral response to pain; beta-arrestin-dependent dopamine receptor signaling pathway; cell differentiation; cell migration involved in sprouting angiogenesis; cell population proliferation; cellular response to epidermal growth factor stimulus; cellular response to insulin stimulus; cellular response to nerve growth factor stimulus; cellular response to oxidised low-density lipoprotein particle stimulus; cellular response to rapamycin; cellular response to stress; complement receptor mediated signaling pathway; cytokine-mediated signaling pathway; epidermal growth factor receptor signaling pathway; excitatory postsynaptic potential; fibroblast migration; G protein-coupled receptor signaling pathway; glucose metabolic process; glycogen biosynthetic process; glycogen metabolic process; insulin receptor signaling pathway; insulin-like growth factor receptor signaling pathway; interleukin-18-mediated signaling pathway; intracellular signal transduction; maintenance of protein location in mitochondrion; mammary gland epithelial cell differentiation; negative regulation of apoptotic process; negative regulation of autophagy; negative regulation of cGAS/STING signaling pathway; negative regulation of cilium assembly; negative regulation of extrinsic apoptotic signaling pathway in absence of ligand; negative regulation of fatty acid beta-oxidation; negative regulation of gene expression; negative regulation of hydrogen peroxide-induced neuron intrinsic apoptotic signaling pathway; negative regulation of intrinsic apoptotic signaling pathway; negative regulation of leukocyte cell-cell adhesion; negative regulation of long-chain fatty acid import across plasma membrane; negative regulation of lymphocyte migration; negative regulation of macroautophagy; negative regulation of Notch signaling pathway; negative regulation of oxidative stress-induced intrinsic apoptotic signaling pathway; negative regulation of PERK-mediated unfolded protein response; negative regulation of protein localization to lysosome; negative regulation of protein maturation; negative regulation of protein ubiquitination; negative regulation of proteolysis; negative regulation of release of cytochrome c from mitochondria; nervous system development; nitric oxide biosynthetic process; nitric oxide metabolic process; osteoblast differentiation; peptidyl-serine phosphorylation; peptidyl-threonine phosphorylation; phosphatidylinositol 3-kinase/protein kinase B signal transduction; positive regulation of anaphase-promoting complex-dependent catabolic process; positive regulation of blood vessel endothelial cell migration; positive regulation of cell growth; positive regulation of cell migration; positive regulation of D-glucose import across plasma membrane; positive regulation of endodeoxyribonuclease activity; positive regulation of endothelial cell migration; positive regulation of endothelial cell proliferation; positive regulation of fat cell differentiation; positive regulation of G1/S transition of mitotic cell cycle; positive regulation of gene expression; positive regulation of glucose metabolic process; positive regulation of glycogen biosynthetic process; positive regulation of lipid biosynthetic process; positive regulation of nitric oxide biosynthetic process; positive regulation of peptidyl-serine phosphorylation; positive regulation of phosphatidylinositol 3-kinase/protein kinase B signal transduction; positive regulation of proteasomal ubiquitin-dependent protein catabolic process; positive regulation of protein import into nucleus; positive regulation of protein localization to cell surface; positive regulation of protein localization to endoplasmic reticulum; positive regulation of protein localization to nucleus; positive regulation of protein localization to plasma membrane; positive regulation of protein metabolic process; positive regulation of smooth muscle cell proliferation; positive regulation of TORC1 signaling; positive regulation of TORC2 signaling; positive regulation of transcription by RNA polymerase II; protein localization to mitochondrion; protein phosphorylation; regulation of apoptotic process; regulation of cell migration; regulation of glycogen biosynthetic process; regulation of mRNA stability; regulation of neuron projection development; regulation of postsynapse organization; regulation of signal transduction by p53 class mediator; regulation of translation; regulation of tRNA methylation; regulation of type B pancreatic cell development; response to fluid shear stress; response to growth factor; response to growth hormone; response to heat; response to hormone; response to insulin-like growth factor stimulus; response to oxidative stress; response to UV-A; signal transduction; sphingosine-1-phosphate receptor signaling pathway; T cell costimulation; TOR signaling; vascular endothelial cell response to laminar fluid shear stress",
+            "Disease": "Breast Cancer ; Colorectal Cancer ; Cowden Syndrome 6 ; Ovarian Cancer ; Proteus Syndrome",
+            "Reference #": "P31749 (UniProtKB)",
+            "Alt. Names/Synonyms": "AKT; AKT serine/threonine kinase 1; AKT1; AKT1 kinase; AKT1m; MGC99656; PKB; PKB alpha; PKB-ALPHA; PRKBA; Protein kinase B; Protein kinase B alpha; Proto-oncogene c-Akt; RAC; rac protein kinase alpha; RAC-ALPHA; RAC-alpha serine/threonine-protein kinase; RAC-PK-alpha; serine-threonine protein kinase; v-akt murine thymoma viral oncogene homolog 1; v-akt murine thymoma viral oncogene-like protein 1",
+            "Gene Symbols": "AKT1",
+            "Molecular weight": "55,686 Da",
+            "Basal Isoelectric point": "5.75 Predict pI for various phosphorylation states",
+            "CST Pathways": "Adherens Junction Dynamics | Alzheimer's Disease | AMPK Signaling | Angiogenesis | Apoptosis Regulation | B Cell Receptor Signaling | ErbB/HER Signaling | ESC Pluripotency and Differentiation | G1/S Checkpoint | IL6 Signaling | Inhibition of Apoptosis | Microtubule Dynamics | Mitochondrial Control of Apoptosis | mTOR Signaling | NF-kB Signaling | PI3K/Akt Signaling | Protein Kinase C Signaling | T Cell Receptor Signaling | TGF-ß Signaling | Translation: eIF4E and p70S6K | Warburg Effect",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 1H10 1UNP 1UNQ 1UNR 2UVM 2UZR 2UZS 3CQU 3CQW 3MV5 3MVH 3O96 3OCB 3OW4 3QKK 3QKL 3QKM 4EJN 4EKK 4EKL 4GV1 5KCV 6BUU 6C0I 6CCY 6HHF 6HHG 6HHH 6HHI 6HHJ 6NPZ 6S9W 6S9X 7APJ 7MYX 7NH4 7NH5 8JOW 8UVY 8UW2 8UW7 8UW9 8ZPU | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "669",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=669&showAllSites=true",
+          "gene_symbol": "AKT2",
+          "uniprot_id": "P31751",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P31751",
+          "protein_name": "one of three AKT kinases of the AGC family which regulate many processes including metabolism, proliferation, cell survival, growth and angiogenesis. AKT2 plays critical roles in the regulation of glucose uptake and the development or maintenance of proper adipose tissue and islet mass for which other Akt paralogs are unable to fully compensate. Specifically involved in skeletal muscle differentiation. Amplified and overexpressed in human ovarian carcinoma cell lines and amplified in some primary ovarian and pancreatic tumors. Antisense blocks invasiveness in xenografts. Expressed in several insulin-responsive tissues, and one case of Type II diabetes has been associated with a likely LOF point mutation. Mouse mutants have defects in insulin response. Two alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P31751 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "AGC group; AKT family; EC 2.7.11.1; Kinase, protein; Oncoprotein; Protein kinase, AGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "19q13.2",
+            "Cellular Component": "cell cortex; cytoplasm; cytosol; early endosome; nucleoplasm; nucleus; plasma membrane; ruffle membrane",
+            "Molecular Function": "ATP binding; kinase activity; metal ion binding; molecular function activator activity; nucleotide binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "apoptotic process; cellular response to insulin stimulus; fat cell differentiation; glucose metabolic process; glycogen biosynthetic process; glycogen metabolic process; insulin receptor signaling pathway; intracellular signal transduction; mammary gland epithelial cell differentiation; negative regulation of apoptotic process; negative regulation of long-chain fatty acid import across plasma membrane; negative regulation of PERK-mediated unfolded protein response; positive regulation of blood vessel endothelial cell migration; positive regulation of cap-dependent translational initiation; positive regulation of cell migration; positive regulation of cell motility; positive regulation of D-glucose import across plasma membrane; positive regulation of fatty acid beta-oxidation; positive regulation of glucose metabolic process; positive regulation of glycogen biosynthetic process; positive regulation of protein targeting to membrane; protein modification process; protein stabilization; regulation of cell cycle; regulation of cell migration; regulation of translation; signal transduction",
+            "Disease": "Diabetes Mellitus, Noninsulin-dependent ; Hypoinsulinemic Hypoglycemia With Hemihypertrophy",
+            "Reference #": "P31751 (UniProtKB)",
+            "Alt. Names/Synonyms": "akt 2; AKT serine/threonine kinase 2; AKT2; HIHGHH; Murine thymoma viral (v-akt) homolog-2; PKB beta; PKBB; PKBBETA; PRKBB; Protein kinase Akt-2; Protein kinase B beta; putative v-akt murine thymoma viral oncoprotein 2; rac protein kinase beta; RAC-BETA; RAC-beta serine/threonine-protein kinase; RAC-PK-beta; v-akt murine thymoma viral oncogene homolog 2",
+            "Gene Symbols": "AKT2",
+            "Molecular weight": "55,769 Da",
+            "Basal Isoelectric point": "5.98 Predict pI for various phosphorylation states",
+            "CST Pathways": "Adherens Junction Dynamics | Alzheimer's Disease | AMPK Signaling | Angiogenesis | Apoptosis Regulation | B Cell Receptor Signaling | ErbB/HER Signaling | ESC Pluripotency and Differentiation | G1/S Checkpoint | IL6 Signaling | Inhibition of Apoptosis | Insulin Receptor Signaling | Microtubule Dynamics | Mitochondrial Control of Apoptosis | mTOR Signaling | NF-kB Signaling | PI3K/Akt Signaling | Protein Kinase C Signaling | T Cell Receptor Signaling | TGF-ß Signaling | Translation: eIF4E and p70S6K | Warburg Effect",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 1GZK 1GZN 1GZO 1MRV 1MRY 1O6K 1O6L 1P6S 2JDO 2JDR 2UW9 2X39 2XH5 3D0E 3E87 3E88 3E8D 8Q61 9C1W | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "670",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=670&showAllSites=true",
+          "gene_symbol": "AKT3",
+          "uniprot_id": "Q9Y243",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9Y243",
+          "protein_name": "one of three AKT kinases of the AGC family that plays a critical role in controlling the balance between survival and apoptosis. AKT3 is the least studied AKT isoform. It plays an important role in brain development and is crucial for the viability of malignant glioma cells. AKT3 isoform may also be the key molecule in up-regulation and down-regulation of MMP13 via IL13. Required for the coordination of mitochondrial biogenesis with growth factor-induced increases in cellular energy demands. Down-regulation by RNA interference reduces the expression of the phosphorylated form of BAD, resulting in the induction of caspase-dependent apoptosis. Belongs to the protein kinase superfamily. AGC Ser/Thr protein kinase family. RAC subfamily. In adult tissues, it is highly expressed in brain, lung and kidney, but weakly in heart, testis and liver. In fetal tissues, it is highly expressed in heart, liver and brain and not at all in kidney. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9Y243 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "AGC group; AKT family; EC 2.7.11.1; Kinase, protein; Protein kinase, AGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "1q43-q44",
+            "Cellular Component": "cytoplasm; cytosol; membrane; nucleoplasm; nucleus",
+            "Molecular Function": "ATP binding; kinase activity; nucleotide binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "insulin receptor signaling pathway; intracellular signal transduction; negative regulation of apoptotic process; negative regulation of cellular senescence; negative regulation of PERK-mediated unfolded protein response; positive regulation of angiogenesis; positive regulation of artery morphogenesis; positive regulation of blood vessel endothelial cell migration; positive regulation of cell migration; positive regulation of cell migration involved in sprouting angiogenesis; positive regulation of endothelial cell proliferation; positive regulation of vascular endothelial cell proliferation; regulation of mitochondrion organization; signal transduction",
+            "Disease": "Megalencephaly-polymicrogyria-polydactyly-hydrocephalus Syndrome 2",
+            "Reference #": "Q9Y243 (UniProtKB)",
+            "Alt. Names/Synonyms": "AKT serine/threonine kinase 3; AKT3; DKFZp434N0250; MPPH; MPPH2; PKB gamma; PKB-GAMMA; PKBG; PRKBG; Protein kinase Akt-3; Protein kinase B gamma; RAC-gamma; RAC-gamma serine/threonine protein kinase; RAC-gamma serine/threonine-protein kinase; RAC-PK-gamma; serine threonine protein kinase, Akt-3; STK-2; v-akt murine thymoma viral oncogene homolog 3 (protein kinase B, gamma)",
+            "Gene Symbols": "AKT3",
+            "Molecular weight": "55,775 Da",
+            "Basal Isoelectric point": "5.72 Predict pI for various phosphorylation states",
+            "CST Pathways": "Adherens Junction Dynamics | Alzheimer's Disease | AMPK Signaling | Angiogenesis | Apoptosis Regulation | B Cell Receptor Signaling | ErbB/HER Signaling | ESC Pluripotency and Differentiation | G1/S Checkpoint | IL6 Signaling | Inhibition of Apoptosis | Microtubule Dynamics | Mitochondrial Control of Apoptosis | mTOR Signaling | NF-kB Signaling | PI3K/Akt Signaling | Protein Kinase C Signaling | T Cell Receptor Signaling | TGF-ß Signaling | Translation: eIF4E and p70S6K | Warburg Effect",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 2X18 8ZXW | ENZYME | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P31749",
+        "P31751",
+        "Q9Y243"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P31749",
+        "https://www.uniprot.org/uniprot/P31751",
+        "https://www.uniprot.org/uniprot/Q9Y243"
+      ],
+      "psp_gene_symbols": [
+        "AKT1",
+        "AKT2",
+        "AKT3"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "MAPK",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=MAPK&site-search-type=Products",
+      "phosphositeplus_id": "595;832;596;715;597;2138",
+      "phosphositeplus_ids": [
+        "595",
+        "832",
+        "596",
+        "715",
+        "597",
+        "2138"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=595",
+        "https://www.phosphosite.org/proteinAction.action?id=832",
+        "https://www.phosphosite.org/proteinAction.action?id=596",
+        "https://www.phosphosite.org/proteinAction.action?id=715",
+        "https://www.phosphosite.org/proteinAction.action?id=597",
+        "https://www.phosphosite.org/proteinAction.action?id=2138"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "595",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=595&showAllSites=true",
+          "gene_symbol": "MAPK3",
+          "uniprot_id": "P27361",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P27361",
+          "protein_name": "Serine/threonine kinase which acts as an essential component of the MAP kinase signal transduction pathway. MAPK1/ERK2 and MAPK3/ERK1 are the 2 MAPKs which play an important role in the MAPK/ERK cascade. They participate also in a signaling cascade initiated by activated KIT and KITLG/SCF. Depending on the cellular context, the MAPK/ERK cascade mediates diverse biological functions such as cell growth, adhesion, survival and differentiation through the regulation of transcription, translation, cytoskeletal rearrangements. The MAPK/ERK cascade plays also a role in initiation and regulation of meiosis, mitosis, and postmitotic functions in differentiated cells by phosphorylating a number of transcription factors. About 160 substrates have already been discovered for ERKs. Many of these substrates are localized in the nucleus, and seem to participate in the regulation of transcription upon stimulation. However, other substrates are found in the cytosol as well as in other cellular organelles, and those are responsible for processes such as translation, mitosis and apoptosis. Moreover, the MAPK/ERK cascade is also involved in the regulation of the endosomal dynamics, including lysosome processing and endosome cycling through the perinuclear recycling compartment (PNRC); as well as in the fragmentation of the Golgi apparatus during mitosis. The substrates include transcription factors (such as ATF2, BCL6, ELK1, ERF, FOS, HSF4 or SPZ1), cytoskeletal elements (such as CANX, CTTN, GJA1, MAP2, MAPT, PXN, SORBS3 or STMN1), regulators of apoptosis (such as BAD, BTG2, CASP9, DAPK1, IER3, MCL1 or PPARG), regulators of translation (such as EIF4EBP1) and a variety of other signaling-related molecules (like ARHGEF2, FRS2 or GRB10). Protein kinases (such as RAF1, RPS6KA1/RSK1, RPS6KA3/RSK2, RPS6KA2/RSK3, RPS6KA6/RSK4, SYK, MKNK1/MNK1, MKNK2/MNK2, RPS6KA5/MSK1, RPS6KA4/MSK2, MAPKAPK3 or MAPKAPK5) and phosphatases (such as DUSP1, DUSP4, DUSP6 or DUSP16) are other substrates which enable the propagation the MAPK/ERK signal to additional cytosolic and nuclear targets, thereby extending the specificity of the cascade. Belongs to the protein kinase superfamily. CMGC Ser/Thr protein kinase family. MAP kinase subfamily. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P27361 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CMGC group; EC 2.7.11.24; ERK1 subfamily; Kinase, protein; MAPK family; MAPK/ERK subfamily; Protein kinase, CMGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "16p11.2",
+            "Cellular Component": "caveola; cytoplasm; cytoskeleton; cytosol; early endosome; endoplasmic reticulum lumen; focal adhesion; glutamatergic synapse; Golgi apparatus; late endosome; mitochondrion; nuclear envelope; nucleoplasm; nucleus; plasma membrane; pseudopodium",
+            "Molecular Function": "ATP binding; DNA-binding transcription factor binding; identical protein binding; kinase activity; MAP kinase activity; nucleotide binding; phosphatase binding; phosphotyrosine residue binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "apoptotic process; BMP signaling pathway; caveolin-mediated endocytosis; cell surface receptor signaling pathway; cellular response to amino acid starvation; cellular response to mechanical stimulus; epidermal growth factor receptor signaling pathway; ERBB2-ERBB3 signaling pathway; ERK1 and ERK2 cascade; insulin receptor signaling pathway; insulin-like growth factor receptor signaling pathway; interleukin-1-mediated signaling pathway; interleukin-34-mediated signaling pathway; intracellular signal transduction; MAPK cascade; modulation of chemical synaptic transmission; myelination; negative regulation of cholesterol efflux; negative regulation of T cell mediated immune response to tumor cell; negative regulation of TORC1 signaling; peptidyl-tyrosine autophosphorylation; phosphorylation; positive regulation of cyclase activity; positive regulation of ERK1 and ERK2 cascade; positive regulation of macrophage chemotaxis; positive regulation of macrophage proliferation; positive regulation of neuroinflammatory response; positive regulation of telomere maintenance; positive regulation of transcription by RNA polymerase II; protein phosphorylation; regulation of cytoskeleton organization; regulation of early endosome to late endosome transport; regulation of gene expression; regulation of Golgi inheritance; regulation of stress-activated MAPK cascade; response to epidermal growth factor; Schwann cell development; sensory perception of pain; signal transduction in response to DNA damage; stress-activated MAPK cascade",
+            "Reference #": "P27361 (UniProtKB)",
+            "Alt. Names/Synonyms": "ERK; ERK-1; ERK1; ERT2; Extracellular signal-regulated kinase 1; extracellular signal-related kinase 1; HS44KDAP; HUMKER1A; Insulin-stimulated MAP2 kinase; MAP kinase 1; MAP kinase 3; MAP kinase isoform p44; MAPK 1; MAPK 3; MAPK3; MGC20180; Microtubule-associated protein 2 kinase; Mitogen-activated protein kinase 1; Mitogen-activated protein kinase 3; MK03; p44-ERK1; p44-MAPK; P44ERK1; P44MAPK; PRKM3",
+            "Gene Symbols": "MAPK3",
+            "Molecular weight": "43,136 Da",
+            "Basal Isoelectric point": "6.28 Predict pI for various phosphorylation states",
+            "CST Pathways": "Angiogenesis | Apoptosis Regulation | B Cell Receptor Signaling | ErbB/HER Signaling | ESC Pluripotency and Differentiation | GPCR Signaling to MAPKs | Growth And Differentiation Control by MAPKs | IL6 Signaling | Inhibition of Apoptosis | Insulin Receptor Signaling | Microtubule Dynamics | Mitochondrial Control of Apoptosis | mTOR Signaling | T Cell Receptor Signaling | TGF-ß Signaling | Translation: eIF4E and p70S6K | Warburg Effect",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 2ZOQ 4QTB 6GES | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "832",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=832&showAllSites=true",
+          "gene_symbol": "MAPK1",
+          "uniprot_id": "P28482",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P28482",
+          "protein_name": "Serine/threonine kinase which acts as an essential component of the MAP kinase signal transduction pathway. MAPK1/ERK2 and MAPK3/ERK1 are the 2 MAPKs which play an important role in the MAPK/ERK cascade. They participate also in a signaling cascade initiated by activated KIT and KITLG/SCF. Depending on the cellular context, the MAPK/ERK cascade mediates diverse biological functions such as cell growth, adhesion, survival and differentiation through the regulation of transcription, translation, cytoskeletal rearrangements. The MAPK/ERK cascade plays also a role in initiation and regulation of meiosis, mitosis, and postmitotic functions in differentiated cells by phosphorylating a number of transcription factors. About 160 substrates have already been discovered for ERKs. Many of these substrates are localized in the nucleus, and seem to participate in the regulation of transcription upon stimulation. However, other substrates are found in the cytosol as well as in other cellular organelles, and those are responsible for processes such as translation, mitosis and apoptosis. Moreover, the MAPK/ERK cascade is also involved in the regulation of the endosomal dynamics, including lysosome processing and endosome cycling through the perinuclear recycling compartment (PNRC); as well as in the fragmentation of the Golgi apparatus during mitosis. The substrates include transcription factors (such as ATF2, BCL6, ELK1, ERF, FOS, HSF4 or SPZ1), cytoskeletal elements (such as CANX, CTTN, GJA1, MAP2, MAPT, PXN, SORBS3 or STMN1), regulators of apoptosis (such as BAD, BTG2, CASP9, DAPK1, IER3, MCL1 or PPARG), regulators of translation (such as EIF4EBP1) and a variety of other signaling-related molecules (like ARHGEF2, DCC, FRS2 or GRB10). Protein kinases (such as RAF1, RPS6KA1/RSK1, RPS6KA3/RSK2, RPS6KA2/RSK3, RPS6KA6/RSK4, SYK, MKNK1/MNK1, MKNK2/MNK2, RPS6KA5/MSK1, RPS6KA4/MSK2, MAPKAPK3 or MAPKAPK5) and phosphatases (such as DUSP1, DUSP4, DUSP6 or DUSP16) are other substrates which enable the propagation the MAPK/ERK signal to additional cytosolic and nuclear targets, thereby extending the specificity of the cascade. Mediates phosphorylation of TPR in respons to EGF stimulation. May play a role in the spindle assembly checkpoint. Phosphorylates PML and promotes its interaction with PIN1, leading to PML degradation. Phosphorylates CDK2AP2. Acts as a transcriptional repressor. Binds to a [GC]AAA[GC] consensus sequence. Repress the expression of interferon gamma-induced genes. Seems to bind to the promoter of CCL5, DMP1, IFIH1, IFITM1, IRF7, IRF9, LAMP3, OAS1, OAS2, OAS3 and STAT1. Transcriptional activity is independent of kinase activity. Belongs to the protein kinase superfamily. CMGC Ser/Thr protein kinase family. MAP kinase subfamily. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P28482 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CMGC group; EC 2.7.11.24; ERK1 subfamily; Kinase, protein; MAPK family; MAPK/ERK subfamily; Protein kinase, CMGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "22q11.22",
+            "Cellular Component": "azurophil granule lumen; caveola; centrosome; cytoplasm; cytoskeleton; cytosol; early endosome; endoplasmic reticulum lumen; extracellular region; ficolin-1-rich granule lumen; focal adhesion; Golgi apparatus; late endosome; mitochondrion; mitotic spindle; nucleoplasm; nucleus; plasma membrane; pseudopodium; spindle; synapse",
+            "Molecular Function": "ATP binding; DNA binding; identical protein binding; kinase activity; MAP kinase activity; nucleotide binding; phosphatase binding; phosphotyrosine residue binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; RNA polymerase II CTD heptapeptide repeat kinase activity; transferase activity",
+            "Biological Process": "apoptotic process; caveolin-mediated endocytosis; cell surface receptor signaling pathway; cellular response to amino acid starvation; chemical synaptic transmission; chemokine-mediated signaling pathway; chemotaxis; epidermal growth factor receptor signaling pathway; ERBB signaling pathway; ERBB2-ERBB3 signaling pathway; ERK1 and ERK2 cascade; insulin receptor signaling pathway; insulin-like growth factor receptor signaling pathway; interleukin-34-mediated signaling pathway; intracellular signal transduction; learning or memory; MAPK cascade; myelination; positive regulation of cholesterol biosynthetic process; positive regulation of macrophage chemotaxis; positive regulation of macrophage proliferation; positive regulation of neuroinflammatory response; positive regulation of peptidyl-threonine phosphorylation; positive regulation of smoothened signaling pathway; positive regulation of telomere maintenance; protein phosphorylation; regulation of cytoskeleton organization; regulation of early endosome to late endosome transport; regulation of Golgi inheritance; regulation of stress-activated MAPK cascade; regulation of transcription by RNA polymerase II; response to epidermal growth factor; response to nicotine; Schwann cell development; signal transduction; stress-activated MAPK cascade",
+            "Disease": "Noonan Syndrome 13",
+            "Reference #": "P28482 (UniProtKB)",
+            "Alt. Names/Synonyms": "ERK; ERK-2; ERK2; ERT1; Extracellular signal-regulated kinase 2; extracellular signal-regulated kinase-2; MAP kinase 1; MAP kinase 2; MAP kinase isoform p42; MAPK 1; MAPK 2; MAPK1; MAPK2; Mitogen-activated protein kinase 1; Mitogen-activated protein kinase 2; MK01; p38; p40; p41; p41mapk; p42-MAPK; P42MAPK; PRKM1; PRKM2; protein tyrosine kinase ERK2",
+            "Gene Symbols": "MAPK1",
+            "Molecular weight": "41,390 Da",
+            "Basal Isoelectric point": "6.5 Predict pI for various phosphorylation states",
+            "CST Pathways": "Angiogenesis | Apoptosis Regulation | B Cell Receptor Signaling | ErbB/HER Signaling | ESC Pluripotency and Differentiation | GPCR Signaling to MAPKs | Growth And Differentiation Control by MAPKs | IL6 Signaling | Inhibition of Apoptosis | Insulin Receptor Signaling | Microtubule Dynamics | Mitochondrial Control of Apoptosis | mTOR Signaling | T Cell Receptor Signaling | TGF-ß Signaling | Translation: eIF4E and p70S6K | Warburg Effect",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 1PME 1TVO 1WZY 2E14 2OJG 2OJI 2OJJ 2Y9Q 3D42 3D44 3I5Z 3I60 3SA0 3TEI 3W55 4FMQ 4FUX 4FUY 4FV0 4FV1 4FV2 4FV3 4FV4 4FV5 4FV6 4FV7 4FV8 4FV9 4G6N 4G6O 4H3P 4H3Q 4IZ5 4IZ7 4IZA 4N0S 4NIF 4O6E 4QP1 4QP2 4QP3 4QP4 4QP6 4QP7 4QP8 4QP9 4QPA 4QTA 4QTE 4XJ0 4ZXT 4ZZM 4ZZN 4ZZO 5AX3 5BUE 5BUI 5BUJ 5BVD 5BVE 5BVF 5K4I 5LCJ 5LCK 5NGU 5NHF 5NHH 5NHJ 5NHL 5NHO 5NHP 5NHV 5V60 5V61 5V62 5WP1 6D5Y 6DMG 6G54 6G8X 6G91 6G92 6G93 6G97 6G9A 6G9D 6G9H 6G9J 6G9K 6G9M 6G9N 6GDM 6GDQ 6GE0 6GJB 6GJD 6NBS 6OPG 6OPH 6OPI 6Q7K 6Q7S 6Q7T 6QA1 6QA3 6QA4 6QAG 6QAH 6QAL 6QAQ 6QAW 6RQ4 6SLG 7AUV 7E73 7E75 7NQQ 7NQW 7NR3 7NR5 7NR8 7NR9 7OPM 7W5O 7X4U 7XC1 8AO2 8AO3 8AO4 8AO5 8AO6 8AO7 8AO8 8AO9 8AOA 8AOB 8AOC 8AOD 8AOE 8AOF 8AOG 8AOH 8AOI 8AOJ 8PSR 8PST 8PSW 8PSY 8PT0 8PT1 8PT3 8PT5 8PVU 8R5F 8U8J 8U8K 8ZJV | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "596",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=596&showAllSites=true",
+          "gene_symbol": "MAPK6",
+          "uniprot_id": "Q16659",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q16659",
+          "protein_name": "Atypical MAPK protein. Phosphorylates microtubule-associated protein 2 (MAP2) and MAPKAPK5. The precise role of the complex formed with MAPKAPK5 is still unclear, but the complex follows a complex set of phosphorylation events: upon interaction with atypical MAPKAPK5, ERK3/MAPK6 is phosphorylated at Ser-189 and then mediates phosphorylation and activation of MAPKAPK5, which in turn phosphorylates ERK3/MAPK6. May promote entry in the cell cycle. Belongs to the protein kinase superfamily. CMGC Ser/Thr protein kinase family. MAP kinase subfamily. Highest expression in the skeletal muscle, followed by the brain. Also found in heart, placenta, lung, liver, pancreas, kidney and skin fibroblasts. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q16659 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CMGC group; EC 2.7.11.24; ERK3 subfamily; Kinase, protein; MAPK family; MAPK/ERK subfamily; Protein kinase, CMGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "15q21.2",
+            "Cellular Component": "cytoplasm; cytosol; nucleoplasm; nucleus; protein-containing complex; septin cytoskeleton",
+            "Molecular Function": "ATP binding; kinase activity; MAP kinase activity; nucleotide binding; protein binding; protein heterodimerization activity; protein kinase activity; protein kinase binding; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "intracellular signal transduction; MAPK cascade; protein phosphorylation; signal transduction",
+            "Reference #": "Q16659 (UniProtKB)",
+            "Alt. Names/Synonyms": "DKFZp686F03189; ERK-3; ERK3; Extracellular signal-regulated kinase 3; extracellular signal-regulated kinase, p97; HsT17250; MAP kinase 6; MAP kinase isoform p97; MAPK 6; MAPK6; Mitogen-activated protein kinase 6; MK06; p97-MAPK; p97MAPK; PRKM6; protein kinase, mitogen-activated 5; protein kinase, mitogen-activated 6",
+            "Gene Symbols": "MAPK6",
+            "Molecular weight": "82,681 Da",
+            "Basal Isoelectric point": "4.91 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | GPCR Signaling to MAPKs | IL6 Signaling | Microtubule Dynamics | mTOR Signaling | Translation: eIF4E and p70S6K",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 2I6L 6YKY 6YLC 6YLL 7AQB | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "715",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=715&showAllSites=true",
+          "gene_symbol": "MAPK4",
+          "uniprot_id": "P31152",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P31152",
+          "protein_name": "Atypical MAPK protein. Phosphorylates microtubule-associated protein 2 (MAP2) and MAPKAPK5. The precise role of the complex formed with MAPKAPK5 is still unclear, but the complex follows a complex set of phosphorylation events: upon interaction with atypical MAPKAPK5, ERK4/MAPK4 is phosphorylated at Ser-186 and then mediates phosphorylation and activation of MAPKAPK5, which in turn phosphorylates ERK4/MAPK4. May promote entry in the cell cycle. Belongs to the protein kinase superfamily. CMGC Ser/Thr protein kinase family. MAP kinase subfamily. High expression in heart and brain. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P31152 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CMGC group; EC 2.7.11.24; ERK3 subfamily; Kinase, protein; MAPK family; MAPK/ERK subfamily; Protein kinase, CMGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "18q21.1-q21.2",
+            "Cellular Component": "cytoplasm; cytosol; nucleoplasm; nucleus",
+            "Molecular Function": "ATP binding; kinase activity; MAP kinase activity; nucleotide binding; protein binding; protein heterodimerization activity; protein homodimerization activity; protein kinase activity; protein kinase binding; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "intracellular signal transduction; MAPK cascade; protein phosphorylation",
+            "Reference #": "P31152 (UniProtKB)",
+            "Alt. Names/Synonyms": "ERK-4; ERK3; Erk3-related; ERK4; Extracellular signal-regulated kinase 4; MAP kinase 4; MAP kinase isoform p63; MAPK 4; MAPK4; Mitogen-activated protein kinase 4; MK04; p63-MAPK; p63MAPK; PRKM4",
+            "Gene Symbols": "MAPK4",
+            "Molecular weight": "65,922 Da",
+            "Basal Isoelectric point": "5.25 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | GPCR Signaling to MAPKs | IL6 Signaling | Microtubule Dynamics | mTOR Signaling | Translation: eIF4E and p70S6K",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | KinBase | Pfam | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "597",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=597&showAllSites=true",
+          "error": "500 Server Error: Internal Server Error for url: https://www.phosphosite.org/overviewExecuteAction?id=597&showAllSites=true"
+        },
+        {
+          "psp_id": "2138",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2138&showAllSites=true",
+          "gene_symbol": "MAPK15",
+          "uniprot_id": "Q8TD08",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q8TD08",
+          "protein_name": "Atypical MAPK protein that regulates several process such as autophagy, ciliogenesis, protein trafficking/secretion and genome integrity, in a kinase activity-dependent manner. Controls both, basal and starvation-induced autophagy throught its interaction with GABARAP, MAP1LC3B and GABARAPL1 leading to autophagosome formation, SQSTM1 degradation and reduced MAP1LC3B inhibitory phosphorylation. Regulates primary cilium formation and the localization of ciliary proteins involved in cilium structure, transport, and signaling. Prevents the relocation of the sugar-adding enzymes from the Golgi to the endoplasmic reticulum, thereby restricting the production of sugar-coated proteins. Upon amino-acid starvation, mediates transitional endoplasmic reticulum site disassembly and inhibition of secretion. Binds to chromatin leading to MAPK15 activation and interaction with PCNA, that which protects genomic integrity by inhibiting MDM2-mediated degradation of PCNA. Regulates DA transporter (DAT) activity and protein expression via activation of RhoA. In response to H(2)O(2) treatment phosphorylates ELAVL1, thus preventing it from binding to the PDCD4 3'UTR and rendering the PDCD4 mRNA accessible to miR-21 and leading to its degradation and loss of protein expression. Also functions in a kinase activity-independent manner as a negative regulator of growth. Phosphorylates in vitro FOS and MBP. During oocyte maturation, plays a key role in the microtubule organization and meiotic cell cycle progression in oocytes, fertilized eggs, and early embryos. Interacts with ESRRA promoting its re-localization from the nucleus to the cytoplasm and then prevents its transcriptional activity. Belongs to the protein kinase superfamily. CMGC Ser/Thr protein kinase family. MAP kinase subfamily. Widely expressed with a maximal expression in lung and kidney. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q8TD08 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CMGC group; EC 2.7.11.24; Erk7 subfamily; Kinase, protein; MAPK family; Protein kinase, CMGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "8q24.3",
+            "Cellular Component": "autophagosome; axoneme; bicellular tight junction; cell-cell junction; centriole; ciliary basal body; cytoplasm; cytoplasmic vesicle; extracellular region; Golgi apparatus; meiotic spindle; nucleus; spindle",
+            "Molecular Function": "ATP binding; chromatin binding; kinase activity; MAP kinase activity; nucleotide binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; SH3 domain binding; transferase activity",
+            "Biological Process": "cellular response to stress; DNA damage response; dopamine uptake; endoplasmic reticulum organization; intracellular signal transduction; MAPK cascade; negative regulation of cell migration; positive regulation of cell population proliferation; positive regulation of metaphase/anaphase transition of meiosis I; positive regulation of spindle assembly; positive regulation of telomere maintenance; positive regulation of transcription by RNA polymerase II; protein autophosphorylation; protein localization to ciliary transition zone; regulation of autophagy; regulation of cilium assembly; regulation of COPII vesicle coating",
+            "Reference #": "Q8TD08 (UniProtKB)",
+            "Alt. Names/Synonyms": "ERK-7; ERK-8; ERK7; ERK8; extracellular regulated kinase 8 delta; extracellular signal regulated kinase 8; Extracellular signal-regulated kinase 7; Extracellular signal-regulated kinase 8; MAP kinase 15; MAPK 15; MAPK15; Mitogen-activated protein kinase 15; MK15",
+            "Gene Symbols": "MAPK15",
+            "Molecular weight": "59,832 Da",
+            "Basal Isoelectric point": "9.17 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | GPCR Signaling to MAPKs | IL6 Signaling | Microtubule Dynamics | mTOR Signaling | Translation: eIF4E and p70S6K",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | KinBase | Pfam | ENZYME | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P27361",
+        "P28482",
+        "Q16659",
+        "P31152",
+        "Q8TD08"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P27361",
+        "https://www.uniprot.org/uniprot/P28482",
+        "https://www.uniprot.org/uniprot/Q16659",
+        "https://www.uniprot.org/uniprot/P31152",
+        "https://www.uniprot.org/uniprot/Q8TD08"
+      ],
+      "psp_gene_symbols": [
+        "MAPK3",
+        "MAPK1",
+        "MAPK6",
+        "MAPK4",
+        "MAPK15"
+      ],
+      "has_uniprot_match": true
+    }
+  ],
+  "protein_module_count": 28,
+  "scraped_at_utc": "2026-03-24T15:30:41.596872+00:00",
+  "uniprot_enriched_at": "2026-03-24T17:13:05.039630+00:00"
+}

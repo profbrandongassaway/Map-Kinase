@@ -1,0 +1,287 @@
+{
+  "pathway_name": "Phospholipase Signaling",
+  "pathway_url": "https://www.cellsignal.com/pathways/phospholipase-signaling-pathway",
+  "source_sections": [
+    "GPCR, Calcium, cAMP",
+    "Cardiovascular Disease"
+  ],
+  "protein_modules": [
+    {
+      "label": "GPCR",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=GPCR&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "EGFR",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=EGFR&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "CaMKII",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=CAMKII&site-search-type=Products",
+      "phosphositeplus_id": "580;674;2093;2090",
+      "phosphositeplus_ids": [
+        "580",
+        "674",
+        "2093",
+        "2090"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=580",
+        "https://www.phosphosite.org/proteinAction.action?id=674",
+        "https://www.phosphosite.org/proteinAction.action?id=2093",
+        "https://www.phosphosite.org/proteinAction.action?id=2090"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "580",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=580&showAllSites=true",
+          "gene_symbol": "CAMK2A",
+          "uniprot_id": "Q9UQM7",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9UQM7",
+          "protein_name": "Calcium/calmodulin-dependent protein kinase that functions autonomously after Ca(2+)/calmodulin-binding and autophosphorylation, and is involved in synaptic plasticity, neurotransmitter release and long-term potentiation. Member of the NMDAR signaling complex in excitatory synapses, it regulates NMDAR-dependent potentiation of the AMPAR and therefore excitatory synaptic transmission. Regulates dendritic spine development. Also regulates the migration of developing neurons. Phosphorylates the transcription factor FOXO3 to activate its transcriptional activity. Belongs to the protein kinase superfamily. CAMK Ser/Thr protein kinase family. CaMK subfamily. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9UQM7 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CAMK group; CAMK2 family; EC 2.7.11.17; Kinase, protein; Protein kinase, CAMK; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "5q32",
+            "Cellular Component": "calcium- and calmodulin-dependent protein kinase complex; cytoplasm; cytosol; dendrite; dendritic spine; endocytic vesicle membrane; mitochondrion; neuron projection; nucleoplasm; postsynaptic density; synapse",
+            "Molecular Function": "ATP binding; calcium/calmodulin-dependent protein kinase activity; calmodulin binding; glutamate receptor binding; identical protein binding; kinase activity; metal ion binding; nucleotide binding; protein binding; protein homodimerization activity; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "angiotensin-activated signaling pathway; calcium ion transport; cellular response to interferon-beta; cellular response to type II interferon; dendritic spine development; G1/S transition of mitotic cell cycle; long-term synaptic potentiation; negative regulation of ferroptosis; positive regulation of calcium ion transport; positive regulation of canonical NF-kappaB signal transduction; positive regulation of cardiac muscle cell apoptotic process; positive regulation of receptor signaling pathway via JAK-STAT; regulation of endocannabinoid signaling pathway; regulation of mitochondrial membrane permeability involved in apoptotic process; regulation of neuron migration; regulation of neuronal synaptic plasticity; regulation of neurotransmitter secretion; regulation of protein localization to plasma membrane; response to ischemia",
+            "Disease": "Mental Retardation, Autosomal Dominant 53 ; Mental Retardation, Autosomal Recessive 63",
+            "Reference #": "Q9UQM7 (UniProtKB)",
+            "Alt. Names/Synonyms": "calcium/calmodulin dependent protein kinase II alpha; calcium/calmodulin-dependent protein kinase (CaM kinase) II alpha; calcium/calmodulin-dependent protein kinase II; calcium/calmodulin-dependent protein kinase II alpha; calcium/calmodulin-dependent protein kinase II alpha-B subunit; calcium/calmodulin-dependent protein kinase type II alpha chain; Calcium/calmodulin-dependent protein kinase type II subunit alpha; calmodulin-dependent kinase II; CaM kinase II alpha subunit; CaM kinase II subunit alpha; CaM-kinase II alpha chain; CaMK-II alpha subunit; CaMK-II subunit alpha; CAMK2A; CAMKA; CaMKII; CaMKIIalpha; CaMKIINalpha; KCC2A; KIAA0968; MRD53; MRT63",
+            "Gene Symbols": "CAMK2A",
+            "Molecular weight": "54,088 Da",
+            "Basal Isoelectric point": "6.61 Predict pI for various phosphorylation states",
+            "CST Pathways": "B Cell Receptor Signaling | ErbB/HER Signaling | GPCR Signaling to MAPKs | Microtubule Dynamics | Mitochondrial Control of Apoptosis | Phospholipase Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 2VZ6 3SOA 5IG3 6OF8 6VZK 6W4O 6W4P 6X5G 6X5Q 6X8V 6XBP 6XBX 6XDL 6XDU 6XF0 6XOE 7KL0 7KL1 7KL2 7KL4 7REC 7UIQ 7UIR 7UIS 7UJP 7UJQ 7UJR 7UJS 7UJT | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "674",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=674&showAllSites=true",
+          "gene_symbol": "CAMK2B",
+          "uniprot_id": "Q13554",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q13554",
+          "protein_name": "Calcium/calmodulin-dependent protein kinase that functions autonomously after Ca(2+)/calmodulin-binding and autophosphorylation, and is involved in dendritic spine and synapse formation, neuronal plasticity and regulation of sarcoplasmic reticulum Ca(2+) transport in skeletal muscle. In neurons, plays an essential structural role in the reorganization of the actin cytoskeleton during plasticity by binding and bundling actin filaments in a kinase-independent manner. This structural function is required for correct targeting of CaMK2A, which acts downstream of NMDAR to promote dendritic spine and synapse formation and maintain synaptic plasticity which enables long-term potentiation (LTP) and hippocampus-dependent learning. In developing hippocampal neurons, promotes arborization of the dendritic tree and in mature neurons, promotes dendritic remodeling. Also regulates the migration of developing neurons. Participates in the modulation of skeletal muscle function in response to exercise. In slow-twitch muscles, is involved in regulation of sarcoplasmic reticulum (SR) Ca(2+) transport and in fast-twitch muscle participates in the control of Ca(2+) release from the SR through phosphorylation of triadin, a ryanodine receptor-coupling factor, and phospholamban (PLN/PLB), an endogenous inhibitor of SERCA2A/ATP2A2. Belongs to the protein kinase superfamily. CAMK Ser/Thr protein kinase family. CaMK subfamily. Widely expressed. Expressed in adult and fetal brain. Expression is slightly lower in fetal brain. Expressed in skeletal muscle. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q13554 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CAMK group; CAMK2 family; EC 2.7.11.17; Kinase, protein; Protein kinase, CAMK; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "7p13",
+            "Cellular Component": "calcium- and calmodulin-dependent protein kinase complex; centrosome; cytoplasm; cytoskeleton; cytosol; endocytic vesicle membrane; neuron projection; nucleoplasm; postsynaptic density; sarcoplasmic reticulum membrane; synapse",
+            "Molecular Function": "actin binding; ATP binding; calcium/calmodulin-dependent protein kinase activity; calmodulin binding; identical protein binding; kinase activity; nucleotide binding; protein binding; protein homodimerization activity; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "cell differentiation; long-term synaptic potentiation; nervous system development; positive regulation of dendritic spine morphogenesis; positive regulation of neuron projection development; positive regulation of synapse maturation; protein autophosphorylation; protein phosphorylation; regulation of calcium ion transport; regulation of dendritic spine development; regulation of long-term neuronal synaptic plasticity; regulation of neuron migration; regulation of neuronal synaptic plasticity; regulation of protein localization to plasma membrane; regulation of skeletal muscle adaptation; regulation of synapse structural plasticity; signal transduction",
+            "Disease": "Mental Retardation, Autosomal Dominant 54",
+            "Reference #": "Q13554 (UniProtKB)",
+            "Alt. Names/Synonyms": "calcium/calmodulin dependent protein kinase II beta; calcium/calmodulin-dependent protein kinase II beta; calcium/calmodulin-dependent protein kinase type II beta chain; Calcium/calmodulin-dependent protein kinase type II subunit beta; CaM kinase II beta subunit; CaM kinase II subunit beta; CaM-kinase II beta chain; CAM2; CaMK-II subunit beta; CAMK2; CaMK2-beta; CAMK2B; CAMKB; CaMKII; CaMKIIbeta; KCC2B; MGC29528; MRD54; proline rich calmodulin-dependent protein kinase",
+            "Gene Symbols": "CAMK2B",
+            "Molecular weight": "72,678 Da",
+            "Basal Isoelectric point": "6.87 Predict pI for various phosphorylation states",
+            "CST Pathways": "B Cell Receptor Signaling | ErbB/HER Signaling | GPCR Signaling to MAPKs | Microtubule Dynamics | Mitochondrial Control of Apoptosis | Phospholipase Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 3BHH 7URW 7URY 7URZ | ENZYME 2.7.1.123 2.7.11.17 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "2093",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2093&showAllSites=true",
+          "gene_symbol": "CAMK2D",
+          "uniprot_id": "Q13557",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q13557",
+          "protein_name": "Calcium/calmodulin-dependent protein kinase involved in the regulation of Ca(2+) homeostatis and excitation-contraction coupling (ECC) in heart by targeting ion channels, transporters and accessory proteins involved in Ca(2+) influx into the myocyte, Ca(2+) release from the sarcoplasmic reticulum (SR), SR Ca(2+) uptake and Na(+) and K(+) channel transport. Targets also transcription factors and signaling molecules to regulate heart function. In its activated form, is involved in the pathogenesis of dilated cardiomyopathy and heart failure. Contributes to cardiac decompensation and heart failure by regulating SR Ca(2+) release via direct phosphorylation of RYR2 Ca(2+) channel on 'Ser-2808'. In the nucleus, phosphorylates the MEF2 repressor HDAC4, promoting its nuclear export and binding to 14-3-3 protein, and expression of MEF2 and genes involved in the hypertrophic program. Is essential for left ventricular remodeling responses to myocardial infarction. In pathological myocardial remodeling acts downstream of the beta adrenergic receptor signaling cascade to regulate key proteins involved in ECC. Regulates Ca(2+) influx to myocytes by binding and phosphorylating the L-type Ca(2+) channel subunit beta-2 CACNB2. In addition to Ca(2+) channels, can target and regulate the cardiac sarcolemmal Na(+) channel Nav1.5/SCN5A and the K+ channel Kv4.3/KCND3, which contribute to arrhythmogenesis in heart failure. Phosphorylates phospholamban (PLN/PLB), an endogenous inhibitor of SERCA2A/ATP2A2, contributing to the enhancement of SR Ca(2+) uptake that may be important in frequency-dependent acceleration of relaxation (FDAR) and maintenance of contractile function during acidosis. May participate in the modulation of skeletal muscle function in response to exercise, by regulating SR Ca(2+) transport through phosphorylation of PLN/PLB and triadin, a ryanodine receptor-coupling factor. Belongs to the protein kinase superfamily. CAMK Ser/Thr protein kinase family. CaMK subfamily. Expressed in cardiac muscle and skeletal muscle. Isoform Delta 3, isoform Delta 2, isoform Delta 8 and isoform Delta 9 are expressed in cardiac muscle. Isoform Delta 11 is expressed in skeletal muscle. 10 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q13557 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CAMK group; CAMK2 family; EC 2.7.11.17; Kinase, protein; Protein kinase, CAMK; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "4q26",
+            "Cellular Component": "calcium- and calmodulin-dependent protein kinase complex; cytoplasm; cytosol; endocytic vesicle membrane; neuron projection; nucleoplasm; nucleus; postsynaptic density; sarcolemma; sarcoplasmic reticulum membrane",
+            "Molecular Function": "ATP binding; calcium/calmodulin-dependent protein kinase activity; calmodulin binding; identical protein binding; kinase activity; nucleotide binding; protein binding; protein homodimerization activity; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; sodium channel inhibitor activity; titin binding; transferase activity; transmembrane transporter binding",
+            "Biological Process": "cardiac muscle cell contraction; cellular response to calcium ion; endoplasmic reticulum calcium ion homeostasis; long-term synaptic potentiation; negative regulation of sodium ion transmembrane transport; positive regulation of cardiac muscle cell apoptotic process; positive regulation of cardiac muscle hypertrophy; protein phosphorylation; regulation of calcium ion transmembrane transport via high voltage-gated calcium channel; regulation of cardiac muscle cell action potential; regulation of cardiac muscle cell action potential involved in regulation of contraction; regulation of cardiac muscle contraction by regulation of the release of sequestered calcium ion; regulation of cell communication by electrical coupling; regulation of cell communication by electrical coupling involved in cardiac conduction; regulation of cell growth; regulation of cellular localization; regulation of heart contraction; regulation of heart rate by cardiac conduction; regulation of membrane depolarization; regulation of neuronal synaptic plasticity; regulation of protein localization to plasma membrane; regulation of relaxation of cardiac muscle; regulation of release of sequestered calcium ion into cytosol by sarcoplasmic reticulum; regulation of ryanodine-sensitive calcium-release channel activity; regulation of the force of heart contraction; regulation of transcription by RNA polymerase II; relaxation of cardiac muscle",
+            "Reference #": "Q13557 (UniProtKB)",
+            "Alt. Names/Synonyms": "calcium/calmodulin dependent protein kinase II delta; calcium/calmodulin-dependent protein kinase (CaM kinase) II delta; calcium/calmodulin-dependent protein kinase II delta; calcium/calmodulin-dependent protein kinase type II delta chain; Calcium/calmodulin-dependent protein kinase type II subunit delta; CaM kinase II delta subunit; CaM kinase II subunit delta; CaM-kinase II delta chain; CaMK-II delta subunit; CaMK-II subunit delta; CaMK2-delta; CAMK2D; CAMKD; CaMKII; KCC2D; MGC44911",
+            "Gene Symbols": "CAMK2D",
+            "Molecular weight": "56,369 Da",
+            "Basal Isoelectric point": "6.81 Predict pI for various phosphorylation states",
+            "CST Pathways": "B Cell Receptor Signaling | ErbB/HER Signaling | GPCR Signaling to MAPKs | Microtubule Dynamics | Mitochondrial Control of Apoptosis | Phospholipase Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 2VN9 2W2C 2WEL 3GP2 5VLO 6AYW 7ZRP 7ZRQ 9BLH | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "2090",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2090&showAllSites=true",
+          "gene_symbol": "CAMK2G",
+          "uniprot_id": "Q13555",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q13555",
+          "protein_name": "Calcium/calmodulin-dependent protein kinase that functions autonomously after Ca(2+)/calmodulin-binding and autophosphorylation, and is involved in sarcoplasmic reticulum Ca(2+) transport in skeletal muscle and may function in dendritic spine and synapse formation and neuronal plasticity. In slow-twitch muscles, is involved in regulation of sarcoplasmic reticulum (SR) Ca(2+) transport and in fast-twitch muscle participates in the control of Ca(2+) release from the SR through phosphorylation of the ryanodine receptor-coupling factor triadin. In neurons, may participate in the promotion of dendritic spine and synapse formation and maintenance of synaptic plasticity which enables long-term potentiation (LTP) and hippocampus-dependent learning. Belongs to the protein kinase superfamily. CAMK Ser/Thr protein kinase family. CaMK subfamily. Expressed in skeletal muscle. 11 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q13555 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CAMK group; CAMK2 family; EC 2.7.11.17; Kinase, protein; Protein kinase, CAMK; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "10q22.2",
+            "Cellular Component": "calcium- and calmodulin-dependent protein kinase complex; cytoplasm; cytosol; endocytic vesicle membrane; neuron projection; nucleoplasm; postsynaptic density; sarcoplasmic reticulum membrane",
+            "Molecular Function": "ATP binding; calcium-dependent protein serine/threonine phosphatase activity; calcium/calmodulin-dependent protein kinase activity; calmodulin binding; identical protein binding; kinase activity; nucleotide binding; protein binding; protein homodimerization activity; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "cell differentiation; insulin secretion; long-term synaptic potentiation; nervous system development; regulation of calcium ion transport; regulation of neuron projection development; regulation of neuronal synaptic plasticity; regulation of protein localization to plasma membrane; regulation of skeletal muscle adaptation",
+            "Disease": "Intellectual Developmental Disorder 59",
+            "Reference #": "Q13555 (UniProtKB)",
+            "Alt. Names/Synonyms": "calcium/calmodulin dependent protein kinase II gamma; calcium/calmodulin-dependent protein kinase (CaM kinase) II gamma; calcium/calmodulin-dependent protein kinase II gamma; Calcium/calmodulin-dependent protein kinase type II subunit gamma; CaM kinase II subunit gamma; CAMK; CAMK-II; CaMK-II subunit gamma; CAMK2G; CAMKG; CaMKII; FLJ16043; KCC2G; MGC26678; MRD59",
+            "Gene Symbols": "CAMK2G",
+            "Molecular weight": "62,607 Da",
+            "Basal Isoelectric point": "7.9 Predict pI for various phosphorylation states",
+            "CST Pathways": "B Cell Receptor Signaling | ErbB/HER Signaling | GPCR Signaling to MAPKs | Microtubule Dynamics | Mitochondrial Control of Apoptosis | Phospholipase Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 2UX0 2V7O | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | Ensembl Gene"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q9UQM7",
+        "Q13554",
+        "Q13557",
+        "Q13555"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q9UQM7",
+        "https://www.uniprot.org/uniprot/Q13554",
+        "https://www.uniprot.org/uniprot/Q13557",
+        "https://www.uniprot.org/uniprot/Q13555"
+      ],
+      "psp_gene_symbols": [
+        "CAMK2A",
+        "CAMK2B",
+        "CAMK2D",
+        "CAMK2G"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "cPLA",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=cPLA&site-search-type=Products",
+      "phosphositeplus_id": "951",
+      "phosphositeplus_ids": [
+        "951"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=951",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=951"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "951",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=951&showAllSites=true",
+          "gene_symbol": "PLA2G4A",
+          "uniprot_id": "P47712",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P47712",
+          "protein_name": "Selectively hydrolyzes arachidonyl phospholipids in the sn-2 position releasing arachidonic acid. Together with its lysophospholipid activity, it is implicated in the initiation of the inflammatory response. Expressed in various tissues such as macrophages, platelets, neutrophils, fibroblasts and lung endothelium. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P47712 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 3.1.1.4; EC 3.1.1.5; Lipid Metabolism - alpha-linolenic acid; Lipid Metabolism - arachidonic acid; Lipid Metabolism - ether lipid; Lipid Metabolism - glycerophospholipid; Lipid Metabolism - linoleic acid; Phospholipase",
+            "Chromosomal Location of human Ortholog": "1q31.1",
+            "Cellular Component": "cytoplasm; cytosol; endoplasmic reticulum; endoplasmic reticulum membrane; Golgi apparatus; Golgi membrane; mitochondrial inner membrane; nuclear envelope; nucleus",
+            "Molecular Function": "A2-type glycerophospholipase activity; calcium ion binding; calcium-dependent phospholipid binding; carboxylic ester hydrolase activity; ceramide 1-phosphate binding; glycerophospholipase activity; hydrolase activity; lipid binding; metal ion binding; O-acyltransferase activity; phosphatidylcholine lysophospholipase A1 activity; phosphatidylinositol-3-phosphate binding; phosphatidylinositol-4-phosphate binding; phosphatidylinositol-5-phosphate binding",
+            "Biological Process": "arachidonate metabolic process; arachidonate secretion; fatty acid biosynthetic process; fatty acid metabolic process; glycerol metabolic process; glycerophospholipid catabolic process; glycerophospholipid metabolic process; icosanoid metabolic process; leukotriene biosynthetic process; lipid catabolic process; lipid metabolic process; monoacylglycerol biosynthetic process; phosphatidylcholine acyl-chain remodeling; phosphatidylcholine catabolic process; phosphatidylglycerol catabolic process; phospholipid catabolic process; platelet activating factor biosynthetic process; positive regulation of macrophage activation; positive regulation of platelet activation; positive regulation of T-helper 1 type immune response; prostaglandin biosynthetic process; prostaglandin metabolic process",
+            "Disease": "Gastrointestinal Ulceration, Recurrent, With Dysfunctional Platelets",
+            "Reference #": "P47712 (UniProtKB)",
+            "Alt. Names/Synonyms": "calcium-dependent phospholipid-binding protein; CPLA2; cPLA2-alpha; Cytosolic phospholipase A2; GURDP; Lysophospholipase; MGC126350; PA24A; Phosphatidylcholine 2-acylhydrolase; Phospholipase A2; Phospholipase A2 group IVA; phospholipase A2, group IVA (cytosolic, calcium-dependent); PLA2G4; PLA2G4A",
+            "Gene Symbols": "PLA2G4A",
+            "Molecular weight": "85,239 Da",
+            "Basal Isoelectric point": "5.22 Predict pI for various phosphorylation states",
+            "CST Pathways": "GPCR Signaling to MAPKs | Growth And Differentiation Control by MAPKs | Phospholipase Signaling | Regulation of P38 MAPKs",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1BCI 1CJY 1RLW | ENZYME 3.1.1.4 3.1.1.5 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P47712"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P47712"
+      ],
+      "psp_gene_symbols": [
+        "PLA2G4A"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Mnk1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=mnk1&site-search-type=Products",
+      "phosphositeplus_id": "624",
+      "phosphositeplus_ids": [
+        "624"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=624",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=624"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "624",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=624&showAllSites=true",
+          "gene_symbol": "MKNK1",
+          "uniprot_id": "Q9BUB5",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9BUB5",
+          "protein_name": "May play a role in the response to environmental stress and cytokines. Appears to regulate translation by phosphorylating EIF4E, thus increasing the affinity of this protein for the 7-methylguanosine-containing mRNA cap. Belongs to the protein kinase superfamily. CAMK Ser/Thr protein kinase family. Ubiquitous. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9BUB5 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CAMK group; EC 2.7.11.1; Kinase, protein; MAPKAPK family; MNK subfamily; Protein kinase, CAMK; Protein kinase, Ser/Thr (non-receptor); Translation",
+            "Chromosomal Location of human Ortholog": "1p33",
+            "Cellular Component": "cytoplasm; cytosol; nucleoplasm; nucleus",
+            "Molecular Function": "ATP binding; calcium-dependent protein serine/threonine kinase activity; calcium/calmodulin-dependent protein kinase activity; calmodulin binding; kinase activity; metal ion binding; nucleotide binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "intracellular signal transduction; protein phosphorylation; regulation of translation",
+            "Reference #": "Q9BUB5 (UniProtKB)",
+            "Alt. Names/Synonyms": "MAP kinase interacting kinase 1; MAP kinase interacting serine/threonine kinase 1; MAP kinase signal-integrating kinase 1; MAP kinase-interacting serine/threonine kinase 1; MAP kinase-interacting serine/threonine-protein kinase 1; MAPK interacting serine/threonine kinase 1; MAPK signal-integrating kinase 1; MKNK1; MNK1",
+            "Gene Symbols": "MKNK1",
+            "Molecular weight": "51,342 Da",
+            "Basal Isoelectric point": "6.26 Predict pI for various phosphorylation states",
+            "CST Pathways": "Angiogenesis | Growth And Differentiation Control by MAPKs | Phospholipase Signaling | Regulation of P38 MAPKs | Translation: eIF4E and p70S6K",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 2HW6 2Y9Q 5WVD | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q9BUB5"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q9BUB5"
+      ],
+      "psp_gene_symbols": [
+        "MKNK1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "p38 MAPK",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=P38 MAPK&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    }
+  ],
+  "protein_module_count": 6,
+  "scraped_at_utc": "2026-03-24T15:31:16.998988+00:00",
+  "uniprot_enriched_at": "2026-03-24T17:23:44.290612+00:00"
+}

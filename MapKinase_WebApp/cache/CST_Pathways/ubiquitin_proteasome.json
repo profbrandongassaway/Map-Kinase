@@ -1,0 +1,160 @@
+{
+  "pathway_name": "Ubiquitin/Proteasome",
+  "pathway_url": "https://www.cellsignal.com/pathways/ubiquitin-proteasome-pathway",
+  "source_sections": [
+    "Ubiquitin and Ubiquitin-Like Protein Resources"
+  ],
+  "protein_modules": [
+    {
+      "label": "K48 Poly-Ub",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=K48&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "K63 Poly-Ub",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=K63&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "E1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=E1enzyme&site-search-type=Products",
+      "phosphositeplus_id": "2621",
+      "phosphositeplus_ids": [
+        "2621"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=2621",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=2621"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "2621",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2621&showAllSites=true",
+          "gene_symbol": "UBA1",
+          "uniprot_id": "P22314",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P22314",
+          "protein_name": "an enzyme of the ubiquitin-activating E1 family. Catalyzes the first step in ubiquitin conjugation to mark cellular proteins for degradation through the ubiquitin-proteasome system. Activates ubiquitin by first adenylating its C-terminal glycine residue with ATP, and thereafter linking this residue to the side chain of a cysteine residue in E1, yielding a ubiquitin-E1 thioester and free AMP. Essential for the formation of radiation-induced foci, timely DNA repair and for response to replication stress. Promotes the recruitment of TP53BP1 and BRCA1 at DNA damage sites. Belongs to the ubiquitin-activating E1 family. Detected in erythrocytes (at protein level). Ubiquitous. 2 alternative initiation human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P22314 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 6.3.2.19; Ubiquitin conjugating system; Ubiquitin ligase",
+            "Chromosomal Location of human Ortholog": "Xp11.3",
+            "Cellular Component": "cytoplasm; cytosol; desmosome; endosome membrane; heterochromatin; lysosomal membrane; mitochondrion; nucleoplasm; nucleus; rough endoplasmic reticulum membrane",
+            "Molecular Function": "ATP binding; ligase activity; nucleotide binding; protein binding; ubiquitin activating enzyme activity; ubiquitin-like modifier activating enzyme activity",
+            "Biological Process": "DNA damage response; protein ubiquitination; ubiquitin-dependent protein catabolic process",
+            "Disease": "Spinal Muscular Atrophy, X-linked 2 ; Vexas Syndrome",
+            "Reference #": "P22314 (UniProtKB)",
+            "Alt. Names/Synonyms": "A1S9; A1S9T; A1S9T and BN75 temperature sensitivity complementing; A1ST; AMCX1; CFAP124; GXP1; MGC4781; POC20; POC20 centriolar protein homolog; Protein A1S9; SMAX2; testicular secretory protein Li 63; UBA1; UBA1, ubiquitin-activating enzyme E1 homolog A; UBA1A; UBE1; UBE1X; ubiquitin like modifier activating enzyme 1; Ubiquitin-activating enzyme E1; ubiquitin-like modifier activating enzyme 1; Ubiquitin-like modifier-activating enzyme 1",
+            "Gene Symbols": "UBA1",
+            "Molecular weight": "117,849 Da",
+            "Basal Isoelectric point": "5.49 Predict pI for various phosphorylation states",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 4P22 6DC6 7PYV | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P22314"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P22314"
+      ],
+      "psp_gene_symbols": [
+        "UBA1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "E2",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=E2conjugating&site-search-type=Products",
+      "phosphositeplus_id": "9178",
+      "phosphositeplus_ids": [
+        "9178"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=9178",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=9178"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "9178",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=9178&showAllSites=true",
+          "gene_symbol": "UBE2N",
+          "uniprot_id": "P61088",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P61088",
+          "protein_name": "The UBE2V1-UBE2N and UBE2V2-UBE2N heterodimers catalyze the synthesis of non-canonical 'Lys-63'-linked polyubiquitin chains. This type of polyubiquitination does not lead to protein degradation by the proteasome. Mediates transcriptional activation of target genes. Plays a role in the control of progress through the cell cycle and differentiation. Plays a role in the error-free DNA repair pathway and contributes to the survival of cells after DNA damage. Acts together with the E3 ligases, HLTF and SHPRH, in the 'Lys-63'-linked poly-ubiquitination of PCNA upon genotoxic stress, which is required for DNA repair. Appears to act together with E3 ligase RNF5 in the 'Lys-63'-linked polyubiquitination of JKAMP thereby regulating JKAMP function by decreasing its association with components of the proteasome and ERAD. Promotes TRIM5 capsid-specific restriction activity and the UBE2V1-UBE2N heterodimer acts in concert with TRIM5 to generate 'Lys-63'-linked polyubiquitin chains which activate the MAP3K7/TAK1 complex which in turn results in the induction and expression of NF-kappa-B and MAPK-responsive inflammatory genes. Belongs to the ubiquitin-conjugating enzyme family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P61088 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "DNA repair, damage; EC 6.3.2.19; Ligase; Ubiquitin conjugating system; Ubiquitin ligase",
+            "Chromosomal Location of human Ortholog": "12q22",
+            "Cellular Component": "cytoplasm; cytosol; fibrillar center; nucleoplasm; nucleus; protein-containing complex; UBC13-MMS2 complex; ubiquitin conjugating enzyme complex; ubiquitin ligase complex",
+            "Molecular Function": "ATP binding; nucleotide binding; protein binding; transferase activity; ubiquitin binding; ubiquitin conjugating enzyme activity; ubiquitin protein ligase binding; ubiquitin-protein transferase activator activity; ubiquitin-protein transferase activity",
+            "Biological Process": "antiviral innate immune response; DNA damage response; DNA damage tolerance; DNA double-strand break processing; DNA repair; double-strand break repair via homologous recombination; negative regulation of TORC1 signaling; positive regulation of canonical NF-kappaB signal transduction; positive regulation of DNA repair; positive regulation of double-strand break repair; positive regulation of intracellular signal transduction; positive regulation of protein K63-linked ubiquitination; proteasome-mediated ubiquitin-dependent protein catabolic process; protein K63-linked ubiquitination; protein monoubiquitination; protein polyubiquitination; protein ubiquitination; regulation of DNA repair; T cell receptor signaling pathway",
+            "Reference #": "P61088 (UniProtKB)",
+            "Alt. Names/Synonyms": "bendless-like ubiquitin conjugating enzyme; Bendless-like ubiquitin-conjugating enzyme; BLU; E2 ubiquitin-conjugating enzyme N; epididymis secretory protein Li 71; HEL-S-71; MGC131857; MGC8489; Ubc13; UbcH-ben; UbcH13; UBCHBEN; UBE2N; Ubiquitin carrier protein N; ubiquitin conjugating enzyme E2 N; ubiquitin conjugating enzyme E2N; Ubiquitin-conjugating enzyme E2 N; ubiquitin-conjugating enzyme E2N (homologous to yeast UBC13); ubiquitin-conjugating enzyme E2N (UBC13 homolog, yeast); Ubiquitin-protein ligase N; yeast UBC13 homolog",
+            "Gene Symbols": "UBE2N",
+            "Molecular weight": "17,138 Da",
+            "Basal Isoelectric point": "6.13 Predict pI for various phosphorylation states",
+            "CST Pathways": "NF-kB Signaling | Toll-Like Receptor Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1J7D 2C2V 3HCT 3HCU 3VON 3W31 4DHI 4DHJ 4DHZ 4EPO 4IP3 4NR3 4NRG 4NRI 4ONL 4ONM 4ONN 4ORH 4TKP 4WHV 5AIT 5AIU 5EYA 5H7S 5VNZ 5VO0 5YWR 6D6I 6JKY 6KFP 6KG6 6KL4 6LP2 6P5B 6S53 6ULH 6UMP 6UMS 7BBD 7BBF 7BXG | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P61088"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P61088"
+      ],
+      "psp_gene_symbols": [
+        "UBE2N"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "E3",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=E3ligase&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "DUBs",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=dub&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    }
+  ],
+  "protein_module_count": 6,
+  "scraped_at_utc": "2026-03-24T15:31:37.480493+00:00",
+  "uniprot_enriched_at": "2026-03-24T17:36:49.171818+00:00"
+}

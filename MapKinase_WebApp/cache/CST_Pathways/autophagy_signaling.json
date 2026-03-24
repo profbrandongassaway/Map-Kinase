@@ -1,0 +1,1415 @@
+{
+  "pathway_name": "Autophagy Signaling",
+  "pathway_url": "https://www.cellsignal.com/pathways/autophagy-signaling-pathway",
+  "source_sections": [
+    "Cell Death",
+    "Cellular Metabolism",
+    "Cardiovascular Disease",
+    "Fibrosis",
+    "Metabolic Disease",
+    "Neurodegeneration",
+    "Deregulating Cellular Metabolism"
+  ],
+  "protein_modules": [
+    {
+      "label": "Raptor",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=raptor&site-search-type=Products",
+      "phosphositeplus_id": "6245",
+      "phosphositeplus_ids": [
+        "6245"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=6245",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=6245"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "6245",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=6245&showAllSites=true",
+          "gene_symbol": "RPTOR",
+          "uniprot_id": "Q8N122",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q8N122",
+          "protein_name": "Involved in the control of the mammalian target of rapamycin complex 1 (mTORC1) activity which regulates cell growth and survival, and autophagy in response to nutrient and hormonal signals; functions as a scaffold for recruiting mTORC1 substrates. mTORC1 is activated in response to growth factors or amino acids. Growth factor-stimulated mTORC1 activation involves a AKT1-mediated phosphorylation of TSC1-TSC2, which leads to the activation of the RHEB GTPase that potently activates the protein kinase activity of mTORC1. Amino acid-signaling to mTORC1 requires its relocalization to the lysosomes mediated by the Ragulator complex and the Rag GTPases. Activated mTORC1 up-regulates protein synthesis by phosphorylating key regulators of mRNA translation and ribosome synthesis. mTORC1 phosphorylates EIF4EBP1 and releases it from inhibiting the elongation initiation factor 4E (eiF4E). mTORC1 phosphorylates and activates S6K1 at 'Thr-389', which then promotes protein synthesis by phosphorylating PDCD4 and targeting it for degradation. Involved in ciliogenesis. Belongs to the WD repeat RAPTOR family. Highly expressed in skeletal muscle, and in a lesser extent in brain, lung, small intestine, kidney and placenta. Isoform 3 is widely expressed, with highest levels in nasal mucosa and pituitary and lowest in spleen. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q8N122 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Adaptor/scaffold",
+            "Chromosomal Location of human Ortholog": "17q25.3",
+            "Cellular Component": "cytoplasm; cytoplasmic stress granule; cytosol; dendrite; lysosomal membrane; lysosome; neuronal cell body; nucleoplasm; TORC1 complex",
+            "Molecular Function": "14-3-3 protein binding; enzyme-substrate adaptor activity; protein binding; protein kinase activator activity; protein kinase binding; protein serine/threonine kinase activity; protein serine/threonine kinase inhibitor activity; protein-containing complex binding; protein-macromolecule adaptor activity; small GTPase binding",
+            "Biological Process": "cellular response to amino acid stimulus; cellular response to glucose stimulus; cellular response to hypoxia; cellular response to L-leucine; cellular response to nutrient levels; cellular response to osmotic stress; cellular response to starvation; DNA damage response; negative regulation of autophagy; positive regulation of cell growth; positive regulation of endothelial cell proliferation; positive regulation of G1/S transition of mitotic cell cycle; positive regulation of glycolytic process; positive regulation of lipid biosynthetic process; positive regulation of odontoblast differentiation; positive regulation of osteoclast differentiation; positive regulation of pentose-phosphate shunt; positive regulation of TOR signaling; positive regulation of transcription by RNA polymerase III; regulation of autophagy; regulation of cell communication; regulation of cell growth; regulation of cell size; regulation of macromolecule metabolic process; regulation of primary metabolic process; regulation of signaling; response to xenobiotic stimulus; social behavior; TOR signaling; TORC1 signaling",
+            "Reference #": "Q8N122 (UniProtKB)",
+            "Alt. Names/Synonyms": "KIAA1303; KOG1; Mip1; p150 target of rapamycin (TOR)-scaffold protein; p150 target of rapamycin (TOR)-scaffold protein containing WD-repeats; RAPTOR; regulatory associated protein of MTOR complex 1; regulatory associated protein of MTOR, complex 1; Regulatory-associated protein of mTOR; RPTOR",
+            "Gene Symbols": "RPTOR",
+            "Molecular weight": "149,038 Da",
+            "Basal Isoelectric point": "6.43 Predict pI for various phosphorylation states",
+            "CST Pathways": "AMPK Signaling | Autophagy Signaling | Insulin Receptor Signaling | mTOR Signaling | PI3K/Akt Signaling | T Cell Receptor Signaling | Translation: eIF4E and p70S6K",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 5H64 6SB0 6SB2 6U62 7OWG 7PEA 7PEB 7PEC 7UX2 7UXC 8ERA 8RCH 8RCK 8RCN 9F42 9F43 9F44 9F45 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q8N122"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q8N122"
+      ],
+      "psp_gene_symbols": [
+        "RPTOR"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "PRAS40",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=pras40&site-search-type=Products",
+      "phosphositeplus_id": "6306",
+      "phosphositeplus_ids": [
+        "6306"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=6306",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=6306"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "6306",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=6306&showAllSites=true",
+          "gene_symbol": "AKT1S1",
+          "uniprot_id": "Q96B36-3",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q96B36-3",
+          "protein_name": "Subunit of mTORC1, which regulates cell growth and survival in response to nutrient and hormonal signals. mTORC1 is activated in response to growth factors or amino acids. Growth factor-stimulated mTORC1 activation involves a AKT1-mediated phosphorylation of TSC1-TSC2, which leads to the activation of the RHEB GTPase that potently activates the protein kinase activity of mTORC1. Amino acid-signaling to mTORC1 requires its relocalization to the lysosomes mediated by the Ragulator complex and the Rag GTPases. Activated mTORC1 up-regulates protein synthesis by phosphorylating key regulators of mRNA translation and ribosome synthesis. mTORC1 phosphorylates EIF4EBP1 and releases it from inhibiting the elongation initiation factor 4E (eiF4E). mTORC1 phosphorylates and activates S6K1 at 'Thr-389', which then promotes protein synthesis by phosphorylating PDCD4 and targeting it for degradation. Within mTORC1, AKT1S1 negatively regulates mTOR activity in a manner that is dependent on its phosphorylation state and binding to 14-3-3 proteins. Inhibits RHEB-GTP-dependent mTORC1 activation. Substrate for AKT1 phosphorylation, but can also be activated by AKT1-independent mechanisms. May also play a role in nerve growth factor-mediated neuroprotection. Widely expressed with highest levels of expression in liver and heart. Expressed at higher levels in cancer cell lines (e.g. A-549 and HeLa) than in normal cell lines (e.g. HEK293). 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q96B36-3 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Apoptosis",
+            "Chromosomal Location of human Ortholog": "19q13.33",
+            "Cellular Component": "cytoplasm; cytosol; nucleoplasm; TORC1 complex",
+            "Molecular Function": "protein binding; protein kinase inhibitor activity; protein serine/threonine kinase inhibitor activity",
+            "Biological Process": "negative regulation of cell size; negative regulation of protein kinase activity; negative regulation of TOR signaling; negative regulation of TORC1 signaling; neurotrophin TRK receptor signaling pathway; regulation of apoptotic process; regulation of neuron apoptotic process",
+            "Reference #": "Q96B36-3 (UniProtKB)",
+            "Alt. Names/Synonyms": "40 kDa proline-rich AKT substrate; AKT1 substrate 1; AKT1 substrate 1 (proline rich); AKT1 substrate 1 (proline-rich); AKT1S1; AKTS1; Lobe; MGC2865; PRAS40; PRAS40 iso3; proline-rich Akt substrate, 40 kDa; Proline-rich AKT1 substrate 1",
+            "Gene Symbols": "AKT1S1",
+            "Molecular weight": "29,262 Da",
+            "Basal Isoelectric point": "4.63 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling | Insulin Receptor Signaling | mTOR Signaling | PI3K/Akt Signaling | T Cell Receptor Signaling | Translation: eIF4E and p70S6K",
+            "Cross-references to other databases": "STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q96B36-3"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q96B36-3"
+      ],
+      "psp_gene_symbols": [
+        "AKT1S1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Beclin-1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=Beclin-1&site-search-type=Products",
+      "phosphositeplus_id": "14839",
+      "phosphositeplus_ids": [
+        "14839"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=14839",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=14839"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "14839",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=14839&showAllSites=true",
+          "gene_symbol": "BECN1",
+          "uniprot_id": "Q14457",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q14457",
+          "protein_name": "Plays a central role in autophagy. Acts as core subunit of the PI3K complex that mediates formation of phosphatidylinositol 3-phosphate; different complex forms are believed to play a role in multiple membrane trafficking pathways: PI3KC3-C1 is involved in initiation of autophagosomes and PI3KC3-C2 in maturation of autophagosomes and endocytosis. Involved in regulation of degradative endocytic trafficking and required for the abcission step in cytokinesis, probably in the context of PI3KC3-C2. Essential for the formation of PI3KC3-C2 but not PI3KC3-C1 PI3K complex forms. Involved in endocytosis. Protects against infection by a neurovirulent strain of Sindbis virus. May play a role in antiviral host defense. Beclin-1-C 35 kDa localized to mitochondria can promote apoptosis; it induces the mitochondrial translocation of BAX and the release of proapoptotic factors. Belongs to the beclin family. Ubiquitous. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q14457 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Adaptor/scaffold; Autophagy; Membrane protein, peripheral",
+            "Chromosomal Location of human Ortholog": "17q21.31",
+            "Cellular Component": "autophagosome; cytoplasm; cytoplasmic side of mitochondrial outer membrane; cytoplasmic vesicle; cytosol; dendrite; endoplasmic reticulum; endoplasmic reticulum membrane; endosome; endosome membrane; Golgi apparatus; mitochondrial membrane; mitochondrion; nuclear body; nucleus; phagocytic vesicle; phagophore assembly site; phosphatidylinositol 3-kinase complex, class III; phosphatidylinositol 3-kinase complex, class III, type I; phosphatidylinositol 3-kinase complex, class III, type II; protein-containing complex; trans-Golgi network",
+            "Molecular Function": "GTPase binding; identical protein binding; molecular adaptor activity; phosphatidylinositol 3-kinase binding; protein binding; protein kinase binding; protein-macromolecule adaptor activity; ubiquitin protein ligase binding",
+            "Biological Process": "apoptotic process; autophagosome assembly; autophagosome maturation; autophagy; cell division; cellular defense response; cellular response to aluminum ion; cellular response to amino acid starvation; cellular response to copper ion; cellular response to epidermal growth factor stimulus; cellular response to glucose starvation; cellular response to hydrogen peroxide; cellular response to nitrogen starvation; cellular response to oxygen-glucose deprivation; circadian rhythm; cytoplasmic pattern recognition receptor signaling pathway; defense response to virus; early endosome to late endosome transport; endocytosis; engulfment of apoptotic cell; JNK cascade; late endosome to vacuole transport; macroautophagy; mitophagy; mitotic metaphase chromosome alignment; negative regulation of apoptotic process; negative regulation of lysosome organization; negative regulation of programmed cell death; p38MAPK cascade; phosphatidylinositol-3-phosphate biosynthetic process; positive regulation of attachment of mitotic spindle microtubules to kinetochore; positive regulation of autophagosome assembly; positive regulation of autophagy; positive regulation of intrinsic apoptotic signaling pathway; positive regulation of phosphatidylinositol 3-kinase/protein kinase B signal transduction; positive regulation of stress granule assembly; protein targeting to lysosome; protein-containing complex assembly; receptor catabolic process; regulation of autophagy; regulation of cytokinesis; regulation of macroautophagy; response to hypoxia; response to iron(II) ion; response to lead ion; response to mitochondrial depolarisation; response to nutrient levels; response to vitamin E; response to xenobiotic stimulus; SMAD protein signal transduction",
+            "Reference #": "Q14457 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATG6; ATG6 autophagy related 6 homolog; beclin 1; beclin 1 (coiled-coil, moesin-like BCL2 interacting protein); beclin 1 (coiled-coil, moesin-like BCL2-interacting protein); beclin 1, autophagy related; Beclin-1; Beclin-1-C 35 kDa; Beclin-1-C 37 kDa; beclin1; BECN1; Coiled-coil myosin-like BCL2-interacting protein; GT197; Protein GT197; testis secretory sperm-binding protein Li 215e; VPS30",
+            "Gene Symbols": "BECN1",
+            "Molecular weight": "51,896 Da",
+            "Basal Isoelectric point": "4.83 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 2P1L 2PON 3DVU 4DDP 4MI8 5EFM 5HHE 5VAU 5VAX 5VAY 5VB1 5VB4 6DCN 6DCO 6HOI 6HOJ 6HOK 8SOR 8SRQ 9MHF 9MHG 9MHH | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q14457"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q14457"
+      ],
+      "psp_gene_symbols": [
+        "BECN1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "AMPK",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=AMPK&site-search-type=Products",
+      "phosphositeplus_id": "742;572;1401;3864;3603;16852;16490",
+      "phosphositeplus_ids": [
+        "742",
+        "572",
+        "1401",
+        "3864",
+        "3603",
+        "16852",
+        "16490"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=742",
+        "https://www.phosphosite.org/proteinAction.action?id=572",
+        "https://www.phosphosite.org/proteinAction.action?id=1401",
+        "https://www.phosphosite.org/proteinAction.action?id=3864",
+        "https://www.phosphosite.org/proteinAction.action?id=3603",
+        "https://www.phosphosite.org/proteinAction.action?id=16852",
+        "https://www.phosphosite.org/proteinAction.action?id=16490"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "742",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=742&showAllSites=true",
+          "gene_symbol": "PRKAA1",
+          "uniprot_id": "Q13131",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q13131",
+          "protein_name": "Catalytic subunit of AMP-activated protein kinase (AMPK), an energy sensor protein kinase that plays a key role in regulating cellular energy metabolism. In response to reduction of intracellular ATP levels, AMPK activates energy-producing pathways and inhibits energy-consuming processes: inhibits protein, carbohydrate and lipid biosynthesis, as well as cell growth and proliferation. AMPK acts via direct phosphorylation of metabolic enzymes, and by longer-term effects via phosphorylation of transcription regulators. Also acts as a regulator of cellular polarity by remodeling the actin cytoskeleton; probably by indirectly activating myosin. Regulates lipid synthesis by phosphorylating and inactivating lipid metabolic enzymes such as ACACA, ACACB, GYS1, HMGCR and LIPE; regulates fatty acid and cholesterol synthesis by phosphorylating acetyl-CoA carboxylase (ACACA and ACACB) and hormone-sensitive lipase (LIPE) enzymes, respectively. Regulates insulin-signaling and glycolysis by phosphorylating IRS1, PFKFB2 and PFKFB3. AMPK stimulates glucose uptake in muscle by increasing the translocation of the glucose transporter SLC2A4/GLUT4 to the plasma membrane, possibly by mediating phosphorylation of TBC1D4/AS160. Regulates transcription and chromatin structure by phosphorylating transcription regulators involved in energy metabolism such as CRTC2/TORC2, FOXO3, histone H2B, HDAC5, MEF2C, MLXIPL/ChREBP, EP300, HNF4A, p53/TP53, SREBF1, SREBF2 and PPARGC1A. Acts as a key regulator of glucose homeostasis in liver by phosphorylating CRTC2/TORC2, leading to CRTC2/TORC2 sequestration in the cytoplasm. In response to stress, phosphorylates 'Ser-36' of histone H2B (H2BS36ph), leading to promote transcription. Acts as a key regulator of cell growth and proliferation by phosphorylating TSC2, RPTOR and ATG1/ULK1: in response to nutrient limitation, negatively regulates the mTORC1 complex by phosphorylating RPTOR component of the mTORC1 complex and by phosphorylating and activating TSC2. In response to nutrient limitation, promotes autophagy by phosphorylating and activating ATG1/ULK1. In that process also activates WDR45. In response to nutrient limitation, phosphorylates transcription factor FOXO3 promoting FOXO3 mitochondrial import. AMPK also acts as a regulator of circadian rhythm by mediating phosphorylation of CRY1, leading to destabilize it. May regulate the Wnt signaling pathway by phosphorylating CTNNB1, leading to stabilize it. Also has tau-protein kinase activity: in response to amyloid beta A4 protein (APP) exposure, activated by CAMKK2, leading to phosphorylation of MAPT/TAU; however the relevance of such data remains unclear in vivo. Also phosphorylates CFTR, EEF2K, KLC1, NOS3 and SLC12A1. Belongs to the protein kinase superfamily. CAMK Ser/Thr protein kinase family. SNF1 subfamily. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q13131 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "AMPK subfamily; Autophagy; CAMK group; CAMKL family; EC 2.7.11.1; EC 2.7.11.26; EC 2.7.11.27; EC 2.7.11.31; Kinase, protein; Protein kinase, CAMK; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "5p13.1",
+            "Cellular Component": "apical plasma membrane; axon; chromatin; ciliary basal body; cytoplasm; cytosol; dendrite; endoplasmic reticulum lumen; neuronal cell body; nuclear speck; nucleoplasm; nucleotide-activated protein kinase complex; nucleus; protein-containing complex",
+            "Molecular Function": "[hydroxymethylglutaryl-CoA reductase (NADPH)] kinase activity; AMP-activated protein kinase activity; ATP binding; cAMP-dependent protein kinase activity; chromatin binding; histone H2BS36 kinase activity; kinase activity; metal ion binding; nucleotide binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; protein-containing complex binding; tau protein binding; tau-protein kinase activity; transferase activity",
+            "Biological Process": "autophagy; CAMKK-AMPK signaling cascade; cellular response to calcium ion; cellular response to ethanol; cellular response to glucose starvation; cellular response to glucose stimulus; cellular response to hydrogen peroxide; cellular response to hypoxia; cellular response to nutrient levels; cellular response to oxidative stress; cellular response to starvation; cellular response to stress; cellular response to xenobiotic stimulus; cholesterol biosynthetic process; cholesterol metabolic process; chromatin organization; chromatin remodeling; cold acclimation; energy homeostasis; fatty acid biosynthetic process; fatty acid homeostasis; fatty acid metabolic process; glucose homeostasis; lipid biosynthetic process; lipid droplet disassembly; lipid metabolic process; motor behavior; negative regulation of apoptotic process; negative regulation of ferroptosis; negative regulation of gene expression; negative regulation of glucosylceramide biosynthetic process; negative regulation of hepatocyte apoptotic process; negative regulation of insulin receptor signaling pathway; negative regulation of lipid catabolic process; negative regulation of TOR signaling; negative regulation of TORC1 signaling; neuron cellular homeostasis; positive regulation of adipose tissue development; positive regulation of autophagy; positive regulation of cell population proliferation; positive regulation of cholesterol biosynthetic process; positive regulation of DNA-templated transcription; positive regulation of glycolytic process; positive regulation of mitochondrial transcription; positive regulation of protein localization; positive regulation of protein localization to mitochondrion; positive regulation of T cell activation; positive regulation of T cell mediated immune response to tumor cell; protein localization to lipid droplet; protein localization to membrane; protein localization to plasma membrane; regulation of circadian rhythm; regulation of microtubule cytoskeleton organization; regulation of stress granule assembly; regulation of vascular permeability; regulation of vesicle-mediated transport; response to activity; response to caffeine; response to estrogen; response to gamma radiation; response to hydrogen peroxide; response to hypoxia; response to UV; response to xenobiotic stimulus; rhythmic process; signal transduction; steroid biosynthetic process; steroid metabolic process; sterol biosynthetic process; Wnt signaling pathway",
+            "Reference #": "Q13131 (UniProtKB)",
+            "Alt. Names/Synonyms": "5'-AMP-activated protein kinase catalytic subunit alpha-1; 5'-AMP-activated protein kinase, catalytic alpha-1 chain; AAPK1; ACACA kinase; Acetyl-CoA carboxylase kinase; AMP -activate kinase alpha 1 subunit; AMP-activated protein kinase; AMP-activated protein kinase, catalytic, alpha-1; AMPK; AMPK alpha 1; AMPK subunit alpha-1; AMPK1; AMPKa1; HMGCR kinase; Hydroxymethylglutaryl-CoA reductase kinase; MGC33776; MGC57364; PRKAA1; protein kinase AMP-activated catalytic subunit alpha 1; protein kinase, AMP-activated, alpha 1 catalytic subunit; Tau-protein kinase PRKAA1",
+            "Gene Symbols": "PRKAA1",
+            "Molecular weight": "64,009 Da",
+            "Basal Isoelectric point": "8.32 Predict pI for various phosphorylation states",
+            "CST Pathways": "AMPK Signaling | Autophagy Signaling | Insulin Receptor Signaling | mTOR Signaling | Translation: eIF4E and p70S6K | Warburg Effect",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 4RED 4RER 4REW 5EZV 6C9F 6C9G 6C9H 6C9J 7JHG 7JHH 7JIJ 7M74 | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "572",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=572&showAllSites=true",
+          "gene_symbol": "PRKAA2",
+          "uniprot_id": "P54646",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P54646",
+          "protein_name": "Catalytic subunit of AMP-activated protein kinase (AMPK), an energy sensor protein kinase that plays a key role in regulating cellular energy metabolism. In response to reduction of intracellular ATP levels, AMPK activates energy-producing pathways and inhibits energy-consuming processes: inhibits protein, carbohydrate and lipid biosynthesis, as well as cell growth and proliferation. AMPK acts via direct phosphorylation of metabolic enzymes, and by longer-term effects via phosphorylation of transcription regulators. Also acts as a regulator of cellular polarity by remodeling the actin cytoskeleton; probably by indirectly activating myosin. Regulates lipid synthesis by phosphorylating and inactivating lipid metabolic enzymes such as ACACA, ACACB, GYS1, HMGCR and LIPE; regulates fatty acid and cholesterol synthesis by phosphorylating acetyl-CoA carboxylase (ACACA and ACACB) and hormone-sensitive lipase (LIPE) enzymes, respectively. Regulates insulin-signaling and glycolysis by phosphorylating IRS1, PFKFB2 and PFKFB3. Involved in insulin receptor/INSR internalization. AMPK stimulates glucose uptake in muscle by increasing the translocation of the glucose transporter SLC2A4/GLUT4 to the plasma membrane, possibly by mediating phosphorylation of TBC1D4/AS160. Regulates transcription and chromatin structure by phosphorylating transcription regulators involved in energy metabolism such as CRTC2/TORC2, FOXO3, histone H2B, HDAC5, MEF2C, MLXIPL/ChREBP, EP300, HNF4A, p53/TP53, SREBF1, SREBF2 and PPARGC1A. Acts as a key regulator of glucose homeostasis in liver by phosphorylating CRTC2/TORC2, leading to CRTC2/TORC2 sequestration in the cytoplasm. In response to stress, phosphorylates 'Ser-36' of histone H2B (H2BS36ph), leading to promote transcription. Acts as a key regulator of cell growth and proliferation by phosphorylating TSC2, RPTOR and ATG1/ULK1: in response to nutrient limitation, negatively regulates the mTORC1 complex by phosphorylating RPTOR component of the mTORC1 complex and by phosphorylating and activating TSC2. In response to nutrient limitation, promotes autophagy by phosphorylating and activating ATG1/ULK1. In that process also activates WDR45. AMPK also acts as a regulator of circadian rhythm by mediating phosphorylation of CRY1, leading to destabilize it. May regulate the Wnt signaling pathway by phosphorylating CTNNB1, leading to stabilize it. Also phosphorylates CFTR, EEF2K, KLC1, NOS3 and SLC12A1. Plays an important role in the differential regulation of pro-autophagy (composed of PIK3C3, BECN1, PIK3R4 and UVRAG or ATG14) and non-autophagy (composed of PIK3C3, BECN1 and PIK3R4) complexes, in response to glucose starvation. Can inhibit the non-autophagy complex by phosphorylating PIK3C3 and can activate the pro-autophagy complex by phosphorylating BECN1. Belongs to the protein kinase superfamily. CAMK Ser/Thr protein kinase family. SNF1 subfamily. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P54646 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "AMPK subfamily; Autophagy; CAMK group; CAMKL family; EC 2.7.11.1; EC 2.7.11.27; EC 2.7.11.31; Kinase, protein; Protein kinase, CAMK; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "1p32.2",
+            "Cellular Component": "axon; ciliary basal body; cytoplasm; cytoplasmic stress granule; cytosol; dendrite; endoplasmic reticulum lumen; neuronal cell body; nuclear speck; nucleoplasm; nucleotide-activated protein kinase complex; nucleus",
+            "Molecular Function": "[hydroxymethylglutaryl-CoA reductase (NADPH)] kinase activity; AMP-activated protein kinase activity; ATP binding; chromatin binding; histone H2BS36 kinase activity; kinase activity; metal ion binding; nucleotide binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; protein serine/threonine/tyrosine kinase activity; transferase activity",
+            "Biological Process": "autophagy; cellular response to calcium ion; cellular response to glucose starvation; cellular response to glucose stimulus; cellular response to nutrient levels; cellular response to oxidative stress; cholesterol biosynthetic process; cholesterol metabolic process; chromatin organization; chromatin remodeling; energy homeostasis; fatty acid biosynthetic process; fatty acid homeostasis; fatty acid metabolic process; glucose homeostasis; lipid biosynthetic process; lipid droplet disassembly; lipid metabolic process; negative regulation of apoptotic process; negative regulation of gene expression; negative regulation of hepatocyte apoptotic process; negative regulation of TOR signaling; negative regulation of TORC1 signaling; positive regulation of autophagy; positive regulation of glycolytic process; positive regulation of macroautophagy; positive regulation of protein localization; protein localization to lipid droplet; regulation of circadian rhythm; regulation of macroautophagy; regulation of microtubule cytoskeleton organization; regulation of stress granule assembly; rhythmic process; signal transduction; steroid biosynthetic process; steroid metabolic process; sterol biosynthetic process; Wnt signaling pathway",
+            "Reference #": "P54646 (UniProtKB)",
+            "Alt. Names/Synonyms": "5'-AMP-activated protein kinase catalytic subunit alpha-2; 5'-AMP-activated protein kinase, catalytic alpha-2 chain; AAPK2; ACACA kinase; Acetyl-CoA carboxylase kinase; AMP-activated protein kinase alpha-2 subunit variant 2; AMP-activated protein kinase alpha-2 subunit variant 3; AMPK; AMPK alpha 2; AMPK subunit alpha-2; AMPK-alpha-2 chain; AMPK2; AMPKA2; HMGCR kinase; Hydroxymethylglutaryl-CoA reductase kinase; PRKAA; PRKAA2; protein kinase AMP-activated catalytic subunit alpha 2; protein kinase, AMP-activated, alpha 2 catalytic subunit",
+            "Gene Symbols": "PRKAA2",
+            "Molecular weight": "62,320 Da",
+            "Basal Isoelectric point": "7.65 Predict pI for various phosphorylation states",
+            "CST Pathways": "AMPK Signaling | Autophagy Signaling | Insulin Receptor Signaling | mTOR Signaling | Translation: eIF4E and p70S6K | Warburg Effect",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 2H6D 2LTU 2YZA 3AQV 4CFE 4CFF 4ZHX 5EZV 5ISO 6B1U 6B2E 6BX6 7MYJ | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "1401",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1401&showAllSites=true",
+          "gene_symbol": "PRKAB1",
+          "uniprot_id": "Q9Y478",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9Y478",
+          "protein_name": "Non-catalytic subunit of AMP-activated protein kinase (AMPK), an energy sensor protein kinase that plays a key role in regulating cellular energy metabolism. In response to reduction of intracellular ATP levels, AMPK activates energy-producing pathways and inhibits energy-consuming processes: inhibits protein, carbohydrate and lipid biosynthesis, as well as cell growth and proliferation. AMPK acts via direct phosphorylation of metabolic enzymes, and by longer-term effects via phosphorylation of transcription regulators. Also acts as a regulator of cellular polarity by remodeling the actin cytoskeleton; probably by indirectly activating myosin. Beta non-catalytic subunit acts as a scaffold on which the AMPK complex assembles, via its C-terminus that bridges alpha (PRKAA1 or PRKAA2) and gamma subunits (PRKAG1, PRKAG2 or PRKAG3). Belongs to the 5'-AMP-activated protein kinase beta subunit family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9Y478 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Protein kinase, regulatory subunit",
+            "Chromosomal Location of human Ortholog": "12q24.23",
+            "Cellular Component": "cytoplasm; cytosol; endoplasmic reticulum lumen; nucleoplasm; nucleotide-activated protein kinase complex; nucleus; protein-containing complex",
+            "Molecular Function": "protein binding; protein kinase binding",
+            "Biological Process": "cellular response to nutrient levels; fatty acid biosynthetic process; fatty acid metabolic process; lipid metabolic process; positive regulation of cold-induced thermogenesis; signal transduction",
+            "Reference #": "Q9Y478 (UniProtKB)",
+            "Alt. Names/Synonyms": "5'-AMP-activated protein kinase beta-1 subunit; 5'-AMP-activated protein kinase subunit beta-1; AAKB1; AMP-activated protein kinase beta subunit; AMPK; AMPK beta -1 chain; AMPK beta 1; AMPK subunit beta-1; AMPKb; AMPKB1; HAMPKb; MGC17785; PRKAB1; protein kinase AMP-activated non-catalytic subunit beta 1; protein kinase, AMP-activated, beta 1 non-catalytic subunit; protein kinase, AMP-activated, noncatalytic, beta-1",
+            "Gene Symbols": "PRKAB1",
+            "Molecular weight": "30,382 Da",
+            "Basal Isoelectric point": "5.94 Predict pI for various phosphorylation states",
+            "CST Pathways": "AMPK Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 4CFE 4CFF 4ZHX 5EZV 5ISO 6B1U 6C9F 6C9G 6C9H 6C9J 7MYJ 8BIK | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "3864",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=3864&showAllSites=true",
+          "gene_symbol": "PRKAB2",
+          "uniprot_id": "O43741",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O43741",
+          "protein_name": "Non-catalytic subunit of AMP-activated protein kinase (AMPK), an energy sensor protein kinase that plays a key role in regulating cellular energy metabolism. In response to reduction of intracellular ATP levels, AMPK activates energy-producing pathways and inhibits energy-consuming processes: inhibits protein, carbohydrate and lipid biosynthesis, as well as cell growth and proliferation. AMPK acts via direct phosphorylation of metabolic enzymes, and by longer-term effects via phosphorylation of transcription regulators. Also acts as a regulator of cellular polarity by remodeling the actin cytoskeleton; probably by indirectly activating myosin. Beta non-catalytic subunit acts as a scaffold on which the AMPK complex assembles, via its C-terminus that bridges alpha (PRKAA1 or PRKAA2) and gamma subunits (PRKAG1, PRKAG2 or PRKAG3). Belongs to the 5'-AMP-activated protein kinase beta subunit family. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O43741 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Protein kinase, regulatory subunit",
+            "Chromosomal Location of human Ortholog": "1q21.1",
+            "Cellular Component": "cytoplasm; cytosol; endoplasmic reticulum lumen; nucleoplasm; nucleotide-activated protein kinase complex; nucleus",
+            "Molecular Function": "AMP-activated protein kinase activity; protein binding; protein kinase binding",
+            "Biological Process": "cellular response to nutrient levels; fatty acid biosynthetic process; fatty acid metabolic process; lipid metabolic process; positive regulation of cold-induced thermogenesis; signal transduction",
+            "Reference #": "O43741 (UniProtKB)",
+            "Alt. Names/Synonyms": "5'-AMP-activated protein kinase subunit beta-2; 5'-AMP-activated protein kinase, beta-2 subunit; AAKB2; AMP-activated protein kinase beta 2 non-catalytic subunit; AMPK beta 2; AMPK beta-2 chain; AMPK subunit beta-2; AMPKB2; MGC61468; PRKAB2; protein kinase AMP-activated non-catalytic subunit beta 2; protein kinase, AMP-activated, beta 2 non-catalytic subunit",
+            "Gene Symbols": "PRKAB2",
+            "Molecular weight": "30,302 Da",
+            "Basal Isoelectric point": "5.99 Predict pI for various phosphorylation states",
+            "CST Pathways": "AMPK Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2F15 2V8Q 2V92 2V9J 2Y8L 2Y8Q 2Y94 2YA3 4CFH 4EAI 4EAJ 4RER 4REW 6B2E 7JHG 7JHH 7JIJ 7M74 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "3603",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=3603&showAllSites=true",
+          "gene_symbol": "PRKAG1",
+          "uniprot_id": "P54619",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P54619",
+          "protein_name": "AMP/ATP-binding subunit of AMP-activated protein kinase (AMPK), an energy sensor protein kinase that plays a key role in regulating cellular energy metabolism. In response to reduction of intracellular ATP levels, AMPK activates energy-producing pathways and inhibits energy-consuming processes: inhibits protein, carbohydrate and lipid biosynthesis, as well as cell growth and proliferation. AMPK acts via direct phosphorylation of metabolic enzymes, and by longer-term effects via phosphorylation of transcription regulators. Also acts as a regulator of cellular polarity by remodeling the actin cytoskeleton; probably by indirectly activating myosin. Gamma non-catalytic subunit mediates binding to AMP, ADP and ATP, leading to activate or inhibit AMPK: AMP-binding results in allosteric activation of alpha catalytic subunit (PRKAA1 or PRKAA2) both by inducing phosphorylation and preventing dephosphorylation of catalytic subunits. ADP also stimulates phosphorylation, without stimulating already phosphorylated catalytic subunit. ATP promotes dephosphorylation of catalytic subunit, rendering the AMPK enzyme inactive. Belongs to the 5'-AMP-activated protein kinase gamma subunit family. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P54619 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Protein kinase, regulatory subunit",
+            "Chromosomal Location of human Ortholog": "12q13.12",
+            "Cellular Component": "cytoplasm; cytosol; endoplasmic reticulum lumen; nucleoplasm; nucleotide-activated protein kinase complex; nucleus; protein-containing complex",
+            "Molecular Function": "ADP binding; AMP binding; AMP-activated protein kinase activity; ATP binding; cAMP-dependent protein kinase activity; cAMP-dependent protein kinase regulator activity; nucleotide binding; protein binding; protein kinase binding; protein kinase regulator activity; protein-containing complex binding",
+            "Biological Process": "cellular response to glucose starvation; cellular response to nutrient levels; fatty acid biosynthetic process; fatty acid metabolic process; lipid metabolic process; positive regulation of gluconeogenesis; protein phosphorylation; regulation of cell cycle; regulation of glycolytic process; signal transduction; spermatogenesis",
+            "Reference #": "P54619 (UniProtKB)",
+            "Alt. Names/Synonyms": "5'-AMP-activated protein kinase subunit gamma-1; 5'-AMP-activated protein kinase, gamma-1 subunit; AAKG1; AMPK gamma-1 chain; AMPK gamma1; AMPK subunit gamma-1; AMPKg; AMPKG1; MGC8666; PRKAG1; protein kinase AMP-activated non-catalytic subunit gamma 1; protein kinase, AMP-activated, gamma 1 non-catalytic subunit",
+            "Gene Symbols": "PRKAG1",
+            "Molecular weight": "37,579 Da",
+            "Basal Isoelectric point": "6.42 Predict pI for various phosphorylation states",
+            "CST Pathways": "AMPK Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2UV4 2UV5 2UV6 2UV7 4CFE 4CFF 4RER 4REW 4ZHX 5EZV 5ISO 6B1U 6B2E 6C9F 6C9G 6C9H 6C9J 7JHG 7JHH 7JIJ 7M74 7MYJ 8BIK | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "16852",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=16852&showAllSites=true",
+          "gene_symbol": "PRKAG2",
+          "uniprot_id": "Q9UGJ0",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9UGJ0",
+          "protein_name": "AMP/ATP-binding subunit of AMP-activated protein kinase (AMPK), an energy sensor protein kinase that plays a key role in regulating cellular energy metabolism. In response to reduction of intracellular ATP levels, AMPK activates energy-producing pathways and inhibits energy-consuming processes: inhibits protein, carbohydrate and lipid biosynthesis, as well as cell growth and proliferation. AMPK acts via direct phosphorylation of metabolic enzymes, and by longer-term effects via phosphorylation of transcription regulators. Also acts as a regulator of cellular polarity by remodeling the actin cytoskeleton; probably by indirectly activating myosin. Gamma non-catalytic subunit mediates binding to AMP, ADP and ATP, leading to activate or inhibit AMPK: AMP-binding results in allosteric activation of alpha catalytic subunit (PRKAA1 or PRKAA2) both by inducing phosphorylation and preventing dephosphorylation of catalytic subunits. ADP also stimulates phosphorylation, without stimulating already phosphorylated catalytic subunit. ATP promotes dephosphorylation of catalytic subunit, rendering the AMPK enzyme inactive. Belongs to the 5'-AMP-activated protein kinase gamma subunit family. Isoform B is ubiquitously expressed except in liver and thymus. The highest level is detected in heart with abundant expression in placenta and testis. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9UGJ0 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Protein kinase, regulatory subunit",
+            "Chromosomal Location of human Ortholog": "7q36.1",
+            "Cellular Component": "cytoplasm; cytosol; endoplasmic reticulum lumen; nucleoplasm; nucleotide-activated protein kinase complex; nucleus",
+            "Molecular Function": "ADP binding; AMP binding; AMP-activated protein kinase activity; ATP binding; cAMP-dependent protein kinase inhibitor activity; cAMP-dependent protein kinase regulator activity; nucleotide binding; phosphorylase kinase regulator activity; protein binding; protein kinase activator activity; protein kinase binding; protein kinase regulator activity",
+            "Biological Process": "ATP biosynthetic process; cellular response to glucose starvation; fatty acid biosynthetic process; fatty acid metabolic process; glycogen metabolic process; intracellular signal transduction; lipid metabolic process; positive regulation of gluconeogenesis; regulation of cell cycle; regulation of D-glucose import across plasma membrane; regulation of fatty acid metabolic process; regulation of fatty acid oxidation; regulation of glycolytic process; sterol biosynthetic process",
+            "Disease": "Cardiomyopathy, Familial Hypertrophic, 6 ; Glycogen Storage Disease Of Heart, Lethal Congenital ; Wolff-parkinson-white Syndrome",
+            "Reference #": "Q9UGJ0 (UniProtKB)",
+            "Alt. Names/Synonyms": "5'-AMP-activated protein kinase subunit gamma-2; AAKG; AAKG2; AMPK gamma2; AMPK subunit gamma-2; AMPKG2; CMH6; epididymis secretory sperm binding protein; H91620p; PRKAG2; protein kinase AMP-activated non-catalytic subunit gamma 2; protein kinase, AMP-activated, gamma 2 non-catalytic subunit; WPWS",
+            "Gene Symbols": "PRKAG2",
+            "Molecular weight": "63,066 Da",
+            "Basal Isoelectric point": "9.37 Predict pI for various phosphorylation states",
+            "CST Pathways": "AMPK Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "16490",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=16490&showAllSites=true",
+          "gene_symbol": "PRKAG3",
+          "uniprot_id": "Q9UGI9",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9UGI9",
+          "protein_name": "AMP/ATP-binding subunit of AMP-activated protein kinase (AMPK), an energy sensor protein kinase that plays a key role in regulating cellular energy metabolism. In response to reduction of intracellular ATP levels, AMPK activates energy-producing pathways and inhibits energy-consuming processes: inhibits protein, carbohydrate and lipid biosynthesis, as well as cell growth and proliferation. AMPK acts via direct phosphorylation of metabolic enzymes, and by longer-term effects via phosphorylation of transcription regulators. Also acts as a regulator of cellular polarity by remodeling the actin cytoskeleton; probably by indirectly activating myosin. Gamma non-catalytic subunit mediates binding to AMP, ADP and ATP, leading to activate or inhibit AMPK: AMP-binding results in allosteric activation of alpha catalytic subunit (PRKAA1 or PRKAA2) both by inducing phosphorylation and preventing dephosphorylation of catalytic subunits. ADP also stimulates phosphorylation, without stimulating already phosphorylated catalytic subunit. ATP promotes dephosphorylation of catalytic subunit, rendering the AMPK enzyme inactive. Belongs to the 5'-AMP-activated protein kinase gamma subunit family. Skeletal muscle, with weak expression in heart and pancreas. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9UGI9 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Protein kinase, regulatory subunit",
+            "Chromosomal Location of human Ortholog": "2q35",
+            "Cellular Component": "cytoplasm; cytosol; endoplasmic reticulum lumen; nucleoplasm; nucleotide-activated protein kinase complex; nucleus",
+            "Molecular Function": "AMP binding; AMP-activated protein kinase activity; ATP binding; nucleotide binding; protein binding; protein kinase binding; protein kinase regulator activity",
+            "Biological Process": "cellular response to glucose starvation; cellular response to nutrient levels; fatty acid biosynthetic process; fatty acid metabolic process; intracellular signal transduction; lipid metabolic process; positive regulation of gluconeogenesis; regulation of cell cycle; regulation of glycolytic process",
+            "Disease": "Skeletal Muscle Glycogen Content And Metabolism Quantitative Trait Locus",
+            "Reference #": "Q9UGI9 (UniProtKB)",
+            "Alt. Names/Synonyms": "5'-AMP-activated protein kinase subunit gamma-3; 5'-AMP-activated protein kinase, gamma-3 subunit; AAKG3; AMPK gamma-3 chain; AMPK gamma3; AMPK subunit gamma-3; AMPKG3; PRKAG3; protein kinase AMP-activated non-catalytic subunit gamma 3; protein kinase, AMP-activated, gamma 3 non-catalytic subunit; SMGMQTL",
+            "Gene Symbols": "PRKAG3",
+            "Molecular weight": "54,258 Da",
+            "Basal Isoelectric point": "5.59 Predict pI for various phosphorylation states",
+            "CST Pathways": "AMPK Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q13131",
+        "P54646",
+        "Q9Y478",
+        "O43741",
+        "P54619",
+        "Q9UGJ0",
+        "Q9UGI9"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q13131",
+        "https://www.uniprot.org/uniprot/P54646",
+        "https://www.uniprot.org/uniprot/Q9Y478",
+        "https://www.uniprot.org/uniprot/O43741",
+        "https://www.uniprot.org/uniprot/P54619",
+        "https://www.uniprot.org/uniprot/Q9UGJ0",
+        "https://www.uniprot.org/uniprot/Q9UGI9"
+      ],
+      "psp_gene_symbols": [
+        "PRKAA1",
+        "PRKAA2",
+        "PRKAB1",
+        "PRKAB2",
+        "PRKAG1",
+        "PRKAG2",
+        "PRKAG3"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "LC3",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=lc3&site-search-type=Products",
+      "phosphositeplus_id": "13300403;13300400;13300406",
+      "phosphositeplus_ids": [
+        "13300403",
+        "13300400",
+        "13300406"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=13300403",
+        "https://www.phosphosite.org/proteinAction.action?id=13300400",
+        "https://www.phosphosite.org/proteinAction.action?id=13300406"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "13300403",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=13300403&showAllSites=true",
+          "gene_symbol": "MAP1LC3A",
+          "uniprot_id": "Q9H492",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9H492",
+          "protein_name": "Ubiquitin-like modifier involved in formation of autophagosomal vacuoles (autophagosomes). Whereas LC3s are involved in elongation of the phagophore membrane, the GABARAP/GATE-16 subfamily is essential for a later stage in autophagosome maturation. Belongs to the ATG8 family. Most abundant in heart, brain, liver, skeletal muscle and testis but absent in thymus and peripheral blood leukocytes. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9H492 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Microtubule-binding; Ubiquitin-like modifier; Vesicle",
+            "Chromosomal Location of human Ortholog": "20q11.22",
+            "Cellular Component": "autolysosome; autophagosome; autophagosome membrane; cytoplasm; cytoplasmic vesicle; cytoskeleton; cytosol; endomembrane system; glutamatergic synapse; late endosome; membrane; microtubule; organelle membrane; synapse",
+            "Molecular Function": "microtubule binding; phosphatidylethanolamine binding; phospholipid binding; protein binding; ubiquitin protein ligase binding",
+            "Biological Process": "autophagosome assembly; autophagosome maturation; autophagy; autophagy of mitochondrion; cellular response to amino acid starvation; cellular response to copper ion; cellular response to hydrogen peroxide; cellular response to nitrogen starvation; cellular response to oxygen-glucose deprivation; cellular response to starvation; JNK cascade; macroautophagy; mitophagy; p38MAPK cascade; response to iron(II) ion; response to lead ion; response to nutrient levels; SMAD protein signal transduction",
+            "Reference #": "Q9H492 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATG8E; Autophagy-related protein LC3 A; Autophagy-related ubiquitin-like modifier LC3 A; LC3; LC3A; MAP1 light chain 3-like protein 1; MAP1A/1B light chain 3 A; MAP1A/MAP1B LC3 A; MAP1A/MAP1B light chain 3 A; MAP1ALC3; MAP1BLC3; MAP1LC3; MAP1LC3A; microtubule associated protein 1 light chain 3 alpha; Microtubule-associated protein 1 light chain 3 alpha; microtubule-associated proteins 1A/1B light chain 3; Microtubule-associated proteins 1A/1B light chain 3A; MLP3A",
+            "Gene Symbols": "MAP1LC3A",
+            "Molecular weight": "14,272 Da",
+            "Basal Isoelectric point": "8.73 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 3ECI 3WAL 3WAN 4ZDV 5CX3 5DPR 6TBE 7R9W 7R9Z 7RA0 8T2L 8T35 8T36 8T4T | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "13300400",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=13300400&showAllSites=true",
+          "gene_symbol": "MAP1LC3B",
+          "uniprot_id": "Q9GZQ8",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9GZQ8",
+          "protein_name": "Ubiquitin-like modifier involved in formation of autophagosomal vacuoles (autophagosomes). Plays a role in mitophagy which contributes to regulate mitochondrial quantity and quality by eliminating the mitochondria to a basal level to fulfill cellular energy requirements and preventing excess ROS production. Whereas LC3s are involved in elongation of the phagophore membrane, the GABARAP/GATE-16 subfamily is essential for a later stage in autophagosome maturation. Promotes primary ciliogenesis by removing OFD1 from centriolar satellites via the autophagic pathway. Belongs to the ATG8 family. Most abundant in heart, brain, skeletal muscle and testis. Little expression observed in liver. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9GZQ8 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Microtubule-binding; Ubiquitin-like modifier; Vesicle",
+            "Chromosomal Location of human Ortholog": "16q24.2",
+            "Cellular Component": "autophagosome; autophagosome membrane; axoneme; cytoplasmic vesicle; cytoskeleton; cytosol; endomembrane system; membrane; microtubule; mitochondrial membrane; mitochondrion; organelle membrane",
+            "Molecular Function": "ceramide binding; microtubule binding; phosphatidylethanolamine binding; phospholipid binding; protein binding; ubiquitin protein ligase binding",
+            "Biological Process": "autophagosome assembly; autophagosome maturation; autophagy; autophagy of mitochondrion; cellular response to nitrogen starvation; cellular response to starvation; macroautophagy; mitophagy",
+            "Reference #": "Q9GZQ8 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATG8F; Autophagy-related protein LC3 B; Autophagy-related ubiquitin-like modifier LC3 B; LC3B; MAP1 light chain 3-like protein 2; MAP1A/1BLC3; MAP1A/MAP1B LC3 B; MAP1A/MAP1B light chain 3 B; MAP1ALC3; MAP1LC3B; MAP1LC3B-a; microtubule associated protein 1 light chain 3 beta; Microtubule-associated protein 1 light chain 3 beta; microtubule-associated proteins 1A/1B light chain 3; Microtubule-associated proteins 1A/1B light chain 3B; MLP3B",
+            "Gene Symbols": "MAP1LC3B",
+            "Molecular weight": "14,688 Da",
+            "Basal Isoelectric point": "8.89 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 1V49 2LUE 2N9X 2ZJD 3VTU 3VTV 3VTW 3WAO 3X0W 4WAA 5D94 5DCN 5GMV 5MS2 5MS5 5MS6 5V4K 5W9A 5XAC 5XAD 5XAE 6J04 6LAN 7ELG 7GA8 7GA9 7GAA 7GAB 7GAC 7GAD 7GAE 7GAF 7GAG 7GAH 7GAI 7GAJ 7GAK 7GAL 7GAM 7GAN 7GAO 7GAP 7GAQ 7GAR 7GAS 7GAU 8Q53 8Q7K 8YV6 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "13300406",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=13300406&showAllSites=true",
+          "gene_symbol": "MAP1LC3C",
+          "uniprot_id": "Q9BXW4",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9BXW4",
+          "protein_name": "Ubiquitin-like modifier that plays a crucial role in antibacterial autophagy (xenophagy) through the selective binding of CALCOCO2. Recruits all ATG8 family members to infecting bacteria such as S.Typhimurium. May also play a role in aggrephagy, the macroautophagic degradation of ubiquitinated and aggregated proteins. Belongs to the ATG8 family. Most abundant in placenta, lung and ovary. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9BXW4 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Microtubule-binding; Ubiquitin-like modifier; Vesicle",
+            "Chromosomal Location of human Ortholog": "1q43",
+            "Cellular Component": "autophagosome; autophagosome membrane; cytoplasmic ribonucleoprotein granule; cytoplasmic vesicle; cytoskeleton; cytosol; endomembrane system; microtubule; organelle membrane",
+            "Molecular Function": "phosphatidylethanolamine binding; phospholipid binding; protein binding; ubiquitin protein ligase binding",
+            "Biological Process": "aggrephagy; autophagosome assembly; autophagosome maturation; autophagy; cellular response to nitrogen starvation; cellular response to starvation; macroautophagy; mitophagy; protein exit from endoplasmic reticulum; response to stress",
+            "Reference #": "Q9BXW4 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATG8J; Autophagy-related protein LC3 C; Autophagy-related ubiquitin-like modifier LC3 C; LC3-like protein 2; LC3C; MAP1 light chain 3-like protein 2; MAP1 light chain 3-like protein 3; MAP1A/MAP1B LC3 C; MAP1A/MAP1B light chain 3 C; MAP1LC3C; microtubule associated protein 1 light chain 3 gamma; Microtubule-associated protein 1 light chain 3 gamma; Microtubule-associated proteins 1A/1B light chain 3C; MLP3C",
+            "Gene Symbols": "MAP1LC3C",
+            "Molecular weight": "16,852 Da",
+            "Basal Isoelectric point": "9.14 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 2NCN 3VVW 3WAM 3WAP 5DPW | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q9H492",
+        "Q9GZQ8",
+        "Q9BXW4"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q9H492",
+        "https://www.uniprot.org/uniprot/Q9GZQ8",
+        "https://www.uniprot.org/uniprot/Q9BXW4"
+      ],
+      "psp_gene_symbols": [
+        "MAP1LC3A",
+        "MAP1LC3B",
+        "MAP1LC3C"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "LC3-II",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=LC3-II&site-search-type=Products",
+      "phosphositeplus_id": "13300403;13300400;13300406",
+      "phosphositeplus_ids": [
+        "13300403",
+        "13300400",
+        "13300406"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=13300403",
+        "https://www.phosphosite.org/proteinAction.action?id=13300400",
+        "https://www.phosphosite.org/proteinAction.action?id=13300406"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "13300403",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=13300403&showAllSites=true",
+          "gene_symbol": "MAP1LC3A",
+          "uniprot_id": "Q9H492",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9H492",
+          "protein_name": "Ubiquitin-like modifier involved in formation of autophagosomal vacuoles (autophagosomes). Whereas LC3s are involved in elongation of the phagophore membrane, the GABARAP/GATE-16 subfamily is essential for a later stage in autophagosome maturation. Belongs to the ATG8 family. Most abundant in heart, brain, liver, skeletal muscle and testis but absent in thymus and peripheral blood leukocytes. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9H492 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Microtubule-binding; Ubiquitin-like modifier; Vesicle",
+            "Chromosomal Location of human Ortholog": "20q11.22",
+            "Cellular Component": "autolysosome; autophagosome; autophagosome membrane; cytoplasm; cytoplasmic vesicle; cytoskeleton; cytosol; endomembrane system; glutamatergic synapse; late endosome; membrane; microtubule; organelle membrane; synapse",
+            "Molecular Function": "microtubule binding; phosphatidylethanolamine binding; phospholipid binding; protein binding; ubiquitin protein ligase binding",
+            "Biological Process": "autophagosome assembly; autophagosome maturation; autophagy; autophagy of mitochondrion; cellular response to amino acid starvation; cellular response to copper ion; cellular response to hydrogen peroxide; cellular response to nitrogen starvation; cellular response to oxygen-glucose deprivation; cellular response to starvation; JNK cascade; macroautophagy; mitophagy; p38MAPK cascade; response to iron(II) ion; response to lead ion; response to nutrient levels; SMAD protein signal transduction",
+            "Reference #": "Q9H492 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATG8E; Autophagy-related protein LC3 A; Autophagy-related ubiquitin-like modifier LC3 A; LC3; LC3A; MAP1 light chain 3-like protein 1; MAP1A/1B light chain 3 A; MAP1A/MAP1B LC3 A; MAP1A/MAP1B light chain 3 A; MAP1ALC3; MAP1BLC3; MAP1LC3; MAP1LC3A; microtubule associated protein 1 light chain 3 alpha; Microtubule-associated protein 1 light chain 3 alpha; microtubule-associated proteins 1A/1B light chain 3; Microtubule-associated proteins 1A/1B light chain 3A; MLP3A",
+            "Gene Symbols": "MAP1LC3A",
+            "Molecular weight": "14,272 Da",
+            "Basal Isoelectric point": "8.73 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 3ECI 3WAL 3WAN 4ZDV 5CX3 5DPR 6TBE 7R9W 7R9Z 7RA0 8T2L 8T35 8T36 8T4T | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "13300400",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=13300400&showAllSites=true",
+          "gene_symbol": "MAP1LC3B",
+          "uniprot_id": "Q9GZQ8",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9GZQ8",
+          "protein_name": "Ubiquitin-like modifier involved in formation of autophagosomal vacuoles (autophagosomes). Plays a role in mitophagy which contributes to regulate mitochondrial quantity and quality by eliminating the mitochondria to a basal level to fulfill cellular energy requirements and preventing excess ROS production. Whereas LC3s are involved in elongation of the phagophore membrane, the GABARAP/GATE-16 subfamily is essential for a later stage in autophagosome maturation. Promotes primary ciliogenesis by removing OFD1 from centriolar satellites via the autophagic pathway. Belongs to the ATG8 family. Most abundant in heart, brain, skeletal muscle and testis. Little expression observed in liver. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9GZQ8 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Microtubule-binding; Ubiquitin-like modifier; Vesicle",
+            "Chromosomal Location of human Ortholog": "16q24.2",
+            "Cellular Component": "autophagosome; autophagosome membrane; axoneme; cytoplasmic vesicle; cytoskeleton; cytosol; endomembrane system; membrane; microtubule; mitochondrial membrane; mitochondrion; organelle membrane",
+            "Molecular Function": "ceramide binding; microtubule binding; phosphatidylethanolamine binding; phospholipid binding; protein binding; ubiquitin protein ligase binding",
+            "Biological Process": "autophagosome assembly; autophagosome maturation; autophagy; autophagy of mitochondrion; cellular response to nitrogen starvation; cellular response to starvation; macroautophagy; mitophagy",
+            "Reference #": "Q9GZQ8 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATG8F; Autophagy-related protein LC3 B; Autophagy-related ubiquitin-like modifier LC3 B; LC3B; MAP1 light chain 3-like protein 2; MAP1A/1BLC3; MAP1A/MAP1B LC3 B; MAP1A/MAP1B light chain 3 B; MAP1ALC3; MAP1LC3B; MAP1LC3B-a; microtubule associated protein 1 light chain 3 beta; Microtubule-associated protein 1 light chain 3 beta; microtubule-associated proteins 1A/1B light chain 3; Microtubule-associated proteins 1A/1B light chain 3B; MLP3B",
+            "Gene Symbols": "MAP1LC3B",
+            "Molecular weight": "14,688 Da",
+            "Basal Isoelectric point": "8.89 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 1V49 2LUE 2N9X 2ZJD 3VTU 3VTV 3VTW 3WAO 3X0W 4WAA 5D94 5DCN 5GMV 5MS2 5MS5 5MS6 5V4K 5W9A 5XAC 5XAD 5XAE 6J04 6LAN 7ELG 7GA8 7GA9 7GAA 7GAB 7GAC 7GAD 7GAE 7GAF 7GAG 7GAH 7GAI 7GAJ 7GAK 7GAL 7GAM 7GAN 7GAO 7GAP 7GAQ 7GAR 7GAS 7GAU 8Q53 8Q7K 8YV6 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "13300406",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=13300406&showAllSites=true",
+          "gene_symbol": "MAP1LC3C",
+          "uniprot_id": "Q9BXW4",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9BXW4",
+          "protein_name": "Ubiquitin-like modifier that plays a crucial role in antibacterial autophagy (xenophagy) through the selective binding of CALCOCO2. Recruits all ATG8 family members to infecting bacteria such as S.Typhimurium. May also play a role in aggrephagy, the macroautophagic degradation of ubiquitinated and aggregated proteins. Belongs to the ATG8 family. Most abundant in placenta, lung and ovary. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9BXW4 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Microtubule-binding; Ubiquitin-like modifier; Vesicle",
+            "Chromosomal Location of human Ortholog": "1q43",
+            "Cellular Component": "autophagosome; autophagosome membrane; cytoplasmic ribonucleoprotein granule; cytoplasmic vesicle; cytoskeleton; cytosol; endomembrane system; microtubule; organelle membrane",
+            "Molecular Function": "phosphatidylethanolamine binding; phospholipid binding; protein binding; ubiquitin protein ligase binding",
+            "Biological Process": "aggrephagy; autophagosome assembly; autophagosome maturation; autophagy; cellular response to nitrogen starvation; cellular response to starvation; macroautophagy; mitophagy; protein exit from endoplasmic reticulum; response to stress",
+            "Reference #": "Q9BXW4 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATG8J; Autophagy-related protein LC3 C; Autophagy-related ubiquitin-like modifier LC3 C; LC3-like protein 2; LC3C; MAP1 light chain 3-like protein 2; MAP1 light chain 3-like protein 3; MAP1A/MAP1B LC3 C; MAP1A/MAP1B light chain 3 C; MAP1LC3C; microtubule associated protein 1 light chain 3 gamma; Microtubule-associated protein 1 light chain 3 gamma; Microtubule-associated proteins 1A/1B light chain 3C; MLP3C",
+            "Gene Symbols": "MAP1LC3C",
+            "Molecular weight": "16,852 Da",
+            "Basal Isoelectric point": "9.14 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 2NCN 3VVW 3WAM 3WAP 5DPW | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q9H492",
+        "Q9GZQ8",
+        "Q9BXW4"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q9H492",
+        "https://www.uniprot.org/uniprot/Q9GZQ8",
+        "https://www.uniprot.org/uniprot/Q9BXW4"
+      ],
+      "psp_gene_symbols": [
+        "MAP1LC3A",
+        "MAP1LC3B",
+        "MAP1LC3C"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Atg5",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=Atg5&site-search-type=Products",
+      "phosphositeplus_id": "10278",
+      "phosphositeplus_ids": [
+        "10278"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=10278",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=10278"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "10278",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=10278&showAllSites=true",
+          "gene_symbol": "ATG5",
+          "uniprot_id": "Q9H1Y0",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9H1Y0",
+          "protein_name": "Involved in autophagic vesicle formation. Conjugation with ATG12, through a ubiquitin-like conjugating system involving ATG7 as an E1-like activating enzyme and ATG10 as an E2-like conjugating enzyme, is essential for its function. The ATG12-ATG5 conjugate acts as an E3-like enzyme which is required for lipidation of ATG8 family proteins and their association to the vesicle membranes. Involved in mitochondrial quality control after oxidative damage, and in subsequent cellular longevity. Plays a critical role in multiple aspects of lymphocyte development and is essential for both B and T lymphocyte survival and proliferation. Required for optimal processing and presentation of antigens for MHC II. Involved in the maintenance of axon morphology and membrane structures, as well as in normal adipocyte differentiation. Promotes primary ciliogenesis through removal of OFD1 from centriolar satellites and degradation of IFT20 via the autophagic pathway. May play an important role in the apoptotic process, possibly within the modified cytoskeleton. Its expression is a relatively late event in the apoptotic process, occurring downstream of caspase activity. Plays a crucial role in IFN-gamma-induced autophagic cell death by interacting with FADD. (Microbial infection) May act as a proviral factor. In association with ATG12, negatively regulates the innate antiviral immune response by impairing the type I IFN production pathway upon vesicular stomatitis virus (VSV) infection. Required for the translation of incoming hepatitis C virus (HCV) RNA and, thereby, for initiation of HCV replication, but not required once infection is established. Belongs to the ATG5 family. Ubiquitous. The mRNA is present at similar levels in viable and apoptotic cells, whereas the protein is dramatically highly expressed in apoptotic cells. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9H1Y0 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Apoptosis; Autophagy; Ubiquitin conjugating system",
+            "Chromosomal Location of human Ortholog": "6q21",
+            "Cellular Component": "Atg12-Atg5-Atg16 complex; autophagosome; axon; axoneme; cytoplasm; cytosol; glutamatergic synapse; membrane; mitochondria-associated endoplasmic reticulum membrane contact site; phagocytic vesicle membrane; phagophore; phagophore assembly site membrane; postsynapse; protein-containing complex; Schaffer collateral - CA1 synapse; synapse",
+            "Molecular Function": "Atg8-family ligase activity; protein binding",
+            "Biological Process": "aggrephagy; apoptotic process; autophagosome assembly; autophagy; axonal transport; cellular response to nitrogen starvation; cellular response to nitrosative stress; chaperone-mediated autophagy; immune system process; macroautophagy; mitophagy; negative regulation of apoptotic process; negative regulation of autophagic cell death; negative regulation of defense response to virus; negative regulation of innate immune response; negative regulation of programmed cell death; negative regulation of type I interferon production; piecemeal microautophagy of the nucleus; positive regulation of autophagy; positive regulation of stress granule assembly; positive regulation of viral translation; post-translational protein modification; postsynaptic modulation of chemical synaptic transmission; regulation of autophagosome maturation; regulation of cilium assembly; regulation of postsynaptic membrane neurotransmitter receptor levels; response to fluoride; response to iron(II) ion",
+            "Disease": "Spinocerebellar Ataxia, Autosomal Recessive 25",
+            "Reference #": "Q9H1Y0 (UniProtKB)",
+            "Alt. Names/Synonyms": "APG5; APG5 (autophagy 5, S. cerevisiae)-like; APG5 autophagy 5-like; APG5-like; APG5L; apoptosis specific protein; Apoptosis-specific protein; ASP; ATG5; ATG5 autophagy related 5 homolog; ATG5 autophagy related 5 homolog (S. cerevisiae); ATG5 autophagy related 5-like; Autophagy protein 5; autophagy related 5; hAPG5; SCAR25",
+            "Gene Symbols": "ATG5",
+            "Molecular weight": "32,447 Da",
+            "Basal Isoelectric point": "5.48 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 4GDK 4GDL 4NAW 4TQ0 4TQ1 5D7G 5NPV 5NPW 7W36 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q9H1Y0"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q9H1Y0"
+      ],
+      "psp_gene_symbols": [
+        "ATG5"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Atg14",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=atg14&site-search-type=Products",
+      "phosphositeplus_id": "3401530",
+      "phosphositeplus_ids": [
+        "3401530"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=3401530",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=3401530"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "3401530",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=3401530&showAllSites=true",
+          "gene_symbol": "ATG14",
+          "uniprot_id": "Q6ZNE5",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q6ZNE5",
+          "protein_name": "Required for both basal and inducible autophagy. Determines the localization of the autophagy-specific PI3-kinase complex PI3KC3-C1. Plays a role in autophagosome formation and MAP1LC3/LC3 conjugation to phosphatidylethanolamine. Promotes BECN1 translocation from the trans-Golgi network to autophagosomes. Enhances PIK3C3 activity in a BECN1-dependent manner. Essential for the autophagy-dependent phosphorylation of BECN1. Stimulates the phosphorylation of BECN1, but suppresses the phosphorylation PIK3C3 by AMPK. Binds to STX17-SNAP29 binary t-SNARE complex on autophagosomes and primes it for VAMP8 interaction to promote autophagosome-endolysosome fusion. Modulates the hepatic lipid metabolism. Belongs to the ATG14 family. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q6ZNE5 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy",
+            "Chromosomal Location of human Ortholog": "14q22.3",
+            "Cellular Component": "autophagosome; autophagosome membrane; axoneme; cytoplasm; cytoplasmic vesicle; cytosol; endoplasmic reticulum membrane; extrinsic component of omegasome membrane; extrinsic component of phagophore assembly site membrane; mitochondria-associated endoplasmic reticulum membrane contact site; phagocytic vesicle; phagophore assembly site; phagophore assembly site membrane; phosphatidylinositol 3-kinase complex, class III; protein-containing complex",
+            "Molecular Function": "GTPase binding; phosphatidylinositol 3-kinase inhibitor activity; phosphatidylinositol 3-kinase regulator activity; protein binding; protein-membrane adaptor activity",
+            "Biological Process": "autophagosome assembly; autophagosome maturation; autophagosome membrane docking; autophagy; cellular response to glucose starvation; cellular response to starvation; early endosome to late endosome transport; endosome to lysosome transport; macroautophagy; mitophagy; negative regulation of protein phosphorylation; phosphatidylinositol 3-kinase/protein kinase B signal transduction; phosphatidylinositol-3-phosphate biosynthetic process; positive regulation of protein phosphorylation; post-transcriptional regulation of gene expression; protein targeting to lysosome; regulation of macroautophagy; regulation of protein complex stability; response to mitochondrial depolarisation",
+            "Reference #": "Q6ZNE5 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATG14; ATG14 autophagy related 14 homolog; Atg14L; autophagy related 14; Autophagy-related protein 14-like protein; BAKOR; Barkor; Beclin 1-associated autophagy-related key regulator; Beclin 1-Interacting protein; KIAA0831; MGC126291; MGC126292",
+            "Gene Symbols": "ATG14",
+            "Molecular weight": "55,309 Da",
+            "Basal Isoelectric point": "6.59 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 6HOL 8SOR 8SRQ 9MHF 9MHG 9MHH | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q6ZNE5"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q6ZNE5"
+      ],
+      "psp_gene_symbols": [
+        "ATG14"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Ambra1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=ambra1&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "Rubicon",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=rubicon&site-search-type=Products",
+      "phosphositeplus_id": "14148",
+      "phosphositeplus_ids": [
+        "14148"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=14148",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=14148"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "14148",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=14148&showAllSites=true",
+          "gene_symbol": "RUBCN",
+          "uniprot_id": "Q92622",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q92622",
+          "protein_name": "Inhibits PIK3C3 activity; under basal conditions negatively regulates PI3K complex II (PI3KC3-C2) function in autophagy. Negatively regulates endosome maturation and degradative endocytic trafficking and impairs autophagosome maturation process. Can sequester UVRAG from association with a class C Vps complex (possibly the HOPS complex) and negatively regulates Rab7 activation. Involved in regulation of pathogen-specific host defense of activated macrophages. Following bacterial infection promotes NADH oxidase activity by association with CYBA thereby affecting TLR2 signaling and probably other TLR-NOX pathways. Stabilizes the CYBA:CYBB NADPH oxidase heterodimer, increases its association with TLR2 and its phagosome trafficking to induce antimicrobial burst of ROS and production of inflammatory cytokines. Following fungal or viral infection (implicating CLEC7A (dectin-1)-mediated myeloid cell activation or DDX58/RIG-I-dependent sensing of RNA viruses) negatively regulates pro-inflammatory cytokine production by association with CARD9 and sequestering it from signaling complexes. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q92622 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Unknown function",
+            "Chromosomal Location of human Ortholog": "3q29",
+            "Cellular Component": "early endosome; Golgi apparatus; late endosome; lysosome",
+            "Molecular Function": "phosphatidylinositol 3-kinase inhibitor activity; phosphatidylinositol phosphate binding; protein binding",
+            "Biological Process": "autophagy; endocytosis; immune system process; multivesicular body sorting pathway; negative regulation of autophagosome maturation; negative regulation of autophagy; negative regulation of endocytosis; negative regulation of phosphatidylinositol 3-kinase/protein kinase B signal transduction; phagocytosis",
+            "Disease": "Spinocerebellar Ataxia, Autosomal Recessive 15",
+            "Reference #": "Q92622 (UniProtKB)",
+            "Alt. Names/Synonyms": "Baron; Beclin-1 associated RUN domain containing protein; hypothetical protein LOC9711; K0226; KIAA0226; RUBCN; RUBIC; rubicon; rubicon autophagy regulator; RUN and cysteine rich domain containing beclin 1 interacting protein; RUN domain and cysteine-rich domain containing, Beclin 1-interacting protein; Run domain Beclin-1-interacting and cysteine-rich domain-containing protein; rundataxin; SCAR15; Uncharacterized protein KIAA0226",
+            "Gene Symbols": "RUBCN",
+            "Molecular weight": "108,622 Da",
+            "Basal Isoelectric point": "5.86 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q92622"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q92622"
+      ],
+      "psp_gene_symbols": [
+        "RUBCN"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Atg12",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=Atg12&site-search-type=Products",
+      "phosphositeplus_id": "21801",
+      "phosphositeplus_ids": [
+        "21801"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=21801",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=21801"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "21801",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=21801&showAllSites=true",
+          "gene_symbol": "ATG12",
+          "uniprot_id": "O94817",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O94817",
+          "protein_name": "Ubiquitin-like protein involved in autophagy vesicles formation. Conjugation with ATG5 through a ubiquitin-like conjugating system involving also ATG7 as an E1-like activating enzyme and ATG10 as an E2-like conjugating enzyme, is essential for its function. The ATG12-ATG5 conjugate acts as an E3-like enzyme which is required for lipidation of ATG8 family proteins and their association to the vesicle membranes. (Microbial infection) May act as a proviral factor. In association with ATG5, negatively regulates the innate antiviral immune response by impairing the type I IFN production pathway upon vesicular stomatitis virus (VSV) infection. Required for the translation of incoming hepatitis C virus (HCV) RNA and, thereby, for the initiation of HCV replication, but not required once infection is established. Belongs to the ATG12 family. Ubiquitous. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O94817 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Ubiquitin-like modifier",
+            "Chromosomal Location of human Ortholog": "5q22.3",
+            "Cellular Component": "Atg12-Atg5-Atg16 complex; autophagosome; autophagosome membrane; cytoplasm; cytosol; membrane; phagocytic vesicle membrane; phagophore assembly site membrane; protein-containing complex",
+            "Molecular Function": "Atg8-family ligase activity; protein binding; protein tag activity",
+            "Biological Process": "autophagosome assembly; autophagosome maturation; autophagy; autophagy of mitochondrion; glycophagy; macroautophagy; negative regulation of defense response to virus; negative regulation of innate immune response; negative regulation of type I interferon production; piecemeal microautophagy of the nucleus; positive regulation of viral translation; regulation of autophagosome maturation",
+            "Reference #": "O94817 (UniProtKB)",
+            "Alt. Names/Synonyms": "APG12; Apg12 (autophagy, yeast) homolog; APG12 autophagy 12-like; APG12-like; APG12L; ATG12; ATG12 autophagy related 12 homolog; ATG12 autophagy related 12 homolog (S. cerevisiae); autophagy related 12; Autophagy-related protein 12; FBR93; HAPG12; Ubiquitin-like protein ATG12",
+            "Gene Symbols": "ATG12",
+            "Molecular weight": "15,113 Da",
+            "Basal Isoelectric point": "5.01 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 4GDK 4GDL 4NAW | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "O94817"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/O94817"
+      ],
+      "psp_gene_symbols": [
+        "ATG12"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Atg7",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=atg7&site-search-type=Products",
+      "phosphositeplus_id": "14969",
+      "phosphositeplus_ids": [
+        "14969"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=14969",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=14969"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "14969",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=14969&showAllSites=true",
+          "gene_symbol": "ATG7",
+          "uniprot_id": "O95352",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O95352",
+          "protein_name": "E1-like activating enzyme involved in the 2 ubiquitin-like systems required for cytoplasm to vacuole transport (Cvt) and autophagy. Activates ATG12 for its conjugation with ATG5 as well as the ATG8 family proteins for their conjugation with phosphatidylethanolamine. Both systems are needed for the ATG8 association to Cvt vesicles and autophagosomes membranes. Required for autophagic death induced by caspase-8 inhibition. Required for mitophagy which contributes to regulate mitochondrial quantity and quality by eliminating the mitochondria to a basal level to fulfill cellular energy requirements and preventing excess ROS production. Modulates p53/TP53 activity to regulate cell cycle and survival during metabolic stress. Plays also a key role in the maintenance of axonal homeostasis, the prevention of axonal degeneration, the maintenance of hematopoietic stem cells, the formation of Paneth cell granules, as well as in adipose differentiation. Plays a role in regulating the liver clock and glucose metabolism by mediating the autophagic degradation of CRY1 (clock repressor) in a time-dependent manner. Belongs to the ATG7 family. Widely expressed, especially in kidney, liver, lymph nodes and bone marrow. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O95352 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Ubiquitin conjugating system",
+            "Chromosomal Location of human Ortholog": "3p25.3",
+            "Cellular Component": "axoneme; cytoplasm; cytosol; extracellular region; ficolin-1-rich granule lumen; phagophore assembly site; secretory granule lumen",
+            "Molecular Function": "Atg12 activating enzyme activity; Atg8 activating enzyme activity; protein binding; protein homodimerization activity; ubiquitin-like modifier activating enzyme activity",
+            "Biological Process": "autophagosome assembly; autophagy; cellular response to hyperoxia; cellular response to nitrogen starvation; cellular response to starvation; cellular response to stress; defense response to virus; macroautophagy; mitophagy; piecemeal microautophagy of the nucleus; positive regulation of apoptotic process; positive regulation of catabolic process; positive regulation of protein catabolic process; positive regulation of protein modification process; protein lipidation; protein lipidation involved in autophagosome assembly; protein modification by small protein conjugation; protein transport; regulation of apoptotic process; regulation of circadian rhythm; regulation of macromolecule metabolic process; regulation of primary metabolic process; response to nutrient levels; rhythmic process",
+            "Disease": "Spinocerebellar Ataxia, Autosomal Recessive 31",
+            "Reference #": "O95352 (UniProtKB)",
+            "Alt. Names/Synonyms": "APG7 autophagy 7-like; APG7-like; APG7L; ATG12-activating enzyme E1 ATG7; ATG7; ATG7 autophagy related 7 homolog (S. cerevisiae); autophagy related 7; Autophagy-related protein 7; DKFZp434N0735; GSA7; hAGP7; ubiquitin activating enzyme E1-like protein; Ubiquitin-activating enzyme E1-like protein; Ubiquitin-like modifier-activating enzyme ATG7",
+            "Gene Symbols": "ATG7",
+            "Molecular weight": "77,960 Da",
+            "Basal Isoelectric point": "5.85 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "O95352"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/O95352"
+      ],
+      "psp_gene_symbols": [
+        "ATG7"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "mTOR",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=mtor&site-search-type=Products",
+      "phosphositeplus_id": "564",
+      "phosphositeplus_ids": [
+        "564"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=564",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=564"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "564",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=564&showAllSites=true",
+          "gene_symbol": "MTOR",
+          "uniprot_id": "P42345",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P42345",
+          "protein_name": "an atypical kinase belonging to the PIKK family of kinases. A central regulator of cellular metabolism, growth and survival in response to hormones, growth factors, nutrients, energy and stress signals. Is the catalytic subunit of two structurally and functionally distinct signaling complexes: mTORC1 and mTORC2 (mTOR complex 1 and 2). mTORC1 up-regulates protein synthesis by phosphorylating key regulators of mRNA translation and ribosome synthesis. It phosphorylates 4EBP1, releasing its inhibition of elongation initiation factor 4E (eiF4E); RPS6KB1 and -2, promoting protein synthesis by modulating the activity of their downstream targets including ribosomal protein S6, eukaryotic translation initiation factor EIF4B, and the inhibitor of translation initiation PDCD4. Stimulates ribosome synthesis by phosphorylating and inhibiting MAF1, an RNA polymerase III-repressor. mTORC1 negatively regulates autophagy through phosphorylation of ULK1. Also prevents autophagy through phosphorylation of the autophagy inhibitor DAP. It exerts negative feedback regulation on upstream growth factor signaling by phosphorylating and activating GRB10, an inhibitor of insulin, EGF and PDGF signaling. mTORC1 contains Raptor, a positive regulatory subunit and scaffold for recruiting substrates, two negative regulators, PRAS40 and DEPTOR, and mLST8; it is a target for the cell-cycle arrest and immunosuppressive effects of the FKBP12-rapamycin complex. mTORC2 is insensitive to rapamycin, and is a downstream effector of PI3K, regulating cellular processes including survival and organization of the cytoskeleton. Phosphorylates Ser473 of AKT1, a pro-survival effector of phosphoinositide 3-kinase, and Ser422 of SGK1, inhibiting apoptosis. Regulates osteoclastogenesis by adjusting the expression of CEBPB isoforms. Plays an important regulatory role in the circadian clock function; regulates period length and rhythm amplitude of the suprachiasmatic nucleus (SCN) and liver clocks. mTORC2 contains regulatory subunits Rictor and mSIN1, PROTOR, mLST8, and the negative regulator DEPTOR. mTORC1 suppresses PI3K activity via a strong negative feedback loop that involves S6K1. Inhibiting mTORC1 ablates this negative feedback loop and potentiates PI3K signaling. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P42345 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "ATYPICAL group; Autophagy; EC 2.7.11.1; FRAP subfamily; Kinase, protein; Motility/polarity/chemotaxis; PIKK family; Protein kinase, Ser/Thr (non-receptor); Protein kinase, atypical",
+            "Chromosomal Location of human Ortholog": "1p36.22",
+            "Cellular Component": "cytoplasm; cytoplasmic vesicle; cytosol; dendrite; endomembrane system; endoplasmic reticulum; endoplasmic reticulum membrane; Golgi apparatus; Golgi membrane; lysosomal membrane; lysosome; membrane; mitochondrial outer membrane; nuclear envelope; nucleoplasm; nucleus; phagocytic vesicle; plasma membrane; PML body; TORC1 complex; TORC2 complex",
+            "Molecular Function": "ATP binding; identical protein binding; inositol hexakisphosphate binding; kinase activity; non-membrane spanning protein tyrosine kinase activity; nucleotide binding; phosphoprotein binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; protein tyrosine kinase activity; protein-containing complex binding; ribosome binding; RNA polymerase III type 1 promoter sequence-specific DNA binding; RNA polymerase III type 2 promoter sequence-specific DNA binding; RNA polymerase III type 3 promoter sequence-specific DNA binding; TFIIIC-class transcription factor complex binding; transferase activity; transmembrane transporter binding",
+            "Biological Process": "'de novo' pyrimidine nucleobase biosynthetic process; anoikis; behavioral response to pain; cardiac cell development; cellular response to amino acid starvation; cellular response to amino acid stimulus; cellular response to hypoxia; cellular response to insulin stimulus; cellular response to L-leucine; cellular response to leucine starvation; cellular response to methionine; cellular response to nutrient; cellular response to nutrient levels; cellular response to osmotic stress; cellular response to starvation; cytoskeleton organization; DNA damage response; inflammatory response; negative regulation of apoptotic process; negative regulation of autophagy; negative regulation of insulin receptor signaling pathway; negative regulation of lysosome organization; negative regulation of macroautophagy; negative regulation of protein localization to nucleus; neuronal action potential; phosphatidylinositol 3-kinase/protein kinase B signal transduction; positive regulation of biosynthetic process; positive regulation of cell differentiation; positive regulation of cell growth; positive regulation of cytoplasmic translational initiation; positive regulation of epithelial to mesenchymal transition; positive regulation of glycolytic process; positive regulation of keratinocyte migration; positive regulation of lipid biosynthetic process; positive regulation of multicellular organismal process; positive regulation of pentose-phosphate shunt; positive regulation of phosphatidylinositol 3-kinase/protein kinase B signal transduction; positive regulation of protein kinase activity; positive regulation of SCF-dependent proteasomal ubiquitin-dependent catabolic process; positive regulation of transcription by RNA polymerase III; positive regulation of transcription of nucleolar large rRNA by RNA polymerase I; positive regulation of translation; positive regulation of translational initiation; positive regulation of ubiquitin-dependent protein catabolic process; positive regulation of wound healing, spreading of epidermal cells; protein phosphorylation; protein stabilization; regulation of actin cytoskeleton organization; regulation of autophagosome assembly; regulation of autophagy; regulation of cell growth; regulation of cell size; regulation of cellular response to heat; regulation of cellular response to stress; regulation of circadian rhythm; regulation of lipid metabolic process; regulation of locomotor rhythm; regulation of lysosome organization; regulation of macroautophagy; regulation of osteoclast differentiation; regulation of phosphatidylinositol 3-kinase/protein kinase B signal transduction; regulation of signal transduction by p53 class mediator; response to amino acid; response to heat; response to nutrient levels; T cell costimulation; T-helper 1 cell lineage commitment; TOR signaling; TORC1 signaling; TORC2 signaling; vascular endothelial cell response to laminar fluid shear stress",
+            "Disease": "Focal Cortical Dysplasia Of Taylor ; Smith-kingsmore Syndrome",
+            "Reference #": "P42345 (UniProtKB)",
+            "Alt. Names/Synonyms": "FK506 binding protein 12-rapamycin associated protein 1; FK506 binding protein 12-rapamycin associated protein 2; FK506-binding protein 12-rapamycin complex-associated protein 1; FKBP-rapamycin associated protein; FKBP12-rapamycin complex-associated protein; FKBP12-rapamycin complex-associated protein 1; FLJ44809; FRAP; FRAP1; FRAP2; Mammalian target of rapamycin; Mechanistic target of rapamycin; mechanistic target of rapamycin (serine/threonine kinase); mechanistic target of rapamycin kinase; mTOR; RAFT1; rapamycin and FKBP12 target 1; rapamycin associated protein FRAP2; Rapamycin target protein 1; RAPT1; Serine/threonine-protein kinase mTOR; SKS",
+            "Gene Symbols": "MTOR",
+            "Molecular weight": "288,892 Da",
+            "Basal Isoelectric point": "6.73 Predict pI for various phosphorylation states",
+            "CST Pathways": "AMPK Signaling | Angiogenesis | Autophagy Signaling | B Cell Receptor Signaling | ErbB/HER Signaling | IL6 Signaling | Insulin Receptor Signaling | mTOR Signaling | PI3K/Akt Signaling | T Cell Receptor Signaling | TGF-ß Signaling | Translation: eIF4E and p70S6K | Warburg Effect",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | CCLE | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 1AUE 1FAP 1NSG 2FAP 2GAQ 2NPU 2RSE 3FAP 3JBZ 4DRH 4DRI 4DRJ 4FAP 4JSN 4JSP 4JSV 4JSX 4JT5 4JT6 5FLC 5GPG 5H64 5WBH 5WBU 5WBY 5ZCS 6M4U 6M4W 6SB0 6SB2 6ZWM 6ZWO 7EPD 7OWG 7PE7 7PE8 7PE9 7PEA 7PEB 7PEC 7TZO 7UXC 8ERA 8PPZ 8RCH 8RCK 8RCN 9F44 9F45 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P42345"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P42345"
+      ],
+      "psp_gene_symbols": [
+        "MTOR"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "PARL",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=parl&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "Parkin",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=parkin&site-search-type=Products",
+      "phosphositeplus_id": "6669",
+      "phosphositeplus_ids": [
+        "6669"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=6669",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=6669"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "6669",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=6669&showAllSites=true",
+          "gene_symbol": "PRKN",
+          "uniprot_id": "O60260",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O60260",
+          "protein_name": "Functions within a multiprotein E3 ubiquitin ligase complex, catalyzing the covalent attachment of ubiquitin moieties onto substrate proteins, such as BCL2, SYT11, CCNE1, GPR37, RHOT1/MIRO1, MFN1, MFN2, STUB1, SNCAIP, SEPTIN5, TOMM20, USP30, ZNF746 and AIMP2. Mediates monoubiquitination as well as 'Lys-6', 'Lys-11', 'Lys-48'-linked and 'Lys-63'-linked polyubiquitination of substrates depending on the context. Participates in the removal and/or detoxification of abnormally folded or damaged protein by mediating 'Lys-63'-linked polyubiquitination of misfolded proteins such as PARK7: 'Lys-63'-linked polyubiquitinated misfolded proteins are then recognized by HDAC6, leading to their recruitment to aggresomes, followed by degradation. Mediates 'Lys-63'-linked polyubiquitination of a 22 kDa O-linked glycosylated isoform of SNCAIP, possibly playing a role in Lewy-body formation. Mediates monoubiquitination of BCL2, thereby acting as a positive regulator of autophagy. Promotes the autophagic degradation of dysfunctional depolarized mitochondria (mitophagy) by promoting the ubiquitination of mitochondrial proteins such as TOMM20, RHOT1/MIRO1 and USP30. Preferentially assembles 'Lys-6'-, 'Lys-11'- and 'Lys-63'-linked polyubiquitin chains following mitochondrial damage, leading to mitophagy. Mediates 'Lys-48'-linked polyubiquitination of ZNF746, followed by degradation of ZNF746 by the proteasome; possibly playing a role in the regulation of neuron death. Limits the production of reactive oxygen species (ROS). Regulates cyclin-E during neuronal apoptosis. In collaboration with CHPF isoform 2, may enhance cell viability and protect cells from oxidative stress. Independently of its ubiquitin ligase activity, protects from apoptosis by the transcriptional repression of p53/TP53. May protect neurons against alpha synuclein toxicity, proteasomal dysfunction, GPR37 accumulation, and kainate-induced excitotoxicity. May play a role in controlling neurotransmitter trafficking at the presynaptic terminal and in calcium-dependent exocytosis. May represent a tumor suppressor gene. Belongs to the RBR family. Parkin subfamily. Highly expressed in the brain including the substantia nigra. Expressed in heart, testis and skeletal muscle. Expression is down-regulated or absent in tumor biopsies, and absent in the brain of PARK2 patients. Overexpression protects dopamine neurons from kainate-mediated apoptosis. Found in serum (at protein level). 8 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O60260 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 6.3.2.-; EC 6.3.2.19; Ligase; Translation; Translation regulation; Ubiquitin conjugating system; Ubiquitin ligase",
+            "Chromosomal Location of human Ortholog": "6q26",
+            "Cellular Component": "aggresome; axon; cytoplasm; cytosol; dopaminergic synapse; endoplasmic reticulum; endoplasmic reticulum membrane; glutamatergic synapse; Golgi apparatus; Golgi membrane; intracellular vesicle; Lewy body; mitochondrial outer membrane; mitochondrion; mitochondrion-derived vesicle; neuron projection; neuronal cell body; nuclear speck; nucleus; Parkin-FBXW7-Cul1 ubiquitin ligase complex; perinuclear region of cytoplasm; postsynapse; postsynaptic density; presynapse; protein-containing complex; SCF ubiquitin ligase complex; synapse; synaptic vesicle; synaptic vesicle membrane; terminal bouton; ubiquitin ligase complex",
+            "Molecular Function": "actin binding; beta-catenin binding; cullin family protein binding; enzyme binding; F-box domain binding; G protein-coupled receptor binding; heat shock protein binding; histone deacetylase binding; Hsp70 protein binding; identical protein binding; kinase binding; metal ion binding; PDZ domain binding; phospholipase binding; protein binding; protein kinase binding; protein-containing complex binding; protein-folding chaperone binding; SH3 domain binding; transcription corepressor activity; transferase activity; tubulin binding; ubiquitin binding; ubiquitin conjugating enzyme binding; ubiquitin protein ligase activity; ubiquitin protein ligase binding; ubiquitin-protein transferase activity; ubiquitin-specific protease binding; zinc ion binding",
+            "Biological Process": "adult locomotory behavior; aggresome assembly; amyloid fibril formation; autophagy; autophagy of mitochondrion; cellular response to dopamine; cellular response to hydrogen sulfide; cellular response to L-glutamate; cellular response to L-glutamine; cellular response to manganese ion; cellular response to oxidative stress; cellular response to toxic substance; cellular response to unfolded protein; central nervous system development; dopamine metabolic process; ERAD pathway; free ubiquitin chain polymerization; host-mediated suppression of viral genome replication; macroautophagy; mitochondrial fission; mitochondrial fragmentation involved in apoptotic process; mitochondrion localization; mitochondrion organization; mitochondrion to lysosome vesicle-mediated transport; mitophagy; modulation of chemical synaptic transmission; negative regulation of actin filament bundle assembly; negative regulation of canonical Wnt signaling pathway; negative regulation of endoplasmic reticulum stress-induced intrinsic apoptotic signaling pathway; negative regulation of endoplasmic reticulum stress-induced neuron intrinsic apoptotic signaling pathway; negative regulation of excitatory postsynaptic potential; negative regulation of exosomal secretion; negative regulation of gene expression; negative regulation of glucokinase activity; negative regulation of insulin secretion; negative regulation of intralumenal vesicle formation; negative regulation of intrinsic apoptotic signaling pathway by p53 class mediator; negative regulation of JNK cascade; negative regulation of mitochondrial fission; negative regulation of mitochondrial fusion; negative regulation of neuron apoptotic process; negative regulation of oxidative stress-induced neuron intrinsic apoptotic signaling pathway; negative regulation of reactive oxygen species biosynthetic process; negative regulation of reactive oxygen species metabolic process; negative regulation of release of cytochrome c from mitochondria; negative regulation of spontaneous neurotransmitter secretion; negative regulation of synaptic transmission, glutamatergic; negative regulation of transcription by RNA polymerase II; neuron cellular homeostasis; positive regulation of apoptotic process; positive regulation of ATP biosynthetic process; positive regulation of canonical NF-kappaB signal transduction; positive regulation of catabolic process; positive regulation of dendrite extension; positive regulation of gene expression; positive regulation of insulin secretion involved in cellular response to glucose stimulus; positive regulation of mitochondrial fission; positive regulation of mitochondrial fusion; positive regulation of mitochondrial membrane potential; positive regulation of mitophagy; positive regulation of neurotransmitter uptake; positive regulation of proteasomal protein catabolic process; positive regulation of proteasomal ubiquitin-dependent protein catabolic process; positive regulation of protein catabolic process; positive regulation of protein linear polyubiquitination; positive regulation of protein localization to membrane; positive regulation of retrograde transport, endosome to Golgi; positive regulation of transcription by RNA polymerase II; positive regulation of tumor necrosis factor-mediated signaling pathway; positive regulation of type 2 mitophagy; proteasomal protein catabolic process; proteasome-mediated ubiquitin-dependent protein catabolic process; protein autoubiquitination; protein catabolic process; protein destabilization; protein deubiquitination; protein K11-linked ubiquitination; protein K27-linked ubiquitination; protein K29-linked ubiquitination; protein K48-linked ubiquitination; protein K6-linked ubiquitination; protein K63-linked ubiquitination; protein localization to mitochondrion; protein monoubiquitination; protein polyubiquitination; protein stabilization; protein ubiquitination; regulation of anatomical structure morphogenesis; regulation of autophagy; regulation of canonical Wnt signaling pathway; regulation of cellular response to oxidative stress; regulation of dopamine metabolic process; regulation of dopamine secretion; regulation of glucose metabolic process; regulation of lipid transport; regulation of mitochondrial membrane potential; regulation of mitochondrion organization; regulation of necroptotic process; regulation of postsynaptic membrane neurotransmitter receptor levels; regulation of primary metabolic process; regulation of protein localization to mitochondrion; regulation of protein stability; regulation of protein ubiquitination; regulation of reactive oxygen species metabolic process; regulation of secretion by cell; regulation of synaptic vesicle endocytosis; regulation of synaptic vesicle transport; regulation protein catabolic process at presynapse; response to corticosterone; response to curcumin; response to endoplasmic reticulum stress; response to muscle activity; response to oxidative stress; response to unfolded protein; response to xenobiotic stimulus; type 2 mitophagy; ubiquitin-dependent protein catabolic process",
+            "Disease": "Lung Cancer ; Ovarian Cancer ; Parkinson Disease 2, Autosomal Recessive Juvenile",
+            "Reference #": "O60260 (UniProtKB)",
+            "Alt. Names/Synonyms": "AR-JP; E3 ubiquitin-protein ligase parkin; LPRS2; PARK2; parkin; parkin 2; parkin RBR E3 ubiquitin protein ligase; Parkin RBR E3 ubiquitin-protein ligase; Parkinson disease (autosomal recessive, juvenile) 2, parkin; Parkinson disease protein 2; Parkinson juvenile disease protein 2; parkinson protein 2 E3 ubiquitin protein ligase; parkinson protein 2, E3 ubiquitin protein ligase (parkin); PDJ; PRKN; PRKN2",
+            "Gene Symbols": "PRKN",
+            "Molecular weight": "51,641 Da",
+            "Basal Isoelectric point": "6.71 Predict pI for various phosphorylation states",
+            "CST Pathways": "Parkinson's Disease",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1IYF 2JMO 4BM9 4I1F 4I1H 5C1Z 5C23 5C9V 5N2W 5N38 5TR5 6GLC 6HUE 6N13 8IK6 8IKV 8JWV 8WZN 8WZO | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "O60260"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/O60260"
+      ],
+      "psp_gene_symbols": [
+        "PRKN"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Atg10",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=atg10&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "Atg3",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=Atg3&site-search-type=Products",
+      "phosphositeplus_id": "2678",
+      "phosphositeplus_ids": [
+        "2678"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=2678",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=2678"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "2678",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2678&showAllSites=true",
+          "gene_symbol": "ATG3",
+          "uniprot_id": "Q9NT62",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9NT62",
+          "protein_name": "E2 conjugating enzyme required for the cytoplasm to vacuole transport (Cvt), autophagy, and mitochondrial homeostasis. Responsible for the E2-like covalent binding of phosphatidylethanolamine to the C-terminal Gly of ATG8-like proteins (GABARAP, GABARAPL1, GABARAPL2 or MAP1LC3A). The ATG12-ATG5 conjugate plays a role of an E3 and promotes the transfer of ATG8-like proteins from ATG3 to phosphatidylethanolamine (PE). This step is required for the membrane association of ATG8-like proteins. The formation of the ATG8-phosphatidylethanolamine conjugates is essential for autophagy and for the cytoplasm to vacuole transport (Cvt). Preferred substrate is MAP1LC3A. Also acts as an autocatalytic E2-like enzyme, catalyzing the conjugation of ATG12 to itself, ATG12 conjugation to ATG3 playing a role in mitochondrial homeostasis but not in autophagy. ATG7 (E1-like enzyme) facilitates this reaction by forming an E1-E2 complex with ATG3. Promotes primary ciliogenesis by removing OFD1 from centriolar satellites via the autophagic pathway. Belongs to the ATG3 family. Widely expressed, with a highest expression in heart, skeletal muscle, kidney, liver and placenta. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9NT62 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; EC 6.3.2.-; Ubiquitin conjugating system",
+            "Chromosomal Location of human Ortholog": "3q13.2",
+            "Cellular Component": "Atg12-Atg5-Atg16 complex; cytoplasm; cytosol; phagophore assembly site; plasma membrane",
+            "Molecular Function": "Atg12 transferase activity; Atg8-family conjugating enzyme activity; Atg8-family ligase activity; enzyme binding; protein binding; transferase activity; ubiquitin-like protein transferase activity",
+            "Biological Process": "autophagosome assembly; autophagy; autophagy of mitochondrion; glycophagy; mitochondrial fragmentation involved in apoptotic process; nucleophagy; protein targeting to membrane; protein transport; protein ubiquitination; regulation of cilium assembly",
+            "Reference #": "Q9NT62 (UniProtKB)",
+            "Alt. Names/Synonyms": "2610016C12Rik; APG3; APG3 autophagy 3-like; APG3-like; APG3L; ATG3; ATG3 autophagy related 3 homolog; ATG3 autophagy related 3 homolog (S. cerevisiae); autophagy Apg3p/Aut1p-like; autophagy related 3; Autophagy-related protein 3; DKFZp564M1178; FLJ22125; hApg3; MGC15201; PC3-96; Protein PC3-96; Ubiquitin-like-conjugating enzyme ATG3",
+            "Gene Symbols": "ATG3",
+            "Molecular weight": "35,864 Da",
+            "Basal Isoelectric point": "4.66 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 4NAW 8FKM 9E8P | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q9NT62"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q9NT62"
+      ],
+      "psp_gene_symbols": [
+        "ATG3"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "SQSTM1/p62",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=SQSTM1/p62&site-search-type=Products",
+      "phosphositeplus_id": "4472",
+      "phosphositeplus_ids": [
+        "4472"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=4472",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=4472"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "4472",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=4472&showAllSites=true",
+          "gene_symbol": "SQSTM1",
+          "uniprot_id": "Q13501",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q13501",
+          "protein_name": "Autophagy receptor required for selective macroautophagy (aggrephagy). Functions as a bridge between polyubiquitinated cargo and autophagosomes. Interacts directly with both the cargo to become degraded and an autophagy modifier of the MAP1 LC3 family. Along with WDFY3, involved in the formation and autophagic degradation of cytoplasmic ubiquitin-containing inclusions (p62 bodies, ALIS/aggresome-like induced structures). Along with WDFY3, required to recruit ubiquitinated proteins to PML bodies in the nucleus. May regulate the activation of NFKB1 by TNF-alpha, nerve growth factor (NGF) and interleukin-1. May play a role in titin/TTN downstream signaling in muscle cells. May regulate signaling cascades through ubiquitination. Adapter that mediates the interaction between TRAF6 and CYLD. May be involved in cell differentiation, apoptosis, immune response and regulation of K(+) channels. Involved in endosome organization by retaining vesicles in the perinuclear cloud: following ubiquitination by RNF26, attracts specific vesicle-associated adapters, forming a molecular bridge that restrains cognate vesicles in the perinuclear region and organizes the endosomal pathway for efficient cargo transport. Promotes relocalization of 'Lys-63'-linked ubiquitinated TMEM173/STING to autophagosomes. Ubiquitously expressed. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q13501 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Nuclear receptor co-regulator; Ubiquitin conjugating system",
+            "Chromosomal Location of human Ortholog": "5q35.3",
+            "Cellular Component": "aggresome; amphisome; autolysosome; autophagosome; cytoplasm; cytoplasmic vesicle; cytosol; endoplasmic reticulum; glutamatergic synapse; inclusion body; intracellular membraneless organelle; late endosome; Lewy body; lysosome; mitochondrion; nucleoplasm; nucleus; P-body; phagophore assembly site; PML body; sarcomere; sperm midpiece; synapse",
+            "Molecular Function": "enzyme binding; identical protein binding; ionotropic glutamate receptor binding; K63-linked polyubiquitin modification-dependent protein binding; metal ion binding; molecular condensate scaffold activity; molecular sequestering activity; protein binding; protein kinase binding; protein kinase C binding; protein sequestering activity; protein-containing complex binding; protein-macromolecule adaptor activity; receptor tyrosine kinase binding; SH2 domain binding; signaling receptor activity; ubiquitin binding; ubiquitin protein ligase binding; ubiquitin-modified protein reader activity; zinc ion binding",
+            "Biological Process": "aggrephagy; apoptotic process; autophagy; autophagy of mitochondrion; brown fat cell proliferation; cell differentiation; cellular response to stress; endosomal transport; endosome organization; energy homeostasis; immune system process; intracellular protein localization; intracellular signal transduction; macroautophagy; membraneless organelle assembly; mitophagy; negative regulation of ferroptosis; negative regulation of protein ubiquitination; negative regulation of toll-like receptor 4 signaling pathway; pexophagy; positive regulation of apoptotic process; positive regulation of autophagy; positive regulation of long-term synaptic potentiation; positive regulation of protein localization to plasma membrane; positive regulation of transcription by RNA polymerase II; protein catabolic process; protein import into nucleus; protein localization to perinuclear region of cytoplasm; protein targeting to vacuole involved in autophagy; regulation of canonical NF-kappaB signal transduction; regulation of mitochondrion organization; regulation of protein complex stability; regulation of Ras protein signal transduction; response to ischemia; response to mitochondrial depolarisation; temperature homeostasis; ubiquitin-dependent protein catabolic process",
+            "Disease": "Frontotemporal Dementia And/or Amyotrophic Lateral Sclerosis 3 ; Myopathy, Distal, With Rimmed Vacuoles ; Neurodegeneration With Ataxia, Dystonia, And Gaze Palsy, Childhood-onset ; Paget Disease Of Bone 3",
+            "Reference #": "Q13501 (UniProtKB)",
+            "Alt. Names/Synonyms": "A170; autophagy receptor p62; DMRV; EBI3-associated protein of 60 kDa; EBI3-associated protein p60; EBIAP; FTDALS3; NADGP; ORCA; OSIL; oxidative stress induced like; p60; p62; p62B; PDB3; phosphotyrosine independent ligand for the Lck SH2 domain p62; Phosphotyrosine-independent ligand for the Lck SH2 domain of 62 kDa; sequestosome 1; Sequestosome-1; SQSTM; SQSTM1; Ubiquitin-binding protein p62; ZIP3",
+            "Gene Symbols": "SQSTM1",
+            "Molecular weight": "47,687 Da",
+            "Basal Isoelectric point": "5.1 Predict pI for various phosphorylation states",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1Q02 2JY7 2JY8 2K0B 2KNV 4MJS 4UF8 4UF9 5YP7 5YP8 5YPA 5YPB 5YPC 5YPE 5YPF 5YPG 5YPH 6JM4 6KHZ 6MIU 6MJ7 6TGY 6TH3 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | NURSA | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q13501"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q13501"
+      ],
+      "psp_gene_symbols": [
+        "SQSTM1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "NBR1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=NBR1&site-search-type=Products",
+      "phosphositeplus_id": "18530",
+      "phosphositeplus_ids": [
+        "18530"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=18530",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=18530"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "18530",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=18530&showAllSites=true",
+          "gene_symbol": "NBR1",
+          "uniprot_id": "Q14596",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q14596",
+          "protein_name": "Acts probably as a receptor for selective autophagosomal degradation of ubiquitinated targets. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q14596 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Ubiquitin conjugating system",
+            "Chromosomal Location of human Ortholog": "17q21.31",
+            "Cellular Component": "autophagosome; cytoplasm; cytoplasmic vesicle; cytosol; intracellular organelle lumen; late endosome; lysosome; M band; mitochondrial intermembrane space; mitochondrion; peroxisomal membrane; phagophore assembly site; receptor complex",
+            "Molecular Function": "metal ion binding; mitogen-activated protein kinase binding; protein binding; ubiquitin binding; zinc ion binding",
+            "Biological Process": "macroautophagy; negative regulation of osteoblast differentiation; regulation of bone mineralization; regulation of stress-activated MAPK cascade",
+            "Reference #": "Q14596 (UniProtKB)",
+            "Alt. Names/Synonyms": "1A1-3B; 1A13B; B-box protein; Cell migration-inducing gene 19 protein; FLJ55359; FLJ98272; IAI3B; KIAA0049; M17S2; Membrane component chromosome 17 surface marker 2; membrane component, chromosome 17, surface marker 2 (ovarian carcinoma antigen CA125); MIG19; migration-inducing protein 19; NBR1; NBR1 autophagy cargo receptor; neighbor of BRCA1 gene 1; Neighbor of BRCA1 gene 1 protein; Next to BRCA1 gene 1 protein; Protein 1A1-3B",
+            "Gene Symbols": "NBR1",
+            "Molecular weight": "107,413 Da",
+            "Basal Isoelectric point": "5.03 Predict pI for various phosphorylation states",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 1WJ6 2BKF 2CP8 2G4S 2L8J 2MGW 2MJ5 4OLE | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q14596"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q14596"
+      ],
+      "psp_gene_symbols": [
+        "NBR1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "ALFY",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=alfy&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "Atg4",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=Atg4&site-search-type=Products",
+      "phosphositeplus_id": "7443902;13944;15161;10037",
+      "phosphositeplus_ids": [
+        "7443902",
+        "13944",
+        "15161",
+        "10037"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=7443902",
+        "https://www.phosphosite.org/proteinAction.action?id=13944",
+        "https://www.phosphosite.org/proteinAction.action?id=15161",
+        "https://www.phosphosite.org/proteinAction.action?id=10037"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "7443902",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=7443902&showAllSites=true",
+          "gene_symbol": "ATG4A",
+          "uniprot_id": "Q8WYN0",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q8WYN0",
+          "protein_name": "Cysteine protease required for the cytoplasm to vacuole transport (Cvt) and autophagy. Cleaves the C-terminal amino acid of ATG8 family proteins to reveal a C-terminal glycine. Exposure of the glycine at the C-terminus is essential for ATG8 proteins conjugation to phosphatidylethanolamine (PE) and insertion to membranes, which is necessary for autophagy. Preferred substrate is GABARAPL2 followed by MAP1LC3A and GABARAP. Has also an activity of delipidating enzyme for the PE-conjugated forms. Belongs to the peptidase C54 family. Widely expressed, at a low level, and the highest expression is observed in skeletal muscle and brain. Also detected in fetal liver. 4 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q8WYN0 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; EC 3.4.22.-; Microtubule-binding; Protease",
+            "Chromosomal Location of human Ortholog": "Xq22.3",
+            "Cellular Component": "cytoplasm",
+            "Molecular Function": "cysteine-type endopeptidase activity; cysteine-type peptidase activity; hydrolase activity; peptidase activity; protein binding; protein-phosphatidylethanolamide deconjugating activity",
+            "Biological Process": "aggrephagy; autophagosome assembly; autophagy; lipid metabolic process; mitophagy; piecemeal microautophagy of the nucleus; protein delipidation; protein processing; protein transport; proteolysis",
+            "Reference #": "Q8WYN0 (UniProtKB)",
+            "Alt. Names/Synonyms": "APG4 autophagy 4 homolog A; APG4A; ATG4 autophagy related 4 homolog A; ATG4 autophagy related 4 homolog A (S. cerevisiae); ATG4A; AUT-like 2 cysteine endopeptidase; AUT-like 2, cysteine endopeptidase; AUTL2; autophagin 2; Autophagin-2; autophagy related 4A cysteine peptidase; Autophagy-related cysteine endopeptidase 2; Autophagy-related protein 4 homolog A; Cysteine protease ATG4A; hAPG4A",
+            "Gene Symbols": "ATG4A",
+            "Molecular weight": "45,378 Da",
+            "Basal Isoelectric point": "4.93 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 2FUY 2P82 | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "13944",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=13944&showAllSites=true",
+          "gene_symbol": "ATG4B",
+          "uniprot_id": "Q9Y4P1",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9Y4P1",
+          "protein_name": "Cysteine protease required for the cytoplasm to vacuole transport (Cvt) and autophagy. Cleaves the C-terminal amino acid of ATG8 family proteins MAP1LC3, GABARAPL1, GABARAPL2 and GABARAP, to reveal a C-terminal glycine. Exposure of the glycine at the C-terminus is essential for ATG8 proteins conjugation to phosphatidylethanolamine (PE) and insertion to membranes, which is necessary for autophagy. Has also an activity of delipidating enzyme for the PE-conjugated forms. Belongs to the peptidase C54 family. Mainly expressed in the skeletal muscle, followed by brain, heart, liver and pancreas. 5 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9Y4P1 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; EC 3.4.22.-; Protease; Ubiquitin conjugating system",
+            "Chromosomal Location of human Ortholog": "2q37.3",
+            "Cellular Component": "autophagosome; autophagosome membrane; cytoplasm; cytoplasmic vesicle; cytosol; endoplasmic reticulum; mitochondrion",
+            "Molecular Function": "cysteine-type endopeptidase activity; cysteine-type peptidase activity; endopeptidase activity; hydrolase activity; peptidase activity; protein binding; protein-phosphatidylethanolamide deconjugating activity; scaffold protein binding",
+            "Biological Process": "aggrephagy; autophagosome assembly; autophagy; macroautophagy; microautophagy; mitophagy; otolith mineralization completed early in development; piecemeal microautophagy of the nucleus; protein delipidation; protein localization to phagophore assembly site; protein processing; protein transport; proteolysis",
+            "Reference #": "Q9Y4P1 (UniProtKB)",
+            "Alt. Names/Synonyms": "APG4 autophagy 4 homolog B; APG4B; ATG4 autophagy related 4 homolog B; ATG4 autophagy related 4 homolog B (S. cerevisiae); ATG4B; AUT-like 1 cysteine endopeptidase; AUTL1; Autophagin-1; autophagy related 4B cysteine peptidase; Autophagy-related cysteine endopeptidase 1; Autophagy-related protein 4 homolog B; Cysteine protease ATG4B; hAPG4B; KIAA0943; MGC1353",
+            "Gene Symbols": "ATG4B",
+            "Molecular weight": "44,294 Da",
+            "Basal Isoelectric point": "4.91 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 2CY7 2D1I 2Z0D 2Z0E 2ZZP 5LXH 5LXI | ENZYME | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "15161",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=15161&showAllSites=true",
+          "gene_symbol": "ATG4C",
+          "uniprot_id": "Q96DT6",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q96DT6",
+          "protein_name": "Cysteine protease required for the cytoplasm to vacuole transport (Cvt) and autophagy. Is not essential for autophagy development under normal conditions but is required for a proper autophagic response under stressful conditions such as prolonged starvation. Cleaves the C-terminal amino acid of ATG8 family proteins MAP1LC3 and GABARAPL2, to reveal a C-terminal glycine. Exposure of the glycine at the C-terminus is essential for ATG8 proteins conjugation to phosphatidylethanolamine (PE) and insertion to membranes, which is necessary for autophagy. Has also an activity of delipidating enzyme for the PE-conjugated forms. Belongs to the peptidase C54 family. Highly expressed in skeletal muscle, heart, liver and testis. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q96DT6 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; EC 3.4.22.-; Protease; Ubiquitin conjugating system",
+            "Chromosomal Location of human Ortholog": "1p31.3",
+            "Cellular Component": "cytoplasm",
+            "Molecular Function": "cysteine-type endopeptidase activity; cysteine-type peptidase activity; hydrolase activity; peptidase activity; protein binding; protein-phosphatidylethanolamide deconjugating activity",
+            "Biological Process": "aggrephagy; autophagosome assembly; autophagy; mitophagy; piecemeal microautophagy of the nucleus; protein delipidation; protein processing; protein transport; proteolysis",
+            "Reference #": "Q96DT6 (UniProtKB)",
+            "Alt. Names/Synonyms": "APG4 autophagy 4 homolog C; APG4-C; APG4C; ATG4 autophagy related 4 homolog C; ATG4 autophagy related 4 homolog C (S. cerevisiae); ATG4C; AUT-like 1, cysteine endopeptidase; AUT-like 3 cysteine endopeptidase; AUTL1; AUTL3; Autophagin-3; autophagy related 4C cysteine peptidase; Autophagy-related cysteine endopeptidase 3; Autophagy-related protein 4 homolog C; Cysteine protease ATG4C; epididymis secretory sperm binding protein; FLJ14867",
+            "Gene Symbols": "ATG4C",
+            "Molecular weight": "52,497 Da",
+            "Basal Isoelectric point": "5.65 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | ENZYME | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "10037",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=10037&showAllSites=true",
+          "gene_symbol": "ATG4D",
+          "uniprot_id": "Q86TL0",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q86TL0",
+          "protein_name": "Cysteine protease ATG4D: Cysteine protease required for the cytoplasm to vacuole transport (Cvt) and autophagy. Cleaves the C-terminal amino acid of ATG8 family proteins MAP1LC3 and GABARAPL2, to reveal a C-terminal glycine. Exposure of the glycine at the C-terminus is essential for ATG8 proteins conjugation to phosphatidylethanolamine (PE) and insertion to membranes, which is necessary for autophagy. Has also an activity of delipidating enzyme for the PE-conjugated forms. Cysteine protease ATG4D, mitochondrial: Plays a role as an autophagy regulator that links mitochondrial dysfunction with apoptosis. The mitochondrial import of ATG4D during cellular stress and differentiation may play important roles in the regulation of mitochondrial physiology, ROS, mitophagy and cell viability. Belongs to the peptidase C54 family. Mainly expressed in skeletal muscle and, to a lower extent, in testis. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q86TL0 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; EC 3.4.22.-; Protease; Ubiquitin conjugating system",
+            "Chromosomal Location of human Ortholog": "19p13.2",
+            "Cellular Component": "cytoplasm; mitochondrial matrix; mitochondrion",
+            "Molecular Function": "cysteine-type endopeptidase activity; cysteine-type exopeptidase activity; cysteine-type peptidase activity; hydrolase activity; peptidase activity; protein-phosphatidylethanolamide deconjugating activity",
+            "Biological Process": "aggrephagy; apoptotic process; autophagosome assembly; autophagy; mitophagy; piecemeal microautophagy of the nucleus; protein delipidation; protein localization to phagophore assembly site; protein processing; protein transport; proteolysis",
+            "Disease": "Spermatogenic Failure 101",
+            "Reference #": "Q86TL0 (UniProtKB)",
+            "Alt. Names/Synonyms": "APG4 autophagy 4 homolog D; APG4-D; APG4D; ATG4 autophagy related 4 homolog D; ATG4 autophagy related 4 homolog D (S. cerevisiae); ATG4D; AUT-like 4 cysteine endopeptidase; AUT-like 4, cysteine endopeptidase; AUTL4; Autophagin-4; autophagy related 4D cysteine peptidase; Autophagy-related cysteine endopeptidase 4; Autophagy-related protein 4 homolog D; Cysteine protease ATG4D; Cysteine protease ATG4D, mitochondrial; cysteine protease involved in autophagy",
+            "Gene Symbols": "ATG4D",
+            "Molecular weight": "52,922 Da",
+            "Basal Isoelectric point": "8.93 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | ENZYME | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q8WYN0",
+        "Q9Y4P1",
+        "Q96DT6",
+        "Q86TL0"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q8WYN0",
+        "https://www.uniprot.org/uniprot/Q9Y4P1",
+        "https://www.uniprot.org/uniprot/Q96DT6",
+        "https://www.uniprot.org/uniprot/Q86TL0"
+      ],
+      "psp_gene_symbols": [
+        "ATG4A",
+        "ATG4B",
+        "ATG4C",
+        "ATG4D"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "ULK1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=ULK1&site-search-type=Products",
+      "phosphositeplus_id": "796",
+      "phosphositeplus_ids": [
+        "796"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=796",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=796"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "796",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=796&showAllSites=true",
+          "gene_symbol": "ULK1",
+          "uniprot_id": "O75385",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O75385",
+          "protein_name": "Serine/threonine-protein kinase involved in autophagy in response to starvation. Acts upstream of phosphatidylinositol 3-kinase PIK3C3 to regulate the formation of autophagophores, the precursors of autophagosomes. Part of regulatory feedback loops in autophagy: acts both as a downstream effector and negative regulator of mammalian target of rapamycin complex 1 (mTORC1) via interaction with RPTOR. Activated via phosphorylation by AMPK and also acts as a regulator of AMPK by mediating phosphorylation of AMPK subunits PRKAA1, PRKAB2 and PRKAG1, leading to negatively regulate AMPK activity. May phosphorylate ATG13/KIAA0652 and RPTOR; however such data need additional evidences. Plays a role early in neuronal differentiation and is required for granule cell axon formation. May also phosphorylate SESN2 and SQSTM1 to regulate autophagy. Belongs to the protein kinase superfamily. Ser/Thr protein kinase family. APG1/unc-51/ULK1 subfamily. Ubiquitously expressed. Detected in the following adult tissues: skeletal muscle, heart, pancreas, brain, placenta, liver, kidney, and lung. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O75385 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; EC 2.7.11.1; Kinase, protein; Other group; Protein kinase, Other; Protein kinase, Ser/Thr (non-receptor); ULK family; ULK subfamily",
+            "Chromosomal Location of human Ortholog": "12q24.33",
+            "Cellular Component": "Atg1/ULK1 kinase complex; autophagosome; autophagosome membrane; axon; cytoplasm; cytosol; endoplasmic reticulum membrane; mitochondrial outer membrane; omegasome membrane; phagophore assembly site; phagophore assembly site membrane; recycling endosome",
+            "Molecular Function": "ATP binding; GTPase binding; identical protein binding; kinase activity; nucleotide binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; protein-containing complex binding; small GTPase binding; transferase activity",
+            "Biological Process": "autophagosome assembly; autophagy; axon extension; axonogenesis; cellular response to nutrient levels; cellular response to stress; intracellular protein localization; macroautophagy; mitophagy; negative regulation of cell population proliferation; negative regulation of collateral sprouting; negative regulation of protein-containing complex assembly; neuron projection development; neuron projection regeneration; peptidyl-serine phosphorylation; piecemeal microautophagy of the nucleus; positive regulation of autophagosome assembly; positive regulation of autophagy; protein autophosphorylation; protein phosphorylation; regulation of autophagy; regulation of macroautophagy; regulation of protein lipidation; regulation of tumor necrosis factor-mediated signaling pathway; response to starvation; reticulophagy; signal transduction",
+            "Reference #": "O75385 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATG1; ATG1 autophagy related 1 homolog; ATG1A; Autophagy-related protein 1 homolog; FLJ38455; FLJ46475; hATG1; KIAA0722; Serine/threonine-protein kinase ULK1; ULK1; unc-51 like autophagy activating kinase 1; Unc-51-like kinase 1; unc-51-like kinase 1 (C. elegans); UNC51; Unc51.1",
+            "Gene Symbols": "ULK1",
+            "Molecular weight": "112,631 Da",
+            "Basal Isoelectric point": "9.03 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 4WNO 4WNP 5CI7 6HYO 6MNH 6QAS 8P5G 8P5H 8P5I 8P5J 8P5K 8P5L 8SOI 8SQZ 8SRM 8SRQ 8SV9 | ENZYME 2.7.1.37 2.7.11.1 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "O75385"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/O75385"
+      ],
+      "psp_gene_symbols": [
+        "ULK1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Atg13",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=Atg13&site-search-type=Products",
+      "phosphositeplus_id": "14815",
+      "phosphositeplus_ids": [
+        "14815"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=14815",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=14815"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "14815",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=14815&showAllSites=true",
+          "gene_symbol": "ATG13",
+          "uniprot_id": "O75143",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O75143",
+          "protein_name": "Autophagy factor required for autophagosome formation and mitophagy. Target of the TOR kinase signaling pathway that regulates autophagy through the control of the phosphorylation status of ATG13 and ULK1, and the regulation of the ATG13-ULK1-RB1CC1 complex. Through its regulation of ULK1 activity, plays a role in the regulation of the kinase activity of mTORC1 and cell proliferation. Belongs to the ATG13 family. Metazoan subfamily. 5 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O75143 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; Vesicle",
+            "Chromosomal Location of human Ortholog": "11p11.2",
+            "Cellular Component": "Atg1/ULK1 kinase complex; autophagosome; cytoplasm; cytosol; endoplasmic reticulum membrane; mitochondrion; phagophore assembly site; phagophore assembly site membrane",
+            "Molecular Function": "kinase activator activity; protein binding; protein kinase binding; protein kinase regulator activity",
+            "Biological Process": "autophagosome assembly; autophagy; macroautophagy; mitophagy; negative regulation of cell population proliferation; piecemeal microautophagy of the nucleus; positive regulation of autophagy; protein localization to phagophore assembly site; regulation of cell population proliferation; regulation of protein lipidation; response to mitochondrial depolarisation",
+            "Reference #": "O75143 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATG13; ATG13 autophagy related 13 homolog; autophagy related 13; Autophagy-related protein 13; FLJ20698; KIAA0652; PARATARG8",
+            "Gene Symbols": "ATG13",
+            "Molecular weight": "56,572 Da",
+            "Basal Isoelectric point": "4.98 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling | mTOR Signaling | PI3K/Akt Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 3WAN 3WAO 3WAP 5C50 5XUY 5XV1 5XV3 5XV4 5XV6 6HYN 8DO8 8SOI 8SQZ 8SRM 8SRQ | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "O75143"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/O75143"
+      ],
+      "psp_gene_symbols": [
+        "ATG13"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "FIP200",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=fip200&site-search-type=Products",
+      "phosphositeplus_id": "3270",
+      "phosphositeplus_ids": [
+        "3270"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=3270",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=3270"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "3270",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=3270&showAllSites=true",
+          "gene_symbol": "RB1CC1",
+          "uniprot_id": "Q8TDY2",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q8TDY2",
+          "protein_name": "Involved in autophagy. Regulates early events but also late events of autophagosome formation through direct interaction with Atg16L1. Required for the formation of the autophagosome-like double-membrane structure that surrounds the Salmonella-containing vacuole (SCV) during S.typhimurium infection and subsequent xenophagy. Involved in repair of DNA damage caused by ionizing radiation, which subsequently improves cell survival by decreasing apoptosis. Inhibits PTK2/FAK1 and PTK2B/PYK2 kinase activity, affecting their downstream signaling pathways. Plays a role as a modulator of TGF-beta-signaling by restricting substrate specificity of RNF111. Functions as a DNA-binding transcription factor. Is a potent regulator of the RB1 pathway through induction of RB1 expression. Plays a crucial role in muscular differentiation. Plays an indispensable role in fetal hematopoiesis and in the regulation of neuronal homeostasis. Belongs to the ATG17 family. Expression levels correlated closely with those of RB1 in cancer cell lines as well as in various normal human tissues. Abundantly expressed in human musculoskeletal and cultured osteosarcoma cells. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q8TDY2 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Autophagy; DNA-binding; Transcription factor; Tumor suppressor",
+            "Chromosomal Location of human Ortholog": "8q11.23",
+            "Cellular Component": "Atg1/ULK1 kinase complex; autophagosome membrane; cytoplasm; cytosol; endoplasmic reticulum membrane; lysosome; nucleus; organelle membrane; phagophore assembly site; phagophore assembly site membrane; vacuole",
+            "Molecular Function": "molecular adaptor activity; protein binding; protein kinase binding; protein-membrane adaptor activity",
+            "Biological Process": "autophagosome assembly; autophagy; autophagy of mitochondrion; glycophagy; macroautophagy; negative regulation of cell population proliferation; pexophagy; piecemeal microautophagy of the nucleus; positive regulation of autophagy; regulation of protein lipidation; reticulophagy; ribophagy",
+            "Disease": "Breast Cancer",
+            "Reference #": "Q8TDY2 (UniProtKB)",
+            "Alt. Names/Synonyms": "200 kDa FAK family kinase-interacting protein; ATG17; CC1; FAK family kinase-interacting protein of 200 kDa; FIP200; KIAA0203; phosphatase 1, regulatory subunit 131; PPP1R131; RB1 inducible coiled-coil 1; RB1-inducible coiled-coil 1; RB1-inducible coiled-coil protein 1; RB1CC1; RBCC1; RBICC",
+            "Gene Symbols": "RB1CC1",
+            "Molecular weight": "183,091 Da",
+            "Basal Isoelectric point": "5.3 Predict pI for various phosphorylation states",
+            "CST Pathways": "Autophagy Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 6DCE 6GMA 7CZG 7CZM 7D0E 7EA2 7EAA 8SOI 8SQZ 8SRM 8SRQ 8W6B 8YFK 8YFL 8YFM 8YFN 9D34 9J54 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q8TDY2"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q8TDY2"
+      ],
+      "psp_gene_symbols": [
+        "RB1CC1"
+      ],
+      "has_uniprot_match": true
+    }
+  ],
+  "protein_module_count": 24,
+  "scraped_at_utc": "2026-03-24T15:30:35.441005+00:00",
+  "uniprot_enriched_at": "2026-03-24T16:53:32.493029+00:00"
+}

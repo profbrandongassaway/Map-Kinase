@@ -34,15 +34,22 @@ from MapKinase_WebApp.d2_psp_kinasesubstrates import load_kinase_substrate_map, 
 from MapKinase_WebApp.d1_transfer_kegg_annotations import load_kegg_map, annotate_protein_with_kegg
 from MapKinase_WebApp.m6_rank_pathways import (
     build_gene_to_uniprot_map,
+    candidate_uniprots_for_node,
     build_protein_lookup,
     compute_single_protein_scores,
     load_kegg_index,
+    normalize_uniprot,
     parse_weights,
     rank_all_pathways,
     resolve_node_scores,
 )
 
 from MapKinase_WebApp.m3_svg_viewer import create_pathway_svg, _build_blank_canvas
+from MapKinase_WebApp.m7_cst_viewer import (
+    create_cst_pathway_viewer,
+    get_cst_pathway_catalog,
+    load_cst_pathway_payload,
+)
 
 try:
     import uvicorn  # type: ignore
@@ -70,6 +77,7 @@ DISPLAY_TYPE_CHOICES = sorted({
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 INDEX_FILES_DIR = os.path.join(BASE_DIR, "index_files")
 ANNOTATION_FILES_DIR = os.path.join(BASE_DIR, "annotation_files")
+ICONS_DIR = os.path.join(BASE_DIR, "icons")
 
 
 def _resolve_kegg_pathways_file() -> str:
@@ -100,10 +108,65 @@ def _resolve_species_ref_file() -> str:
     return candidates[0]
 
 
+def _icon_markup(icon_name: str, class_name: str = "mk-inline-icon") -> Any:
+    icon_path = Path(ICONS_DIR) / f"{icon_name}.svg"
+    fallback = ui.tags.span(icon_name[:1].upper(), {"aria-hidden": "true"})
+    try:
+        svg_text = icon_path.read_text(encoding="utf-8")
+    except OSError:
+        return fallback
+    svg_text = re.sub(r"<\?xml[^>]*\?>", "", svg_text, count=1).strip()
+    svg_text = svg_text.replace("#000000", "currentColor").replace("#000", "currentColor")
+    escaped_class = html.escape(class_name, quote=True)
+    if "<svg" in svg_text:
+        svg_text = re.sub(
+            r"<svg\b",
+            f'<svg class="{escaped_class}" aria-hidden="true" focusable="false"',
+            svg_text,
+            count=1,
+        )
+    return ui.HTML(svg_text)
+
+
+def _asset_data_uri(filename: str) -> str:
+    asset_path = Path(ICONS_DIR) / filename
+    suffix = asset_path.suffix.lower()
+    mime_type = {
+        ".gif": "image/gif",
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".webp": "image/webp",
+        ".svg": "image/svg+xml",
+    }.get(suffix, "application/octet-stream")
+    try:
+        raw = asset_path.read_bytes()
+    except OSError:
+        return ""
+    return f"data:{mime_type};base64,{base64.b64encode(raw).decode('ascii')}"
+
+
+def _asset_data_uri_from_path(path: Path) -> str:
+    suffix = path.suffix.lower()
+    mime_type = {
+        ".gif": "image/gif",
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".webp": "image/webp",
+        ".svg": "image/svg+xml",
+    }.get(suffix, "application/octet-stream")
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        return ""
+    return f"data:{mime_type};base64,{base64.b64encode(raw).decode('ascii')}"
+
+
 KEGG_PATHWAYS_FILE = _resolve_kegg_pathways_file()
 KEGG_PATHWAY_MAX_MATCHES = 12
 WIKIPATHWAYS_MAX_MATCHES = 25
-WEB_PATHWAY_SOURCES = ["WikiPathways", "KEGG"]
+WEB_PATHWAY_SOURCES = ["WikiPathways", "KEGG", "CST"]
 DEFAULT_BG_OPACITY = 0.9
 DEFAULT_BG_SCALE = 1.0
 DEFAULT_BG_OFFSET_X = 0.0
@@ -132,7 +195,7 @@ TERMINAL_LOG_FILE = os.environ.get(
     "M5_TERMINAL_LOG_FILE", os.path.join(BASE_DIR, "m5_terminal_output.txt")
 )
 MANUAL_BUILD_ONLY = True
-GUI_POPUP = True
+GUI_POPUP = False
 debug_var = False
 
 def _load_species_choices() -> Dict[str, Dict[str, str]]:
@@ -296,6 +359,53 @@ WIKIPATHWAYS_CACHE: Dict[str, List[Dict[str, str]]] = {}
 WIKIPATHWAYS_ORG_CACHE: Optional[set] = None
 
 
+def _load_wikipathways_catalog_from_local_index(organism: str, fallback: Optional[str] = None) -> List[Dict[str, str]]:
+    names = [str(v).strip().lower() for v in (organism, fallback) if v]
+    species_code = None
+    for key, info in SPECIES_CHOICES.items():
+        candidates = {
+            key.strip().lower(),
+            str(info.get("label") or "").strip().lower(),
+            str(info.get("species") or "").strip().lower(),
+            str(info.get("code") or "").strip().lower(),
+        }
+        if any(name in candidates for name in names):
+            species_code = str(info.get("code") or "").strip().lower()
+            break
+    if not species_code:
+        return []
+    index_path = Path(INDEX_FILES_DIR) / f"wikipathways_index_{species_code}.json"
+    if not index_path.exists():
+        return []
+    try:
+        payload = json.loads(index_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        print(f"Warning: failed to read local WikiPathways index '{index_path.name}': {exc}")
+        return []
+    pathways = payload.get("pathways") if isinstance(payload, dict) else None
+    if not isinstance(pathways, list):
+        return []
+    meta = payload.get("meta") if isinstance(payload, dict) else {}
+    species_name = ""
+    if isinstance(meta, dict):
+        species_name = str(meta.get("species") or organism or fallback or "").strip()
+    options: List[Dict[str, str]] = []
+    for row in pathways:
+        if not isinstance(row, dict):
+            continue
+        path_id = str(row.get("pathway_id") or row.get("id") or row.get("wpid") or "").strip().upper()
+        name = str(row.get("name") or "").strip()
+        if not path_id or not name:
+            continue
+        org = str(row.get("species") or species_name).strip()
+        label = f"{path_id} | {name}"
+        if org:
+            label = f"{label} ({org})"
+        options.append({"id": path_id, "name": name, "species": org, "label": label})
+    options.sort(key=lambda opt: opt.get("name", "").lower())
+    return options
+
+
 def _wp_supported_orgs() -> set:
     global WIKIPATHWAYS_ORG_CACHE
     if WIKIPATHWAYS_ORG_CACHE is not None:
@@ -313,31 +423,54 @@ def _wp_supported_orgs() -> set:
 
 
 def _load_wikipathways_catalog(organism: str, fallback: Optional[str] = None) -> List[Dict[str, str]]:
-    cache_key = organism.strip().lower() if organism else "__all__"
+    cache_key = "||".join(
+        str(v).strip().lower()
+        for v in (organism or "", fallback or "")
+    ) or "__all__"
     if cache_key in WIKIPATHWAYS_CACHE:
         return WIKIPATHWAYS_CACHE[cache_key]
+    local_options = _load_wikipathways_catalog_from_local_index(organism, fallback=fallback)
+    if local_options:
+        WIKIPATHWAYS_CACHE[cache_key] = local_options
+        return local_options
     options: List[Dict[str, str]] = []
 
-    def _fetch_df(name: str, quiet: bool = False):
+    def _extract_rows(payload: Any) -> List[Dict[str, Any]]:
+        if isinstance(payload, list):
+            return [row for row in payload if isinstance(row, dict)]
+        if not isinstance(payload, dict):
+            return []
+        candidates = [
+            payload.get("pathways"),
+            payload.get("result"),
+            payload.get("listPathwaysResult"),
+            payload.get("pathway"),
+        ]
+        for candidate in candidates:
+            if isinstance(candidate, list):
+                return [row for row in candidate if isinstance(row, dict)]
+            if isinstance(candidate, dict):
+                nested = candidate.get("pathways") or candidate.get("pathway")
+                if isinstance(nested, list):
+                    return [row for row in nested if isinstance(row, dict)]
+                return [candidate]
+        return [payload]
+
+    def _fetch_rows(name: str, quiet: bool = False) -> List[Dict[str, Any]]:
         try:
-            import pywikipathways as pwp  # type: ignore
-            df = pwp.list_pathways(name or "")
-            # Convert list responses to DataFrame for consistent handling
-            if isinstance(df, list):
-                try:
-                    import pandas as pd  # type: ignore
-                    df = pd.DataFrame(df)
-                except Exception:
-                    return None
-            if df is None:
-                return None
-            if hasattr(df, "empty") and df.empty:
-                return None
-            return df
+            import requests
+            response = requests.get(
+                "https://webservice.wikipathways.org/listpathways",
+                params={"organism": name or "", "format": "json"},
+                timeout=5,
+            )
+            response.raise_for_status()
+            rows = _extract_rows(response.json())
+            return rows
         except Exception as exc:  # pragma: no cover - network/service issues
             if not quiet:
                 print(f"Warning: list_pathways failed for '{name}': {exc}")
-            return None
+            return []
 
     try:
         names_to_try: List[str] = []
@@ -345,25 +478,17 @@ def _load_wikipathways_catalog(organism: str, fallback: Optional[str] = None) ->
             names_to_try.append(organism)
         if fallback and (not organism or fallback.lower() != organism.lower()):
             names_to_try.append(fallback)
-        # Prefer the first name that is explicitly supported
-        supported = _wp_supported_orgs()
-        if supported:
-            for idx, nm in enumerate(names_to_try):
-                if nm and nm.strip().lower() in supported:
-                    # Move supported name to front
-                    names_to_try.insert(0, names_to_try.pop(idx))
-                    break
 
-        df = None
+        records: List[Dict[str, Any]] = []
         for idx, nm in enumerate(names_to_try):
             quiet = idx < len(names_to_try) - 1
-            df = _fetch_df(nm, quiet=quiet)
-            if df is not None:
+            records = _fetch_rows(nm, quiet=quiet)
+            if records:
                 break
-        if df is None:
+        if not records:
             WIKIPATHWAYS_CACHE[cache_key] = []
             return []
-        records = df.to_dict("records") if hasattr(df, "to_dict") else []
+
         for row in records:
             path_id = str(row.get("id") or row.get("wpid") or "").strip()
             name = str(row.get("name") or "").strip()
@@ -374,8 +499,8 @@ def _load_wikipathways_catalog(organism: str, fallback: Optional[str] = None) ->
             label = f"{path_id} | {name}"
             if org:
                 label = f"{label} ({org})"
-                options.append({"id": path_id, "name": name, "species": org, "label": label})
-            options.sort(key=lambda opt: opt.get("name", "").lower())
+            options.append({"id": path_id, "name": name, "species": org, "label": label})
+        options.sort(key=lambda opt: opt.get("name", "").lower())
     except Exception as exc:
         print(f"Warning: failed to load WikiPathways catalogue for '{organism or fallback or 'all'}': {exc}")
     WIKIPATHWAYS_CACHE[cache_key] = options
@@ -944,6 +1069,7 @@ def collect_settings(input, cfg: Dict[str, Any]) -> Dict[str, Any]:  # type: ign
     overrides["show_arrows"] = _to_bool(_get("show_arrows", _bool_default(cfg, "show_arrows")), _bool_default(cfg, "show_arrows"))
     overrides["show_text_boxes"] = _to_bool(_get("show_text_boxes", _bool_default(cfg, "show_text_boxes")), _bool_default(cfg, "show_text_boxes"))
     overrides["mode"] = str(cfg.get("mode", "analysis")).strip().lower()
+    overrides["simple_kegg_mode"] = _to_bool(_get_input_value(input, _prefixed_id(prefix, "simple_kegg_mode")), prefix == "web")
     overrides["negative_color"] = _hex_to_rgb(
         _get_input_value(input, "settings_negative_color") or _rgb_tuple_to_hex(DEFAULT_SETTINGS["negative_color"]),
         DEFAULT_SETTINGS["negative_color"],
@@ -1132,11 +1258,128 @@ CUSTOM_STYLES = ui.tags.style(
     .ks-filter-popup { position: absolute; z-index: 20; min-width: 320px; background: #fff; border: 1px solid #d4d7dd;
         box-shadow: 0 14px 32px rgba(0,0,0,0.18); border-radius: 12px; padding: 12px; display: none; }
     .ks-filter-popup.active { display: block; }
+    .ks-evidence-toggle { margin-bottom: 8px; }
+    .ks-evidence-toggle .shiny-input-checkboxgroup { margin-bottom: 0; }
+    .ks-evidence-toggle .shiny-options-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ks-evidence-toggle .checkbox { margin: 0; }
+    .ks-evidence-toggle .checkbox label {
+        display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px;
+        border: 1px solid #d4d7dd; border-radius: 10px; background: #f8fafc; cursor: pointer;
+        font-weight: 600; color: #1f2937; transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .ks-evidence-toggle .checkbox label:hover { background: #eef2ff; border-color: #b7c4f6; }
+    .ks-evidence-toggle input[type="checkbox"] { margin: 0; accent-color: #2563eb; }
     .ks-filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
     .ks-filter-row > * { flex: 1; min-width: 140px; }
     .ks-filter-disabled { opacity: 0.45; pointer-events: none; }
     .pathway-table { width: 100%; }
+    .input-page-stack { display: flex; flex-direction: column; row-gap: 16px; width: 100%; }
+    .input-page-row { width: 100%; }
+    .input-preview-section { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; width: 100%; }
+    .input-preview-panel { flex: 0 0 auto; min-width: 0; max-width: 100%; }
+    .input-preview-wrap { display: inline-block; border: 1px solid #dbe2ea; border-radius: 14px; background: #ffffff; overflow-x: auto;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08); }
+    .input-preview-table { margin: 0; min-width: max-content; width: auto; table-layout: fixed; }
+    .input-preview-table thead th { background: #f8fafc; color: #0f172a; font-weight: 700; white-space: nowrap; }
+    .input-preview-table thead th.input-preview-header-error { color: #b91c1c; }
+    .input-preview-table tbody td { color: #334155; white-space: nowrap; }
+    .input-preview-table th, .input-preview-table td { padding: 10px 12px; border-color: #e5e7eb;
+        overflow: hidden; text-overflow: ellipsis; }
+    .input-preview-guide-card { width: 1240px; min-width: 940px; height: 200px; border: 1px solid #dbe2ea;
+        border-radius: 16px; background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+        box-shadow: 0 18px 36px rgba(15, 23, 42, 0.10); overflow: hidden; }
+    .input-preview-guide-layout { display: block; height: 100%; }
+    .input-preview-guide-body { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; padding: 16px 18px 16px 18px; height: 100%; }
+    .input-preview-guide-pill { background: rgba(255,255,255,0.94); border: 1px solid #d7e3f4; border-radius: 12px; padding: 12px 14px; }
+    .input-preview-guide-pill-title { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .input-preview-guide-pill-text { font-size: 12px; line-height: 1.45; color: #334155; }
+    .web-load-ready { background-color: #16a34a !important; border-color: #16a34a !important; color: #ffffff !important; }
+    .web-load-ready:hover, .web-load-ready:focus { background-color: #15803d !important; border-color: #15803d !important; color: #ffffff !important; }
     .pathway-viewer-card { position: relative; }
+    .viewer-fullscreen-btn, .viewer-overlay-btn { border: 1px solid rgba(107, 114, 128, 0.45);
+        background: rgba(107, 114, 128, 0.22); color: #111827; border-radius: 10px; padding: 6px 10px; font-size: 12px;
+        font-weight: 600; backdrop-filter: blur(4px); transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease; }
+    .viewer-fullscreen-btn { position: absolute; top: 10px; right: 10px; z-index: 15; }
+    .viewer-fullscreen-btn:hover, .viewer-fullscreen-btn:focus, .viewer-overlay-btn:hover, .viewer-overlay-btn:focus {
+        background: rgba(75, 85, 99, 0.82); border-color: rgba(75, 85, 99, 0.95); color: #ffffff; }
+    .viewer-overlay-panel { position: absolute; top: 52px; right: 10px; z-index: 15; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+    .viewer-overlay-settings { min-width: 92px; padding: 6px 12px; font-size: 12px !important; line-height: 1.2; letter-spacing: 0; }
+    .viewer-overlay-panel.is-open .viewer-overlay-settings { background: rgba(75, 85, 99, 0.82); border-color: rgba(75, 85, 99, 0.95); color: #ffffff; }
+    .viewer-overlay-controls { display: none; flex-direction: column; gap: 8px; align-items: flex-end; }
+    .viewer-overlay-panel.is-open .viewer-overlay-controls { display: flex; }
+    .viewer-overlay-btn { min-width: 36px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; padding: 4px 8px; font-size: 16px; line-height: 1; }
+    .viewer-overlay-btn.is-off { background: rgba(31, 41, 55, 0.72); border-color: rgba(31, 41, 55, 0.9); color: #ffffff; }
+    .viewer-overlay-btn.viewer-overlay-text { font-size: 13px; font-weight: 700; }
+    .viewer-overlay-icon, .viewer-create-icon, .viewer-create-select-icon { width: 18px; height: 18px; display: block; color: currentColor; }
+    .viewer-create-icon { width: 20px; height: 20px; }
+    .viewer-create-panel { position: relative; z-index: 24; width: 100%; max-width: 100%; min-width: 0;
+        margin-bottom: 12px; overflow: visible; }
+    .viewer-create-scroll { width: 100%; overflow-x: auto; overflow-y: visible; scrollbar-width: thin; }
+    .viewer-create-card { display: flex; align-items: flex-end; gap: 12px; flex-wrap: nowrap; width: max-content; min-width: 100%;
+        background: rgba(255,255,255,0.94); border: 1px solid rgba(203, 213, 225, 0.9); border-radius: 16px;
+        box-shadow: none; backdrop-filter: blur(10px); padding: 10px 12px; }
+    .viewer-create-group { display: flex; flex-direction: column; gap: 5px; min-width: 0; flex: 0 0 auto; }
+    .viewer-create-group-label { display: none; }
+    .viewer-create-group-label.viewer-create-main-label { display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+        text-transform: uppercase; color: #64748b; margin-bottom: 2px; }
+    .viewer-create-section { display: flex; flex-direction: column; gap: 5px; min-width: 0; flex: 0 0 auto; margin-left: 4px; padding-left: 12px;
+        border-left: 1px solid #e2e8f0; }
+    .viewer-create-section.is-disabled { opacity: 0.5; }
+    .viewer-create-section-label { display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; margin-bottom: 2px; }
+    .viewer-create-inline { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .viewer-create-select-wrap { position: relative; display: inline-flex; align-items: center; }
+    .viewer-create-select-wrap .viewer-create-select-icon { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; color: #0f172a; }
+    .viewer-create-select-wrap .viewer-create-select-icon.viewer-create-shape-icon { width: 24px; height: 24px; }
+    .viewer-create-field { height: 34px; border: 1px solid #cbd5e1; border-radius: 12px; background: #ffffff; color: #0f172a;
+        font-size: 12px; padding: 0 10px; box-sizing: border-box; }
+    .viewer-create-field:focus { outline: none; border-color: #94a3b8; box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.18); }
+    .viewer-create-field.viewer-create-search { width: 190px; }
+    .viewer-create-field.viewer-create-select { min-width: 51px; width: 51px; padding-left: 22px; padding-right: 10px; color: transparent; text-shadow: none; }
+    .viewer-create-field.viewer-create-select-interaction { width: 51px; min-width: 51px; }
+    .viewer-create-field.viewer-create-select-shape { width: 51px; min-width: 51px; }
+    .viewer-create-field.viewer-create-select option { color: #0f172a; }
+    .viewer-create-field.viewer-create-select-protein { min-width: 220px; max-width: 260px; }
+    .viewer-create-action { height: 34px; border: 1px solid #cbd5e1; border-radius: 12px; background: linear-gradient(180deg, #f8fafc, #eef2f7);
+        color: #0f172a; padding: 0 12px; font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer;
+        transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease; }
+    .viewer-create-action:hover, .viewer-create-action:focus { background: linear-gradient(180deg, #eef2f7, #e2e8f0); border-color: #94a3b8; transform: translateY(-1px); }
+    .viewer-create-action:disabled { opacity: 0.55; cursor: default; transform: none; }
+    .viewer-create-action.viewer-create-icon-action { width: 44px; min-width: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+    .viewer-create-action.viewer-create-mode-btn.is-active { background: linear-gradient(180deg, #dbeafe, #bfdbfe); border-color: #60a5fa; color: #1d4ed8; }
+    .viewer-create-icon-pair { position: relative; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; }
+    .viewer-create-icon-pair .viewer-create-icon { position: absolute; inset: 0; margin: auto; }
+    .viewer-create-icon-secondary { display: none; }
+    .viewer-create-action:disabled .viewer-create-icon-primary { display: none; }
+    .viewer-create-action:disabled .viewer-create-icon-secondary { display: block; }
+    .viewer-create-action.viewer-create-snap-btn .viewer-create-icon-secondary { display: none; }
+    .viewer-create-action.viewer-create-snap-btn.is-active .viewer-create-icon-primary { display: block; }
+    .viewer-create-action.viewer-create-snap-btn.is-active .viewer-create-icon-secondary { display: none; }
+    .viewer-create-action.viewer-create-snap-btn:not(.is-active) .viewer-create-icon-primary { display: none; }
+    .viewer-create-action.viewer-create-snap-btn:not(.is-active) .viewer-create-icon-secondary { display: block; }
+    .viewer-create-item { position: relative; }
+    .viewer-create-popover { display: none; position: absolute; top: calc(100% + 8px); left: 0; z-index: 40; min-width: 150px; background: rgba(255,255,255,0.98);
+        border: 1px solid #d7dee8; border-radius: 14px; box-shadow: 0 18px 44px rgba(15, 23, 42, 0.18); backdrop-filter: blur(12px); padding: 8px; }
+    .viewer-create-item.is-open .viewer-create-popover { display: block; }
+    .viewer-create-option-stack { display: flex; flex-direction: column; gap: 6px; }
+    .viewer-create-option { border: 1px solid #d7dee8; border-radius: 12px; background: #f8fafc; color: #0f172a; padding: 9px 10px;
+        font-size: 12px; font-weight: 700; text-align: left; cursor: pointer; transition: background 0.16s ease, border-color 0.16s ease; }
+    .viewer-create-option:hover, .viewer-create-option:focus { background: #eef2f7; border-color: #94a3b8; }
+    .viewer-create-protein-popover-overlay { display: none; position: absolute; z-index: 40; min-width: 240px; max-width: 300px; max-height: 220px; overflow-y: auto; }
+    .viewer-create-legend-popover-overlay { display: none; position: absolute; z-index: 50; min-width: 150px; }
+    .pathway-viewer-body { min-width: 0; position: relative; }
+    .viewer-create-option.viewer-create-protein-option { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .viewer-create-protein-label { min-width: 0; flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .viewer-create-protein-swatch { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(15, 23, 42, 0.16); flex: 0 0 auto; }
+    .pathway-viewer-card:fullscreen { background: #ffffff; padding: 16px; overflow: auto; box-sizing: border-box;
+        width: 100vw; height: 100vh; max-width: none; display: flex; flex-direction: column; align-items: stretch; }
+    .pathway-viewer-card:fullscreen > *:not(.viewer-fullscreen-btn):not(.viewer-overlay-panel) { width: 100%; max-width: none; }
+    .pathway-viewer-card:fullscreen .viewer-create-panel { display: block !important; visibility: visible !important; flex: 0 0 auto;
+        align-self: stretch; width: 100%; max-width: 100%; min-width: 0; }
+    .pathway-viewer-card:fullscreen .pathway-viewer-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+    .pathway-viewer-card:fullscreen .svg-container { width: 100% !important; min-width: 100% !important; max-width: none !important; flex: 1 1 auto; }
+    .pathway-viewer-card:fullscreen #svgCanvas { width: 100% !important; max-width: none !important; }
+    .pathway-viewer-card:fullscreen .viewer-fullscreen-btn { top: 16px; right: 16px; }
+    .pathway-viewer-card:fullscreen .viewer-overlay-panel { top: 58px; right: 16px; }
     .svg-download-row { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
     .svg-download-row .svg-download-label { font-weight: 700; color: #1f2937; margin-right: 4px; }
     .svg-download-row .btn { font-weight: 600; padding: 6px 12px; }
@@ -1154,7 +1397,7 @@ NAV_LOCK_SCRIPT = ui.tags.script(
             var links = nav.querySelectorAll("a.nav-link");
             links.forEach(function(link){
                 var val = link.getAttribute("data-value");
-                if (val === "input") return;
+                if (val === "home" || val === "input") return;
                 if (locked){
                     if (!link.dataset.prevHref){
                         link.dataset.prevHref = link.getAttribute("href") || "";
@@ -1184,7 +1427,8 @@ EXPORT_DOWNLOAD_SCRIPT = ui.tags.script(
         Shiny.addCustomMessageHandler("download_payload", function(msg){
             var filename = msg && msg.filename ? msg.filename : "custom_pathway.json";
             var content = msg && typeof msg.content === "string" ? msg.content : "";
-            var blob = new Blob([content], { type: "application/json;charset=utf-8" });
+            var mimeType = msg && msg.mime_type ? msg.mime_type : "application/json;charset=utf-8";
+            var blob = new Blob([content], { type: mimeType });
             var url = URL.createObjectURL(blob);
             var link = document.createElement("a");
             link.href = url;
@@ -1556,6 +1800,9 @@ def _pathway_search_ui(prefix: str) -> ui.div:
     default_value = "" if prefix == "web" else DEFAULT_SETTINGS["pathway_id"]
     filter_btn_id = _prefixed_id(prefix, "pathway_filter_btn")
     filter_popup_id = _prefixed_id(prefix, "pathway_filter_popup")
+    fisher_btn_id = _prefixed_id(prefix, "run_fisher_test")
+    fisher_settings_btn_id = _prefixed_id(prefix, "fisher_settings_btn")
+    fisher_settings_popup_id = _prefixed_id(prefix, "fisher_settings_popup")
     filter_choices = {opt: opt for opt in WEB_PATHWAY_SOURCES}
     children = []
     search_input = ui.input_text(
@@ -1571,12 +1818,41 @@ def _pathway_search_ui(prefix: str) -> ui.div:
                 {"style": "display:flex; flex-direction:column; gap:8px; position:relative;", "class": "pathway-search-row"},
                 ui.div({"style": "flex:1;"}, search_input),
                 ui.div(
-                    {"style": "display:flex; align-items:center; gap:8px;"},
+                    {"style": "display:flex; align-items:center; justify-content:space-between; gap:12px;"},
                     ui.tags.button(
                         ui.tags.i({"class": "fa fa-filter"}), "Filters",
                         {"id": filter_btn_id, "type": "button", "class": "ks-filter-button pathway-filter-button"}
                     ),
+                    ui.div(
+                        {"class": "pathway-action-buttons"},
+                        ui.input_action_button(
+                            _prefixed_id(prefix, "download_pathway_table"),
+                            _icon_markup("download", "mk-inline-icon pathway-action-icon"),
+                            class_="btn btn-outline-secondary btn-sm pathway-action-btn pathway-icon-btn",
+                        ),
+                        ui.input_action_button(
+                            fisher_btn_id,
+                            ui.span({"class": "pathway-run-label"}, "Fisher's Exact Test"),
+                            class_="btn btn-primary btn-sm pathway-action-btn pathway-run-btn",
+                        ),
+                        ui.tags.button(
+                            _icon_markup("settings", "mk-inline-icon pathway-action-icon"),
+                            {
+                                "id": fisher_settings_btn_id,
+                                "type": "button",
+                                "class": "btn btn-outline-secondary btn-sm pathway-action-btn pathway-icon-btn fisher-settings-trigger",
+                                "title": "Fisher exact test settings",
+                                "aria-label": "Fisher exact test settings",
+                            },
+                        ),
+                    ),
                 ),
+                ui.div(
+                    {"id": _prefixed_id(prefix, "fisher_run_progress"), "class": "fisher-run-progress"},
+                    ui.div({"class": "fisher-run-progress-bar"}),
+                    ui.div({"class": "fisher-run-progress-text"}, "Running Fisher's Exact Test..."),
+                ),
+                ui.output_ui(_prefixed_id(prefix, "fisher_run_state")),
                 ui.div(
                     {"id": filter_popup_id, "class": "ks-filter-popup"},
                     ui.div({"class": "ks-filter-row"},
@@ -1589,6 +1865,45 @@ def _pathway_search_ui(prefix: str) -> ui.div:
                         ),
                     ),
                 ),
+                ui.div(
+                    {"id": fisher_settings_popup_id, "class": "ks-filter-popup fisher-settings-popup"},
+                    ui.div({"class": "fisher-settings-title"}, "Fisher's Exact Test Settings"),
+                    ui.div(
+                        {"class": "fisher-settings-copy"},
+                        "Choose which direction of significance to test and set the fold-change cutoffs used for proteins and PTMs.",
+                    ),
+                    ui.div(
+                        {"class": "ks-filter-row"},
+                        ui.input_radio_buttons(
+                            _prefixed_id(prefix, "fisher_sig_mode"),
+                            "Significance Mode",
+                            choices={
+                                "both": "Positive + Negative",
+                                "positive": "Positive only",
+                                "negative": "Negative only",
+                            },
+                            selected="both",
+                            inline=False,
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "fisher-settings-thresholds"},
+                        ui.input_numeric(
+                            _prefixed_id(prefix, "fisher_sig_pos"),
+                            "Positive cutoff",
+                            value=1.5,
+                            step=0.1,
+                            width="140px",
+                        ),
+                        ui.input_numeric(
+                            _prefixed_id(prefix, "fisher_sig_neg"),
+                            "Negative cutoff",
+                            value=-1.5,
+                            step=0.1,
+                            width="140px",
+                        ),
+                    ),
+                ),
                 ui.tags.style(
                     """
                     .ks-filter-popup { display:none; }
@@ -1596,6 +1911,81 @@ def _pathway_search_ui(prefix: str) -> ui.div:
                     .pathway-filter-button { gap: 0; }
                     .pathway-filter-button { gap: 0; }
                     .pathway-filter-button .fa { margin-right: 0; }
+                    .pathway-action-buttons { display:flex; align-items:center; justify-content:flex-end; gap:8px; margin-left:auto; }
+                    .pathway-action-btn {
+                        height: 38px;
+                        min-height: 38px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        flex-wrap: nowrap;
+                        gap: 8px;
+                        font-weight: 600;
+                    }
+                    .pathway-icon-btn { width: 38px; min-width: 38px; padding: 0; }
+                    .pathway-run-btn { min-width: 92px; padding: 0 12px; white-space: nowrap; }
+                    .pathway-run-btn .btn { white-space: nowrap; }
+                    .pathway-run-btn .shiny-bound-input,
+                    .pathway-run-btn span,
+                    .pathway-run-btn svg { vertical-align: middle; }
+                    .pathway-run-label { white-space: nowrap; line-height: 1; display:inline-block; }
+                    .pathway-action-icon { width: 17px; height: 17px; display:block; }
+                    .fisher-run-progress {
+                        display: none;
+                        align-items: center;
+                        gap: 10px;
+                        margin-top: -2px;
+                    }
+                    .fisher-run-progress.active { display:flex; }
+                    .fisher-run-progress-bar {
+                        position: relative;
+                        flex: 1 1 auto;
+                        height: 6px;
+                        border-radius: 999px;
+                        overflow: hidden;
+                        background: rgba(37, 99, 235, 0.14);
+                    }
+                    .fisher-run-progress-bar::before {
+                        content: "";
+                        position: absolute;
+                        inset: 0;
+                        width: 42%;
+                        border-radius: inherit;
+                        background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+                        animation: fisher-run-slide 1.1s ease-in-out infinite;
+                    }
+                    .fisher-run-progress-text {
+                        flex: 0 0 auto;
+                        color: #1f4fa3;
+                        font-size: 0.84rem;
+                        font-weight: 600;
+                        white-space: nowrap;
+                    }
+                    @keyframes fisher-run-slide {
+                        0% { transform: translateX(-120%); }
+                        100% { transform: translateX(260%); }
+                    }
+                    .fisher-settings-popup {
+                        min-width: 320px;
+                        max-width: 420px;
+                        padding: 14px 16px 12px;
+                        border-radius: 14px;
+                        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.16);
+                    }
+                    .fisher-settings-title { font-size: 0.96rem; font-weight: 700; color: #111827; margin-bottom: 4px; }
+                    .fisher-settings-copy { font-size: 0.84rem; color: #4b5563; line-height: 1.4; margin-bottom: 12px; }
+                    .fisher-settings-popup .shiny-input-radiogroup > label { font-weight: 700; color: #1f2937; margin-bottom: 8px; }
+                    .fisher-settings-popup .radio { margin-bottom: 6px; }
+                    .fisher-settings-popup .radio label { color: #374151; font-size: 0.9rem; }
+                    .fisher-settings-thresholds {
+                        display:flex;
+                        gap: 12px;
+                        align-items:flex-end;
+                        flex-wrap:wrap;
+                        margin-top: 10px;
+                        padding-top: 10px;
+                        border-top: 1px solid #e5e7eb;
+                    }
                     """
                 ),
                 ui.tags.script(
@@ -1603,13 +1993,34 @@ def _pathway_search_ui(prefix: str) -> ui.div:
                     (function(){{
                         const btn = document.getElementById('{filter_btn_id}');
                         const popup = document.getElementById('{filter_popup_id}');
+                        const runBtn = document.getElementById('{fisher_btn_id}');
+                        const runProgress = document.getElementById('{_prefixed_id(prefix, "fisher_run_progress")}');
+                        const fisherBtn = document.getElementById('{fisher_settings_btn_id}');
+                        const fisherPopup = document.getElementById('{fisher_settings_popup_id}');
                         if (!btn || !popup) return;
+                        if (runBtn && runProgress && !runBtn.dataset.bound) {{
+                            runBtn.addEventListener('click', () => {{
+                                runBtn.disabled = true;
+                                runProgress.classList.add('active');
+                            }});
+                            runBtn.dataset.bound = '1';
+                        }}
                         btn.addEventListener('click', () => {{
                             popup.classList.toggle('active');
+                            if (fisherPopup) fisherPopup.classList.remove('active');
                         }});
+                        if (fisherBtn && fisherPopup) {{
+                            fisherBtn.addEventListener('click', () => {{
+                                fisherPopup.classList.toggle('active');
+                                popup.classList.remove('active');
+                            }});
+                        }}
                         document.addEventListener('click', (ev) => {{
                             if (!popup.contains(ev.target) && ev.target !== btn && !btn.contains(ev.target)) {{
                                 popup.classList.remove('active');
+                            }}
+                            if (fisherPopup && !fisherPopup.contains(ev.target) && ev.target !== fisherBtn && !(fisherBtn && fisherBtn.contains(ev.target))) {{
+                                fisherPopup.classList.remove('active');
                             }}
                         }}, true);
                     }})();
@@ -1794,6 +2205,18 @@ def _settings_panel(cfg: Dict[str, Any]) -> ui.card:
         )
         controls.append(
             ui.div(
+                {"class": "ks-evidence-toggle"},
+                ui.input_checkbox_group(
+                    _prefixed_id(prefix, "ks_evidence_types"),
+                    None,
+                    choices={"in_vivo": "in vivo", "in_vitro": "in vitro"},
+                    selected=["in_vivo"],
+                    inline=True,
+                ),
+            )
+        )
+        controls.append(
+            ui.div(
                 {"class": "ks-filter-panel"},
                 ui.div(
                     {"style": "display:flex; align-items:center; gap:8px;"},
@@ -1830,15 +2253,6 @@ def _settings_panel(cfg: Dict[str, Any]) -> ui.card:
                             "Known regulatory sites only (substrates)",
                             value=False,
                         )
-                    ),
-                    ui.tags.hr({"style": "margin:6px 0;"}),
-                    ui.div({"class": "ks-filter-row"},
-                        ui.input_select(
-                            _prefixed_id(prefix, "ks_filter_evidence"),
-                            "Evidence",
-                            choices={"both": "Both", "in_vivo": "in vivo", "in_vitro": "in vitro"},
-                            selected="both",
-                        ),
                     ),
                     ui.tags.hr({"style": "margin:6px 0;"}),
                     ui.div({"class": "ks-filter-row"},
@@ -1897,12 +2311,19 @@ def _settings_panel(cfg: Dict[str, Any]) -> ui.card:
     if not is_ks:
         if cfg.get("show_search", False):
             if is_simple_web:
-                load_btn = ui.input_action_button(
+                load_btn_control = ui.input_action_button(
                     _prefixed_id(prefix, "generate"),
                     "Load Pathway",
                     width="auto",
                     style="white-space: nowrap; min-width: 140px;"
                 )
+                if cfg.get("key") == "web":
+                    load_btn = ui.div(
+                        load_btn_control,
+                        ui.output_ui(_prefixed_id(prefix, "generate_button_state")),
+                    )
+                else:
+                    load_btn = load_btn_control
                 if is_simple:
                     search_ui = _simple_pathway_search_ui(prefix)
                     top_controls.append(
@@ -1978,6 +2399,14 @@ def _settings_panel(cfg: Dict[str, Any]) -> ui.card:
             controls.append(export_script)
     if cfg.get("show_toggles", True):
         toggle_controls = []
+        if cfg.get("key") == "web":
+            toggle_controls.append(
+                ui.input_checkbox(
+                    _prefixed_id(prefix, "simple_kegg_mode"),
+                    "Simple: KEGG",
+                    value=True,
+                )
+            )
         if cfg.get("key") not in {"web", "figure"}:
             toggle_controls.extend([
                 ui.input_checkbox(_prefixed_id(prefix, "show_arrows"), "Show arrows", value=_bool_default(cfg, "show_arrows")),
@@ -2036,6 +2465,734 @@ def _settings_panel(cfg: Dict[str, Any]) -> ui.card:
 def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
     prefix = cfg["key"]
     download_name = f"{prefix}_pathway"
+    fullscreen_btn = None
+    viewer_controls = None
+    create_panel = None
+    fullscreen_script = None
+    toolbar_script = None
+    if cfg.get("key") in {"web", "figure", "ks"}:
+        btn_id = _prefixed_id(prefix, "fullscreen_btn")
+        card_id = _prefixed_id(prefix, "viewer_card")
+        panel_id = _prefixed_id(prefix, "viewer_overlay_panel")
+        settings_btn_id = _prefixed_id(prefix, "viewer_settings_btn")
+        create_panel_id = _prefixed_id(prefix, "viewer_create_panel")
+        protein_search_id = _prefixed_id(prefix, "viewer_create_protein_search")
+        protein_item_id = _prefixed_id(prefix, "viewer_create_protein_item")
+        protein_popover_id = _prefixed_id(prefix, "viewer_create_protein_popover")
+        arrow_select_id = _prefixed_id(prefix, "viewer_create_arrow_select")
+        shape_select_id = _prefixed_id(prefix, "viewer_create_shape_select")
+        text_add_id = _prefixed_id(prefix, "viewer_create_text_add")
+        legend_add_id = _prefixed_id(prefix, "viewer_create_legend_add")
+        legend_item_id = _prefixed_id(prefix, "viewer_create_legend_item")
+        legend_popover_id = _prefixed_id(prefix, "viewer_create_legend_popover")
+        undo_btn_id = _prefixed_id(prefix, "viewer_create_undo")
+        redo_btn_id = _prefixed_id(prefix, "viewer_create_redo")
+        delete_btn_id = _prefixed_id(prefix, "viewer_create_delete")
+        interaction_section_id = _prefixed_id(prefix, "viewer_create_interaction_section")
+        edge_auto_btn_id = _prefixed_id(prefix, "viewer_create_edge_auto")
+        edge_shortest_btn_id = _prefixed_id(prefix, "viewer_create_edge_shortest")
+        edge_type_btn_id = _prefixed_id(prefix, "viewer_create_edge_type")
+        edge_dash_btn_id = _prefixed_id(prefix, "viewer_create_edge_dash")
+        edge_flip_btn_id = _prefixed_id(prefix, "viewer_create_edge_flip")
+        drag_mode_btn_id = _prefixed_id(prefix, "viewer_create_drag_mode")
+        select_mode_btn_id = _prefixed_id(prefix, "viewer_create_select_mode")
+        protbox_snap_btn_id = _prefixed_id(prefix, "viewer_create_protbox_snap")
+        protbox_align_btn_id = _prefixed_id(prefix, "viewer_create_protbox_align")
+        arrow_snap_btn_id = _prefixed_id(prefix, "viewer_create_arrow_snap")
+        control_specs = [
+            ("background", "media-image", "Hide or show the KEGG background image."),
+            ("protboxes", "xmark-square", "Hide or show protein boxes."),
+            ("ptms", "xmark-circle", "Hide or show PTM circles and labels."),
+            ("ptmLabels", "phoscircle_label", "Hide or show PTM site labels."),
+            ("ptmSymbols", "phoscircle_symbol", "Hide or show PTM symbols."),
+            ("arrows", "arrow-right", "Hide or show pathway interactions."),
+            ("compounds", "select-point3d", "Hide or show compounds."),
+            ("groups", "combine", "Hide or show group shapes."),
+            ("tooltips", "edit-pencil", "Turn pathway tooltips on or off."),
+        ]
+        fullscreen_btn = ui.tags.button(
+            {
+                "id": btn_id,
+                "class": "viewer-fullscreen-btn",
+                "type": "button",
+            },
+            "Full Screen",
+        )
+        viewer_controls = ui.div(
+            {"class": "viewer-overlay-panel", "id": panel_id},
+            ui.tags.button(
+                {
+                    "id": settings_btn_id,
+                    "class": "viewer-overlay-btn viewer-overlay-settings",
+                    "type": "button",
+                    "title": "Show or hide viewer display controls.",
+                },
+                "Hide Objects ^",
+            ),
+            ui.div(
+                {"class": "viewer-overlay-controls"},
+                *[
+                    ui.tags.button(
+                        {
+                            "id": _prefixed_id(prefix, f"viewer_toggle_{key}"),
+                            "class": "viewer-overlay-btn",
+                            "type": "button",
+                            "title": title,
+                            "aria-label": title,
+                        },
+                        _icon_markup(label, "viewer-overlay-icon"),
+                    )
+                    for key, label, title in control_specs
+                ],
+            ),
+        )
+        create_panel = ui.div(
+            {"class": "viewer-create-panel", "id": create_panel_id},
+            ui.div(
+                {"class": "viewer-create-scroll"},
+                ui.div(
+                    {"class": "viewer-create-card"},
+                    ui.div(
+                        {"class": "viewer-create-group viewer-create-item viewer-create-protein-item", "id": protein_item_id},
+                        ui.div({"class": "viewer-create-group-label viewer-create-main-label"}, "Add Objects"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.tags.input({"id": protein_search_id, "class": "viewer-create-field viewer-create-search", "type": "text", "placeholder": "Regex UniProt or gene symbol"}),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-group"},
+                        ui.div({"class": "viewer-create-group-label"}, "Interaction"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.div(
+                                {"class": "viewer-create-select-wrap"},
+                                _icon_markup("arrow-right", "viewer-create-select-icon"),
+                                ui.tags.select(
+                                    {"id": arrow_select_id, "class": "viewer-create-field viewer-create-select viewer-create-select-interaction", "aria-label": "Add Edge"},
+                                    ui.tags.option(" ", value="", selected=True, disabled=True),
+                                    ui.tags.option("→ Arrow", value="arrow"),
+                                    ui.tags.option("⊣ Inhibitor", value="inhibition"),
+                                    ui.tags.option("─ Line", value="line"),
+                                    ui.tags.option("⇢ Dashed Arrow", value="dashed_arrow"),
+                                    ui.tags.option("╌⊣ Dashed Inhibitor", value="dashed_inhibition"),
+                                    ui.tags.option("╌ Line", value="dashed_line"),
+                                ),
+                            ),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-group"},
+                        ui.div({"class": "viewer-create-group-label"}, "Shape"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.div(
+                                {"class": "viewer-create-select-wrap"},
+                                _icon_markup("shapes", "viewer-create-select-icon viewer-create-shape-icon"),
+                                ui.tags.select(
+                                    {"id": shape_select_id, "class": "viewer-create-field viewer-create-select viewer-create-select-shape", "aria-label": "Add Shape"},
+                                    ui.tags.option(" ", value="", selected=True, disabled=True),
+                                    ui.tags.option("□ Square", value="square"),
+                                    ui.tags.option("▢ Rounded", value="rounded"),
+                                    ui.tags.option("○ Circle", value="circle"),
+                                ),
+                            ),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-group"},
+                        ui.div({"class": "viewer-create-group-label"}, "Text"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.tags.button({"id": text_add_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Add Textbox", "aria-label": "Add Textbox"}, _icon_markup("text-box", "viewer-create-icon")),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-group viewer-create-item", "id": legend_item_id},
+                        ui.div({"class": "viewer-create-group-label"}, "Legend"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.tags.button({"id": legend_add_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Add Legend", "aria-label": "Add Legend"}, _icon_markup("key-plus", "viewer-create-icon")),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-section", "id": interaction_section_id},
+                        ui.div({"class": "viewer-create-section-label"}, "Interactions"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.tags.button({"id": edge_shortest_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Auto-add arrows using the shortest side-to-side path. Shortcut: Ctrl+Shift+A", "aria-label": "Shortest Auto Add Arrows", "disabled": "disabled"}, _icon_markup("divide-three-solid", "viewer-create-icon")),
+                            ui.tags.button({"id": edge_type_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Cycle the selected interactor type. Shortcut: Ctrl+S", "aria-label": "Cycle Interactor Type", "disabled": "disabled"}, _icon_markup("arrow_head_switch", "viewer-create-icon")),
+                            ui.tags.button({"id": edge_dash_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Toggle dashed or solid style for the selected interactor. Shortcut: Ctrl+D", "aria-label": "Toggle Interactor Dash", "disabled": "disabled"}, _icon_markup("data-transfer-up", "viewer-create-icon")),
+                            ui.tags.button({"id": edge_flip_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Flip the selected interactor direction. Shortcut: Ctrl+F", "aria-label": "Flip Interactor Direction", "disabled": "disabled"}, _icon_markup("ruler-arrows", "viewer-create-icon")),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-section"},
+                        ui.div({"class": "viewer-create-section-label"}, "Edit Controls"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.tags.button(
+                                {"id": undo_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Undo", "aria-label": "Undo"},
+                                ui.span({"class": "viewer-create-icon-pair"}, _icon_markup("undo", "viewer-create-icon viewer-create-icon-primary"), _icon_markup("undo (1)", "viewer-create-icon viewer-create-icon-secondary")),
+                            ),
+                            ui.tags.button(
+                                {"id": redo_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Redo", "aria-label": "Redo"},
+                                ui.span({"class": "viewer-create-icon-pair"}, _icon_markup("redo", "viewer-create-icon viewer-create-icon-primary"), _icon_markup("redo (1)", "viewer-create-icon viewer-create-icon-secondary")),
+                            ),
+                            ui.tags.button(
+                                {"id": delete_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Select an object to delete.", "aria-label": "Delete Selected Object", "disabled": "disabled"},
+                                ui.span({"class": "viewer-create-icon-pair"}, _icon_markup("xmark (1)", "viewer-create-icon viewer-create-icon-primary"), _icon_markup("xmark (2)", "viewer-create-icon viewer-create-icon-secondary")),
+                            ),
+                            ui.tags.button({"id": drag_mode_btn_id, "class": "viewer-create-action viewer-create-icon-action viewer-create-mode-btn", "type": "button", "title": "Drag Mode", "aria-label": "Drag Mode"}, _icon_markup("drag-hand-gesture", "viewer-create-icon")),
+                            ui.tags.button({"id": select_mode_btn_id, "class": "viewer-create-action viewer-create-icon-action viewer-create-mode-btn", "type": "button", "title": "Selection Mode", "aria-label": "Selection Mode"}, _icon_markup("frame-select", "viewer-create-icon")),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-section"},
+                        ui.div({"class": "viewer-create-section-label"}, "Snapping"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.tags.button(
+                                {"id": protbox_snap_btn_id, "class": "viewer-create-action viewer-create-icon-action viewer-create-snap-btn", "type": "button", "aria-label": "Protbox Snapping"},
+                                ui.span({"class": "viewer-create-icon-pair"}, _icon_markup("protboxes_align", "viewer-create-icon viewer-create-icon-primary"), _icon_markup("protboxes_not_align", "viewer-create-icon viewer-create-icon-secondary")),
+                            ),
+                            ui.tags.button(
+                                {"id": protbox_align_btn_id, "class": "viewer-create-action viewer-create-icon-action viewer-create-snap-btn", "type": "button", "aria-label": "Protbox Alignment"},
+                                ui.span({"class": "viewer-create-icon-pair"}, _icon_markup("align_on", "viewer-create-icon viewer-create-icon-primary"), _icon_markup("align_off", "viewer-create-icon viewer-create-icon-secondary")),
+                            ),
+                            ui.tags.button(
+                                {"id": arrow_snap_btn_id, "class": "viewer-create-action viewer-create-icon-action viewer-create-snap-btn", "type": "button", "aria-label": "Arrow Snapping"},
+                                ui.span({"class": "viewer-create-icon-pair"}, _icon_markup("Arrow_snap", "viewer-create-icon viewer-create-icon-primary"), _icon_markup("Arrow_not_snap", "viewer-create-icon viewer-create-icon-secondary")),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            ui.div(
+                {"id": protein_popover_id, "class": "viewer-create-popover viewer-create-protein-popover-overlay"},
+            ),
+            ui.div(
+                {"id": legend_popover_id, "class": "viewer-create-popover viewer-create-legend-popover-overlay"},
+                ui.div(
+                    {"class": "viewer-create-option-stack"},
+                    ui.tags.button({"class": "viewer-create-option", "type": "button", "data-legend-type": "horizontal"}, "Horizontal"),
+                    ui.tags.button({"class": "viewer-create-option", "type": "button", "data-legend-type": "vertical"}, "Vertical"),
+                ),
+            ),
+        )
+        fullscreen_script = ui.tags.script(
+            f"""
+            (function(){{
+                const btn = document.getElementById('{btn_id}');
+                const card = document.getElementById('{card_id}');
+                const panel = document.getElementById('{panel_id}');
+                const settingsBtn = document.getElementById('{settings_btn_id}');
+                const toggleButtons = {{
+                    background: document.getElementById('{_prefixed_id(prefix, "viewer_toggle_background")}'),
+                    protboxes: document.getElementById('{_prefixed_id(prefix, "viewer_toggle_protboxes")}'),
+                    ptms: document.getElementById('{_prefixed_id(prefix, "viewer_toggle_ptms")}'),
+                    ptmLabels: document.getElementById('{_prefixed_id(prefix, "viewer_toggle_ptmLabels")}'),
+                    ptmSymbols: document.getElementById('{_prefixed_id(prefix, "viewer_toggle_ptmSymbols")}'),
+                    arrows: document.getElementById('{_prefixed_id(prefix, "viewer_toggle_arrows")}'),
+                    compounds: document.getElementById('{_prefixed_id(prefix, "viewer_toggle_compounds")}'),
+                    groups: document.getElementById('{_prefixed_id(prefix, "viewer_toggle_groups")}'),
+                    tooltips: document.getElementById('{_prefixed_id(prefix, "viewer_toggle_tooltips")}'),
+                }};
+                if (!btn || !card || !panel || !settingsBtn || btn.dataset.bound === '1') return;
+                const viewerKey = '{prefix}';
+                const getApi = () => window.__mkViewerControls && window.__mkViewerControls[viewerKey];
+                const updateSettingsLabel = () => {{
+                    settingsBtn.textContent = panel.classList.contains('is-open') ? 'Hide Objects ⌄' : 'Hide Objects ^';
+                }};
+                const setPanelOpen = (open) => {{
+                    panel.classList.toggle('is-open', !!open);
+                    updateSettingsLabel();
+                }};
+                const syncToggleButtons = (state) => {{
+                    if (!state) return;
+                    Object.entries(toggleButtons).forEach(([key, el]) => {{
+                        if (!el) return;
+                        const enabled = state[key] !== false;
+                        el.classList.toggle('is-off', !enabled);
+                    }});
+                }};
+                function syncLabel(){{
+                    const active = document.fullscreenElement === card;
+                    btn.textContent = active ? 'Exit Full Screen' : 'Full Screen';
+                    window.dispatchEvent(new Event('resize'));
+                }}
+                btn.addEventListener('click', async () => {{
+                    try {{
+                        if (document.fullscreenElement === card) {{
+                            await document.exitFullscreen();
+                        }} else {{
+                            await card.requestFullscreen();
+                        }}
+                    }} catch (err) {{
+                        console.log('fullscreen toggle failed', err);
+                    }}
+                    syncLabel();
+                }});
+                document.addEventListener('fullscreenchange', syncLabel);
+                settingsBtn.addEventListener('click', () => {{
+                    setPanelOpen(!panel.classList.contains('is-open'));
+                }});
+                Object.entries(toggleButtons).forEach(([key, el]) => {{
+                    if (!el) return;
+                    el.addEventListener('click', () => {{
+                        const api = getApi();
+                        if (!api || typeof api.toggle !== 'function') return;
+                        syncToggleButtons(api.toggle(key));
+                    }});
+                }});
+                document.addEventListener('mk-viewer-controls-ready', (evt) => {{
+                    if (evt?.detail?.key === viewerKey) {{
+                        syncToggleButtons(evt.detail.state || {{}});
+                    }}
+                }});
+                btn.dataset.bound = '1';
+                setPanelOpen(false);
+                syncLabel();
+                window.setTimeout(() => {{
+                    const api = getApi();
+                    if (api && typeof api.getState === 'function') {{
+                        syncToggleButtons(api.getState());
+                    }}
+                }}, 0);
+            }})();
+            """
+        )
+        toolbar_script = ui.tags.script(
+            f"""
+            (function(){{
+                const panel = document.getElementById('{create_panel_id}');
+                if (!panel || panel.dataset.bound === '1') return;
+                const viewerKey = '{prefix}';
+                const getApi = () => window.__mkViewerControls && window.__mkViewerControls[viewerKey];
+                const createScroll = panel.querySelector('.viewer-create-scroll');
+                const proteinSearch = document.getElementById('{protein_search_id}');
+                const proteinItem = document.getElementById('{protein_item_id}');
+                const proteinPopover = document.getElementById('{protein_popover_id}');
+                const arrowSelect = document.getElementById('{arrow_select_id}');
+                const shapeSelect = document.getElementById('{shape_select_id}');
+                const textAdd = document.getElementById('{text_add_id}');
+                const legendAdd = document.getElementById('{legend_add_id}');
+                const legendItem = document.getElementById('{legend_item_id}');
+                const legendPopover = document.getElementById('{legend_popover_id}');
+                const undoBtn = document.getElementById('{undo_btn_id}');
+                const redoBtn = document.getElementById('{redo_btn_id}');
+                const deleteBtn = document.getElementById('{delete_btn_id}');
+                const interactionSection = document.getElementById('{interaction_section_id}');
+                const edgeAutoBtn = document.getElementById('{edge_auto_btn_id}');
+                const edgeShortestBtn = document.getElementById('{edge_shortest_btn_id}');
+                const edgeTypeBtn = document.getElementById('{edge_type_btn_id}');
+                const edgeDashBtn = document.getElementById('{edge_dash_btn_id}');
+                const edgeFlipBtn = document.getElementById('{edge_flip_btn_id}');
+                const dragModeBtn = document.getElementById('{drag_mode_btn_id}');
+                const selectModeBtn = document.getElementById('{select_mode_btn_id}');
+                const protboxSnapBtn = document.getElementById('{protbox_snap_btn_id}');
+                const protboxAlignBtn = document.getElementById('{protbox_align_btn_id}');
+                const arrowSnapBtn = document.getElementById('{arrow_snap_btn_id}');
+                const proteinMatches = new Map();
+                const proteinSearchDelayMs = 1500;
+                let proteinSearchTimer = null;
+                const clearProteinSearchTimer = () => {{
+                    if (proteinSearchTimer) {{
+                        window.clearTimeout(proteinSearchTimer);
+                        proteinSearchTimer = null;
+                    }}
+                }};
+                const closeProteinResults = () => {{
+                    clearProteinSearchTimer();
+                    proteinMatches.clear();
+                    if (proteinPopover) {{
+                        proteinPopover.innerHTML = '';
+                        proteinPopover.style.display = 'none';
+                    }}
+                    proteinItem?.classList.remove('is-open');
+                }};
+                const positionProteinResults = () => {{
+                    if (!panel || !proteinSearch || !proteinPopover) return;
+                    const panelRect = panel.getBoundingClientRect();
+                    const searchRect = proteinSearch.getBoundingClientRect();
+                    const left = Math.max(0, searchRect.left - panelRect.left);
+                    const top = Math.max(0, searchRect.bottom - panelRect.top + 8);
+                    proteinPopover.style.left = `${{left}}px`;
+                    proteinPopover.style.top = `${{top}}px`;
+                    proteinPopover.style.minWidth = `${{Math.max(240, Math.round(searchRect.width))}}px`;
+                }};
+                const syncHistoryButtons = (state = {{}}) => {{
+                    const canUndo = !!state.canUndo;
+                    const canRedo = !!state.canRedo;
+                    if (undoBtn) undoBtn.disabled = !canUndo;
+                    if (redoBtn) redoBtn.disabled = !canRedo;
+                }};
+                const syncSelectionButtons = (state = {{}}) => {{
+                    const canDelete = !!state.canDelete;
+                    const canAutoConnect = !!state.canAutoConnect;
+                    const canModifyInteractor = !!state.canModifyInteractor;
+                    if (deleteBtn) {{
+                        deleteBtn.disabled = !canDelete;
+                        deleteBtn.title = canDelete
+                            ? 'Delete selected object.'
+                            : 'Select an object to delete.';
+                    }}
+                    interactionSection?.classList.toggle('is-disabled', !canAutoConnect && !canModifyInteractor);
+                    if (edgeAutoBtn) edgeAutoBtn.disabled = !canAutoConnect;
+                    if (edgeShortestBtn) edgeShortestBtn.disabled = !canAutoConnect;
+                    if (edgeTypeBtn) edgeTypeBtn.disabled = !canModifyInteractor;
+                    if (edgeDashBtn) edgeDashBtn.disabled = !canModifyInteractor;
+                    if (edgeFlipBtn) edgeFlipBtn.disabled = !canModifyInteractor;
+                }};
+                const syncMouseModeButtons = (mode = 'drag') => {{
+                    dragModeBtn?.classList.toggle('is-active', mode === 'drag');
+                    selectModeBtn?.classList.toggle('is-active', mode === 'selection');
+                }};
+                const syncSnapButtons = (state = {{}}) => {{
+                    const protboxSnap = state.protboxSnap !== false;
+                    const protboxAlign = state.protboxAlign !== false;
+                    const arrowSnap = state.arrowSnap !== false;
+                    protboxSnapBtn?.classList.toggle('is-active', protboxSnap);
+                    protboxAlignBtn?.classList.toggle('is-active', protboxAlign);
+                    arrowSnapBtn?.classList.toggle('is-active', arrowSnap);
+                    if (protboxSnapBtn) {{
+                        protboxSnapBtn.title = protboxSnap
+                            ? 'Protbox snapping is on. Nearby protboxes snap together; hold Shift while dragging to temporarily disable it.'
+                            : 'Protbox snapping is off. Nearby protboxes will not snap together; hold Shift while dragging to temporarily enable it.';
+                    }}
+                    if (protboxAlignBtn) {{
+                        protboxAlignBtn.title = protboxAlign
+                            ? 'Protbox alignment is on. Protboxes align to matching horizontal or vertical positions; hold Shift while dragging to temporarily disable it.'
+                            : 'Protbox alignment is off. Protboxes will not align to shared horizontal or vertical positions; hold Shift while dragging to temporarily enable it.';
+                    }}
+                    if (arrowSnapBtn) {{
+                        arrowSnapBtn.title = arrowSnap
+                            ? 'Arrow snapping is on. Interactor ends snap to protbox sides and snap guides are shown.'
+                            : 'Arrow snapping is off. Interactor ends do not snap to protbox sides and snap guides are hidden.';
+                    }}
+                }};
+                const positionLegendPopover = () => {{
+                    if (!panel || !legendAdd || !legendItem || !legendPopover) return;
+                    const panelRect = panel.getBoundingClientRect();
+                    const btnRect = legendAdd.getBoundingClientRect();
+                    const left = Math.max(0, btnRect.left - panelRect.left);
+                    const top = Math.max(0, btnRect.bottom - panelRect.top + 8);
+                    legendPopover.style.left = `${{left}}px`;
+                    legendPopover.style.top = `${{top}}px`;
+                }};
+                const closeLegendPopover = () => {{
+                    if (legendPopover) {{
+                        legendPopover.style.display = 'none';
+                    }}
+                    legendItem?.classList.remove('is-open');
+                }};
+                const proteinColorToCss = (value) => {{
+                    if (Array.isArray(value) && value.length >= 3) {{
+                        const parts = value.slice(0, 3).map((part) => {{
+                            const num = Number(part);
+                            if (!Number.isFinite(num)) return 0;
+                            return Math.max(0, Math.min(255, Math.round(num)));
+                        }});
+                        return `rgb(${{parts[0]}}, ${{parts[1]}}, ${{parts[2]}})`;
+                    }}
+                    if (typeof value === 'string' && value.trim()) {{
+                        return value.trim();
+                    }}
+                    return '#d1d5db';
+                }};
+                const renderProteinResults = () => {{
+                    if (!proteinSearch || !proteinPopover) return;
+                    proteinMatches.clear();
+                    proteinPopover.innerHTML = '';
+                    proteinItem?.classList.remove('is-open');
+                    const api = getApi();
+                    if (!api || typeof api.searchProteins !== 'function') {{
+                        return;
+                    }}
+                    const query = proteinSearch.value.trim();
+                    if (!query) {{
+                        return;
+                    }}
+                    const payload = api.searchProteins(query, 40) || {{}};
+                    if (payload.error) {{
+                        return;
+                    }}
+                    const results = Array.isArray(payload.results) ? payload.results : [];
+                    if (!results.length) {{
+                        return;
+                    }}
+                    const stack = document.createElement('div');
+                    stack.className = 'viewer-create-option-stack';
+                    results.forEach((entry) => {{
+                        const label = `${{entry.uniprot}} - ${{entry.geneSymbol}}`;
+                        proteinMatches.set(label, entry.uniprot);
+                        const option = document.createElement('button');
+                        option.className = 'viewer-create-option viewer-create-protein-option';
+                        option.type = 'button';
+                        const text = document.createElement('span');
+                        text.className = 'viewer-create-protein-label';
+                        text.textContent = label;
+                        const swatch = document.createElement('span');
+                        swatch.className = 'viewer-create-protein-swatch';
+                        swatch.style.background = proteinColorToCss(entry.color);
+                        option.appendChild(text);
+                        option.appendChild(swatch);
+                        option.addEventListener('click', () => {{
+                            const api = getApi();
+                            if (api && typeof api.addProtbox === 'function') {{
+                                api.addProtbox(entry.uniprot);
+                            }}
+                            if (proteinSearch) {{
+                                proteinSearch.value = '';
+                            }}
+                            closeProteinResults();
+                        }});
+                        stack.appendChild(option);
+                    }});
+                    proteinPopover.appendChild(stack);
+                    positionProteinResults();
+                    proteinPopover.style.display = 'block';
+                    proteinItem?.classList.add('is-open');
+                }};
+                const scheduleProteinResults = () => {{
+                    if (!proteinSearch) return;
+                    const query = proteinSearch.value.trim();
+                    if (!query) {{
+                        closeProteinResults();
+                        return;
+                    }}
+                    clearProteinSearchTimer();
+                    proteinSearchTimer = window.setTimeout(() => {{
+                        proteinSearchTimer = null;
+                        renderProteinResults();
+                    }}, proteinSearchDelayMs);
+                }};
+                proteinSearch?.addEventListener('input', scheduleProteinResults);
+                proteinSearch?.addEventListener('keydown', (evt) => {{
+                    if (evt.key === 'Escape') {{
+                        evt.preventDefault();
+                        closeProteinResults();
+                        return;
+                    }}
+                    if (evt.key === 'Enter') {{
+                        evt.preventDefault();
+                        const raw = proteinSearch?.value?.trim() || '';
+                        const value = proteinMatches.get(raw) || '';
+                        const api = getApi();
+                        if (api && typeof api.addProtbox === 'function' && value) {{
+                            api.addProtbox(value);
+                            proteinSearch.value = '';
+                            closeProteinResults();
+                        }} else if (raw) {{
+                            renderProteinResults();
+                        }}
+                    }}
+                }});
+                proteinSearch?.addEventListener('focus', () => {{
+                    if ((proteinSearch?.value || '').trim()) {{
+                        scheduleProteinResults();
+                    }}
+                }});
+                createScroll?.addEventListener('scroll', () => {{
+                    if (proteinItem?.classList.contains('is-open')) {{
+                        positionProteinResults();
+                    }}
+                    if (legendItem?.classList.contains('is-open')) {{
+                        positionLegendPopover();
+                    }}
+                }});
+                window.addEventListener('resize', () => {{
+                    if (proteinItem?.classList.contains('is-open')) {{
+                        positionProteinResults();
+                    }}
+                    if (legendItem?.classList.contains('is-open')) {{
+                        positionLegendPopover();
+                    }}
+                }});
+                arrowSelect?.addEventListener('change', () => {{
+                    const value = arrowSelect?.value || '';
+                    if (!value) return;
+                    const api = getApi();
+                    if (api && typeof api.addArrow === 'function') {{
+                        api.addArrow(value);
+                    }}
+                    arrowSelect.value = '';
+                }});
+                shapeSelect?.addEventListener('change', () => {{
+                    const value = shapeSelect?.value || '';
+                    if (!value) return;
+                    const api = getApi();
+                    if (api && typeof api.addShape === 'function') {{
+                        api.addShape(value);
+                    }}
+                    shapeSelect.value = '';
+                }});
+                undoBtn?.addEventListener('click', () => {{
+                    const api = getApi();
+                    if (api && typeof api.undo === 'function') {{
+                        syncHistoryButtons(api.undo() || {{}});
+                    }}
+                }});
+                redoBtn?.addEventListener('click', () => {{
+                    const api = getApi();
+                    if (api && typeof api.redo === 'function') {{
+                        syncHistoryButtons(api.redo() || {{}});
+                    }}
+                }});
+                edgeAutoBtn?.addEventListener('click', () => {{
+                    if (edgeAutoBtn?.disabled) return;
+                    const api = getApi();
+                    if (api && typeof api.autoConnectEdges === 'function') {{
+                        api.autoConnectEdges();
+                    }}
+                }});
+                edgeShortestBtn?.addEventListener('click', () => {{
+                    if (edgeShortestBtn?.disabled) return;
+                    const api = getApi();
+                    if (api && typeof api.autoConnectShortestEdges === 'function') {{
+                        api.autoConnectShortestEdges();
+                    }}
+                }});
+                edgeTypeBtn?.addEventListener('click', () => {{
+                    if (edgeTypeBtn?.disabled) return;
+                    const api = getApi();
+                    if (api && typeof api.cycleSelectedEdgeType === 'function') {{
+                        api.cycleSelectedEdgeType();
+                    }}
+                }});
+                edgeDashBtn?.addEventListener('click', () => {{
+                    if (edgeDashBtn?.disabled) return;
+                    const api = getApi();
+                    if (api && typeof api.toggleSelectedEdgeDash === 'function') {{
+                        api.toggleSelectedEdgeDash();
+                    }}
+                }});
+                edgeFlipBtn?.addEventListener('click', () => {{
+                    if (edgeFlipBtn?.disabled) return;
+                    const api = getApi();
+                    if (api && typeof api.flipSelectedEdgeDirection === 'function') {{
+                        api.flipSelectedEdgeDirection();
+                    }}
+                }});
+                deleteBtn?.addEventListener('click', () => {{
+                    if (deleteBtn?.disabled) return;
+                    const api = getApi();
+                    if (api && typeof api.deleteSelected === 'function') {{
+                        syncSelectionButtons(api.deleteSelected() || {{}});
+                    }}
+                }});
+                dragModeBtn?.addEventListener('click', () => {{
+                    const api = getApi();
+                    if (api && typeof api.setMouseMode === 'function') {{
+                        syncMouseModeButtons(api.setMouseMode('drag') || 'drag');
+                    }} else {{
+                        syncMouseModeButtons('drag');
+                    }}
+                }});
+                selectModeBtn?.addEventListener('click', () => {{
+                    const api = getApi();
+                    if (api && typeof api.setMouseMode === 'function') {{
+                        syncMouseModeButtons(api.setMouseMode('selection') || 'selection');
+                    }} else {{
+                        syncMouseModeButtons('selection');
+                    }}
+                }});
+                protboxSnapBtn?.addEventListener('click', () => {{
+                    const api = getApi();
+                    if (api && typeof api.setProtboxSnapEnabled === 'function' && typeof api.getProtboxSnapEnabled === 'function') {{
+                        syncSnapButtons(api.setProtboxSnapEnabled(!api.getProtboxSnapEnabled()) || {{}});
+                    }}
+                }});
+                protboxAlignBtn?.addEventListener('click', () => {{
+                    const api = getApi();
+                    if (api && typeof api.setProtboxAlignEnabled === 'function' && typeof api.getProtboxAlignEnabled === 'function') {{
+                        syncSnapButtons(api.setProtboxAlignEnabled(!api.getProtboxAlignEnabled()) || {{}});
+                    }}
+                }});
+                arrowSnapBtn?.addEventListener('click', () => {{
+                    const api = getApi();
+                    if (api && typeof api.setArrowSnapEnabled === 'function' && typeof api.getArrowSnapEnabled === 'function') {{
+                        syncSnapButtons(api.setArrowSnapEnabled(!api.getArrowSnapEnabled()) || {{}});
+                    }}
+                }});
+                textAdd?.addEventListener('click', () => {{
+                    const api = getApi();
+                    if (api && typeof api.addText === 'function') {{
+                        api.addText();
+                    }}
+                }});
+                legendAdd?.addEventListener('click', () => {{
+                    const opening = !legendItem?.classList.contains('is-open');
+                    if (!opening) {{
+                        closeLegendPopover();
+                        return;
+                    }}
+                    positionLegendPopover();
+                    if (legendPopover) {{
+                        legendPopover.style.display = 'block';
+                    }}
+                    legendItem?.classList.add('is-open');
+                }});
+                proteinItem?.addEventListener('click', (evt) => evt.stopPropagation());
+                legendItem?.addEventListener('click', (evt) => evt.stopPropagation());
+                panel.querySelectorAll('[data-legend-type]').forEach((el) => {{
+                    el.addEventListener('click', () => {{
+                        const api = getApi();
+                        if (api && typeof api.addLegend === 'function') {{
+                            api.addLegend(el.getAttribute('data-legend-type') || 'vertical');
+                        }}
+                        closeLegendPopover();
+                    }});
+                }});
+                document.addEventListener('click', () => {{
+                    closeProteinResults();
+                    closeLegendPopover();
+                }});
+                document.addEventListener('mk-viewer-history-state', (evt) => {{
+                    if (evt?.detail?.key === viewerKey) {{
+                        syncHistoryButtons(evt.detail || {{}});
+                    }}
+                }});
+                document.addEventListener('mk-viewer-selection-state', (evt) => {{
+                    if (evt?.detail?.key === viewerKey) {{
+                        syncSelectionButtons(evt.detail || {{}});
+                    }}
+                }});
+                document.addEventListener('mk-viewer-mouse-mode', (evt) => {{
+                    if (evt?.detail?.key === viewerKey) {{
+                        syncMouseModeButtons(evt.detail.mode || 'drag');
+                    }}
+                }});
+                document.addEventListener('mk-viewer-snap-state', (evt) => {{
+                    if (evt?.detail?.key === viewerKey) {{
+                        syncSnapButtons(evt.detail || {{}});
+                    }}
+                }});
+                const api = getApi();
+                if (api && typeof api.getHistoryState === 'function') {{
+                    syncHistoryButtons(api.getHistoryState() || {{}});
+                }} else {{
+                    syncHistoryButtons({{}});
+                }}
+                if (api && typeof api.getSelectionState === 'function') {{
+                    syncSelectionButtons(api.getSelectionState() || {{}});
+                }} else {{
+                    syncSelectionButtons({{}});
+                }}
+                if (api && typeof api.getMouseMode === 'function') {{
+                    syncMouseModeButtons(api.getMouseMode() || 'drag');
+                }} else {{
+                    syncMouseModeButtons('drag');
+                }}
+                if (api && typeof api.getSnapState === 'function') {{
+                    syncSnapButtons(api.getSnapState() || {{}});
+                }} else {{
+                    syncSnapButtons({{}});
+                }}
+                panel.dataset.bound = '1';
+            }})();
+            """
+        )
     download_controls = ui.div(
         {"class": "svg-download-row"},
         ui.span({"class": "svg-download-label"}, "Download:"),
@@ -2081,15 +3238,395 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
         ui.div(
             {
                 "class": "pathway-viewer-card",
+                "id": _prefixed_id(prefix, "viewer_card"),
                 "data-prefix": prefix,
                 "data-download-name": download_name,
             },
-            ui.output_ui(_prefixed_id(prefix, "pathway_preview")),
+            *( [create_panel] if create_panel is not None else [] ),
+            ui.div(
+                {"class": "pathway-viewer-body"},
+                *( [fullscreen_btn] if fullscreen_btn is not None else [] ),
+                *( [viewer_controls] if viewer_controls is not None else [] ),
+                ui.output_ui(_prefixed_id(prefix, "pathway_preview")),
+            ),
             download_controls,
+            *( [fullscreen_script] if fullscreen_script is not None else [] ),
+            *( [toolbar_script] if toolbar_script is not None else [] ),
         ),
         ui.hr(),
         ui.output_text(_prefixed_id(prefix, "status_message")),
         ui.output_text(_prefixed_id(prefix, "json_summary")),
+    )
+
+
+def _apply_simple_kegg_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
+    payload = dict(payload)
+    payload["_active_mode"] = "analysis"
+    payload.pop("_full_width_canvas", None)
+    payload["arrows"] = []
+    for group in payload.get("groups", []) or []:
+        if isinstance(group, dict):
+            group["show_box"] = False
+    general_settings = payload.setdefault("general_data", {}).setdefault("settings", {})
+    general_settings["mode"] = "analysis"
+    general_settings["show_background_image"] = True
+    general_settings["show_text_boxes"] = False
+    return payload
+
+
+def _home_fake_button(label: Any, icon_name: Optional[str] = None, title: str = "") -> Any:
+    contents: List[Any] = []
+    if icon_name:
+        contents.append(_icon_markup(icon_name, "home-inline-icon"))
+    if label not in (None, ""):
+        contents.append(ui.tags.span(label))
+    attrs = {
+        "class": "home-static-button",
+        "type": "button",
+        "disabled": "disabled",
+        "aria-disabled": "true",
+    }
+    if title:
+        attrs["title"] = title
+    return ui.tags.button(*contents, attrs)
+
+
+def _home_shortcut_row(keys: str, action: str, description: str, button: Optional[Any] = None) -> Any:
+    button_cell = button if button is not None else ui.div({"class": "home-shortcut-empty"}, "Keyboard only")
+    return ui.div(
+        {"class": "home-shortcut-row"},
+        ui.div({"class": "home-shortcut-keys"}, keys),
+        ui.div({"class": "home-shortcut-button-cell"}, button_cell),
+        ui.div(
+            {"class": "home-shortcut-copy"},
+            ui.div({"class": "home-shortcut-action"}, action),
+            ui.div({"class": "home-shortcut-description"}, description),
+        ),
+    )
+
+
+def _home_bookmark_card(
+    title: str,
+    subtitle: str,
+    details: Sequence[str],
+    image_label: Optional[str] = None,
+    image_file: Optional[str] = None,
+) -> Any:
+    image_block: Any = ""
+    image_src = _asset_data_uri(image_file) if image_file else ""
+    if image_src:
+        image_block = ui.div(
+            {"class": "home-shot-image-wrap"},
+            ui.tags.img(
+                {
+                    "src": image_src,
+                    "alt": f"{title} screenshot",
+                    "class": "home-shot-image",
+                }
+            ),
+        )
+    elif image_label:
+        image_block = ui.div(
+            {"class": "home-shot-placeholder"},
+            ui.div({"class": "home-shot-placeholder-title"}, "Screenshot Placeholder"),
+            ui.div({"class": "home-shot-placeholder-text"}, image_label),
+        )
+    return ui.div(
+        {"class": "home-detail-card"},
+        ui.div({"class": "home-detail-card-title"}, title),
+        ui.div({"class": "home-detail-card-subtitle"}, subtitle),
+        ui.tags.ul(
+            {"class": "home-detail-list"},
+            *[ui.tags.li(item) for item in details],
+        ),
+        image_block,
+    )
+
+
+def _home_tab() -> ui.nav_panel:
+    hero_gif_src = _asset_data_uri("gif_arrows_add.gif")
+    mapkinase_logo_src = _asset_data_uri("MapKinase_logo.png")
+    logos_dir = Path(ICONS_DIR) / "Logos"
+    combined_logos_src = _asset_data_uri_from_path(logos_dir / "Logos.png")
+    return ui.nav_panel(
+        "Home",
+        ui.div(
+            {"class": "home-page-shell"},
+            ui.div(
+                {"class": "home-hero-card"},
+                ui.div(
+                    {"class": "home-hero-main"},
+                    ui.div(
+                        {"class": "home-hero-brand-row"},
+                        ui.tags.img(
+                            {
+                                "src": mapkinase_logo_src,
+                                "alt": "MapKinase logo",
+                                "class": "home-brand-logo",
+                            }
+                        ) if mapkinase_logo_src else "",
+                    ),
+                    ui.div({"class": "home-hero-title"}, "Pathway scoring, editing, and figure design in one workspace."),
+                    ui.div(
+                        {"class": "home-hero-text"},
+                        "MapKinase is an interactive pathway analysis and figure-building environment for protein and PTM datasets. "
+                        "It lets you score pathways from uploaded comparisons, open KEGG and WikiPathways maps, add or edit objects directly in the viewer, "
+                        "and turn pathway views into publication-ready figures without leaving the program.",
+                    ),
+                    ui.div(
+                        {"class": "home-hero-text"},
+                        "The main workflow is: upload protein and PTM data, choose a pathway source or start from a blank figure, inspect pathway scores, "
+                        "and then refine the view with protboxes, PTMs, edges, legends, groups, and text. The viewer supports both mouse-driven editing and keyboard shortcuts for fast work.",
+                    ),
+                    ui.div(
+                        {"class": "home-credit-strip"},
+                        ui.div(
+                            {"class": "home-credit-copy"},
+                            ui.div({"class": "home-credit-label"}, "Credit"),
+                            ui.div(
+                                {"class": "home-credit-text"},
+                                "PTM annotations and kinase-substrate information in MapKinase draw on PhosphoSitePlus resources.",
+                            ),
+                        ),
+                        ui.div(
+                            {"class": "home-credit-logo-row"},
+                            ui.tags.img(
+                                {
+                                    "src": combined_logos_src,
+                                    "alt": "Project and data source logos",
+                                    "class": "home-credit-logo home-credit-logo-combined",
+                                }
+                            ) if combined_logos_src else "",
+                        ),
+                    ),
+                ),
+                ui.div(
+                    {"class": "home-hero-side"},
+                    ui.div(
+                        {"class": "home-hero-media-shell"},
+                        ui.div({"class": "home-hero-media-label"}, "Viewer Demo"),
+                        ui.div(
+                            {"class": "home-hero-media-frame"},
+                            ui.tags.img(
+                                {
+                                    "src": hero_gif_src,
+                                    "alt": "MapKinase pathway editing demo",
+                                    "class": "home-hero-media",
+                                }
+                            ) if hero_gif_src else ui.div({"class": "home-shot-placeholder"}, "Add gif_arrows_add.gif here"),
+                        ),
+                    ),
+                    ui.div({"class": "home-side-card-title"}, "Quick Start"),
+                    ui.tags.ol(
+                        {"class": "home-quickstart-list"},
+                        ui.tags.li("Upload a protein dataset and, if available, a PTM dataset in the Input tab."),
+                        ui.tags.li("Use Web Pathways to load scored KEGG or WikiPathways maps, or Figure Creation to start from a blank canvas."),
+                        ui.tags.li("Edit the pathway with Add Objects, Edit Controls, Snapping, and Hide Objects."),
+                        ui.tags.li("Export figures or custom pathway layouts once the view looks the way you want."),
+                    ),
+                ),
+            ),
+            ui.div(
+                {"class": "home-section-grid"},
+                _home_bookmark_card(
+                    "Web Pathways",
+                    "Search, score, and load KEGG or WikiPathways pathway maps.",
+                    [
+                        "The pathway catalogue is ranked by pathway score so the strongest matches rise to the top.",
+                        "The Web Pathways viewer includes Full Screen, Hide Objects, Add Objects, Edit Controls, Snapping, and interaction editing tools.",
+                        "The Simple: KEGG option applies the simpler KEGG rendering style directly inside the Web Pathways workflow.",
+                    ],
+                    image_file="web_pathway (1).png",
+                ),
+                _home_bookmark_card(
+                    "Figure Creation",
+                    "Start from a blank viewer and build a custom figure manually.",
+                    [
+                        "Use this tab when you want to place protboxes, text, shapes, legends, and interactions without starting from an existing pathway.",
+                        "The same viewer controls used in Web Pathways are available here, so editing behavior stays consistent.",
+                        "Custom layouts can be exported once the figure is complete.",
+                    ],
+                    image_file="fig_create_pic.png",
+                ),
+                _home_bookmark_card(
+                    "Kinase Substrates",
+                    "Inspect kinase-substrate relationships from the uploaded PTM dataset.",
+                    [
+                        "The in vivo and in vitro checkboxes determine which evidence types are considered in both the table and the viewer.",
+                        "This tab focuses on upstream kinase relationships rather than pathway maps.",
+                        "The viewer shares the same editing and visibility controls as the other figure-style tabs.",
+                    ],
+                    image_file="Substrates_pic.png",
+                ),
+                _home_bookmark_card(
+                    "Input Format",
+                    "Protein and PTM uploads follow a header-based format.",
+                    [
+                        "Protein file core columns: UniProt, GeneSymbol, and one or more comparison columns beginning with C:.",
+                        "PTM file core columns: UniProt, PTM Site, and comparison columns that match the protein comparison headers exactly.",
+                        "Optional text columns begin with T:, and optional outline columns begin with O: and should match the related comparison names.",
+                        "Accepted upload types: .txt, .tsv, and .csv.",
+                    ],
+                ),
+            ),
+            ui.div(
+                {"class": "home-shortcuts-card"},
+                ui.div({"class": "home-section-title"}, "Viewer Shortcuts"),
+                ui.div(
+                    {"class": "home-section-subtitle"},
+                    "Keyboard shortcuts below use the same actions as the viewer controls. The button column shows the matching tool when a visible button exists.",
+                ),
+                ui.div(
+                    {"class": "home-shortcut-list"},
+                    _home_shortcut_row(
+                        "Ctrl + A",
+                        "Auto-connect selected protboxes",
+                        "Creates standard interactor connections between the selected protboxes using the default auto-connect behavior.",
+                    ),
+                    _home_shortcut_row(
+                        "Ctrl + Shift + A",
+                        "Shortest auto-connect",
+                        "Adds interactions between selected protboxes using the shortest available path.",
+                        _home_fake_button("", "divide-three-solid", "Shortest auto-connect"),
+                    ),
+                    _home_shortcut_row(
+                        "Ctrl + S",
+                        "Cycle interactor type",
+                        "Cycles the selected interactor, or the interactor between two selected protboxes, through the available interaction types.",
+                        _home_fake_button("", "arrow_head_switch", "Cycle interactor type"),
+                    ),
+                    _home_shortcut_row(
+                        "Ctrl + D",
+                        "Toggle dashed style",
+                        "Switches the selected interactor between solid and dashed styling.",
+                        _home_fake_button("", "data-transfer-up", "Toggle interactor dash"),
+                    ),
+                    _home_shortcut_row(
+                        "Ctrl + F",
+                        "Flip interactor direction",
+                        "Reverses the direction of the selected interactor.",
+                        _home_fake_button("", "ruler-arrows", "Flip interactor direction"),
+                    ),
+                    _home_shortcut_row(
+                        "Ctrl + Z",
+                        "Undo",
+                        "Undoes the most recent viewer action.",
+                        _home_fake_button("", "undo", "Undo"),
+                    ),
+                    _home_shortcut_row(
+                        "Ctrl + Y",
+                        "Redo",
+                        "Redoes the most recently undone viewer action.",
+                        _home_fake_button("", "redo", "Redo"),
+                    ),
+                    _home_shortcut_row(
+                        "Delete / Backspace",
+                        "Delete selected object",
+                        "Deletes the currently selected viewer object when that object can be removed.",
+                        _home_fake_button("", "xmark (1)", "Delete selected object"),
+                    ),
+                    _home_shortcut_row(
+                        "Escape",
+                        "Clear selection",
+                        "Exits group editing if active and clears the current selection.",
+                    ),
+                ),
+            ),
+        ),
+        value="home",
+    )
+
+
+def _ptm_shape_picker() -> Any:
+    trigger_id = "input_ptm_shape_trigger"
+    menu_id = "input_ptm_shape_menu"
+    hidden_id = "input_ptm_shape"
+    option_specs = [
+        ("circle", "ptm_circle", "Circle"),
+        ("square", "ptm_square", "Square"),
+        ("diamond", "ptm_diamond", "Diamond"),
+    ]
+    return ui.div(
+        {"class": "ptm-shape-picker", "id": "input_ptm_shape_picker"},
+        ui.div(
+            {"style": "display:none;"},
+            ui.input_text(hidden_id, None, value="circle", width="1px"),
+        ),
+        ui.tags.button(
+            {
+                "id": trigger_id,
+                "type": "button",
+                "class": "ptm-shape-picker-trigger",
+                "title": "PTM shape",
+                "aria-label": "PTM shape",
+            },
+            *[
+                ui.tags.span(
+                    {
+                        "class": f"ptm-shape-trigger-icon{' is-active' if value == 'circle' else ''}",
+                        "data-value": value,
+                        "aria-hidden": "true",
+                    },
+                    _icon_markup(icon_name, "ptm-shape-picker-icon"),
+                )
+                for value, icon_name, _label in option_specs
+            ],
+        ),
+        ui.div(
+            {"id": menu_id, "class": "ptm-shape-picker-menu"},
+            *[
+                ui.tags.button(
+                    {
+                        "type": "button",
+                        "class": "ptm-shape-picker-option",
+                        "data-value": value,
+                        "title": label,
+                        "aria-label": label,
+                    },
+                    _icon_markup(icon_name, "ptm-shape-picker-icon"),
+                )
+                for value, icon_name, label in option_specs
+            ],
+        ),
+        ui.tags.script(
+            f"""
+            (function(){{
+                const picker = document.getElementById('input_ptm_shape_picker');
+                const trigger = document.getElementById('{trigger_id}');
+                const menu = document.getElementById('{menu_id}');
+                const hidden = document.getElementById('{hidden_id}');
+                if (!picker || !trigger || !menu || !hidden) return;
+                const setValue = (value) => {{
+                    hidden.value = value;
+                    picker.querySelectorAll('.ptm-shape-trigger-icon').forEach((el) => {{
+                        el.classList.toggle('is-active', el.dataset.value === value);
+                    }});
+                    if (window.Shiny && typeof window.Shiny.setInputValue === 'function') {{
+                        window.Shiny.setInputValue('{hidden_id}', value, {{ priority: 'event' }});
+                    }}
+                }};
+                trigger.addEventListener('click', (evt) => {{
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    picker.classList.toggle('is-open');
+                }});
+                menu.querySelectorAll('.ptm-shape-picker-option').forEach((btn) => {{
+                    btn.addEventListener('click', (evt) => {{
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        setValue(btn.dataset.value || 'circle');
+                        picker.classList.remove('is-open');
+                    }});
+                }});
+                document.addEventListener('click', (evt) => {{
+                    if (!picker.contains(evt.target)) {{
+                        picker.classList.remove('is-open');
+                    }}
+                }}, true);
+                setValue(hidden.value || 'circle');
+            }})();
+            """
+        ),
     )
 
 
@@ -2105,7 +3642,7 @@ def _bookmark_tab(cfg: Dict[str, Any]) -> ui.nav_panel:
             ),
             value=cfg["key"],
         )
-    settings_col = 6 if cfg.get("key") == "ks" else 4
+    settings_col = 4
     preview_col = 12 - settings_col
     settings_children: Any = _settings_panel(cfg)
     if cfg.get("key") == "web":
@@ -2140,13 +3677,98 @@ app_ui = ui.page_fluid(
         .input-bg { background: #0b4f9c; min-height: 100vh; padding: 32px 24px; }
         .input-wrapper { min-height: 100vh; display: flex; align-items: flex-start; justify-content: flex-start; padding-top: 16px; }
         .data-input-card { max-width: 520px; width: 100%; box-shadow: 0 18px 40px rgba(0,0,0,0.25); border-radius: 16px; }
+        .home-page-shell { min-height: 100vh; padding: 28px 18px 40px; background:
+            radial-gradient(circle at top left, rgba(14,116,144,0.18), transparent 30%),
+            radial-gradient(circle at top right, rgba(30,64,175,0.16), transparent 28%),
+            linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%); }
+        .home-hero-card, .home-shortcuts-card, .home-detail-card { background: rgba(255,255,255,0.94); border: 1px solid rgba(148,163,184,0.22);
+            box-shadow: 0 24px 54px rgba(15,23,42,0.08); }
+        .home-hero-card { border-radius: 26px; padding: 28px; display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.9fr); gap: 22px; margin-bottom: 22px; }
+        .home-hero-main { display: flex; flex-direction: column; min-height: 100%; }
+        .home-hero-brand-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+        .home-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+            color: #0f766e; background: rgba(204,251,241,0.9); border-radius: 999px; padding: 8px 12px; margin-bottom: 14px; }
+        .home-brand-logo { display: block; max-width: 190px; width: 34%; min-width: 120px; height: auto; object-fit: contain; }
+        .home-hero-title { font-size: clamp(28px, 3.1vw, 44px); line-height: 1.02; font-weight: 900; color: #0f172a; max-width: 860px; margin-bottom: 18px; }
+        .home-hero-text { color: #334155; font-size: 15px; line-height: 1.72; max-width: 900px; margin-bottom: 12px; }
+        .home-credit-strip { margin-top: auto; border-radius: 18px; border: 1px solid rgba(148,163,184,0.26); background: #ffffff;
+            padding: 12px 16px; display: flex; align-items: stretch; justify-content: space-between; gap: 18px; min-height: 150px; }
+        .home-credit-label { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #0f766e; }
+        .home-credit-copy { min-width: 0; max-width: 360px; align-self: flex-start; }
+        .home-credit-text { color: #475569; font-size: 13px; line-height: 1.55; margin-top: 4px; }
+        .home-credit-logo-row { display: flex; align-items: stretch; justify-content: flex-end; gap: 16px; flex-shrink: 0; }
+        .home-credit-logo { display: block; height: auto; object-fit: contain; }
+        .home-credit-logo-combined { max-width: 460px; width: 100%; min-width: 220px; height: calc(100% - 8px); margin: 4px 0; object-fit: contain; }
+        .home-hero-side { border-radius: 22px; padding: 22px; background: linear-gradient(180deg, #eff6ff 0%, #e0f2fe 100%); border: 1px solid rgba(96,165,250,0.25); }
+        .home-hero-media-shell { margin-bottom: 18px; }
+        .home-hero-media-label { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #0369a1; margin-bottom: 8px; }
+        .home-hero-media-frame { border-radius: 18px; overflow: hidden; border: 1px solid rgba(148,163,184,0.35); background:
+            linear-gradient(135deg, rgba(15,23,42,0.10), rgba(255,255,255,0.72)); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55); }
+        .home-hero-media { display: block; width: 100%; height: auto; object-fit: cover; background: #ffffff; }
+        .home-side-card-title, .home-section-title { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+        .home-quickstart-list { margin: 0; padding-left: 18px; color: #334155; line-height: 1.6; font-size: 13px; }
+        .home-section-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 22px; }
+        .home-detail-card { border-radius: 22px; padding: 20px; }
+        .home-detail-card-title { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+        .home-detail-card-subtitle { color: #0f4c81; font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+        .home-detail-list { margin: 0; padding-left: 18px; color: #334155; line-height: 1.65; }
+        .home-detail-list li + li { margin-top: 6px; }
+        .home-shot-image-wrap { margin-top: 16px; border-radius: 18px; overflow: hidden; border: 1px solid rgba(148,163,184,0.32);
+            background: linear-gradient(180deg, #ffffff, #f8fafc); box-shadow: inset 0 1px 0 rgba(255,255,255,0.65); }
+        .home-shot-image { display: block; width: 100%; height: auto; object-fit: cover; }
+        .home-shot-placeholder { margin-top: 16px; border-radius: 18px; border: 1px dashed #94a3b8; min-height: 160px; background:
+            linear-gradient(135deg, rgba(226,232,240,0.55), rgba(248,250,252,0.95)); display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 18px; color: #475569; }
+        .home-shot-placeholder-title { font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+        .home-shot-placeholder-text { max-width: 220px; line-height: 1.55; }
+        .home-shortcuts-card { border-radius: 26px; padding: 24px; }
+        .home-section-subtitle { color: #475569; line-height: 1.65; margin-bottom: 16px; }
+        .home-shortcut-list { display: flex; flex-direction: column; gap: 10px; }
+        .home-shortcut-row { display: grid; grid-template-columns: 180px 92px minmax(0, 1fr); align-items: center; gap: 12px; border-radius: 18px;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #dbe5f0; padding: 12px 14px; }
+        .home-shortcut-keys { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; font-weight: 800; color: #0f172a;
+            background: #ffffff; border: 1px solid #dbe5f0; border-radius: 12px; padding: 10px 12px; text-align: center; }
+        .home-shortcut-button-cell { display: flex; justify-content: center; }
+        .home-shortcut-copy { min-width: 0; }
+        .home-shortcut-action { font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+        .home-shortcut-description { color: #475569; line-height: 1.55; }
+        .home-static-button { min-width: 44px; height: 38px; border: 1px solid #cbd5e1; border-radius: 12px; background: linear-gradient(180deg, #ffffff, #eef2f7);
+            color: #0f172a; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; font-size: 12px; font-weight: 800; opacity: 1; }
+        .home-shortcut-empty { color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        .home-inline-icon { width: 18px; height: 18px; display: inline-block; color: currentColor; }
+        .ptm-shape-picker { position: relative; width: 42px; min-width: 42px; }
+        .ptm-shape-picker-trigger { width: 42px; height: 38px; border: 1px solid #cbd5e1; border-radius: 12px;
+            background: linear-gradient(180deg, #ffffff, #eef2f7); color: #0f172a; display: inline-flex; align-items: center; justify-content: center;
+            padding: 0; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8); }
+        .ptm-shape-picker-trigger:hover, .ptm-shape-picker.is-open .ptm-shape-picker-trigger { border-color: #94a3b8; background: linear-gradient(180deg, #f8fafc, #e2e8f0); }
+        .ptm-shape-trigger-icon { display: none; align-items: center; justify-content: center; }
+        .ptm-shape-trigger-icon.is-active { display: inline-flex; }
+        .ptm-shape-picker-menu { position: absolute; top: calc(100% + 6px); right: 0; display: none; flex-direction: column; gap: 6px;
+            padding: 8px; border-radius: 14px; border: 1px solid #d7dee8; background: rgba(255,255,255,0.98);
+            box-shadow: 0 18px 44px rgba(15,23,42,0.18); z-index: 20; }
+        .ptm-shape-picker.is-open .ptm-shape-picker-menu { display: flex; }
+        .ptm-shape-picker-option { width: 42px; height: 38px; border: 1px solid #d7dee8; border-radius: 12px;
+            background: #f8fafc; color: #0f172a; display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; }
+        .ptm-shape-picker-option:hover { background: #e2e8f0; border-color: #94a3b8; }
+        .ptm-shape-picker-icon { width: 18px; height: 18px; display: inline-block; color: currentColor; }
+        @media (max-width: 900px) {
+            .home-hero-card { grid-template-columns: 1fr; }
+            .home-hero-brand-row { flex-direction: column; align-items: flex-start; }
+            .home-brand-logo { width: auto; max-width: 180px; }
+            .home-shortcut-row { grid-template-columns: 1fr; align-items: flex-start; }
+            .home-shortcut-button-cell { justify-content: flex-start; }
+            .home-credit-strip { min-height: 0; flex-direction: column; align-items: flex-start; }
+            .home-credit-logo-row { flex-wrap: wrap; justify-content: flex-start; }
+            .home-credit-logo-combined { width: auto; max-width: 320px; }
+        }
+        #bookmark_selector a.nav-link[data-value="simple"] { display: none; }
         """
     ),
     NAV_LOCK_SCRIPT,
     EXPORT_DOWNLOAD_SCRIPT,
     SVG_DOWNLOAD_SCRIPT,
-    ui.h2("MapKinase Demo"),
     ui.navset_tab(
+        _home_tab(),
         input_tab,
         *[_bookmark_tab(cfg) for cfg in BOOKMARK_CONFIGS],
         ui.nav_panel(
@@ -2282,7 +3904,7 @@ app_ui = ui.page_fluid(
             value="settings",
         ),
         id="bookmark_selector",
-        selected="input",
+        selected="home",
     ),
 )
 
@@ -2309,6 +3931,9 @@ def server(input, output, session):  # type: ignore[override]
     extra_datasets = reactive.Value([])  # type: ignore[var-annotated]
     protein_dataset = reactive.Value(None)
     ptm_dataset = reactive.Value(None)
+    protein_preview_dataset = reactive.Value(None)
+    ptm_preview_dataset = reactive.Value(None)
+    global_catalog_info = reactive.Value(dict(GLOBAL_CATALOG_INFO))
     protein_dataset_path = reactive.Value(None)
     ptm_dataset_path = reactive.Value(None)
     psp_cache: Dict[str, Any] = {}
@@ -2324,6 +3949,10 @@ def server(input, output, session):  # type: ignore[override]
             "fc_columns": [],
             "selected_fc": "",
             "results_by_fc": {},
+            "download_rows_by_fc": {},
+            "significance_mode": "both",
+            "positive_cutoff": 1.5,
+            "negative_cutoff": -1.5,
             "updated_at": 0.0,
         }
     )
@@ -2338,9 +3967,16 @@ def server(input, output, session):  # type: ignore[override]
                 "fc_columns": [],
                 "selected_fc": "",
                 "results_by_fc": {},
+                "download_rows_by_fc": {},
+                "significance_mode": "both",
+                "positive_cutoff": 1.5,
+                "negative_cutoff": -1.5,
                 "updated_at": time.time(),
             }
         )
+
+    def _mark_pathway_scores_pending(status: str = "Run Fisher's Exact Test to score pathways.") -> None:
+        _clear_pathway_scores(status)
 
     def _dataset_to_df(dataset: Optional[Dict[str, Any]]) -> pd.DataFrame:
         if not dataset:
@@ -2361,6 +3997,176 @@ def server(input, output, session):  # type: ignore[override]
                 vals = vals[:width]
             normalized_rows.append(vals)
         return pd.DataFrame(normalized_rows, columns=headers, dtype=str)
+
+    def _fisher_right_tail(total_n: int, pathway_n: int, sig_n: int, sig_in_pathway: int) -> float:
+        if total_n <= 0 or pathway_n < 0 or sig_n < 0 or sig_in_pathway < 0:
+            return 1.0
+        if pathway_n > total_n or sig_n > total_n:
+            return 1.0
+        max_hits = min(pathway_n, sig_n)
+        if sig_in_pathway > max_hits:
+            return 1.0
+        min_hits = max(0, pathway_n - (total_n - sig_n))
+        if sig_in_pathway < min_hits:
+            return 1.0
+
+        def _log_choose(n: int, k: int) -> float:
+            if k < 0 or k > n:
+                return float("-inf")
+            return math.lgamma(n + 1) - math.lgamma(k + 1) - math.lgamma(n - k + 1)
+
+        denom = _log_choose(total_n, pathway_n)
+        if not math.isfinite(denom):
+            return 1.0
+        p_val = 0.0
+        for hit_count in range(sig_in_pathway, max_hits + 1):
+            log_prob = _log_choose(sig_n, hit_count) + _log_choose(total_n - sig_n, pathway_n - hit_count) - denom
+            if math.isfinite(log_prob):
+                p_val += math.exp(log_prob)
+        return min(max(p_val, 0.0), 1.0)
+
+    def _benjamini_hochberg(values: List[Optional[float]]) -> List[Optional[float]]:
+        indexed = [(idx, float(val)) for idx, val in enumerate(values) if val is not None and math.isfinite(float(val))]
+        if not indexed:
+            return [None] * len(values)
+        indexed.sort(key=lambda item: item[1])
+        adjusted: List[Optional[float]] = [None] * len(values)
+        total = len(indexed)
+        running = 1.0
+        for rev_rank, (original_idx, p_val) in enumerate(reversed(indexed), start=1):
+            rank = total - rev_rank + 1
+            bh_val = min(running, (p_val * total) / rank)
+            running = bh_val
+            adjusted[original_idx] = min(max(bh_val, 0.0), 1.0)
+        return adjusted
+
+    def _coerce_numeric_series(series: pd.Series) -> pd.Series:
+        return pd.to_numeric(series.astype(str).str.strip(), errors="coerce")
+
+    def _fisher_significance_mask(
+        series: pd.Series,
+        positive_cutoff: float,
+        negative_cutoff: float,
+        mode: str = "both",
+    ) -> pd.Series:
+        active_mode = str(mode or "both").strip().lower()
+        if active_mode == "positive":
+            return series >= positive_cutoff
+        if active_mode == "negative":
+            return series <= negative_cutoff
+        return (series >= positive_cutoff) | (series <= negative_cutoff)
+
+    def _pathway_uniprots(pathway: Dict[str, Any], index_nodes: Dict[str, Dict[str, Any]], gene_to_uniprot: Dict[str, List[str]]) -> set[str]:
+        pathway_uniprots: set[str] = set()
+        for node_id in list(pathway.get("nodes", [])):
+            node_obj = index_nodes.get(str(node_id), {})
+            for uni in candidate_uniprots_for_node(node_obj, gene_to_uniprot):
+                normalized = normalize_uniprot(uni)
+                if normalized:
+                    pathway_uniprots.add(normalized)
+        return pathway_uniprots
+
+    def _compute_fisher_pathway_rows(
+        prot_df: pd.DataFrame,
+        site_df: Optional[pd.DataFrame],
+        fc_col: str,
+        positive_cutoff: float,
+        negative_cutoff: float,
+        significance_mode: str,
+        index_sources: List[Tuple[str, Dict[str, Any], str]],
+        gene_map: Dict[str, List[str]],
+        site_fc_col: Optional[str] = None,
+    ) -> Tuple[Dict[str, Dict[str, Dict[str, Any]]], List[Dict[str, Any]]]:
+        protein_rows = prot_df.copy()
+        protein_id_col = protein_rows.columns[0]
+        protein_rows["_uniprot"] = protein_rows[protein_id_col].map(normalize_uniprot)
+        protein_rows = protein_rows[protein_rows["_uniprot"] != ""].copy()
+        protein_rows["_fc"] = _coerce_numeric_series(protein_rows[fc_col])
+        protein_rows["_significant"] = _fisher_significance_mask(
+            protein_rows["_fc"],
+            positive_cutoff,
+            negative_cutoff,
+            significance_mode,
+        )
+        protein_rows = protein_rows.drop_duplicates(subset=["_uniprot"], keep="first")
+
+        total_proteins = int(len(protein_rows))
+        significant_proteins = int(protein_rows["_significant"].sum()) if total_proteins else 0
+        protein_uniprots = set(protein_rows["_uniprot"].tolist())
+        significant_protein_uniprots = set(protein_rows.loc[protein_rows["_significant"], "_uniprot"].tolist())
+
+        site_rows = pd.DataFrame()
+        total_sites = 0
+        significant_sites = 0
+        if site_df is not None and not site_df.empty:
+            site_rows = site_df.copy()
+            site_uniprot_col = site_rows.columns[0]
+            site_rows["_parent_uniprot"] = site_rows[site_uniprot_col].map(normalize_uniprot)
+            site_rows = site_rows[site_rows["_parent_uniprot"] != ""].copy()
+            active_site_fc_col = site_fc_col if site_fc_col and site_fc_col in site_rows.columns else None
+            if active_site_fc_col:
+                site_rows["_fc"] = _coerce_numeric_series(site_rows[active_site_fc_col])
+                site_rows["_significant"] = _fisher_significance_mask(
+                    site_rows["_fc"],
+                    positive_cutoff,
+                    negative_cutoff,
+                    significance_mode,
+                )
+            else:
+                site_rows["_significant"] = False
+            total_sites = int(len(site_rows))
+            significant_sites = int(site_rows["_significant"].sum()) if total_sites else 0
+
+        combined_rows: List[Dict[str, Any]] = []
+        nested_rows: Dict[str, Dict[str, Dict[str, Any]]] = {}
+        for source_key, source_index, _source_file in index_sources:
+            source_rows: Dict[str, Dict[str, Any]] = {}
+            for pathway in list(source_index.get("pathways", [])):
+                pathway_id = str(pathway.get("pathway_id", "")).strip().lower()
+                if not pathway_id:
+                    continue
+                pathway_name = str(pathway.get("name") or pathway_id).strip()
+                pathway_uniprots = _pathway_uniprots(pathway, source_index.get("nodes", {}), gene_map)
+                proteins_in_dataset = protein_uniprots & pathway_uniprots
+                sig_proteins_in_path = significant_protein_uniprots & pathway_uniprots
+                pathway_protein_total = len(proteins_in_dataset)
+                sig_protein_in_pathway = len(sig_proteins_in_path)
+                protein_p = _fisher_right_tail(total_proteins, pathway_protein_total, significant_proteins, sig_protein_in_pathway) if total_proteins else None
+
+                pathway_site_total = 0
+                sig_site_in_pathway = 0
+                site_p: Optional[float] = None
+                if total_sites and not site_rows.empty:
+                    in_path_mask = site_rows["_parent_uniprot"].isin(pathway_uniprots)
+                    pathway_site_total = int(in_path_mask.sum())
+                    if pathway_site_total:
+                        sig_site_in_pathway = int((site_rows["_significant"] & in_path_mask).sum())
+                    site_p = _fisher_right_tail(total_sites, pathway_site_total, significant_sites, sig_site_in_pathway)
+
+                row = {
+                    "pathway_source": source_key,
+                    "pathway_id": pathway_id,
+                    "name": pathway_name,
+                    "prot_dataset_total": total_proteins,
+                    "prot_pathway_total": pathway_protein_total,
+                    "prot_significant_total": significant_proteins,
+                    "prot_significant_in_pathway": sig_protein_in_pathway,
+                    "prot_fisher_p": protein_p,
+                    "phos_dataset_total": total_sites,
+                    "phos_pathway_total": pathway_site_total,
+                    "phos_significant_total": significant_sites,
+                    "phos_significant_in_pathway": sig_site_in_pathway,
+                    "phos_fisher_p": site_p,
+                    "positive_cutoff": positive_cutoff,
+                    "negative_cutoff": negative_cutoff,
+                    "significance_mode": significance_mode,
+                    "comparison_column": fc_col,
+                }
+                combined_rows.append(row)
+                source_rows[pathway_id] = row
+            nested_rows[source_key] = source_rows
+
+        return nested_rows, combined_rows
 
     def _resolve_kegg_index_file_for_species(species_code: str) -> str:
         code = (species_code or "").strip().lower()
@@ -2431,8 +4237,13 @@ def server(input, output, session):  # type: ignore[override]
             protein_data = protein_dataset.get()
             ptm_ok = bool(ptm_validation.get().get("valid"))
             ptm_data = ptm_dataset.get() if ptm_ok else None
-            species_choice, species_info = _resolve_species(_get_input_value(input, "input_species"))
+            _species_choice, species_info = _resolve_species(_get_input_value(input, "input_species"))
             current_mode = _current_mode()
+            significance_mode = str(_get_input_value(input, "web_fisher_sig_mode") or "both").strip().lower()
+            if significance_mode not in {"both", "positive", "negative"}:
+                significance_mode = "both"
+            positive_cutoff = abs(_to_float(_get_input_value(input, "web_fisher_sig_pos"), 1.5))
+            negative_cutoff = -abs(_to_float(_get_input_value(input, "web_fisher_sig_neg"), -1.5))
 
         if not protein_ok or not protein_data:
             _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
@@ -2462,7 +4273,6 @@ def server(input, output, session):  # type: ignore[override]
             ordered_fc_cols = list(fc_columns)
 
         try:
-            weights = parse_weights(None)
             gene_map_file = _resolve_gene_to_uniprot_file_for_species(species_code)
             gene_map = build_gene_to_uniprot_map(Path(gene_map_file)) if gene_map_file else {}
             index_sources: List[Tuple[str, Dict[str, Any], str]] = []
@@ -2472,55 +4282,24 @@ def server(input, output, session):  # type: ignore[override]
                 index_sources.append(("wikipathways", load_kegg_index(Path(wikipathways_index_file)), wikipathways_index_file))
 
             results_by_fc: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = {}
+            download_rows_by_fc: Dict[str, List[Dict[str, Any]]] = {}
             site_headers = list(site_df.columns) if site_df is not None and not site_df.empty else []
-            site_uniprot_col = site_headers[0] if len(site_headers) >= 1 else None
-            site_key_cols = f"{site_headers[0]},{site_headers[1]}" if len(site_headers) >= 2 else None
 
             for fc_col in ordered_fc_cols:
                 site_fc_col = fc_col if site_df is not None and fc_col in site_headers else None
-                args_ns = Namespace(
-                    protein_id_col=str(prot_df.columns[0]) if len(prot_df.columns) > 0 else "Uniprot_ID",
-                    p_col_prot=None,
-                    fc_col_prot=fc_col,
-                    p_col_phospho=None,
-                    fc_col_phospho=None,
-                    p_col_site=None,
-                    fc_col_site=site_fc_col,
-                    site_uniprot_col=site_uniprot_col,
-                    site_key_col="site_key",
-                    site_key_cols=site_key_cols,
-                    reg_annot_col="PSP: regulatory_site",
-                    locprob_col=None,
-                    locprob_min=0.75,
-                )
-                protein_scores = compute_single_protein_scores(
-                    protein_df=prot_df,
+                source_maps, flat_rows = _compute_fisher_pathway_rows(
+                    prot_df=prot_df,
                     site_df=site_df,
-                    args=args_ns,
-                    weights=weights,
+                    fc_col=fc_col,
+                    positive_cutoff=positive_cutoff,
+                    negative_cutoff=negative_cutoff,
+                    significance_mode=significance_mode,
+                    index_sources=index_sources,
+                    gene_map=gene_map,
+                    site_fc_col=site_fc_col,
                 )
-                protein_lookup = build_protein_lookup(protein_scores)
-                source_maps: Dict[str, Dict[str, Dict[str, Any]]] = {}
-                for source_key, source_index, _source_file in index_sources:
-                    node_state = resolve_node_scores(
-                        index_nodes=source_index.get("nodes", {}),
-                        protein_lookup=protein_lookup,
-                        gene_to_uniprot=gene_map,
-                    )
-                    ranked = rank_all_pathways(
-                        kegg_index=source_index,
-                        node_state=node_state,
-                        weights=weights,
-                        max_pathways=None,
-                        pathway_source=source_key,
-                    )
-                    per_pathway: Dict[str, Dict[str, Any]] = {}
-                    for row in ranked:
-                        pid = str(row.get("pathway_id", "")).strip().lower()
-                        if pid:
-                            per_pathway[pid] = row
-                    source_maps[source_key] = per_pathway
                 results_by_fc[fc_col] = source_maps
+                download_rows_by_fc[fc_col] = flat_rows
 
             index_files_obj: Dict[str, str] = {}
             if kegg_index_file:
@@ -2533,7 +4312,8 @@ def server(input, output, session):  # type: ignore[override]
                 {
                     "status": (
                         f"Pathway scoring complete ({len(ordered_fc_cols)} main columns, "
-                        f"sources={source_label}, mode={current_mode})."
+                        f"sources={source_label}, mode={current_mode}, "
+                        f"fisher={significance_mode}, cutoffs={positive_cutoff:g}/{negative_cutoff:g})."
                     ),
                     "species_code": species_code,
                     "index_file": kegg_index_file or wikipathways_index_file or "",
@@ -2541,6 +4321,10 @@ def server(input, output, session):  # type: ignore[override]
                     "fc_columns": ordered_fc_cols,
                     "selected_fc": ordered_fc_cols[0] if ordered_fc_cols else "",
                     "results_by_fc": results_by_fc,
+                    "download_rows_by_fc": download_rows_by_fc,
+                    "significance_mode": significance_mode,
+                    "positive_cutoff": positive_cutoff,
+                    "negative_cutoff": negative_cutoff,
                     "updated_at": time.time(),
                 }
             )
@@ -2613,6 +4397,188 @@ def server(input, output, session):  # type: ignore[override]
         except Exception as exc:
             return {"error": f"Debug load failed: {exc}"}
 
+    def _get_input_preview_content(
+        dataset: Optional[Dict[str, Any]],
+        fallback_headers: List[str],
+    ) -> Tuple[List[str], List[str]]:
+        preview_char_limit = 20
+        headers: List[str] = []
+        row_values: List[str] = []
+        if dataset and not dataset.get("error"):
+            raw_headers = dataset.get("headers") or []
+            raw_rows = dataset.get("rows") or []
+            first_data_row = raw_rows[0] if raw_rows else []
+            width = max(len(raw_headers), len(first_data_row))
+            for idx in range(width):
+                header = str(raw_headers[idx]).strip() if idx < len(raw_headers) else ""
+                value = str(first_data_row[idx]).strip() if idx < len(first_data_row) else ""
+                if header or value:
+                    headers.append(header or f"Column {idx + 1}")
+                    row_values.append(value[:preview_char_limit])
+        if not headers:
+            headers = list(fallback_headers)
+            row_values = [""] * len(headers)
+        return headers, row_values
+
+    def _get_input_preview_widths(*table_contents: Tuple[List[str], List[str]]) -> List[str]:
+        max_columns = max((len(headers) for headers, _ in table_contents), default=0)
+        widths: List[str] = []
+        for idx in range(max_columns):
+            placeholder_only = True
+            max_chars = 10
+            for headers, row_values in table_contents:
+                if idx < len(headers):
+                    header_text = str(headers[idx]).strip()
+                    max_chars = max(max_chars, len(header_text))
+                    if header_text != "...":
+                        placeholder_only = False
+                if idx < len(row_values):
+                    cell_text = str(row_values[idx]).strip()
+                    max_chars = max(max_chars, len(cell_text))
+                    if cell_text:
+                        placeholder_only = False
+            if placeholder_only:
+                widths.append("5ch")
+            else:
+                widths.append(f"{min(max(max_chars + 2, 10), 24)}ch")
+        return widths
+
+    def _extract_problem_column_indexes(headers: List[str], errors: List[str]) -> List[int]:
+        if not headers or not errors:
+            return []
+        problem_indexes: set[int] = set()
+        header_map = {str(h).strip(): idx for idx, h in enumerate(headers)}
+        for err in errors:
+            text = str(err or "").strip()
+            if not text:
+                continue
+            col_match = re.search(r"\bcolumn\s+(\d+)\b", text, flags=re.IGNORECASE)
+            if col_match:
+                idx = int(col_match.group(1)) - 1
+                if 0 <= idx < len(headers):
+                    problem_indexes.add(idx)
+            invalid_header_match = re.search(r"Invalid header in column\s+(\d+)", text, flags=re.IGNORECASE)
+            if invalid_header_match:
+                idx = int(invalid_header_match.group(1)) - 1
+                if 0 <= idx < len(headers):
+                    problem_indexes.add(idx)
+            outline_match = re.search(r"Outline header '([^']+)'", text)
+            if outline_match:
+                header_name = outline_match.group(1).strip()
+                idx = header_map.get(header_name)
+                if idx is not None:
+                    problem_indexes.add(idx)
+            missing_match = re.search(r"Missing Comparison columns present in protein file:\s*(.+)\.", text)
+            if missing_match:
+                for part in missing_match.group(1).split(","):
+                    idx = header_map.get(part.strip())
+                    if idx is not None:
+                        problem_indexes.add(idx)
+        return sorted(problem_indexes)
+
+    def _build_input_preview_table(
+        headers: List[str],
+        row_values: List[str],
+        column_widths: List[str],
+        error_columns: Optional[List[int]] = None,
+        fixed_width: Optional[str] = None,
+    ) -> Any:
+        error_set = set(error_columns or [])
+        wrap_style = ""
+        table_style = ""
+        if fixed_width:
+            wrap_style = f"width:{fixed_width};"
+            table_style = "width:100%;"
+        colgroup = ui.tags.colgroup(
+            *[
+                ui.tags.col(style=f"width:{column_widths[idx]}; min-width:{column_widths[idx]};")
+                for idx in range(len(headers))
+            ]
+        )
+        return ui.div(
+            {"class": "input-preview-wrap", "style": wrap_style} if wrap_style else {"class": "input-preview-wrap"},
+            ui.tags.table(
+                {"class": "table table-sm input-preview-table", "style": table_style} if table_style else {"class": "table table-sm input-preview-table"},
+                colgroup,
+                ui.tags.thead(
+                    ui.tags.tr(
+                        *[
+                            ui.tags.th({"class": "input-preview-header-error"} if idx in error_set else {}, h)
+                            for idx, h in enumerate(headers)
+                        ]
+                    )
+                ),
+                ui.tags.tbody(ui.tags.tr(*[ui.tags.td(v) for v in row_values])),
+            ),
+        )
+
+    def _build_input_preview_guide() -> Any:
+        return ui.div(
+            {"class": "input-preview-guide-card"},
+            ui.div(
+                {"class": "input-preview-guide-layout"},
+                ui.div(
+                    {"class": "input-preview-guide-body"},
+                    ui.div(
+                        {"class": "input-preview-guide-pill"},
+                        ui.div({"class": "input-preview-guide-pill-title"}, "Uniprot"),
+                        ui.div(
+                            {"class": "input-preview-guide-pill-text"},
+                            "Use the UniProt ID for each protein or PTM row.",
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "input-preview-guide-pill"},
+                        ui.div({"class": "input-preview-guide-pill-title"}, "Gene Symbol"),
+                        ui.div(
+                            {"class": "input-preview-guide-pill-text"},
+                            "Use the matching gene symbol for each protein entry.",
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "input-preview-guide-pill"},
+                        ui.div({"class": "input-preview-guide-pill-title"}, "PTM Site"),
+                        ui.div(
+                            {"class": "input-preview-guide-pill-text"},
+                            "Use the modified residue position for each PTM entry.",
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "input-preview-guide-pill"},
+                        ui.div({"class": "input-preview-guide-pill-title"}, "Comparisons"),
+                        ui.div(
+                            {"class": "input-preview-guide-pill-text"},
+                            "Use log2 fold-change values comparing two conditions. Each comparison header must start with 'C:'.",
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "input-preview-guide-pill"},
+                        ui.div({"class": "input-preview-guide-pill-title"}, "Text"),
+                        ui.div(
+                            {"class": "input-preview-guide-pill-text"},
+                            "Optional tooltip or descriptive columns. These headers should start with 'T:'.",
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "input-preview-guide-pill"},
+                        ui.div({"class": "input-preview-guide-pill-title"}, "Outline"),
+                        ui.div(
+                            {"class": "input-preview-guide-pill-text"},
+                            "Optional outline columns. These headers should start with 'O:' and correspond to a comparison header.",
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "input-preview-guide-pill"},
+                        ui.div({"class": "input-preview-guide-pill-title"}, "PTM Comparisons"),
+                        ui.div(
+                            {"class": "input-preview-guide-pill-text"},
+                            "PTM comparison headers must exactly match the comparison headers used in the protein dataset.",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
     def _write_debug_dump(filename: str, payload: Dict[str, Any]) -> None:
         if not debug_var:
             return
@@ -2622,6 +4588,84 @@ def server(input, output, session):  # type: ignore[override]
                 json.dump(payload, fh, indent=2)
         except Exception as exc:
             print(f"Failed to write debug dump {filename}: {exc}")
+
+    def _sync_catalog_into_open_payloads(catalog_info: Dict[str, Any]) -> None:
+        for state in bookmark_state.values():
+            current = state["json"].get()
+            if not current:
+                continue
+            updated = dict(current)
+            updated["_global_protein_catalog"] = dict(catalog_info)
+            updated["_persist_token"] = time.time()
+            state["json"].set(updated)
+
+    def _refresh_global_catalog_from_current(reset: bool = False) -> None:
+        if reset:
+            info = dict(GLOBAL_CATALOG_INFO)
+            global_catalog_info.set(info)
+            _sync_catalog_into_open_payloads(info)
+            return
+        data_override = collect_data_override()
+        if not data_override:
+            info = dict(GLOBAL_CATALOG_INFO)
+            global_catalog_info.set(info)
+            _sync_catalog_into_open_payloads(info)
+            return
+        species_choice, species_info = _resolve_species(_get_input_value(input, "input_species"))
+        protein_cfg = data_override.get("protein", {}) if isinstance(data_override, dict) else {}
+        settings_override = {
+            "species": species_choice,
+            "species_code": species_info.get("code", ""),
+            "prot_uniprot_column": protein_cfg.get("uniprot_column", "Uniprot_ID"),
+            "gene_name_column": protein_cfg.get("gene_column", "Gene Symbol"),
+            "main_columns": protein_cfg.get("main_columns", []),
+            "outline_columns": protein_cfg.get("outline_columns", []),
+            "protein_tooltip_columns": protein_cfg.get("tooltip_columns", []),
+            "hsa_id_column": protein_cfg.get("kegg_column", protein_cfg.get("uniprot_column", "Uniprot_ID")),
+        }
+        try:
+            info = ensure_global_protein_catalog(
+                force=True,
+                data_override=data_override,
+                settings_override=settings_override,
+            )
+        except Exception as exc:
+            print(f"Warning: failed to refresh global protein catalog: {exc}")
+            return
+        path = info.get("path")
+        if path and os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as fh:
+                    payload = json.load(fh)
+                protein_catalog = payload.get("protein_catalog")
+                if isinstance(protein_catalog, dict):
+                    info = dict(info)
+                    info["protein_catalog"] = protein_catalog
+            except Exception as exc:
+                print(f"Warning: failed to hydrate refreshed global protein catalog: {exc}")
+        global_catalog_info.set(dict(info))
+        _sync_catalog_into_open_payloads(dict(info))
+
+    def _current_global_catalog_info() -> Dict[str, Any]:
+        try:
+            with reactive.isolate():
+                info = global_catalog_info.get()
+        except RuntimeError:
+            info = None
+        info_dict = dict(info or GLOBAL_CATALOG_INFO)
+        if info_dict.get("protein_catalog"):
+            return info_dict
+        path = info_dict.get("path")
+        if path and os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as fh:
+                    payload = json.load(fh)
+                protein_catalog = payload.get("protein_catalog")
+                if isinstance(protein_catalog, dict):
+                    info_dict["protein_catalog"] = protein_catalog
+            except Exception as exc:
+                print(f"Warning: failed to load global protein catalog from {path}: {exc}")
+        return info_dict
 
     @reactive.Effect
     @reactive.event(input.export_snapshot)
@@ -2813,6 +4857,9 @@ def server(input, output, session):  # type: ignore[override]
             ptm_validation.set({"status": "Demo mode files missing.", "errors": missing, "valid": False})
             protein_dataset.set(None)
             ptm_dataset.set(None)
+            protein_preview_dataset.set(None)
+            ptm_preview_dataset.set(None)
+            _refresh_global_catalog_from_current(reset=True)
             nav_lock_status.set("Demo mode: sample files missing. Navigation locked.")
             _clear_pathway_scores("Demo datasets missing; pathway scoring unavailable.")
             return
@@ -2824,6 +4871,9 @@ def server(input, output, session):  # type: ignore[override]
                 ptm_validation.set({"status": "PTM upload disabled until demo protein is valid.", "errors": [], "valid": False})
                 protein_dataset.set(None)
                 ptm_dataset.set(None)
+                protein_preview_dataset.set(None)
+                ptm_preview_dataset.set(None)
+                _refresh_global_catalog_from_current(reset=True)
                 nav_lock_status.set("Demo mode: sample protein validation failed.")
                 _clear_pathway_scores("Demo protein validation failed; pathway scoring unavailable.")
                 return
@@ -2836,6 +4886,7 @@ def server(input, output, session):  # type: ignore[override]
             print(f"Demo mode: loading sample datasets for species '{species_choice}' code '{species_code}'")
 
             demo_prot_payload = _load_dataset(SAMPLE_PROTEIN_FILE)
+            protein_preview_dataset.set(demo_prot_payload)
             try:
                 demo_prot_payload = annotate_protein_with_kegg(demo_prot_payload, species_code, _get_kegg_map(species_code))
             except Exception as exc:
@@ -2858,11 +4909,13 @@ def server(input, output, session):  # type: ignore[override]
             if not ptm_result.valid:
                 ptm_validation.set({"status": "Demo PTM file failed validation.", "errors": ptm_result.errors, "valid": False})
                 ptm_dataset.set(None)
+                ptm_preview_dataset.set(None)
                 nav_lock_status.set("Demo mode: sample PTM validation failed.")
-                _refresh_pathway_scores()
+                _mark_pathway_scores_pending("Demo datasets changed. Run Fisher's Exact Test to score pathways.")
                 return
 
             demo_ptm_payload = _load_dataset(SAMPLE_PTM_FILE)
+            ptm_preview_dataset.set(demo_ptm_payload)
             try:
                 demo_ptm_payload = annotate_ptm_dataset(demo_ptm_payload, species_choice, _get_psp_map())
                 demo_ptm_payload = annotate_ptm_dataset_with_kinases(demo_ptm_payload, species_choice, _get_psp_ks_map())
@@ -2880,8 +4933,9 @@ def server(input, output, session):  # type: ignore[override]
                 "valid": True,
             })
             _write_debug_dump("user_ptm_dataset_debug.txt", demo_ptm_payload)
+            _refresh_global_catalog_from_current()
             _update_ks_index()
-            _refresh_pathway_scores()
+            _mark_pathway_scores_pending("Demo datasets loaded. Run Fisher's Exact Test to score pathways.")
             nav_lock_status.set("Demo mode: sample datasets loaded. Navigation unlocked.")
             print("Demo mode: sample protein/PTM loaded successfully.")
         except Exception as exc:
@@ -2892,6 +4946,9 @@ def server(input, output, session):  # type: ignore[override]
             ptm_validation.set({"status": "Demo mode failed to load sample PTM.", "errors": [str(exc)], "valid": False})
             protein_dataset.set(None)
             ptm_dataset.set(None)
+            protein_preview_dataset.set(None)
+            ptm_preview_dataset.set(None)
+            _refresh_global_catalog_from_current(reset=True)
             nav_lock_status.set("Demo mode: sample datasets failed to load.")
             _clear_pathway_scores("Demo datasets failed to load; pathway scoring unavailable.")
 
@@ -3034,6 +5091,8 @@ def server(input, output, session):  # type: ignore[override]
             protein_validation.set({"status": "Upload a protein file to begin.", "errors": [], "valid": False, "comparisons": []})
             ptm_validation.set({"status": "PTM upload disabled until a valid protein file is uploaded.", "errors": [], "valid": False})
             protein_dataset.set(None)
+            protein_preview_dataset.set(None)
+            _refresh_global_catalog_from_current(reset=True)
             _write_debug_dump("user_protein_dataset_debug.txt", {"info": "No dataset loaded"})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
@@ -3048,6 +5107,8 @@ def server(input, output, session):  # type: ignore[override]
             protein_validation.set({"status": "Could not locate the uploaded protein file.", "errors": [], "valid": False, "comparisons": []})
             ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
             protein_dataset.set(None)
+            protein_preview_dataset.set(None)
+            _refresh_global_catalog_from_current(reset=True)
             _write_debug_dump("user_protein_dataset_debug.txt", {"info": "No dataset loaded"})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
@@ -3055,10 +5116,12 @@ def server(input, output, session):  # type: ignore[override]
             return
         result = validate_protein_file(datapath)
         if not result.valid:
+            protein_preview_dataset.set(_load_dataset(datapath))
             protein_validation.set({"status": "Protein file failed validation. See errors below.", "errors": result.errors, "valid": False, "comparisons": []})
             ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
             protein_dataset.set(None)
             protein_dataset_path.set(None)
+            _refresh_global_catalog_from_current(reset=True)
             _write_debug_dump("user_protein_dataset_debug.txt", {"errors": result.errors})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
@@ -3072,6 +5135,7 @@ def server(input, output, session):  # type: ignore[override]
         )
         protein_validation.set({"status": status, "errors": [], "valid": True, "comparisons": result.comparisons})
         dataset_payload = _load_dataset(datapath)
+        protein_preview_dataset.set(dataset_payload)
         species_key, species_info = _resolve_species(_get_input_value(input, "input_species"))
         species_code = species_info.get("code", "")
         try:
@@ -3090,18 +5154,44 @@ def server(input, output, session):  # type: ignore[override]
                 protein_kegg_warning.set("")
         except Exception as exc:
             print(f"Warning: KEGG annotation failed: {exc}")
-            protein_kegg_warning.set("")
+        protein_kegg_warning.set("")
         protein_dataset.set(dataset_payload)
         protein_dataset_path.set(datapath)
         _write_debug_dump("user_protein_dataset_debug.txt", dataset_payload)
         ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
-        _refresh_pathway_scores()
+        _refresh_global_catalog_from_current()
+        _mark_pathway_scores_pending("Protein dataset loaded. Run Fisher's Exact Test to score pathways.")
 
     @output
     @render.text
     def input_protein_status():
         data = protein_validation.get()
         return data.get("status", "")
+
+    @output
+    @render.ui
+    def input_protein_preview_guide():
+        return _build_input_preview_guide()
+
+    @output
+    @render.ui
+    def input_protein_preview():
+        protein_preview_data = protein_preview_dataset.get()
+        protein_headers, protein_row = _get_input_preview_content(
+            protein_preview_data,
+            ["Uniprot", "GeneSymbol", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
+        )
+        ptm_headers, ptm_row = _get_input_preview_content(
+            ptm_preview_dataset.get(),
+            ["Uniprot", "PTM Site", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
+        )
+        return _build_input_preview_table(
+            protein_headers,
+            protein_row,
+            _get_input_preview_widths((protein_headers, protein_row), (ptm_headers, ptm_row)),
+            _extract_problem_column_indexes(protein_headers, protein_validation.get().get("errors") or []),
+            None if protein_preview_data else "815px",
+        )
 
     @output
     @render.ui
@@ -3125,6 +5215,26 @@ def server(input, output, session):  # type: ignore[override]
     def input_ptm_status():
         data = ptm_validation.get()
         return data.get("status", "")
+
+    @output
+    @render.ui
+    def input_ptm_preview():
+        ptm_preview_data = ptm_preview_dataset.get()
+        protein_headers, protein_row = _get_input_preview_content(
+            protein_preview_dataset.get(),
+            ["Uniprot", "GeneSymbol", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
+        )
+        ptm_headers, ptm_row = _get_input_preview_content(
+            ptm_preview_data,
+            ["Uniprot", "PTM Site", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
+        )
+        return _build_input_preview_table(
+            ptm_headers,
+            ptm_row,
+            _get_input_preview_widths((protein_headers, protein_row), (ptm_headers, ptm_row)),
+            _extract_problem_column_indexes(ptm_headers, ptm_validation.get().get("errors") or []),
+            None if ptm_preview_data else "815px",
+        )
 
     @output
     @render.ui
@@ -3155,10 +5265,12 @@ def server(input, output, session):  # type: ignore[override]
         if not upload:
             ptm_validation.set({"status": "No PTM file uploaded (optional).", "errors": [], "valid": False})
             ptm_dataset.set(None)
+            ptm_preview_dataset.set(None)
             ptm_dataset_path.set(None)
+            _refresh_global_catalog_from_current()
             _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "No dataset loaded"})
             _update_ks_index(reset=True)
-            _refresh_pathway_scores()
+            _mark_pathway_scores_pending("PTM dataset changed. Run Fisher's Exact Test to refresh pathway scores.")
             return
         file_info = upload[0]
         datapath = getattr(file_info, "datapath", None)
@@ -3167,10 +5279,12 @@ def server(input, output, session):  # type: ignore[override]
         if not datapath:
             ptm_validation.set({"status": "Could not locate the uploaded PTM file.", "errors": [], "valid": False})
             ptm_dataset.set(None)
+            ptm_preview_dataset.set(None)
             ptm_dataset_path.set(None)
+            _refresh_global_catalog_from_current()
             _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "No dataset loaded"})
             _update_ks_index(reset=True)
-            _refresh_pathway_scores()
+            _mark_pathway_scores_pending("PTM dataset changed. Run Fisher's Exact Test to refresh pathway scores.")
             return
         protein_comparisons = protein_validation.get().get("comparisons") or []
         result = validate_ptm_file(datapath, protein_comparisons)
@@ -3182,6 +5296,7 @@ def server(input, output, session):  # type: ignore[override]
             )
             ptm_validation.set({"status": status, "errors": [], "valid": True})
             dataset_payload = _load_dataset(datapath)
+            ptm_preview_dataset.set(dataset_payload)
             try:
                 species_choice, _ = _resolve_species(_get_input_value(input, "input_species"))
                 dataset_payload = annotate_ptm_dataset(dataset_payload, species_choice, _get_psp_map())
@@ -3190,24 +5305,25 @@ def server(input, output, session):  # type: ignore[override]
                 print(f"Warning: PSP annotation failed: {exc}")
             ptm_dataset.set(dataset_payload)
             ptm_dataset_path.set(datapath)
+            _refresh_global_catalog_from_current()
             _write_debug_dump("user_ptm_dataset_debug.txt", dataset_payload)
             _update_ks_index()
-            _refresh_pathway_scores()
+            _mark_pathway_scores_pending("PTM dataset loaded. Run Fisher's Exact Test to refresh pathway scores.")
         else:
+            ptm_preview_dataset.set(_load_dataset(datapath))
             ptm_validation.set({"status": "PTM file failed validation. See errors below.", "errors": result.errors, "valid": False})
             ptm_dataset.set(None)
             ptm_dataset_path.set(None)
+            _refresh_global_catalog_from_current()
             _write_debug_dump("user_ptm_dataset_debug.txt", {"errors": result.errors})
             _update_ks_index(reset=True)
-            _refresh_pathway_scores()
+            _mark_pathway_scores_pending("PTM dataset changed. Run Fisher's Exact Test to refresh pathway scores.")
 
     @reactive.Effect
-    @reactive.event(input.bookmark_selector, input.input_mode, input.input_protein_upload, input.input_ptm_upload)
     def _enforce_nav_lock():
         mode = _current_mode()
-        selected = _get_input_value(input, "bookmark_selector") or "input"
+        selected = _get_input_value(input, "bookmark_selector") or "home"
         protein_ok = bool(protein_validation.get().get("valid"))
-        ptm_ok = bool(ptm_validation.get().get("valid"))
         if mode == "demo":
             status_msg = "Demo mode: sample datasets loaded. Navigation unlocked." if protein_ok else "Demo mode: loading sample datasets..."
             nav_lock_status.set(status_msg)
@@ -3216,8 +5332,8 @@ def server(input, output, session):  # type: ignore[override]
             return
         ready = protein_ok
         locked = not ready
-        if locked and selected != "input":
-            session.send_input_message("bookmark_selector", {"value": "input"})
+        if locked and selected not in {"input", "home"}:
+            session.send_input_message("bookmark_selector", {"value": "home"})
         if ready:
             nav_lock_status.set("User mode: protein validated. Navigation unlocked. PTM optional.")
         else:
@@ -3235,6 +5351,9 @@ def server(input, output, session):  # type: ignore[override]
                 print(f"Warning: demo mode failed to load sample datasets: {exc}")
                 protein_dataset.set(None)
                 ptm_dataset.set(None)
+                protein_preview_dataset.set(None)
+                ptm_preview_dataset.set(None)
+                _refresh_global_catalog_from_current(reset=True)
                 protein_validation.set({"status": "Demo mode failed to load sample protein.", "errors": [str(exc)], "valid": False, "comparisons": []})
                 ptm_validation.set({"status": "Demo mode failed to load sample PTM.", "errors": [str(exc)], "valid": False})
                 nav_lock_status.set("Demo mode: sample datasets failed to load.")
@@ -3242,6 +5361,9 @@ def server(input, output, session):  # type: ignore[override]
         else:
             protein_dataset.set(None)
             ptm_dataset.set(None)
+            protein_preview_dataset.set(None)
+            ptm_preview_dataset.set(None)
+            _refresh_global_catalog_from_current(reset=True)
             protein_kegg_warning.set("")
             protein_validation.set({"status": "Upload a protein file to begin.", "errors": [], "valid": False, "comparisons": []})
             ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
@@ -3255,7 +5377,7 @@ def server(input, output, session):  # type: ignore[override]
         with reactive.isolate():
             protein_ok = bool(protein_validation.get().get("valid"))
         if protein_ok:
-            _refresh_pathway_scores()
+            _mark_pathway_scores_pending("Species changed. Run Fisher's Exact Test to refresh pathway scores.")
 
     @reactive.Effect
     @reactive.event(input.settings_gradient_preset)
@@ -3360,7 +5482,7 @@ def server(input, output, session):  # type: ignore[override]
             error_flag = True
 
         data_card = ui.card(
-            {"class": "data-input-card", "style": "max-width: 540px;"},
+            {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px; height: 174px;"},
             ui.card_header(
                 ui.div(
                     {"style": "display:flex; align-items:center; justify-content:space-between; gap:12px;"},
@@ -3391,64 +5513,42 @@ def server(input, output, session):  # type: ignore[override]
             ),
         )
 
-        add_card = ui.div(
-            {
-                "style": (
-                    f"{add_wrap_style}display:flex; align-items:center; justify-content:center; "
-                    "min-width: 140px; min-height: 120px; border:1px dashed #2563eb; "
-                    "border-radius:12px; background:rgba(37,99,235,0.08); padding:12px;"
-                )
-            },
-            ui.input_action_button("input_dataset_add", "+ Add dataset", width="100%"),
-        )
+        add_card = ui.div(style="display:none;")
 
         ptm_card = ui.card(
-            {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px;"},
+            {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px; height: 174px;"},
             ui.card_header(
-                # Always render a span for the checkmark to avoid None in the UI list; toggle visibility via style.
                 ui.div(
                     {"style": "display:flex; align-items:center; gap:8px;"},
-                    ui.tags.span("PTM Dataset", style="font-weight:700; color:#0b1f33;"),
-                    ui.tags.span(
-                        "OK",
-                        style="color:#16a34a; font-weight:700;" if ptm_valid else "color:transparent; font-weight:700;",
+                    ui.div(
+                        {"style": "display:flex; align-items:center; gap:8px;"},
+                        ui.tags.span("PTM Dataset", style="font-weight:700; color:#0b1f33;"),
+                        ui.tags.span(
+                            "OK",
+                            style="color:#16a34a; font-weight:700;" if ptm_valid else "color:transparent; font-weight:700;",
+                        ),
                     ),
                 )
             ),
             ui.card_body(
+                ui.div(
+                    {"style": ptm_wrap_style},
                     ui.div(
-                        {"style": ptm_wrap_style},
+                        {"style": "display:flex; align-items:flex-end; gap:8px;"},
                         ui.input_file(
                             "input_ptm_upload",
-                            "PTM Dataset Upload",
-                        multiple=False,
-                        accept=UPLOAD_ACCEPT_TYPES,
-                    ),
-                    ui.div(
-                        {"style": "display:flex; align-items:center; gap:8px; margin-top:4px;"},
-                        ui.input_select(
-                            "input_ptm_shape",
-                            None,
-                            choices={"circle": "Circle", "diamond": "Diamond", "triangle": "Triangle"},
-                            selected="circle",
-                            width="120px",
+                            ui.TagList("PTM Dataset Upload ", ui.tags.em("(.txt, .tsv, .csv)")),
+                            multiple=False,
+                            accept=UPLOAD_ACCEPT_TYPES,
                         ),
-                    ),
-                    ui.div(
-                        "- The first column must contain UniProt IDs. The header name does not matter, but every row must be populated.\n"
-                        "- The second column must contain PTM site positions. The header name does not matter, and all values must be positive integers.\n"
-                        "- The third column is the first (and required) comparison column. Its header must start with C: and may include any descriptive text (e.g., C: TNBC vs ER+). All values must be numeric (integer or float, positive or negative).\n"
-                        "- Additional comparison columns may appear after the third column. These headers must start with C:, and every row must contain a numeric value.\n"
-                        "- Optional outline comparison columns may be included after the required columns. These headers must start with O: and match a C: header label (e.g., O: TNBC vs ER+). Values must be numeric or NA (NA keeps the outline black).\n"
-                        "- Optional tooltip columns may be included after the required columns. These headers must start with T: (e.g., T: GOCC). Tooltip values are optional and may be blank.",
-                        style="margin-top:10px; font-size:11px; color:#444; white-space:pre-line;",
+                        _ptm_shape_picker(),
                     ),
                 )
             ),
         )
 
         protein_card = ui.card(
-            {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px;"},
+            {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px; height: 174px;"},
             ui.card_header(
                 ui.div(
                     {"style": "display:flex; align-items:center; gap:8px;"},
@@ -3466,7 +5566,7 @@ def server(input, output, session):  # type: ignore[override]
                         {"style": "display: flex; align-items: center; gap: 8px;"},
                         ui.input_file(
                             "input_protein_upload",
-                            "Protein Dataset Upload",
+                            ui.TagList("Protein Dataset Upload ", ui.tags.em("(.txt, .tsv, .csv)")),
                             multiple=False,
                             accept=UPLOAD_ACCEPT_TYPES,
                         ),
@@ -3476,15 +5576,6 @@ def server(input, output, session):  # type: ignore[override]
                         ),
                     ),
                     ui.div(
-                        "- The first column must contain UniProt IDs. The header name does not matter, but every row must have a valid UniProt ID.\n"
-                        "- The second column must contain gene symbols. The header name does not matter, and all rows must be populated.\n"
-                        "- The third column is the first (and required) comparison column. Its header must start with C: and may include any descriptive text (e.g., C: TNBC vs ER+). All values must be numeric (integer or float, positive or negative).\n"
-                        "- Any additional comparison columns may appear after the third column. These columns must also have headers starting with C: and contain only numeric values.\n"
-                        "- Optional outline comparison columns may be included after the required columns. These headers must start with O: and match a C: header label (e.g., O: TNBC vs ER+). Values must be numeric or NA (NA keeps the outline black).\n"
-                        "- Optional tooltip columns may be included after the required columns. These headers must start with T: (e.g., T: GOCC). Tooltip values are optional and may be blank.",
-                        style="margin-top:10px; font-size:11px; color:#444; white-space:pre-line;",
-                    ),
-                    ui.div(
                         "Demo mode uses bundled sample files. Switch to User mode to upload your own.",
                         style="color: #b00020; font-size: 12px;" if disabled else "display:none;",
                     ),
@@ -3492,29 +5583,44 @@ def server(input, output, session):  # type: ignore[override]
             ),
         )
 
-        error_block = ui.div(
-            ui.output_ui("input_protein_errors"),
-            ui.output_ui("input_ptm_errors"),
-            style="margin-top:10px; color:#b00020; font-size:13px;",
+        error_block = ui.card(
+            {"class": "data-input-card", "style": "max-width: 420px; min-width: 350px; width: 380px; border-color:#fecaca;"},
+            ui.card_header(
+                ui.div(
+                    {"style": "display:flex; align-items:center; gap:8px;"},
+                    ui.tags.span("Input Errors", style="font-weight:700; color:#7f1d1d;"),
+                )
+            ),
+            ui.card_body(
+                ui.div(
+                    ui.output_ui("input_protein_errors"),
+                    ui.output_ui("input_ptm_errors"),
+                    style="color:#b00020; font-size:13px;",
+                )
+            ),
         )
 
         return ui.TagList(
             ui.div(
-                {"style": "display:flex; align-items:flex-start; gap:16px; width:100%;"},
+                {"class": "input-page-stack"},
                 ui.div(
-                    error_block,
-                    style="min-width: 260px;" if error_flag else "display:none; min-width:0; width:0;",
-                ),
-                ui.div(
-                    {"style": "display:flex; flex-direction:column; gap:16px; flex:1;"},
+                    {"class": "input-page-row", "style": "display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;"},
                     data_card,
-                    ui.div(
-                        {"style": "display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;"},
-                        protein_card,
-                        ptm_card,
-                        ui.output_ui("input_extra_datasets_panel"),
-                        add_card,
-                    ),
+                    protein_card,
+                    ptm_card,
+                ),
+                ui.div({"class": "input-page-row"}, ui.output_ui("input_protein_preview_guide")),
+                ui.div({"class": "input-page-row input-preview-section"}, ui.output_ui("input_protein_preview")),
+                ui.div(
+                    {"class": "input-page-row"},
+                    error_block,
+                    style="display:block;" if error_flag else "display:none;",
+                ),
+                ui.div({"class": "input-page-row input-preview-section"}, ui.output_ui("input_ptm_preview")),
+                ui.div(
+                    {"class": "input-page-row", "style": "display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;"},
+                    ui.output_ui("input_extra_datasets_panel"),
+                    add_card,
                 ),
             )
         )
@@ -3589,14 +5695,16 @@ def server(input, output, session):  # type: ignore[override]
     def _register_bookmark(cfg: Dict[str, Any]) -> None:
         prefix = cfg["key"]
         state = bookmark_state[prefix]
-        web_sort_col = reactive.Value("pathway") if prefix == "web" else None
+        web_sort_col = reactive.Value("prot_fisher_p") if prefix == "web" else None
         web_sort_dir = reactive.Value("asc") if prefix == "web" else None
         web_selected_label = reactive.Value("")
         web_selected_id = reactive.Value("") if prefix == "web" else None
+        web_selected_source = reactive.Value("wikipathways") if prefix == "web" else None
         web_filter_options = reactive.Value(list(WEB_PATHWAY_SOURCES)) if prefix == "web" else None
         web_filter_selected = reactive.Value(list(WEB_PATHWAY_SOURCES)) if prefix == "web" else None
         web_filter_tick = reactive.Value(0) if prefix == "web" else None
         web_filter_refresh_evt = reactive.Value(0) if prefix == "web" else None
+        web_page = reactive.Value(1) if prefix == "web" else None
 
         def _get_custom_layout():
             # Access reactive value safely even outside a reactive context
@@ -3617,11 +5725,42 @@ def server(input, output, session):  # type: ignore[override]
         ks_sort_col = reactive.Value("gene")
         ks_sort_dir = reactive.Value("asc")
 
+        def _ks_selected_types() -> set:
+            raw = _get_input_value(input, _prefixed_id(prefix, "ks_evidence_types"))
+            if raw in (None, "", False):
+                return {"in_vivo"}
+            values = raw if isinstance(raw, (list, tuple, set)) else [raw]
+            selected = {str(value).strip().lower() for value in values if value not in (None, "", False)}
+            return selected.intersection({"in_vivo", "in_vitro"})
+
         def _ks_mode_value() -> str:
-            return "both"
+            selected = _ks_selected_types()
+            if selected == {"in_vivo", "in_vitro"}:
+                return "both"
+            if selected == {"in_vitro"}:
+                return "in_vitro"
+            if selected == {"in_vivo"}:
+                return "in_vivo"
+            return "none"
 
         def _ks_allowed_types(mode: str) -> set:
-            return {"in_vivo", "in_vitro"}
+            if mode == "both":
+                return {"in_vivo", "in_vitro"}
+            if mode == "in_vivo":
+                return {"in_vivo"}
+            if mode == "in_vitro":
+                return {"in_vitro"}
+            return set()
+
+        def _ks_evidence_label(types: set) -> str:
+            clean_types = set(types or set())
+            if {"in_vivo", "in_vitro"}.issubset(clean_types):
+                return "both"
+            if "in_vivo" in clean_types:
+                return "in vivo"
+            if "in_vitro" in clean_types:
+                return "in vitro"
+            return ""
 
         def _ks_context() -> Dict[str, Any]:
             data_override = collect_data_override()
@@ -3698,7 +5837,8 @@ def server(input, output, session):  # type: ignore[override]
             settings_override["main_columns"] = main_columns or settings_override.get("main_columns", [])
             settings_override["show_arrows"] = True
             color_override = _color_override_from_settings(settings_override)
-            payload = _build_blank_canvas(GLOBAL_CATALOG_INFO)
+            catalog_info = _current_global_catalog_info()
+            payload = _build_blank_canvas(catalog_info)
             _apply_color_metadata(payload, color_override)
             general_settings = payload.setdefault("general_data", {}).setdefault("settings", {})
             general_settings["show_background_image"] = False
@@ -3739,7 +5879,7 @@ def server(input, output, session):  # type: ignore[override]
             payload["_active_mode"] = settings_override.get("mode", cfg["mode"])
             payload["_full_width_canvas"] = True
             payload["_custom_layout_applied"] = False
-            payload["_global_protein_catalog"] = dict(GLOBAL_CATALOG_INFO)
+            payload["_global_protein_catalog"] = dict(catalog_info)
             return payload
 
         def _make_protein_entry(
@@ -4170,22 +6310,74 @@ def server(input, output, session):  # type: ignore[override]
 
         def build_json():
             settings_override = collect_settings(input, cfg)
-            if settings_override.get("pathway_source") == "wikipathways" and not settings_override.get("pathway_id"):
-                state["json"].set(None)
-                state["status"].set("Select a WikiPathways entry, then click Load Pathway.")
-                return
+            web_simple_kegg = (
+                cfg.get("key") == "web"
+                and str(settings_override.get("pathway_source", "")).lower() == "kegg"
+                and bool(settings_override.get("simple_kegg_mode"))
+            )
+            if web_simple_kegg:
+                settings_override["mode"] = "analysis"
+                settings_override["show_background_image"] = True
+                settings_override["show_text_boxes"] = False
             if cfg.get("key") == "web":
                 selected_id = ""
+                selected_source = ""
                 if web_selected_id is not None:
                     try:
                         selected_id = web_selected_id.get() or ""
                     except Exception:
                         selected_id = ""
+                if web_selected_source is not None:
+                    try:
+                        selected_source = str(web_selected_source.get() or "").strip().lower()
+                    except Exception:
+                        selected_source = ""
+                if selected_id:
+                    settings_override["pathway_id"] = selected_id
+                if selected_source:
+                    settings_override["pathway_source"] = selected_source
                 current_id = str(settings_override.get("pathway_id") or "").strip()
                 if not selected_id or not current_id or selected_id.strip().lower() != current_id.lower():
                     state["json"].set(None)
                     state["status"].set("Select a pathway from the table, then click Load Pathway.")
                     return
+                if str(settings_override.get("pathway_source") or "").strip().lower() == "cst":
+                    with reactive.isolate():
+                        prot_data = protein_dataset.get()
+                    cst_payload = load_cst_pathway_payload(
+                        selected_id,
+                        Path(BASE_DIR),
+                        protein_dataset=prot_data,
+                        negative_color=settings_override.get("negative_color", DEFAULT_SETTINGS["negative_color"]),
+                        positive_color=settings_override.get("positive_color", DEFAULT_SETTINGS["positive_color"]),
+                        max_negative=settings_override.get("max_negative", DEFAULT_SETTINGS["max_negative"]),
+                        max_positive=settings_override.get("max_positive", DEFAULT_SETTINGS["max_positive"]),
+                    )
+                    if not cst_payload:
+                        state["json"].set(None)
+                        state["status"].set("The selected CST pathway file could not be loaded.")
+                        return
+                    colored_count = len(cst_payload.get("overlay_nodes") or [])
+                    payload = {
+                        "_viewer_kind": "cst_pdf",
+                        "_cst_payload": cst_payload,
+                        "_bookmark_key": cfg["key"],
+                        "_persist_token": time.time(),
+                    }
+                    state["json"].set(payload)
+                    if colored_count:
+                        state["status"].set(
+                            f"Loaded CST pathway: {cst_payload.get('name', selected_id)}. Applied protein fold-change colors to {colored_count} CST nodes."
+                        )
+                    else:
+                        state["status"].set(
+                            f"Loaded CST pathway: {cst_payload.get('name', selected_id)}. No mapped protein fold-change colors were found for the current dataset."
+                        )
+                    return
+            if settings_override.get("pathway_source") == "wikipathways" and not settings_override.get("pathway_id"):
+                state["json"].set(None)
+                state["status"].set("Select a WikiPathways entry, then click Load Pathway.")
+                return
             if is_ks_bookmark:
                 ctx = _ks_context()
                 if ctx.get("protein_main_columns"):
@@ -4247,10 +6439,10 @@ def server(input, output, session):  # type: ignore[override]
                         else:
                             settings_override["hsa_id_column"] = headers[0]
                 # KEGG column already forced to KEGG_Gene_ID in collect_settings; keep consistent
-            catalog_info = dict(GLOBAL_CATALOG_INFO)
+            catalog_info = _current_global_catalog_info()
             color_override = _color_override_from_settings(settings_override)
             if cfg.get("start_blank"):
-                payload = _build_blank_canvas(GLOBAL_CATALOG_INFO)
+                payload = _build_blank_canvas(catalog_info)
                 payload = dict(payload)
                 seed_payload = None
                 # Only seed from data override for non-figure modes; figure clear should start empty
@@ -4308,7 +6500,7 @@ def server(input, output, session):  # type: ignore[override]
                 _apply_color_metadata(payload, color_override)
                 payload["_bookmark_key"] = cfg["key"]
                 payload["_persist_token"] = time.time()
-                payload["_global_protein_catalog"] = dict(GLOBAL_CATALOG_INFO)
+                payload["_global_protein_catalog"] = dict(catalog_info)
                 payload["_kegg_preview"] = {
                     "show": False,
                     "opacity": DEFAULT_BG_OPACITY,
@@ -4341,7 +6533,7 @@ def server(input, output, session):  # type: ignore[override]
                 payload = dict(payload)
                 payload["_bookmark_key"] = cfg["key"]
                 payload["_persist_token"] = time.time()
-                payload["_global_protein_catalog"] = dict(GLOBAL_CATALOG_INFO)
+                payload["_global_protein_catalog"] = dict(catalog_info)
                 _apply_color_metadata(payload, color_override)
                 try:
                     os.makedirs(JSON_PREVIEW_DIR, exist_ok=True)
@@ -4367,6 +6559,18 @@ def server(input, output, session):  # type: ignore[override]
                     for group in payload.get("groups", []) or []:
                         if isinstance(group, dict):
                             group["show_box"] = False
+                if web_simple_kegg:
+                    payload = _apply_simple_kegg_payload(payload)
+                    payload["_bookmark_key"] = cfg["key"]
+                    payload["_persist_token"] = time.time()
+                    payload["_global_protein_catalog"] = dict(catalog_info)
+                    payload["_kegg_preview"] = {
+                        "show": True,
+                        "opacity": DEFAULT_BG_OPACITY,
+                        "offset_x": DEFAULT_BG_OFFSET_X,
+                        "offset_y": DEFAULT_BG_OFFSET_Y,
+                        "scale": DEFAULT_BG_SCALE,
+                    }
                 layout_override = _get_custom_layout()
                 if layout_override:
                     _apply_custom_layout(payload, layout_override)
@@ -4384,7 +6588,9 @@ def server(input, output, session):  # type: ignore[override]
                 ctx = _ks_context()
                 ks_data = ctx.get("ks_data") or _empty_ks_index()
                 entity_mode = str(_get_input_value(input, _prefixed_id(prefix, "ks_entity_mode")) or "substrate").lower()
-                allowed = {"in_vivo", "in_vitro"}
+                allowed_types = _ks_allowed_types(_ks_mode_value())
+                if not allowed_types:
+                    return []
                 fc_choices_local = _fc_choices()
                 fc_idx = state["fc_index"].get() or 1
                 selected_fc = fc_choices_local[fc_idx - 1] if fc_idx >= 1 and fc_idx <= len(fc_choices_local) else None
@@ -4396,7 +6602,6 @@ def server(input, output, session):  # type: ignore[override]
                     except re.error:
                         search_re = None
                 max_pos, max_neg = _ks_thresholds()
-                evidence_filter = str(_get_input_value(input, _prefixed_id(prefix, "ks_filter_evidence")) or "both").lower()
                 fc_op = str(_get_input_value(input, _prefixed_id(prefix, "ks_filter_fc_op")) or "")
                 fc_val_raw = _get_input_value(input, _prefixed_id(prefix, "ks_filter_fc_val"))
                 try:
@@ -4406,15 +6611,6 @@ def server(input, output, session):  # type: ignore[override]
                 reg_only = bool(_get_input_value(input, _prefixed_id(prefix, "ks_filter_reg_only")))
                 def _is_sig(fc: Optional[float]) -> bool:
                     return fc is not None and (fc >= max_pos or fc <= max_neg)
-
-                def _evidence_matches(label: str) -> bool:
-                    if evidence_filter == "both":
-                        return True
-                    if evidence_filter == "in_vivo":
-                        return label in {"in vivo", "both"}
-                    if evidence_filter == "in_vitro":
-                        return label in {"in vitro", "both"}
-                    return True
 
                 def _fc_matches(value: Optional[float]) -> bool:
                     if fc_val is None or not fc_op:
@@ -4437,25 +6633,27 @@ def server(input, output, session):  # type: ignore[override]
                 rows: List[Dict[str, Any]] = []
                 if entity_mode == "kinase":
                     for kin_id, info in (ks_data.get("kinases") or {}).items():
-                        types = info.get("types", set())
-                        if not types:
-                            continue
                         gene = _resolve_gene_label(kin_id, info, ctx)
                         prot_row = ctx.get("prot_rows_by_uniprot", {}).get(kin_id, {})
                         prot_fc_cols = [selected_fc] if selected_fc else ctx.get("protein_main_columns", [])
                         fc_val = _first_fc_value(prot_row, prot_fc_cols)
                         sig_count = 0
                         sub_count = 0
+                        visible_types: set = set()
                         for sub_key in info.get("substrates", []):
                             sub_entry = (ks_data.get("substrates") or {}).get(sub_key, {})
-                            if sub_entry.get("types", set()) & allowed:
-                                sub_count += 1
-                                sub_fc = _first_fc_value(sub_entry.get("row", {}), ctx.get("ptm_main_columns", []))
-                                if _is_sig(sub_fc):
-                                    sig_count += 1
-                        evid_label = "both" if types >= {"in_vivo", "in_vitro"} else ("in vivo" if "in_vivo" in types else ("in vitro" if "in_vitro" in types else ""))
-                        if not _evidence_matches(evid_label):
+                            rel_types = (sub_entry.get("kinases", {}).get(kin_id, {}) or {}).get("types", set())
+                            matched_types = set(rel_types or set()).intersection(allowed_types)
+                            if not matched_types:
+                                continue
+                            visible_types.update(matched_types)
+                            sub_count += 1
+                            sub_fc = _first_fc_value(sub_entry.get("row", {}), ctx.get("ptm_main_columns", []))
+                            if _is_sig(sub_fc):
+                                sig_count += 1
+                        if not sub_count:
                             continue
+                        evid_label = _ks_evidence_label(visible_types)
                         if not _fc_matches(fc_val):
                             continue
                         has_reg = ""
@@ -4482,9 +6680,6 @@ def server(input, output, session):  # type: ignore[override]
                         )
                 else:
                     for sub_key, info in (ks_data.get("substrates") or {}).items():
-                        types = info.get("types", set())
-                        if not types:
-                            continue
                         sub_uid = info.get("uniprot", "")
                         gene = _resolve_gene_label(sub_uid, info, ctx)
                         site = info.get("site_label") or info.get("site") or ""
@@ -4494,11 +6689,18 @@ def server(input, output, session):  # type: ignore[override]
                         else:
                             ptm_fc_cols = ctx.get("ptm_main_columns", [])
                         ptm_fc_val = _first_fc_value(info.get("row", {}), ptm_fc_cols)
-                        kin_count = len(info.get("kinases") or {})
-                        reg_val = str(info.get("row", {}).get("PSP: regulatory_site", "")).strip()
-                        evid_label = "both" if types >= {"in_vivo", "in_vitro"} else ("in vivo" if "in_vivo" in types else ("in vitro" if "in_vitro" in types else ""))
-                        if not _evidence_matches(evid_label):
+                        kin_count = 0
+                        visible_types: set = set()
+                        for _, rel in (info.get("kinases") or {}).items():
+                            matched_types = set((rel or {}).get("types", set()) or set()).intersection(allowed_types)
+                            if not matched_types:
+                                continue
+                            kin_count += 1
+                            visible_types.update(matched_types)
+                        if not kin_count:
                             continue
+                        reg_val = str(info.get("row", {}).get("PSP: regulatory_site", "")).strip()
+                        evid_label = _ks_evidence_label(visible_types)
                         if not _fc_matches(ptm_fc_val):
                             continue
                         if reg_only:
@@ -4555,7 +6757,6 @@ def server(input, output, session):  # type: ignore[override]
                         header("Protein", "gene"),
                         header("Regulatory site", "reg"),
                         header("FC", "fc"),
-                        header("Evidence", "evidence"),
                         header("Significant PTMs (%)", "sig_pct"),
                         header("Substrates", "count"),
                     ]
@@ -4565,7 +6766,6 @@ def server(input, output, session):  # type: ignore[override]
                         header("Site", "site"),
                         header("FC", "fc"),
                         header("Regulatory site", "reg"),
-                        header("Evidence", "evidence"),
                         header("Kinases", "count"),
                     ]
                 body_rows = []
@@ -4588,7 +6788,6 @@ def server(input, output, session):  # type: ignore[override]
                             ui.tags.td(entry.get("gene", "")),
                             ui.tags.td(entry.get("reg", "")),
                             ui.tags.td("N/A" if entry.get("fc") is None else f"{entry['fc']:.3g}"),
-                            ui.tags.td(entry.get("evidence", "")),
                             ui.tags.td("N/A" if entry.get("sig_pct") is None else f"{entry['sig_pct']:.1f}%"),
                             ui.tags.td(str(entry.get("count", 0))),
                         ]
@@ -4598,7 +6797,6 @@ def server(input, output, session):  # type: ignore[override]
                             ui.tags.td(entry.get("site", "")),
                             ui.tags.td("" if entry.get("fc") is None else f"{entry['fc']:.3g}"),
                             ui.tags.td(entry.get("reg", "")),
-                            ui.tags.td(entry.get("evidence", "")),
                             ui.tags.td(str(entry.get("count", 0))),
                         ]
                     body_rows.append(ui.tags.tr(*cells, **row_attrs))
@@ -4628,7 +6826,6 @@ def server(input, output, session):  # type: ignore[override]
             def _reset_ks_filters():
                 session.send_input_message(_prefixed_id(prefix, "ks_filter_regex"), {"value": ""})
                 session.send_input_message(_prefixed_id(prefix, "ks_filter_reg_only"), {"value": False})
-                session.send_input_message(_prefixed_id(prefix, "ks_filter_evidence"), {"value": "both"})
                 session.send_input_message(_prefixed_id(prefix, "ks_filter_fc_op"), {"value": ""})
                 session.send_input_message(_prefixed_id(prefix, "ks_filter_fc_val"), {"value": ""})
 
@@ -4636,6 +6833,12 @@ def server(input, output, session):  # type: ignore[override]
             @reactive.event(getattr(input, _prefixed_id(prefix, "ks_choice")))
             def _build_kinase_substrate_view():
                 build_json()
+
+            @reactive.Effect
+            @reactive.event(getattr(input, _prefixed_id(prefix, "ks_evidence_types")))
+            def _sync_ks_evidence_types():
+                if _get_input_value(input, _prefixed_id(prefix, "ks_choice")):
+                    build_json()
 
             @reactive.Effect
             @reactive.event(getattr(input, "ks_spawn_ptm_kinases"))
@@ -4930,9 +7133,13 @@ def server(input, output, session):  # type: ignore[override]
                         source_val = selection.get("source")
                     name_val = selection.get("name") or ""
                 if value:
-                    session.send_input_message(_prefixed_id(prefix, "pathway_id"), {"value": value})
-                    if web_selected_id is not None and cfg.get("key") == "web":
-                        web_selected_id.set(str(value))
+                    if cfg.get("key") == "web":
+                        if web_selected_id is not None:
+                            web_selected_id.set(str(value))
+                        if web_selected_source is not None:
+                            web_selected_source.set(str(source_val or "wikipathways").strip().lower())
+                    else:
+                        session.send_input_message(_prefixed_id(prefix, "pathway_id"), {"value": value})
                 if source_val and cfg.get("key") == "web":
                     session.send_input_message(_prefixed_id(prefix, "pathway_source_choice"), {"value": source_val})
                 if cfg.get("key") == "web":
@@ -4949,14 +7156,74 @@ def server(input, output, session):  # type: ignore[override]
                 @reactive.Effect
                 @reactive.event(getattr(input, _prefixed_id(prefix, "pathway_id")))
                 def _sync_web_selection_input():
-                    current = (str(_get_input_value(input, _prefixed_id(prefix, "pathway_id"))) or "").strip()
-                    selected = web_selected_id.get() if web_selected_id is not None else ""
-                    if selected and current and selected.strip().lower() == current.lower():
-                        return
-                    if web_selected_id is not None:
-                        web_selected_id.set("")
-                    if web_selected_label is not None:
-                        web_selected_label.set("")
+                    return
+
+                @output(id=_prefixed_id(prefix, "generate_button_state"))
+                @render.ui
+                def generate_button_state():
+                    selected = (web_selected_id.get() if web_selected_id is not None else "") or ""
+                    class_name = "web-load-ready" if str(selected).strip() else ""
+                    return ui.tags.script(
+                        f"""
+                        (function(){{
+                            const btn = document.getElementById('{_prefixed_id(prefix, "generate")}');
+                            if (!btn) return;
+                            btn.classList.toggle('web-load-ready', {str(bool(class_name)).lower()});
+                        }})();
+                        """
+                    )
+
+            if cfg.get("key") == "web":
+                @reactive.Effect
+                @reactive.event(getattr(input, _prefixed_id(prefix, "run_fisher_test")))
+                def _handle_run_fisher_test():
+                    _refresh_pathway_scores()
+
+            if cfg.get("key") == "web":
+                @output(id=_prefixed_id(prefix, "fisher_run_state"))
+                @render.ui
+                def fisher_run_state():
+                    score_cache = pathway_score_cache.get() or {}
+                    _ = score_cache.get("updated_at")
+                    return ui.tags.script(
+                        f"""
+                        (function(){{
+                            const runBtn = document.getElementById('{_prefixed_id(prefix, "run_fisher_test")}');
+                            const progress = document.getElementById('{_prefixed_id(prefix, "fisher_run_progress")}');
+                            if (runBtn) runBtn.disabled = false;
+                            if (progress) progress.classList.remove('active');
+                        }})();
+                        """
+                    )
+
+            if cfg.get("key") == "web":
+                @reactive.Effect
+                @reactive.event(
+                    getattr(input, _prefixed_id(prefix, "fisher_sig_mode")),
+                    getattr(input, _prefixed_id(prefix, "fisher_sig_pos")),
+                    getattr(input, _prefixed_id(prefix, "fisher_sig_neg")),
+                )
+                def _mark_fisher_scores_stale():
+                    with reactive.isolate():
+                        protein_ok = bool(protein_validation.get().get("valid"))
+                        score_cache = pathway_score_cache.get() or {}
+                    if protein_ok:
+                        cached_results = score_cache.get("results_by_fc", {}) if isinstance(score_cache, dict) else {}
+                        if not cached_results:
+                            return
+                        cached_mode = str(score_cache.get("significance_mode") or "both").strip().lower()
+                        cached_pos = abs(_to_float(score_cache.get("positive_cutoff"), 1.5))
+                        cached_neg = -abs(_to_float(score_cache.get("negative_cutoff"), -1.5))
+                        current_mode = str(_get_input_value(input, _prefixed_id(prefix, "fisher_sig_mode")) or "both").strip().lower()
+                        current_pos = abs(_to_float(_get_input_value(input, _prefixed_id(prefix, "fisher_sig_pos")), 1.5))
+                        current_neg = -abs(_to_float(_get_input_value(input, _prefixed_id(prefix, "fisher_sig_neg")), -1.5))
+                        if (
+                            current_mode == cached_mode
+                            and abs(current_pos - cached_pos) < 1e-9
+                            and abs(current_neg - cached_neg) < 1e-9
+                        ):
+                            return
+                        _mark_pathway_scores_pending("Fisher settings changed. Run Fisher's Exact Test to refresh pathway scores.")
 
             if cfg.get("key") == "web":
                 @reactive.Effect
@@ -4967,19 +7234,13 @@ def server(input, output, session):  # type: ignore[override]
                     if col not in {
                         "source",
                         "pathway",
-                        "final_score",
-                        "connection_score",
-                        "node_mass",
-                        "scored_node_count",
-                        "reg_node_count",
+                        "prot_fisher_p",
+                        "phos_fisher_p",
                     }:
                         return
                     numeric_cols = {
-                        "final_score",
-                        "connection_score",
-                        "node_mass",
-                        "scored_node_count",
-                        "reg_node_count",
+                        "prot_fisher_p",
+                        "phos_fisher_p",
                     }
                     current_col = web_sort_col.get()
                     current_dir = web_sort_dir.get()
@@ -4988,6 +7249,8 @@ def server(input, output, session):  # type: ignore[override]
                     else:
                         web_sort_col.set(col)
                         web_sort_dir.set("desc" if col in numeric_cols else "asc")
+                    if web_page is not None:
+                        web_page.set(1)
 
             if cfg.get("key") == "web":
                 @reactive.Effect
@@ -5014,6 +7277,29 @@ def server(input, output, session):  # type: ignore[override]
                         except Exception:
                             current = 0
                         web_filter_tick.set(current + 1)
+                    if web_page is not None:
+                        web_page.set(1)
+
+            if cfg.get("key") == "web":
+                @reactive.Effect
+                @reactive.event(getattr(input, _prefixed_id(prefix, "pathway_id")))
+                def _reset_web_page_for_search():
+                    if web_page is not None:
+                        web_page.set(1)
+
+            if cfg.get("key") == "web":
+                @reactive.Effect
+                @reactive.event(getattr(input, _prefixed_id(prefix, "pathway_table_page_nav")))
+                def _handle_web_page_nav():
+                    if web_page is None:
+                        return
+                    payload = _get_input_value(input, _prefixed_id(prefix, "pathway_table_page_nav")) or {}
+                    action = str(payload.get("action") or "").strip().lower()
+                    current_page = max(1, int(web_page.get() or 1))
+                    if action == "prev":
+                        web_page.set(max(1, current_page - 1))
+                    elif action == "next":
+                        web_page.set(current_page + 1)
 
             if cfg.get("key") == "web":
                 @reactive.Effect
@@ -5032,6 +7318,8 @@ def server(input, output, session):  # type: ignore[override]
                         except Exception:
                             current = 0
                         web_filter_refresh_evt.set(current + 1)
+                    if web_page is not None:
+                        web_page.set(1)
 
             if cfg.get("key") == "web":
                 @output(id=_prefixed_id(prefix, "pathway_table"))
@@ -5070,6 +7358,7 @@ def server(input, output, session):  # type: ignore[override]
                     species_label = species_info.get("label") or species_key
                     species_full = species_info.get("species") or species_label
                     options = _load_wikipathways_catalog(species_label, fallback=species_full)
+                    cst_options = get_cst_pathway_catalog(Path(BASE_DIR))
                     species_code = species_info.get("code", "")
                     kegg_rows: List[Dict[str, Any]] = []
                     for opt in KEGG_PATHWAY_OPTIONS:
@@ -5079,11 +7368,8 @@ def server(input, output, session):  # type: ignore[override]
                                 "id": species_id,
                                 "pathway": opt["name"],
                                 "source": "KEGG",
-                                "final_score": None,
-                                "connection_score": None,
-                                "node_mass": None,
-                                "scored_node_count": None,
-                                "reg_node_count": None,
+                                "prot_fisher_p": None,
+                                "phos_fisher_p": None,
                             }
                         )
                     wp_rows: List[Dict[str, str]] = []
@@ -5097,15 +7383,23 @@ def server(input, output, session):  # type: ignore[override]
                                 "pathway": str(opt.get("name") or "").strip(),
                                 "source": "WikiPathways",
                                 "species": str(opt.get("species") or ""),
-                                "final_score": None,
-                                "connection_score": None,
-                                "node_mass": None,
-                                "scored_node_count": None,
-                                "reg_node_count": None,
+                                "prot_fisher_p": None,
+                                "phos_fisher_p": None,
                             }
                             for opt in options
                             if opt.get("id") and opt.get("name")
                         ]
+                    cst_rows: List[Dict[str, Any]] = [
+                        {
+                            "id": str(opt.get("id") or "").strip(),
+                            "pathway": str(opt.get("name") or "").strip(),
+                            "source": "CST",
+                            "prot_fisher_p": None,
+                            "phos_fisher_p": None,
+                        }
+                        for opt in cst_options
+                        if opt.get("id") and opt.get("name")
+                    ]
                     query = (str(_get_input_value(input, _prefixed_id(prefix, "pathway_id"))) or "").strip()
                     combined_rows: List[Dict[str, Any]] = []
                     pattern = None
@@ -5124,6 +7418,11 @@ def server(input, output, session):  # type: ignore[override]
                         if pattern and not pattern.search(search_target):
                             continue
                         combined_rows.append(opt)
+                    for opt in cst_rows:
+                        search_target = f"{opt['id']} | {opt['pathway']} | {opt['source']}"
+                        if pattern and not pattern.search(search_target):
+                            continue
+                        combined_rows.append(dict(opt))
                     available_sources = list(WEB_PATHWAY_SOURCES)
                     if web_filter_options is not None:
                         web_filter_options.set(available_sources)
@@ -5157,31 +7456,22 @@ def server(input, output, session):  # type: ignore[override]
                             score_entry = source_map.get(pid) if isinstance(source_map, dict) else None
                             if not isinstance(score_entry, dict):
                                 continue
-                            row["final_score"] = score_entry.get("final_score")
-                            row["connection_score"] = score_entry.get("connection_score")
-                            row["node_mass"] = score_entry.get("node_mass")
-                            row["scored_node_count"] = score_entry.get("scored_node_count")
-                            row["reg_node_count"] = score_entry.get("reg_node_count")
+                            row["prot_fisher_p"] = score_entry.get("prot_fisher_p")
+                            row["phos_fisher_p"] = score_entry.get("phos_fisher_p")
                     if not combined_rows:
                         return ui.div({"class": "pathway-search-empty"}, "No pathways matched your search.")
-                    sort_col = (web_sort_col.get() or "pathway") if web_sort_col else "pathway"
+                    sort_col = (web_sort_col.get() or "prot_fisher_p") if web_sort_col else "prot_fisher_p"
                     sort_dir = (web_sort_dir.get() or "asc") if web_sort_dir else "asc"
                     sort_field_map = {
                         "source": "source",
                         "pathway": "pathway",
-                        "final_score": "final_score",
-                        "connection_score": "connection_score",
-                        "node_mass": "node_mass",
-                        "scored_node_count": "scored_node_count",
-                        "reg_node_count": "reg_node_count",
+                        "prot_fisher_p": "prot_fisher_p",
+                        "phos_fisher_p": "phos_fisher_p",
                     }
                     field = sort_field_map.get(sort_col, "pathway")
                     numeric_fields = {
-                        "final_score",
-                        "connection_score",
-                        "node_mass",
-                        "scored_node_count",
-                        "reg_node_count",
+                        "prot_fisher_p",
+                        "phos_fisher_p",
                     }
                     if field in numeric_fields:
                         ascending = sort_dir == "asc"
@@ -5195,11 +7485,11 @@ def server(input, output, session):  # type: ignore[override]
                                 except (TypeError, ValueError):
                                     parsed_val = None
                             if parsed_val is None:
-                                # Asc: missing first. Desc: missing last.
-                                missing_rank = 0 if ascending else 1
+                                # Missing values always sort after real pathway statistics.
+                                missing_rank = 1
                                 sort_val = 0.0
                             else:
-                                missing_rank = 1 if ascending else 0
+                                missing_rank = 0
                                 sort_val = parsed_val if ascending else -parsed_val
                             return (missing_rank, sort_val, str(row.get("pathway", "")).lower())
 
@@ -5213,20 +7503,17 @@ def server(input, output, session):  # type: ignore[override]
                             ),
                             reverse=reverse,
                         )
-                    active_value = (str(_get_input_value(input, _prefixed_id(prefix, "pathway_id"))) or "").strip().upper()
-                    # Update selection label to include name if still selected
-                    for entry in combined_rows:
-                        if active_value and active_value == entry["id"]:
-                            label_src = entry.get("source", "").upper()
-                            label_val = entry["id"].upper()
-                            name_val = entry.get("pathway") or ""
-                            label = f"{label_src}: {label_val}"
-                            if name_val:
-                                label = f"{label} | {name_val}"
-                            web_selected_label.set(label)
-                            break
+                    rows_per_page = 20
+                    total_rows = len(combined_rows)
+                    total_pages = max(1, math.ceil(total_rows / rows_per_page))
+                    current_page = max(1, int(web_page.get() or 1)) if web_page is not None else 1
+                    current_page = min(current_page, total_pages)
+                    page_start = (current_page - 1) * rows_per_page
+                    page_end = page_start + rows_per_page
+                    page_rows = combined_rows[page_start:page_end]
+                    active_value = ""
                     def _fmt_metric(raw: Any, digits: int = 4) -> str:
-                        if raw in (None, "", False):
+                        if raw is None or raw == "":
                             return ""
                         try:
                             return f"{float(raw):.{digits}g}"
@@ -5234,7 +7521,22 @@ def server(input, output, session):  # type: ignore[override]
                             return str(raw)
 
                     table_rows: List[Any] = []
-                    for entry in combined_rows:
+                    def _metric_title(entry: Dict[str, Any], prefix_name: str) -> str:
+                        label = "Protein" if prefix_name == "prot" else "Phospho"
+                        fisher_val = entry.get(f"{prefix_name}_fisher_p")
+                        dataset_total = entry.get(f"{prefix_name}_dataset_total")
+                        pathway_total = entry.get(f"{prefix_name}_pathway_total")
+                        sig_total = entry.get(f"{prefix_name}_significant_total")
+                        sig_path = entry.get(f"{prefix_name}_significant_in_pathway")
+                        return (
+                            f"{label} Fisher p: {_fmt_metric(fisher_val, 6) or 'NA'}\n"
+                            f"Dataset total: {dataset_total if dataset_total is not None else 'NA'}\n"
+                            f"In pathway: {pathway_total if pathway_total is not None else 'NA'}\n"
+                            f"Significant total: {sig_total if sig_total is not None else 'NA'}\n"
+                            f"Significant in pathway: {sig_path if sig_path is not None else 'NA'}"
+                        )
+
+                    for entry in page_rows:
                         classes = []
                         if active_value and active_value == entry["id"]:
                             classes.append("table-active")
@@ -5247,6 +7549,10 @@ def server(input, output, session):  # type: ignore[override]
                                     "class": " ".join(classes),
                                     "onclick": (
                                         "(() => {"
+                                        "const row=this;"
+                                        "const table=row.closest('table');"
+                                        "if(table){table.querySelectorAll('tbody tr.table-active').forEach((el)=>el.classList.remove('table-active'));}"
+                                        "row.classList.add('table-active');"
                                         "const data={value:this.dataset.value,source:this.dataset.source||'wikipathways',name:this.dataset.name||''};"
                                         f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_id_choice')}', data, {{priority:'event'}});"
                                         f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_source_choice')}', data.source, {{priority:'event'}});"
@@ -5258,28 +7564,57 @@ def server(input, output, session):  # type: ignore[override]
                                     ui.tags.div(entry["pathway"]),
                                     ui.tags.small({"style": "color:#6b7280;"}, entry["id"]),
                                 ),
-                                ui.tags.td(_fmt_metric(entry.get("final_score"), 5)),
-                                ui.tags.td(_fmt_metric(entry.get("connection_score"), 5)),
-                                ui.tags.td(_fmt_metric(entry.get("node_mass"), 4)),
-                                ui.tags.td(
-                                    ""
-                                    if entry.get("scored_node_count") is None
-                                    else str(entry.get("scored_node_count"))
-                                ),
-                                ui.tags.td(
-                                    ""
-                                    if entry.get("reg_node_count") is None
-                                    else str(entry.get("reg_node_count"))
-                                ),
+                                ui.tags.td({"title": _metric_title(entry, "prot")}, _fmt_metric(entry.get("prot_fisher_p"), 5)),
+                                ui.tags.td({"title": _metric_title(entry, "phos")}, _fmt_metric(entry.get("phos_fisher_p"), 5)),
                             )
                         )
                     source_arrow = "▲" if sort_col == "source" and sort_dir == "asc" else ("▼" if sort_col == "source" else "")
                     pathway_arrow = "▲" if sort_col == "pathway" and sort_dir == "asc" else ("▼" if sort_col == "pathway" else "")
-                    score_arrow = "▲" if sort_col == "final_score" and sort_dir == "asc" else ("▼" if sort_col == "final_score" else "")
-                    conn_arrow = "▲" if sort_col == "connection_score" and sort_dir == "asc" else ("▼" if sort_col == "connection_score" else "")
-                    mass_arrow = "▲" if sort_col == "node_mass" and sort_dir == "asc" else ("▼" if sort_col == "node_mass" else "")
-                    scored_arrow = "▲" if sort_col == "scored_node_count" and sort_dir == "asc" else ("▼" if sort_col == "scored_node_count" else "")
-                    reg_arrow = "▲" if sort_col == "reg_node_count" and sort_dir == "asc" else ("▼" if sort_col == "reg_node_count" else "")
+                    prot_arrow = "▲" if sort_col == "prot_fisher_p" and sort_dir == "asc" else ("▼" if sort_col == "prot_fisher_p" else "")
+                    phos_arrow = "▲" if sort_col == "phos_fisher_p" and sort_dir == "asc" else ("▼" if sort_col == "phos_fisher_p" else "")
+                    page_nav_input_id = _prefixed_id(prefix, "pathway_table_page_nav")
+
+                    def _pagination_controls(location: str) -> Any:
+                        prev_attrs: Dict[str, Any] = {
+                            "type": "button",
+                            "class": "btn btn-outline-secondary btn-sm",
+                            "onclick": (
+                                f"Shiny.setInputValue('{page_nav_input_id}', "
+                                "{action:'prev', ts:Date.now()}, {priority:'event'});"
+                            ),
+                        }
+                        next_attrs: Dict[str, Any] = {
+                            "type": "button",
+                            "class": "btn btn-outline-secondary btn-sm",
+                            "onclick": (
+                                f"Shiny.setInputValue('{page_nav_input_id}', "
+                                "{action:'next', ts:Date.now()}, {priority:'event'});"
+                            ),
+                        }
+                        if current_page <= 1:
+                            prev_attrs["disabled"] = True
+                        if current_page >= total_pages:
+                            next_attrs["disabled"] = True
+                        return ui.div(
+                            {
+                                "class": f"pathway-table-pagination pathway-table-pagination-{location}",
+                                "style": "display:flex; align-items:center; justify-content:space-between; gap:12px; margin:8px 0;",
+                            },
+                            ui.tags.div(
+                                {"style": "color:#4b5563; font-size:0.9rem;"},
+                                f"Showing {page_start + 1}-{min(page_end, total_rows)} of {total_rows}",
+                            ),
+                            ui.tags.div(
+                                {"style": "display:flex; align-items:center; gap:8px;"},
+                                ui.tags.button("Previous", prev_attrs),
+                                ui.tags.span(
+                                    {"style": "min-width:92px; text-align:center; color:#374151; font-size:0.9rem;"},
+                                    f"Page {current_page} / {total_pages}",
+                                ),
+                                ui.tags.button("Next", next_attrs),
+                            ),
+                        )
+
                     table = ui.tags.table(
                         {"class": "table table-sm table-hover pathway-table"},
                         ui.tags.thead(
@@ -5295,36 +7630,31 @@ def server(input, output, session):  # type: ignore[override]
                                     ui.tags.span(f" {pathway_arrow}" if pathway_arrow else ""),
                                 ),
                                 ui.tags.th(
-                                    {"style": "cursor:pointer;", "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'final_score', ts:Date.now()}}, {{priority:'event'}});"},
-                                    ui.tags.span("Final"),
-                                    ui.tags.span(f" {score_arrow}" if score_arrow else ""),
+                                    {
+                                        "style": "cursor:pointer;",
+                                        "title": "Fisher exact test p-value for protein-level pathway enrichment.",
+                                        "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'prot_fisher_p', ts:Date.now()}}, {{priority:'event'}});",
+                                    },
+                                    ui.tags.span("Prot p-value"),
+                                    ui.tags.span(f" {prot_arrow}" if prot_arrow else ""),
                                 ),
                                 ui.tags.th(
-                                    {"style": "cursor:pointer;", "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'connection_score', ts:Date.now()}}, {{priority:'event'}});"},
-                                    ui.tags.span("Conn"),
-                                    ui.tags.span(f" {conn_arrow}" if conn_arrow else ""),
-                                ),
-                                ui.tags.th(
-                                    {"style": "cursor:pointer;", "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'node_mass', ts:Date.now()}}, {{priority:'event'}});"},
-                                    ui.tags.span("Mass"),
-                                    ui.tags.span(f" {mass_arrow}" if mass_arrow else ""),
-                                ),
-                                ui.tags.th(
-                                    {"style": "cursor:pointer;", "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'scored_node_count', ts:Date.now()}}, {{priority:'event'}});"},
-                                    ui.tags.span("Scored"),
-                                    ui.tags.span(f" {scored_arrow}" if scored_arrow else ""),
-                                ),
-                                ui.tags.th(
-                                    {"style": "cursor:pointer;", "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'reg_node_count', ts:Date.now()}}, {{priority:'event'}});"},
-                                    ui.tags.span("Reg"),
-                                    ui.tags.span(f" {reg_arrow}" if reg_arrow else ""),
+                                    {
+                                        "style": "cursor:pointer;",
+                                        "title": "Fisher exact test p-value for phosphosite-level pathway enrichment.",
+                                        "onclick": f"Shiny.setInputValue('{_prefixed_id(prefix, 'pathway_table_sort')}', {{col:'phos_fisher_p', ts:Date.now()}}, {{priority:'event'}});",
+                                    },
+                                    ui.tags.span("PTM p-value"),
+                                    ui.tags.span(f" {phos_arrow}" if phos_arrow else ""),
                                 ),
                             )
                         ),
                         ui.tags.tbody(*table_rows),
                     )
                     return ui.TagList(
+                        _pagination_controls("top"),
                         table,
+                        _pagination_controls("bottom"),
                         ui.tags.script(
                             """
                             (function(){
@@ -5340,6 +7670,55 @@ def server(input, output, session):  # type: ignore[override]
                             })();
                             """
                         ),
+                    )
+
+                @reactive.Effect
+                @reactive.event(getattr(input, _prefixed_id(prefix, "download_pathway_table")))
+                def _download_pathway_table():
+                    fc_choices = _fc_choices()
+                    fc_idx = state["fc_index"].get() or 1
+                    if fc_idx < 1 or fc_idx > len(fc_choices):
+                        fc_idx = 1
+                    selected_fc = fc_choices[fc_idx - 1] if fc_choices and fc_idx >= 1 else ""
+                    score_cache = pathway_score_cache.get() or {}
+                    download_rows_by_fc = score_cache.get("download_rows_by_fc", {}) if isinstance(score_cache, dict) else {}
+                    rows = download_rows_by_fc.get(selected_fc, []) if isinstance(download_rows_by_fc, dict) else []
+                    if not rows and isinstance(download_rows_by_fc, dict):
+                        for value in download_rows_by_fc.values():
+                            if isinstance(value, list) and value:
+                                rows = value
+                                break
+                    columns = [
+                        "pathway_source",
+                        "pathway_id",
+                        "name",
+                        "comparison_column",
+                        "significance_mode",
+                        "positive_cutoff",
+                        "negative_cutoff",
+                        "prot_dataset_total",
+                        "prot_pathway_total",
+                        "prot_significant_total",
+                        "prot_significant_in_pathway",
+                        "prot_fisher_p",
+                        "phos_dataset_total",
+                        "phos_pathway_total",
+                        "phos_significant_total",
+                        "phos_significant_in_pathway",
+                        "phos_fisher_p",
+                    ]
+                    buffer = io.StringIO()
+                    writer = csv.DictWriter(buffer, fieldnames=columns, extrasaction="ignore")
+                    writer.writeheader()
+                    for row in rows:
+                        writer.writerow(row)
+                    _send_custom_message_safe(
+                        "download_payload",
+                        {
+                            "filename": "web_pathway_table.csv",
+                            "content": buffer.getvalue(),
+                            "mime_type": "text/csv;charset=utf-8",
+                        },
                     )
 
                 @output(id=_prefixed_id(prefix, "selected_pathway_label"))
@@ -5472,7 +7851,7 @@ def server(input, output, session):  # type: ignore[override]
             prot_data = payload.setdefault("protein_data", {})
             protboxes = payload.setdefault("protbox_data", [])
             existing_ids = {str(pb.get("protbox_id")) for pb in protboxes}
-            catalog_info = payload.get("_global_protein_catalog") or GLOBAL_CATALOG_INFO
+            catalog_info = payload.get("_global_protein_catalog") or _current_global_catalog_info()
 
             def _catalog_lookup(uniprot: str) -> Dict[str, Any]:
                 if not isinstance(catalog_info, dict):
@@ -5636,11 +8015,40 @@ def server(input, output, session):  # type: ignore[override]
                     prompt = "Click Reset Canvas to start building a pathway." if cfg.get("key") == "figure" else "Click Create Blank Canvas to start building a pathway."
                     return ui.div({"class": "alert alert-warning"}, prompt)
                 return ui.div({"class": "alert alert-warning"}, "No pathway data to display.")
+            if data.get("_viewer_kind") == "cst_pdf":
+                cst_payload = dict(data.get("_cst_payload") or {})
+                cst_payload["_active_fc_index"] = fc_idx or 1
+                return ui.TagList(
+                    ui.tags.script(
+                        f"""
+                        (function(){{
+                            const overlay = document.getElementById('{_prefixed_id(prefix, "viewer_overlay_panel")}');
+                            const editor = document.getElementById('{_prefixed_id(prefix, "viewer_create_panel")}');
+                            if (overlay) overlay.style.display = 'none';
+                            if (editor) editor.style.display = 'none';
+                        }})();
+                        """
+                    ),
+                    create_cst_pathway_viewer(cst_payload),
+                )
+            hide_cst_script = ui.tags.script(
+                f"""
+                (function(){{
+                    const overlay = document.getElementById('{_prefixed_id(prefix, "viewer_overlay_panel")}');
+                    const editor = document.getElementById('{_prefixed_id(prefix, "viewer_create_panel")}');
+                    if (overlay) overlay.style.display = '';
+                    if (editor) editor.style.display = '';
+                }})();
+                """
+            )
             settings = data.get("general_data", {}).get("settings", {})
             show_bg = bool(settings.get("show_background_image", False))
             data_with_fc = dict(data)
             data_with_fc["_active_fc_index"] = fc_idx
-            return create_pathway_svg(data_with_fc, show_kegg_bg=show_bg)
+            return ui.TagList(
+                hide_cst_script,
+                create_pathway_svg(data_with_fc, show_kegg_bg=show_bg),
+            )
 
         @output(id=_prefixed_id(prefix, "status_message"))
         @render.text

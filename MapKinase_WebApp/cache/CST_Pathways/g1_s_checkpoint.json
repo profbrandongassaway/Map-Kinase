@@ -1,0 +1,1379 @@
+{
+  "pathway_name": "G1/S Checkpoint",
+  "pathway_url": "https://www.cellsignal.com/pathways/g1-s-checkpoint-pathway",
+  "source_sections": [
+    "Cell Cycle Regulation",
+    "Evading Growth Suppressors",
+    "Enabling Replicative Immortality",
+    "Senescent Cells",
+    "Genome Instability and Mutation"
+  ],
+  "protein_modules": [
+    {
+      "label": "Suv39H1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=suv39h1&site-search-type=Products",
+      "phosphositeplus_id": "16822",
+      "phosphositeplus_ids": [
+        "16822"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=16822",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=16822"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "16822",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=16822&showAllSites=true",
+          "gene_symbol": "SUV39H1",
+          "uniprot_id": "O43463",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O43463",
+          "protein_name": "Histone methyltransferase that specifically trimethylates 'Lys-9' of histone H3 using monomethylated H3 'Lys-9' as substrate. Also weakly methylates histone H1 (in vitro). H3 'Lys-9' trimethylation represents a specific tag for epigenetic transcriptional repression by recruiting HP1 (CBX1, CBX3 and/or CBX5) proteins to methylated histones. Mainly functions in heterochromatin regions, thereby playing a central role in the establishment of constitutive heterochromatin at pericentric and telomere regions. H3 'Lys-9' trimethylation is also required to direct DNA methylation at pericentric repeats. SUV39H1 is targeted to histone H3 via its interaction with RB1 and is involved in many processes, such as repression of MYOD1-stimulated differentiation, regulation of the control switch for exiting the cell cycle and entering differentiation, repression by the PML-RARA fusion protein, BMP-induced repression, repression of switch recombination to IgA and regulation of telomere length. Component of the eNoSC (energy-dependent nucleolar silencing) complex, a complex that mediates silencing of rDNA in response to intracellular energy status and acts by recruiting histone-modifying enzymes. The eNoSC complex is able to sense the energy status of cell: upon glucose starvation, elevation of NAD(+)/NADP(+) ratio activates SIRT1, leading to histone H3 deacetylation followed by dimethylation of H3 at 'Lys-9' (H3K9me2) by SUV39H1 and the formation of silent chromatin in the rDNA locus. Recruited by the large PER complex to the E-box elements of the circadian target genes such as PER2 itself or PER1, contributes to the conversion of local chromatin to a heterochromatin-like repressive state through H3 'Lys-9' trimethylation. Belongs to the class V-like SAM-binding methyltransferase superfamily. Histone-lysine methyltransferase family. Suvar3-9 subfamily. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O43463 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Amino Acid Metabolism - lysine degradation; EC 2.1.1.43; Methyltransferase; Methyltransferase, protein lysine",
+            "Chromosomal Location of human Ortholog": "Xp11.23",
+            "Cellular Component": "chromatin; chromatin silencing complex; chromosome; chromosome, centromeric region; condensed nuclear chromosome; cytoplasmic vesicle; heterochromatin; nuclear lamina; nucleolus; nucleoplasm; nucleus; pericentric heterochromatin; plasma membrane; rDNA heterochromatin; ribonucleoprotein complex",
+            "Molecular Function": "chromatin binding; histone H3 methyltransferase activity; histone H3K14ub reader activity; histone H3K9 methyltransferase activity; histone H3K9 trimethyltransferase activity; histone H3K9me2 methyltransferase activity; histone methyltransferase activity; metal ion binding; methyltransferase activity; protein binding; RNA polymerase II transcription regulatory region sequence-specific DNA binding; S-adenosylmethionine-dependent methyltransferase activity; transcription cis-regulatory region binding; transferase activity; zinc ion binding",
+            "Biological Process": "cell differentiation; cellular response to glucose starvation; cellular response to hypoxia; chromatin organization; circadian rhythm; DNA damage response; energy homeostasis; epigenetic programming in the zygotic pronuclei; heterochromatin formation; heterochromatin organization; methylation; negative regulation of cell cycle; negative regulation of DNA-templated transcription; negative regulation of gene expression, epigenetic; negative regulation of transcription by RNA polymerase II; pericentric heterochromatin formation; rDNA heterochromatin formation; regulation of transcription by glucose; rhythmic process; rRNA processing",
+            "Reference #": "O43463 (UniProtKB)",
+            "Alt. Names/Synonyms": "H3-K9-HMTase 1; Histone H3-K9 methyltransferase 1; Histone-lysine N-methyltransferase SUV39H1; histone-lysine N-methyltransferase, H3 lysine-9 specific 1; KMT1A; Lysine N-methyltransferase 1A; MG44; Position-effect variegation 3-9 homolog; Su(var)3-9 homolog 1; Suppressor of variegation 3-9 homolog 1; suppressor of variegation 3-9 homolog 1 (Drosophila); SUV39H; SUV39H1; SUV91",
+            "Gene Symbols": "SUV39H1",
+            "Molecular weight": "47,907 Da",
+            "Basal Isoelectric point": "8.38 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | Histone Methylation",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB | ENZYME | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "O43463"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/O43463"
+      ],
+      "psp_gene_symbols": [
+        "SUV39H1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "p53",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=p53&site-search-type=Products",
+      "phosphositeplus_id": "465",
+      "phosphositeplus_ids": [
+        "465"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=465",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=465"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "465",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=465&showAllSites=true",
+          "gene_symbol": "TP53",
+          "uniprot_id": "P04637",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P04637",
+          "protein_name": "a ubiquitous transcription factor and major tumor suppressor in many tumor types. Activation of p53 can lead to either cell cycle arrest and DNA repair or apoptosis. More than 50 percent of human tumors contain a mutation or deletion of the TP53 gene. Involved in cell cycle regulation as a trans-activator that acts to negatively regulate cell division by controlling a set of genes required for this process. Apoptosis induction seems to be mediated either by stimulation of BAX and FAS antigen expression, or by repression of Bcl-2 expression. In cooperation with mitochondrial PPIF is involved in activating oxidative stress-induced necrosis; the function is largely independent of transcription. Induces the transcription of long intergenic non-coding RNA p21 (lincRNA-p21) and lincRNA-Mkln1. LincRNA-p21 participates in TP53-dependent transcriptional repression leading to apoptosis and seems to have an effect on cell-cycle regulation. Implicated in Notch signaling cross-over. Prevents CDK7 kinase activity when associated to CAK complex in response to DNA damage, thus stopping cell cycle progression. p53 is modified post-translationally at multiple sites. DNA damage induces phosphorylation at multiple sites, reducing its interaction with the oncoprotein MDM2. MDM2 inhibits p53 accumulation by targeting it for ubiquitination and proteasomal degradation. Phosphorylation by many kinases including Chk2 and Chk1 enhances its tetramerization, stability and activity. The phosphorylation by CAK increases in human tumors and has been reported to influence the growth suppressor function, DNA binding and transcriptional activation of p53.The acetylation of p53 appears to play a positive role in the accumulation of p53 during the stress response. Following DNA damage, p53 becomes acetylated at K382, enhancing its binding to DNA. Deacetylation of p53 can occur through interaction with SIRT1, a deacetylase that may be involved in cellular aging and the DNA damage response. Nine human isoforms generated by alternative promoter usage or alternative splicing have been reported. Isoform 2 enhances the transactivation activity of isoform 1 from some but not all TP53-inducible promoters. Isoform 4 suppresses transactivation activity and impairs growth suppression mediated by isoform 1. Isoform 7 inhibits isoform 1-mediated apoptosis. Isoforms are expressed in a wide range of normal tissues but in a tissue-dependent manner. Isoform 2 is expressed in most normal tissues but is not detected in brain, lung, prostate, muscle, fetal brain, spinal cord and fetal liver. Isoform 3 is expressed in most normal tissues but is not detected in lung, spleen, testis, fetal brain, spinal cord and fetal liver. Isoform 7 is expressed in most normal tissues but is not detected in prostate, uterus, skeletal muscle and breast. Isoform 8 is detected only in colon, bone marrow, testis, fetal brain and intestine. Isoform 9 is expressed in most normal tissues but is not detected in brain, heart, lung, fetal liver, salivary gland, breast or intestine. Belongs to the p53 family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P04637 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Activator; DNA-binding; Motility/polarity/chemotaxis; Nuclear receptor co-regulator; Transcription factor; Tumor suppressor",
+            "Chromosomal Location of human Ortholog": "17p13.1",
+            "Cellular Component": "centrosome; chromatin; cytoplasm; cytosol; endoplasmic reticulum; mitochondrial matrix; mitochondrion; nuclear body; nuclear matrix; nucleolus; nucleoplasm; nucleus; PML body; protein-containing complex; transcription regulator complex",
+            "Molecular Function": "14-3-3 protein binding; ATP-dependent DNA/DNA annealing activity; chromatin binding; cis-regulatory region sequence-specific DNA binding; copper ion binding; core promoter sequence-specific DNA binding; disordered domain specific binding; DNA binding; DNA-binding transcription activator activity, RNA polymerase II-specific; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; DNA-binding transcription repressor activity, RNA polymerase II-specific; enzyme binding; general transcription initiation factor binding; histone deacetylase binding; identical protein binding; MDM2/MDM4 family protein binding; metal ion binding; molecular condensate scaffold activity; molecular function activator activity; mRNA 3'-UTR binding; p53 binding; promoter-specific chromatin binding; protease binding; protein binding; protein heterodimerization activity; protein phosphatase 2A binding; protein-folding chaperone binding; receptor tyrosine kinase binding; RNA polymerase II cis-regulatory region sequence-specific DNA binding; RNA polymerase II-specific DNA-binding transcription factor binding; TFIID-class transcription factor complex binding; transcription cis-regulatory region binding; transcription coactivator binding; ubiquitin protein ligase binding; zinc ion binding",
+            "Biological Process": "apoptotic process; apoptotic signaling pathway; autophagy; bone marrow development; cellular response to actinomycin D; cellular response to gamma radiation; cellular response to glucose starvation; cellular response to hypoxia; cellular response to ionizing radiation; cellular response to UV; cellular response to xenobiotic stimulus; cellular senescence; circadian behavior; circadian rhythm; determination of adult lifespan; DNA damage response; DNA damage response, signal transduction by p53 class mediator; entrainment of circadian clock by photoperiod; ER overload response; hematopoietic progenitor cell differentiation; hematopoietic stem cell differentiation; intracellular protein localization; intrinsic apoptotic signaling pathway; intrinsic apoptotic signaling pathway by p53 class mediator; intrinsic apoptotic signaling pathway in response to DNA damage by p53 class mediator; intrinsic apoptotic signaling pathway in response to endoplasmic reticulum stress; mitotic G1 DNA damage checkpoint signaling; mRNA transcription; negative regulation of apoptotic process; negative regulation of cell growth; negative regulation of cell population proliferation; negative regulation of DNA metabolic process; negative regulation of DNA-templated transcription; negative regulation of fibroblast proliferation; negative regulation of G1 to G0 transition; negative regulation of helicase activity; negative regulation of pentose-phosphate shunt; negative regulation of telomere maintenance via telomerase; negative regulation of transcription by RNA polymerase II; nucleotide-excision repair; oligodendrocyte apoptotic process; oxidative stress-induced premature senescence; positive regulation of apoptotic process; positive regulation of cellular senescence; positive regulation of DNA-templated transcription; positive regulation of execution phase of apoptosis; positive regulation of gene expression; positive regulation of intrinsic apoptotic signaling pathway; positive regulation of miRNA transcription; positive regulation of programmed necrotic cell death; positive regulation of reactive oxygen species metabolic process; positive regulation of release of cytochrome c from mitochondria; positive regulation of RNA polymerase II transcription preinitiation complex assembly; positive regulation of thymocyte apoptotic process; positive regulation of transcription by RNA polymerase II; programmed cell death; protein tetramerization; protein-containing complex assembly; Ras protein signal transduction; regulation of apoptotic process; regulation of cell cycle; regulation of cell cycle G2/M phase transition; regulation of DNA-templated transcription; regulation of intrinsic apoptotic signaling pathway; regulation of transcription by RNA polymerase II; replicative senescence; response to antibiotic; response to gamma radiation; response to ionizing radiation; response to oxidative stress; response to UV; response to xenobiotic stimulus; rhythmic process; signal transduction by p53 class mediator; transcription initiation-coupled chromatin remodeling; tumor necrosis factor-mediated signaling pathway; type II interferon-mediated signaling pathway; viral process",
+            "Disease": "Adrenocortical Carcinoma, Hereditary ; Basal Cell Carcinoma, Susceptibility To, 7 ; Bone Marrow Failure Syndrome 5 ; Breast Cancer ; Colorectal Cancer ; Glioma Susceptibility 1 ; Hepatocellular Carcinoma ; Li-fraumeni Syndrome 1 ; Nasopharyngeal Carcinoma ; Osteogenic Sarcoma ; Pancreatic Cancer ; Papilloma Of Choroid Plexus",
+            "Reference #": "P04637 (UniProtKB)",
+            "Alt. Names/Synonyms": "Antigen NY-CO-13; BCC7; BMFS5; Cellular tumor antigen p53; FLJ92943; LFS1; mutant tumor protein 53; P53; p53 antigen; p53 transformation suppressor; p53 tumor suppressor; Phosphoprotein p53; TP53; transformation-related protein 53; TRP53; tumor protein 53; tumor protein p53; Tumor suppressor p53; tumor supressor p53",
+            "Gene Symbols": "TP53",
+            "Molecular weight": "43,653 Da",
+            "Basal Isoelectric point": "6.33 Predict pI for various phosphorylation states",
+            "CST Pathways": "AMPK Signaling | Apoptosis Regulation | ErbB/HER Signaling | G1/S Checkpoint | G2/M DNA Damage Checkpoint | Mitochondrial Control of Apoptosis | PI3K/Akt Signaling | Protein Acetylation | Regulation of P38 MAPKs | SAPK/JNK Signaling Cascades | Warburg Effect",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | CCLE | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1A1U 1AIE 1C26 1DT7 1GZH 1H26 1HS5 1JSP 1KZY 1MA3 1OLG 1OLH 1PES 1PET 1SAE 1SAF 1SAG 1SAH 1SAI 1SAJ 1SAK 1SAL 1TSR 1TUP 1UOL 1XQH 1YC5 1YCQ 1YCR 1YCS 2AC0 2ADY 2AHI 2ATA 2B3G 2BIM 2BIN 2BIO 2BIP 2BIQ 2F1X 2FEJ 2FOJ 2FOO 2GS0 2H1L 2H2D 2H2F 2H4F 2H4H 2H4J 2H59 2J0Z 2J10 2J11 2J1W 2J1X 2J1Y 2J1Z 2J20 2J21 2K8F 2L14 2LY4 2MEJ 2MWO 2MWP 2MWY 2MZD 2OCJ 2PCX 2QVQ 2QXA 2QXB 2QXC 2RUK 2VUK 2WGX 2X0U 2X0V 2X0W 2XWR 2YBG 2YDR 2Z5S 2Z5T 3D05 3D06 3D07 3D08 3D09 3D0A 3DAB 3DAC 3IGK 3IGL 3KMD 3KZ8 3LW1 3OQ5 3PDH 3Q01 3Q05 3Q06 3SAK 3TG5 3TS8 3ZME 4AGL 4AGM 4AGN 4AGO 4AGP 4AGQ 4BUZ 4BV2 4FZ3 4HFZ 4HJE 4IBQ 4IBS 4IBT 4IBU 4IBV 4IBW 4IBY 4IBZ 4IJT 4KVP 4LO9 4LOE 4LOF 4MZI 4MZR 4QO1 4RP6 4RP7 4X34 4XR8 4ZZJ 5A7B 5AB9 5ABA 5AOI 5AOJ 5AOK 5AOL 5AOM 5BUA 5ECG 5G4M 5G4N 5G4O 5HOU 5HP0 5HPD 5LAP 5LGY 5MCT 5MCU 5MCV 5MCW 5MF7 5MG7 5MHC 5MOC 5O1A 5O1B 5O1C 5O1D 5O1E 5O1F 5O1G 5O1H 5O1I 5OL0 5UN8 5XZC 6FF9 6FJ5 6GGA 6GGB 6GGC 6GGD 6GGE 6GGF 6LHD 6R5L 6RJZ 6RK8 6RKI 6RKK 6RKM 6RL3 6RL4 6RL6 6RM5 6RM7 6RWH 6RWI 6RWS 6RWU 6RX2 6RZ3 6S39 6S3C 6S40 6S9Q 6SHZ 6SI0 6SI1 6SI2 6SI3 6SI4 6SIN 6SIO 6SIP 6SIQ 6SL6 6SLV 6T58 6V4F 6V4H 6VQO 6VR1 6VR5 6VRM 6VRN 6W51 6XRE 6ZNC 7B46 7B47 7B48 7B49 7B4A 7B4B 7B4C 7B4D 7B4E 7B4F 7B4G 7B4H 7B4N 7BWN 7DHY 7DHZ 7DVD 7EAX 7EDS 7EEU 7EL4 7NMI 7RM4 7V97 7XZX 7XZZ 7YGI 8A31 8A32 8A92 8CG7 8DC4 8DC6 8DC7 8DC8 8E7A 8E7B 8F2H 8F2I 8GCR 8HLL 8HLM 8HLN 8OXM 8OXO 8QWK 8QWL 8QWM 8QWN 8QWO 8QWP 8R1F 8R1G 8RBA 8RBB 8RBC 8RCI 8UQR 8WD2 8XP5 9C5S 9CHT 9FZB | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | NURSA | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P04637"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P04637"
+      ],
+      "psp_gene_symbols": [
+        "TP53"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Smad3",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=smad3&site-search-type=Products",
+      "phosphositeplus_id": "1045",
+      "phosphositeplus_ids": [
+        "1045"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=1045",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1045"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1045",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1045&showAllSites=true",
+          "gene_symbol": "SMAD3",
+          "uniprot_id": "P84022",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P84022",
+          "protein_name": "a transcription factor that transduces signals from receptors of transforming growth factor beta (TGF-B) and activin type 1 receptor kinases that regulate cell development and growth. Binds directly to consensus DNA-binding elements in the promoters of target genes. Upon formation of the SMAD3/SMAD4 complex, activates transcription. Has an inhibitory effect on wound healing probably by modulating both growth and migration of primary keratinocytes and by altering the TGF-mediated chemotaxis of monocytes. This effect on wound healing appears to be hormone-sensitive. Regulator of chondrogenesis and osteogenesis and inhibits early healing of bone fractures. In the mouse, it is required for establishemnt of the mucosal immune response and proper development of skeleton. It can form complexes that include, for example, SMAD4/JUN/FOS, SMAD2/SMAD4, and AIP1, ACVR2A, and ACVR1B. Interacts with DACH1, inhibiting TGF-beta signaling. Interacts (via the MH2 domain) with LEMD3, repressing SMAD3 transcriptional activity through preventing the formation of the heteromeric complex with SMAD4 and translocation to the nucleus. Interacts (via the linker region) with EP300 (C-terminal), promoting SMAD3 acetylation. Interacts with SKI, repressing SMAD3 transcriptional activity. Interacts with PPM1A which dephosphorylates SMAD3 in the C-terminal SXS motif leading to disruption of the SMAD2/3-SMAD4 complex, nuclear export and termination of TGF-beta signaling. Interacts with RANBP3, resulting in the export of dephosphorylated SMAD3 out of the nucleus and termination of the TGF-beta signaling. TGF-beta stimulation enhances interactions with DAB2. Interacts with PPP5C, decreasing SMAD3 phosphorylation and protein levels. Interacts (when phosphorylated) with RNF111, which acts as an enhancer of the transcriptional responses by mediating ubiquitination and degradation of SMAD3 inhibitors. Belongs to the dwarfin/SMAD family. Four alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P84022 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "DNA-binding; Nuclear receptor co-regulator; Transcription factor",
+            "Chromosomal Location of human Ortholog": "15q22.33",
+            "Cellular Component": "chromatin; cytoplasm; cytosol; heteromeric SMAD protein complex; nuclear inner membrane; nucleoplasm; nucleus; plasma membrane; protein-DNA complex; receptor complex; SMAD protein complex; transcription regulator complex",
+            "Molecular Function": "beta-catenin binding; bHLH transcription factor binding; chromatin binding; chromatin DNA binding; cis-regulatory region sequence-specific DNA binding; co-SMAD binding; collagen binding; DEAD/H-box RNA helicase binding; DNA binding; DNA-binding transcription activator activity, RNA polymerase II-specific; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; DNA-binding transcription factor binding; DNA-binding transcription repressor activity; double-stranded DNA binding; enzyme binding; I-SMAD binding; identical protein binding; metal ion binding; nuclear glucocorticoid receptor binding; nuclear mineralocorticoid receptor binding; nuclear receptor binding; phosphatase binding; promoter-specific chromatin binding; protein binding; protein homodimerization activity; protein kinase binding; R-SMAD binding; RNA polymerase II cis-regulatory region sequence-specific DNA binding; RNA polymerase II transcription regulatory region sequence-specific DNA binding; RNA polymerase II-specific DNA-binding transcription factor binding; sequence-specific DNA binding; sterol response element binding; transcription cis-regulatory region binding; transcription coactivator binding; transcription corepressor binding; transforming growth factor beta receptor binding; ubiquitin binding; ubiquitin protein ligase binding; zinc ion binding",
+            "Biological Process": "activin receptor signaling pathway; adrenal gland development; anatomical structure morphogenesis; apoptotic signaling pathway; cell differentiation; cell-cell junction organization; cellular response to glucose stimulus; cellular response to growth factor stimulus; cellular response to platelet-derived growth factor stimulus; cellular response to transforming growth factor beta stimulus; cellular response to virus; developmental process; extrinsic apoptotic signaling pathway; gene expression; immune response; JNK cascade; MAPK cascade; negative regulation of apoptotic process; negative regulation of cardiac muscle hypertrophy in response to stress; negative regulation of cell differentiation; negative regulation of cell growth; negative regulation of cell population proliferation; negative regulation of cytosolic calcium ion concentration; negative regulation of fat cell differentiation; negative regulation of gene expression; negative regulation of inflammatory response; negative regulation of lipopolysaccharide-mediated signaling pathway; negative regulation of lung blood pressure; negative regulation of miRNA transcription; negative regulation of ossification; negative regulation of osteoblast proliferation; negative regulation of protein catabolic process; negative regulation of transcription by RNA polymerase II; negative regulation of transforming growth factor beta production; negative regulation of wound healing; nodal signaling pathway; osteoblast differentiation; positive regulation of bone mineralization; positive regulation of canonical Wnt signaling pathway; positive regulation of cell migration; positive regulation of chondrocyte differentiation; positive regulation of DNA-templated transcription; positive regulation of epithelial to mesenchymal transition; positive regulation of extracellular matrix assembly; positive regulation of focal adhesion assembly; positive regulation of gene expression; positive regulation of interleukin-1 beta production; positive regulation of miRNA transcription; positive regulation of nitric oxide biosynthetic process; positive regulation of positive chemotaxis; positive regulation of protein import into nucleus; positive regulation of SMAD protein signal transduction; positive regulation of stress fiber assembly; positive regulation of transcription by RNA polymerase II; positive regulation of transforming growth factor beta3 production; primary miRNA processing; protein stabilization; regulation of dendritic spine morphogenesis; regulation of DNA-templated transcription; regulation of immune response; regulation of miRNA transcription; regulation of mitochondrial membrane potential; regulation of transcription by RNA polymerase II; regulation of transforming growth factor beta2 production; release of cytochrome c from mitochondria; response to alcohol; response to angiotensin; response to cocaine; response to gamma radiation; response to hypoxia; signal transduction involved in regulation of gene expression; SMAD protein signal transduction; T cell activation; transdifferentiation; transforming growth factor beta receptor signaling pathway; transforming growth factor beta receptor superfamily signaling pathway; trophoblast cell migration; ureteric bud development; wound healing",
+            "Disease": "Loeys-dietz Syndrome 3",
+            "Reference #": "P84022 (UniProtKB)",
+            "Alt. Names/Synonyms": "DKFZp586N0721; DKFZp686J10186; hMAD-3; hSMAD3; HSPC193; HsT17436; JV15-2; LDS1C; LDS3; MAD homolog 3; mad homolog JV15-2; mad protein homolog; MAD, mothers against decapentaplegic homolog 3; Mad3; MADH3; MGC60396; Mothers against decapentaplegic homolog 3; Mothers against DPP homolog 3; SMA- and MAD-related protein 3; SMAD 3; SMAD family member 3; SMAD, mothers against DPP homolog 3; SMAD3",
+            "Gene Symbols": "SMAD3",
+            "Molecular weight": "48,081 Da",
+            "Basal Isoelectric point": "6.73 Predict pI for various phosphorylation states",
+            "CST Pathways": "Angiogenesis | ESC Pluripotency and Differentiation | G1/S Checkpoint | TGF-ß Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1MHD 1MJS 1MK2 1OZJ 1U7F 2LAJ 2LB2 5OD6 5ODG 5XOC 6YIB 6ZMN | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | NURSA | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P84022"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P84022"
+      ],
+      "psp_gene_symbols": [
+        "SMAD3"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Smad4",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=smad4&site-search-type=Products",
+      "phosphositeplus_id": "1845",
+      "phosphositeplus_ids": [
+        "1845"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=1845",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1845"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1845",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1845&showAllSites=true",
+          "gene_symbol": "SMAD4",
+          "uniprot_id": "Q13485",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q13485",
+          "protein_name": "In muscle physiology, plays a central role in the balance between atrophy and hypertrophy. When recruited by MSTN, promotes atrophy response via phosphorylated SMAD2/4. MSTN decrease causes SMAD4 release and subsequent recruitment by the BMP pathway to promote hypertrophy via phosphorylated SMAD1/5/8. Acts synergistically with SMAD1 and YY1 in bone morphogenetic protein (BMP)-mediated cardiac-specific gene expression. Binds to SMAD binding elements (SBEs) (5'-GTCT/AGAC-3') within BMP response element (BMPRE) of cardiac activating regions. Common SMAD (co-SMAD) is the coactivator and mediator of signal transduction by TGF-beta (transforming growth factor). Component of the heterotrimeric SMAD2/SMAD3-SMAD4 complex that forms in the nucleus and is required for the TGF-mediated signaling. Promotes binding of the SMAD2/SMAD4/FAST-1 complex to DNA and provides an activation function required for SMAD1 or SMAD2 to stimulate transcription. Component of the multimeric SMAD3/SMAD4/JUN/FOS complex which forms at the AP1 promoter site; required for synergistic transcriptional activity in response to TGF-beta. May act as a tumor suppressor. Positively regulates PDPK1 kinase activity by stimulating its dissociation from the 14-3-3 protein YWHAQ which acts as a negative regulator. Belongs to the dwarfin/SMAD family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q13485 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "DNA-binding; Nuclear receptor co-regulator; Transcription, coactivator/corepressor",
+            "Chromosomal Location of human Ortholog": "18q21.2",
+            "Cellular Component": "activin responsive factor complex; chromatin; cytoplasm; cytosol; heteromeric SMAD protein complex; nucleoplasm; nucleus; protein-containing complex; RNA polymerase II transcription regulator complex; SMAD protein complex; transcription regulator complex",
+            "Molecular Function": "chromatin binding; collagen binding; DNA binding; DNA-binding transcription activator activity, RNA polymerase II-specific; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; filamin binding; I-SMAD binding; identical protein binding; metal ion binding; protein binding; protein homodimerization activity; protein-containing complex binding; R-SMAD binding; RNA polymerase II cis-regulatory region sequence-specific DNA binding; RNA polymerase II transcription regulatory region sequence-specific DNA binding; RNA polymerase II-specific DNA-binding transcription factor binding; sequence-specific DNA binding; SMAD binding; sulfate binding; transcription cis-regulatory region binding; transcription coactivator binding; transcription corepressor binding",
+            "Biological Process": "activin receptor signaling pathway; adrenal gland development; anatomical structure morphogenesis; atrioventricular canal development; atrioventricular valve formation; BMP signaling pathway; cardiac conduction system development; cardiac muscle hypertrophy in response to stress; cardiac septum development; cell differentiation; cellular response to BMP stimulus; cellular response to glucose stimulus; cellular response to growth factor stimulus; cellular response to transforming growth factor beta stimulus; DNA-templated transcription; embryonic digit morphogenesis; endocardial cell differentiation; endothelial cell activation; epithelial cell migration; epithelial to mesenchymal transition; epithelial to mesenchymal transition involved in endocardial cushion formation; ERK1 and ERK2 cascade; extrinsic apoptotic signaling pathway; interleukin-6-mediated signaling pathway; intracellular iron ion homeostasis; intracellular signal transduction; left ventricular cardiac muscle tissue morphogenesis; metanephric mesenchyme morphogenesis; negative regulation of canonical Wnt signaling pathway; negative regulation of cardiac muscle hypertrophy; negative regulation of cardiac myofibril assembly; negative regulation of cell growth; negative regulation of DNA-templated transcription; negative regulation of ERK1 and ERK2 cascade; negative regulation of protein catabolic process; negative regulation of transcription by RNA polymerase II; nephrogenic mesenchyme morphogenesis; neuron fate specification; osteoblast differentiation; outflow tract septum morphogenesis; ovarian follicle development; positive regulation of cardiac muscle cell apoptotic process; positive regulation of DNA-templated transcription; positive regulation of epithelial to mesenchymal transition; positive regulation of extracellular matrix assembly; positive regulation of gene expression; positive regulation of miRNA transcription; positive regulation of SMAD protein signal transduction; positive regulation of transcription by RNA polymerase II; positive regulation of transforming growth factor beta receptor signaling pathway; regulation of DNA-templated transcription; regulation of gene expression; regulation of primary metabolic process; regulation of transcription by RNA polymerase II; regulation of transforming growth factor beta2 production; response to hypoxia; response to transforming growth factor beta; secondary palate development; SMAD protein signal transduction; transforming growth factor beta receptor signaling pathway; transforming growth factor beta receptor superfamily signaling pathway; ventricular septum morphogenesis",
+            "Disease": "Juvenile Polyposis Syndrome ; Juvenile Polyposis/hereditary Hemorrhagic Telangiectasia Syndrome ; Myhre Syndrome ; Pancreatic Cancer",
+            "Reference #": "Q13485 (UniProtKB)",
+            "Alt. Names/Synonyms": "deleted in pancreatic carcinoma locus 4; Deletion target in pancreatic carcinoma 4; DPC4; hSMAD4; JIP; MAD homolog 4; MAD, mothers against decapentaplegic homolog 4; MADH4; Mothers against decapentaplegic homolog 4; mothers against decapentaplegic, Drosophila, homolog of, 4; Mothers against DPP homolog 4; MYHRS; SMAD 4; SMAD family member 4; SMAD, mothers against DPP homolog 4; SMAD4",
+            "Gene Symbols": "SMAD4",
+            "Molecular weight": "60,439 Da",
+            "Basal Isoelectric point": "6.5 Predict pI for various phosphorylation states",
+            "CST Pathways": "ESC Pluripotency and Differentiation | G1/S Checkpoint | SAPK/JNK Signaling Cascades | TGF-ß Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | CCLE | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1DD1 1G88 1MR1 1U7F 1U7V 1YGS 5C4V 5MEY 5MEZ 5MF0 5UWU 6YIC | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | NURSA | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q13485"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q13485"
+      ],
+      "psp_gene_symbols": [
+        "SMAD4"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Akt",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=Akt&site-search-type=Products",
+      "phosphositeplus_id": "570;669;670",
+      "phosphositeplus_ids": [
+        "570",
+        "669",
+        "670"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=570",
+        "https://www.phosphosite.org/proteinAction.action?id=669",
+        "https://www.phosphosite.org/proteinAction.action?id=670"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "570",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=570&showAllSites=true",
+          "gene_symbol": "AKT1",
+          "uniprot_id": "P31749",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P31749",
+          "protein_name": "an oncogenic AGC kinase that plays a critical role in regulating many processes including cell survival, metabolism, proliferation, growth and angiogenesis. Over 160 protein substrates are known including many that regulate transcription, metabolism, apoptosis, cell cycle, and growth. The activation of phosphatidylinositol 3-kinase alpha (PIK3CA) at the plasma membrane generates phosphatidylinositol 3,4,5-trisphosphate (PIP3), which binds to the PH domain of Akt, inducing its translocation to the plasma membrane. Dual phosphorylation is required for its activation. T308 is phosphorylated by PDK1 in the PI3 kinase pathway, and S473 is phosphorylated by mTOR in the mTORC2 pathway. The 'Lys-63'-linked ubiquitination of AKT1 by TRAF6 is important for its translocation to the plasma membrane, phosphorylation, and activation. When Akt is fully phosphorylated it translocates into the nucleus, undergoes 'Lys-48'-polyubiquitination catalyzed by TTC3, leading to its proteosomal degradation. Hyperactive or overexpressed in a number of cancers including breast, prostate, lung, pancreatic, liver, ovarian and colorectal. Two alternatively-spliced human isoforms have been described. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P31749 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "AGC group; AKT family; EC 2.7.11.1; Kinase, protein; Oncoprotein; Protein kinase, AGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "14q32.33",
+            "Cellular Component": "cell cortex; cell-cell junction; ciliary basal body; cytoplasm; cytosol; glutamatergic synapse; lamellipodium; membrane; mitochondrial intermembrane space; mitochondrion; nucleoplasm; nucleus; plasma membrane; postsynapse; protein-containing complex; spindle; vesicle",
+            "Molecular Function": "14-3-3 protein binding; ATP binding; calmodulin binding; enzyme binding; identical protein binding; kinase activity; kinase binding; nitric-oxide synthase regulator activity; nucleotide binding; phosphatidylinositol-3,4,5-trisphosphate binding; phosphatidylinositol-3,4-bisphosphate binding; potassium channel activator activity; protein binding; protein homodimerization activity; protein kinase activity; protein kinase binding; protein serine kinase activity; protein serine/threonine kinase activity; protein serine/threonine kinase inhibitor activity; protein serine/threonine/tyrosine kinase activity; TORC2 complex binding; transferase activity",
+            "Biological Process": "activation-induced cell death of T cells; anoikis; apoptotic process; behavioral response to pain; beta-arrestin-dependent dopamine receptor signaling pathway; cell differentiation; cell migration involved in sprouting angiogenesis; cell population proliferation; cellular response to epidermal growth factor stimulus; cellular response to insulin stimulus; cellular response to nerve growth factor stimulus; cellular response to oxidised low-density lipoprotein particle stimulus; cellular response to rapamycin; cellular response to stress; complement receptor mediated signaling pathway; cytokine-mediated signaling pathway; epidermal growth factor receptor signaling pathway; excitatory postsynaptic potential; fibroblast migration; G protein-coupled receptor signaling pathway; glucose metabolic process; glycogen biosynthetic process; glycogen metabolic process; insulin receptor signaling pathway; insulin-like growth factor receptor signaling pathway; interleukin-18-mediated signaling pathway; intracellular signal transduction; maintenance of protein location in mitochondrion; mammary gland epithelial cell differentiation; negative regulation of apoptotic process; negative regulation of autophagy; negative regulation of cGAS/STING signaling pathway; negative regulation of cilium assembly; negative regulation of extrinsic apoptotic signaling pathway in absence of ligand; negative regulation of fatty acid beta-oxidation; negative regulation of gene expression; negative regulation of hydrogen peroxide-induced neuron intrinsic apoptotic signaling pathway; negative regulation of intrinsic apoptotic signaling pathway; negative regulation of leukocyte cell-cell adhesion; negative regulation of long-chain fatty acid import across plasma membrane; negative regulation of lymphocyte migration; negative regulation of macroautophagy; negative regulation of Notch signaling pathway; negative regulation of oxidative stress-induced intrinsic apoptotic signaling pathway; negative regulation of PERK-mediated unfolded protein response; negative regulation of protein localization to lysosome; negative regulation of protein maturation; negative regulation of protein ubiquitination; negative regulation of proteolysis; negative regulation of release of cytochrome c from mitochondria; nervous system development; nitric oxide biosynthetic process; nitric oxide metabolic process; osteoblast differentiation; peptidyl-serine phosphorylation; peptidyl-threonine phosphorylation; phosphatidylinositol 3-kinase/protein kinase B signal transduction; positive regulation of anaphase-promoting complex-dependent catabolic process; positive regulation of blood vessel endothelial cell migration; positive regulation of cell growth; positive regulation of cell migration; positive regulation of D-glucose import across plasma membrane; positive regulation of endodeoxyribonuclease activity; positive regulation of endothelial cell migration; positive regulation of endothelial cell proliferation; positive regulation of fat cell differentiation; positive regulation of G1/S transition of mitotic cell cycle; positive regulation of gene expression; positive regulation of glucose metabolic process; positive regulation of glycogen biosynthetic process; positive regulation of lipid biosynthetic process; positive regulation of nitric oxide biosynthetic process; positive regulation of peptidyl-serine phosphorylation; positive regulation of phosphatidylinositol 3-kinase/protein kinase B signal transduction; positive regulation of proteasomal ubiquitin-dependent protein catabolic process; positive regulation of protein import into nucleus; positive regulation of protein localization to cell surface; positive regulation of protein localization to endoplasmic reticulum; positive regulation of protein localization to nucleus; positive regulation of protein localization to plasma membrane; positive regulation of protein metabolic process; positive regulation of smooth muscle cell proliferation; positive regulation of TORC1 signaling; positive regulation of TORC2 signaling; positive regulation of transcription by RNA polymerase II; protein localization to mitochondrion; protein phosphorylation; regulation of apoptotic process; regulation of cell migration; regulation of glycogen biosynthetic process; regulation of mRNA stability; regulation of neuron projection development; regulation of postsynapse organization; regulation of signal transduction by p53 class mediator; regulation of translation; regulation of tRNA methylation; regulation of type B pancreatic cell development; response to fluid shear stress; response to growth factor; response to growth hormone; response to heat; response to hormone; response to insulin-like growth factor stimulus; response to oxidative stress; response to UV-A; signal transduction; sphingosine-1-phosphate receptor signaling pathway; T cell costimulation; TOR signaling; vascular endothelial cell response to laminar fluid shear stress",
+            "Disease": "Breast Cancer ; Colorectal Cancer ; Cowden Syndrome 6 ; Ovarian Cancer ; Proteus Syndrome",
+            "Reference #": "P31749 (UniProtKB)",
+            "Alt. Names/Synonyms": "AKT; AKT serine/threonine kinase 1; AKT1; AKT1 kinase; AKT1m; MGC99656; PKB; PKB alpha; PKB-ALPHA; PRKBA; Protein kinase B; Protein kinase B alpha; Proto-oncogene c-Akt; RAC; rac protein kinase alpha; RAC-ALPHA; RAC-alpha serine/threonine-protein kinase; RAC-PK-alpha; serine-threonine protein kinase; v-akt murine thymoma viral oncogene homolog 1; v-akt murine thymoma viral oncogene-like protein 1",
+            "Gene Symbols": "AKT1",
+            "Molecular weight": "55,686 Da",
+            "Basal Isoelectric point": "5.75 Predict pI for various phosphorylation states",
+            "CST Pathways": "Adherens Junction Dynamics | Alzheimer's Disease | AMPK Signaling | Angiogenesis | Apoptosis Regulation | B Cell Receptor Signaling | ErbB/HER Signaling | ESC Pluripotency and Differentiation | G1/S Checkpoint | IL6 Signaling | Inhibition of Apoptosis | Microtubule Dynamics | Mitochondrial Control of Apoptosis | mTOR Signaling | NF-kB Signaling | PI3K/Akt Signaling | Protein Kinase C Signaling | T Cell Receptor Signaling | TGF-ß Signaling | Translation: eIF4E and p70S6K | Warburg Effect",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 1H10 1UNP 1UNQ 1UNR 2UVM 2UZR 2UZS 3CQU 3CQW 3MV5 3MVH 3O96 3OCB 3OW4 3QKK 3QKL 3QKM 4EJN 4EKK 4EKL 4GV1 5KCV 6BUU 6C0I 6CCY 6HHF 6HHG 6HHH 6HHI 6HHJ 6NPZ 6S9W 6S9X 7APJ 7MYX 7NH4 7NH5 8JOW 8UVY 8UW2 8UW7 8UW9 8ZPU | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "669",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=669&showAllSites=true",
+          "gene_symbol": "AKT2",
+          "uniprot_id": "P31751",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P31751",
+          "protein_name": "one of three AKT kinases of the AGC family which regulate many processes including metabolism, proliferation, cell survival, growth and angiogenesis. AKT2 plays critical roles in the regulation of glucose uptake and the development or maintenance of proper adipose tissue and islet mass for which other Akt paralogs are unable to fully compensate. Specifically involved in skeletal muscle differentiation. Amplified and overexpressed in human ovarian carcinoma cell lines and amplified in some primary ovarian and pancreatic tumors. Antisense blocks invasiveness in xenografts. Expressed in several insulin-responsive tissues, and one case of Type II diabetes has been associated with a likely LOF point mutation. Mouse mutants have defects in insulin response. Two alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P31751 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "AGC group; AKT family; EC 2.7.11.1; Kinase, protein; Oncoprotein; Protein kinase, AGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "19q13.2",
+            "Cellular Component": "cell cortex; cytoplasm; cytosol; early endosome; nucleoplasm; nucleus; plasma membrane; ruffle membrane",
+            "Molecular Function": "ATP binding; kinase activity; metal ion binding; molecular function activator activity; nucleotide binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "apoptotic process; cellular response to insulin stimulus; fat cell differentiation; glucose metabolic process; glycogen biosynthetic process; glycogen metabolic process; insulin receptor signaling pathway; intracellular signal transduction; mammary gland epithelial cell differentiation; negative regulation of apoptotic process; negative regulation of long-chain fatty acid import across plasma membrane; negative regulation of PERK-mediated unfolded protein response; positive regulation of blood vessel endothelial cell migration; positive regulation of cap-dependent translational initiation; positive regulation of cell migration; positive regulation of cell motility; positive regulation of D-glucose import across plasma membrane; positive regulation of fatty acid beta-oxidation; positive regulation of glucose metabolic process; positive regulation of glycogen biosynthetic process; positive regulation of protein targeting to membrane; protein modification process; protein stabilization; regulation of cell cycle; regulation of cell migration; regulation of translation; signal transduction",
+            "Disease": "Diabetes Mellitus, Noninsulin-dependent ; Hypoinsulinemic Hypoglycemia With Hemihypertrophy",
+            "Reference #": "P31751 (UniProtKB)",
+            "Alt. Names/Synonyms": "akt 2; AKT serine/threonine kinase 2; AKT2; HIHGHH; Murine thymoma viral (v-akt) homolog-2; PKB beta; PKBB; PKBBETA; PRKBB; Protein kinase Akt-2; Protein kinase B beta; putative v-akt murine thymoma viral oncoprotein 2; rac protein kinase beta; RAC-BETA; RAC-beta serine/threonine-protein kinase; RAC-PK-beta; v-akt murine thymoma viral oncogene homolog 2",
+            "Gene Symbols": "AKT2",
+            "Molecular weight": "55,769 Da",
+            "Basal Isoelectric point": "5.98 Predict pI for various phosphorylation states",
+            "CST Pathways": "Adherens Junction Dynamics | Alzheimer's Disease | AMPK Signaling | Angiogenesis | Apoptosis Regulation | B Cell Receptor Signaling | ErbB/HER Signaling | ESC Pluripotency and Differentiation | G1/S Checkpoint | IL6 Signaling | Inhibition of Apoptosis | Insulin Receptor Signaling | Microtubule Dynamics | Mitochondrial Control of Apoptosis | mTOR Signaling | NF-kB Signaling | PI3K/Akt Signaling | Protein Kinase C Signaling | T Cell Receptor Signaling | TGF-ß Signaling | Translation: eIF4E and p70S6K | Warburg Effect",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 1GZK 1GZN 1GZO 1MRV 1MRY 1O6K 1O6L 1P6S 2JDO 2JDR 2UW9 2X39 2XH5 3D0E 3E87 3E88 3E8D 8Q61 9C1W | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "670",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=670&showAllSites=true",
+          "gene_symbol": "AKT3",
+          "uniprot_id": "Q9Y243",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9Y243",
+          "protein_name": "one of three AKT kinases of the AGC family that plays a critical role in controlling the balance between survival and apoptosis. AKT3 is the least studied AKT isoform. It plays an important role in brain development and is crucial for the viability of malignant glioma cells. AKT3 isoform may also be the key molecule in up-regulation and down-regulation of MMP13 via IL13. Required for the coordination of mitochondrial biogenesis with growth factor-induced increases in cellular energy demands. Down-regulation by RNA interference reduces the expression of the phosphorylated form of BAD, resulting in the induction of caspase-dependent apoptosis. Belongs to the protein kinase superfamily. AGC Ser/Thr protein kinase family. RAC subfamily. In adult tissues, it is highly expressed in brain, lung and kidney, but weakly in heart, testis and liver. In fetal tissues, it is highly expressed in heart, liver and brain and not at all in kidney. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9Y243 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "AGC group; AKT family; EC 2.7.11.1; Kinase, protein; Protein kinase, AGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "1q43-q44",
+            "Cellular Component": "cytoplasm; cytosol; membrane; nucleoplasm; nucleus",
+            "Molecular Function": "ATP binding; kinase activity; nucleotide binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "insulin receptor signaling pathway; intracellular signal transduction; negative regulation of apoptotic process; negative regulation of cellular senescence; negative regulation of PERK-mediated unfolded protein response; positive regulation of angiogenesis; positive regulation of artery morphogenesis; positive regulation of blood vessel endothelial cell migration; positive regulation of cell migration; positive regulation of cell migration involved in sprouting angiogenesis; positive regulation of endothelial cell proliferation; positive regulation of vascular endothelial cell proliferation; regulation of mitochondrion organization; signal transduction",
+            "Disease": "Megalencephaly-polymicrogyria-polydactyly-hydrocephalus Syndrome 2",
+            "Reference #": "Q9Y243 (UniProtKB)",
+            "Alt. Names/Synonyms": "AKT serine/threonine kinase 3; AKT3; DKFZp434N0250; MPPH; MPPH2; PKB gamma; PKB-GAMMA; PKBG; PRKBG; Protein kinase Akt-3; Protein kinase B gamma; RAC-gamma; RAC-gamma serine/threonine protein kinase; RAC-gamma serine/threonine-protein kinase; RAC-PK-gamma; serine threonine protein kinase, Akt-3; STK-2; v-akt murine thymoma viral oncogene homolog 3 (protein kinase B, gamma)",
+            "Gene Symbols": "AKT3",
+            "Molecular weight": "55,775 Da",
+            "Basal Isoelectric point": "5.72 Predict pI for various phosphorylation states",
+            "CST Pathways": "Adherens Junction Dynamics | Alzheimer's Disease | AMPK Signaling | Angiogenesis | Apoptosis Regulation | B Cell Receptor Signaling | ErbB/HER Signaling | ESC Pluripotency and Differentiation | G1/S Checkpoint | IL6 Signaling | Inhibition of Apoptosis | Microtubule Dynamics | Mitochondrial Control of Apoptosis | mTOR Signaling | NF-kB Signaling | PI3K/Akt Signaling | Protein Kinase C Signaling | T Cell Receptor Signaling | TGF-ß Signaling | Translation: eIF4E and p70S6K | Warburg Effect",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 2X18 8ZXW | ENZYME | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P31749",
+        "P31751",
+        "Q9Y243"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P31749",
+        "https://www.uniprot.org/uniprot/P31751",
+        "https://www.uniprot.org/uniprot/Q9Y243"
+      ],
+      "psp_gene_symbols": [
+        "AKT1",
+        "AKT2",
+        "AKT3"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "BMI1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=BMI1&site-search-type=Products",
+      "phosphositeplus_id": "1286622",
+      "phosphositeplus_ids": [
+        "1286622"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=1286622",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1286622"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1286622",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1286622&showAllSites=true",
+          "gene_symbol": "BMI1",
+          "uniprot_id": "P35226",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P35226",
+          "protein_name": "Component of a Polycomb group (PcG) multiprotein PRC1-like complex, a complex class required to maintain the transcriptionally repressive state of many genes, including Hox genes, throughout development. PcG PRC1 complex acts via chromatin remodeling and modification of histones; it mediates monoubiquitination of histone H2A 'Lys-119', rendering chromatin heritably changed in its expressibility. The complex composed of RNF2, UB2D3 and BMI1 binds nucleosomes, and has activity only with nucleosomal histone H2A. In the PRC1-like complex, regulates the E3 ubiquitin-protein ligase activity of RNF2/RING2. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P35226 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 6.3.2.-; Ligase; Motility/polarity/chemotaxis; Oncoprotein; Ubiquitin conjugating system; Ubiquitin ligase",
+            "Chromosomal Location of human Ortholog": "10p12.2",
+            "Cellular Component": "chromatin; cytoplasm; heterochromatin; nuclear body; nucleoplasm; nucleus; PcG protein complex; PRC1 complex; ubiquitin ligase complex",
+            "Molecular Function": "chromatin binding; metal ion binding; promoter-specific chromatin binding; protein binding; RING-like zinc finger domain binding; ubiquitin-protein transferase activator activity; zinc ion binding",
+            "Biological Process": "chromatin organization; chromatin remodeling; hemopoiesis; heterochromatin formation; negative regulation of DNA-templated transcription; negative regulation of gene expression, epigenetic; negative regulation of transcription by RNA polymerase II; positive regulation of B cell proliferation; positive regulation of fibroblast proliferation; positive regulation of immature T cell proliferation in thymus; positive regulation of ubiquitin-protein transferase activity; regulation of gene expression; segment specification",
+            "Reference #": "P35226 (UniProtKB)",
+            "Alt. Names/Synonyms": "B lymphoma Mo-MLV insertion region 1 homolog; BMI1; BMI1 polycomb ring finger oncogene; BMI1 polycomb ring finger proto-oncogene; BMI1 proto-oncogene, polycomb ring finger; flvi-2/bmi-1; FLVI2/BMI1; MGC12685; murine leukemia viral (bmi-1) oncogene homolog; oncogene BMI-1; PCGF4; Polycomb complex protein BMI-1; polycomb group protein Bmi1; polycomb group ring finger 4; Polycomb group RING finger protein 4; RING finger protein 51; RNF51",
+            "Gene Symbols": "BMI1",
+            "Molecular weight": "36,949 Da",
+            "Basal Isoelectric point": "8.9 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 2H0D 2NA1 3RPG 4R8P 5FR6 6WI7 6WI8 7ND1 8PP7 9DBY 9DDE 9DGG | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P35226"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P35226"
+      ],
+      "psp_gene_symbols": [
+        "BMI1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "cdc25A",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=cdc25A&site-search-type=Products",
+      "phosphositeplus_id": "1198",
+      "phosphositeplus_ids": [
+        "1198"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=1198",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1198"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1198",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1198&showAllSites=true",
+          "gene_symbol": "CDC25A",
+          "uniprot_id": "P30304",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P30304",
+          "protein_name": "Tyrosine protein phosphatase which functions as a dosage-dependent inducer of mitotic progression. Directly dephosphorylates CDK1 and stimulates its kinase activity. Also dephosphorylates CDK2 in complex with cyclin E, in vitro. Belongs to the MPI phosphatase family. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P30304 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 3.1.3.48; Motility/polarity/chemotaxis; Protein phosphatase, dual-specificity",
+            "Chromosomal Location of human Ortholog": "3p21.31",
+            "Cellular Component": "cytoplasm; cytosol; nucleoplasm; nucleus",
+            "Molecular Function": "hydrolase activity; phosphoprotein phosphatase activity; protein binding; protein kinase binding; protein tyrosine phosphatase activity; protein-folding chaperone binding",
+            "Biological Process": "cell division; cell population proliferation; G1/S transition of mitotic cell cycle; G2/M transition of mitotic cell cycle; positive regulation of cell cycle G2/M phase transition; positive regulation of DNA replication; positive regulation of G2/M transition of mitotic cell cycle; positive regulation of G2/MI transition of meiotic cell cycle; regulation of cyclin-dependent protein serine/threonine kinase activity; response to radiation",
+            "Reference #": "P30304 (UniProtKB)",
+            "Alt. Names/Synonyms": "CDC25A; CDC25A2; cell division cycle 25 homolog A (S. pombe); cell division cycle 25A; Dual specificity phosphatase Cdc25A; M-phase inducer phosphatase 1; MPIP1",
+            "Gene Symbols": "CDC25A",
+            "Molecular weight": "59,087 Da",
+            "Basal Isoelectric point": "6.49 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | G2/M DNA Damage Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1C25 8ROZ | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P30304"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P30304"
+      ],
+      "psp_gene_symbols": [
+        "CDC25A"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "p27 Kip1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=p27 Kip1&site-search-type=Products",
+      "phosphositeplus_id": "1021",
+      "phosphositeplus_ids": [
+        "1021"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=1021",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1021"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1021",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1021&showAllSites=true",
+          "gene_symbol": "CDKN1B",
+          "uniprot_id": "P46527",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P46527",
+          "protein_name": "Important regulator of cell cycle progression. Inhibits the kinase activity of CDK2 bound to cyclin A, but has little inhibitory activity on CDK2 bound to SPDYA. Involved in G1 arrest. Potent inhibitor of cyclin E- and cyclin A-CDK2 complexes. Forms a complex with cyclin type D-CDK4 complexes and is involved in the assembly, stability, and modulation of CCND1-CDK4 complex activation. Acts either as an inhibitor or an activator of cyclin type D-CDK4 complexes depending on its phosphorylation state and/or stoichometry. Belongs to the CDI family. Expressed in all tissues tested. Highest levels in skeletal muscle, lowest in liver and kidney. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P46527 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Cell cycle regulation; Inhibitor; Oncoprotein; Protein kinase, regulatory subunit",
+            "Chromosomal Location of human Ortholog": "12p13.1",
+            "Cellular Component": "Cul4A-RING E3 ubiquitin ligase complex; cytoplasm; cytosol; endosome; nucleoplasm; nucleus",
+            "Molecular Function": "cyclin binding; cyclin-dependent protein kinase regulator activity; cyclin-dependent protein serine/threonine kinase inhibitor activity; molecular adaptor activity; molecular function inhibitor activity; protein binding; protein kinase binding; protein kinase inhibitor activity; protein phosphatase binding; protein-containing complex binding; protein-folding chaperone binding; ubiquitin ligase activator activity; ubiquitin protein ligase binding",
+            "Biological Process": "autophagic cell death; cellular response to lithium ion; cellular senescence; DNA damage response, signal transduction by p53 class mediator; G1/S transition of mitotic cell cycle; heart development; negative regulation of cardiac muscle tissue regeneration; negative regulation of cell growth; negative regulation of cell population proliferation; negative regulation of epithelial cell proliferation; negative regulation of growth; negative regulation of mitotic cell cycle; negative regulation of vascular associated smooth muscle cell proliferation; nuclear export; positive regulation of DNA replication; positive regulation of protein catabolic process; programmed cell death; regulation of cell cycle; regulation of cell cycle G1/S phase transition; regulation of cyclin-dependent protein serine/threonine kinase activity; regulation of G1/S transition of mitotic cell cycle; regulation of mitotic cell cycle phase transition; signal transduction",
+            "Disease": "Multiple Endocrine Neoplasia, Type Iv",
+            "Reference #": "P46527 (UniProtKB)",
+            "Alt. Names/Synonyms": "CDKN1B; CDKN4; CDN1B; cyclin dependent kinase inhibitor 1B; Cyclin-dependent kinase inhibitor 1B; cyclin-dependent kinase inhibitor 1B (p27, Kip1); Cyclin-dependent kinase inhibitor p27; KIP1; MEN1B; MEN4; p27Kip1",
+            "Gene Symbols": "CDKN1B",
+            "Molecular weight": "22,073 Da",
+            "Basal Isoelectric point": "6.54 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | G1/S Checkpoint | Growth And Differentiation Control by MAPKs | PI3K/Akt Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1H27 1JSU 2AST 5UQ3 6ATH 6P8E 6P8F 6P8G 7B5L 7B5M 7B5R 7OR8 7ORG 7ORH 7ORS 7ORT 8BYL | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P46527"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P46527"
+      ],
+      "psp_gene_symbols": [
+        "CDKN1B"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "p18 INK4C",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=p18 INK4C&site-search-type=Products",
+      "phosphositeplus_id": "6425004",
+      "phosphositeplus_ids": [
+        "6425004"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=6425004",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=6425004"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "6425004",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=6425004&showAllSites=true",
+          "gene_symbol": "CDKN2C",
+          "uniprot_id": "P42773",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P42773",
+          "protein_name": "Interacts strongly with CDK6, weakly with CDK4. Inhibits cell growth and proliferation with a correlated dependence on endogenous retinoblastoma protein RB. Belongs to the CDKN2 cyclin-dependent kinase inhibitor family. Highest levels found in skeletal muscle. Also found in pancreas and heart. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P42773 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Cell cycle regulation; Inhibitor; Protein kinase, regulatory subunit",
+            "Chromosomal Location of human Ortholog": "1p32.3",
+            "Cellular Component": "cytoplasm; cytosol; nucleus",
+            "Molecular Function": "cyclin-dependent protein serine/threonine kinase inhibitor activity; protein binding; protein kinase binding",
+            "Biological Process": "negative regulation of cell growth; negative regulation of cell population proliferation; oligodendrocyte differentiation; regulation of G1/S transition of mitotic cell cycle",
+            "Reference #": "P42773 (UniProtKB)",
+            "Alt. Names/Synonyms": "CDK6 inhibitor p18; CDKN2C; CDKN6; CDN2C; cyclin dependent kinase inhibitor 2C; cyclin-dependent inhibitor; Cyclin-dependent kinase 4 inhibitor C; Cyclin-dependent kinase 6 inhibitor; cyclin-dependent kinase 6 inhibitor p18; cyclin-dependent kinase inhibitor 2C (p18, inhibits CDK4); INK4C; p18; p18-INK4c; p18-INK6",
+            "Gene Symbols": "CDKN2C",
+            "Molecular weight": "18,127 Da",
+            "Basal Isoelectric point": "6.05 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1BU9 1G3N 1IHB 1MX2 1MX4 1MX6 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P42773"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P42773"
+      ],
+      "psp_gene_symbols": [
+        "CDKN2C"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "CDK4/6",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=CDK4/6&site-search-type=Products",
+      "phosphositeplus_id": "584;679",
+      "phosphositeplus_ids": [
+        "584",
+        "679"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=584",
+        "https://www.phosphosite.org/proteinAction.action?id=679"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "584",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=584&showAllSites=true",
+          "gene_symbol": "CDK4",
+          "uniprot_id": "P11802",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P11802",
+          "protein_name": "Ser/Thr-kinase component of cyclin D-CDK4 (DC) complexes that phosphorylate and inhibit members of the retinoblastoma (RB) protein family including RB1 and regulate the cell-cycle during G(1)/S transition. Phosphorylation of RB1 allows dissociation of the transcription factor E2F from the RB/E2F complexes and the subsequent transcription of E2F target genes which are responsible for the progression through the G(1) phase. Hypophosphorylates RB1 in early G(1) phase. Cyclin D-CDK4 complexes are major integrators of various mitogenenic and antimitogenic signals. Also phosphorylates SMAD3 in a cell-cycle-dependent manner and represses its transcriptional activity. Component of the ternary complex, cyclin D/CDK4/CDKN1B, required for nuclear translocation and activity of the cyclin D-CDK4 complex. Belongs to the protein kinase superfamily. CMGC Ser/Thr protein kinase family. CDC2/CDKX subfamily. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P11802 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CDK family; CDK/CDK4 subfamily; CDK4 subfamily; CMGC group; Cell cycle regulation; EC 2.7.11.22; Kinase, protein; Protein kinase, CMGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "12q14.1",
+            "Cellular Component": "bicellular tight junction; chromatin; cyclin D1-CDK4 complex; cyclin D2-CDK4 complex; cyclin-dependent protein kinase holoenzyme complex; cytoplasm; cytosol; nuclear membrane; nucleolus; nucleoplasm; nucleus; transcription regulator complex",
+            "Molecular Function": "ATP binding; cyclin binding; cyclin-dependent protein serine/threonine kinase activity; cyclin-dependent protein serine/threonine kinase regulator activity; kinase activity; nucleotide binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "cell division; G1/S transition of mitotic cell cycle; G2/M transition of mitotic cell cycle; positive regulation of cell population proliferation; positive regulation of fibroblast proliferation; positive regulation of G2/M transition of mitotic cell cycle; regulation of cell cycle; regulation of gene expression; regulation of transcription initiation by RNA polymerase II; response to xenobiotic stimulus; signal transduction",
+            "Disease": "Melanoma, Cutaneous Malignant, Susceptibility To, 3",
+            "Reference #": "P11802 (UniProtKB)",
+            "Alt. Names/Synonyms": "CDK4; cell division kinase 4; Cell division protein kinase 4; CMM3; cyclin dependent kinase 4; Cyclin-dependent kinase 4; melanoma cutaneous malignant, 3; MGC14458; PSK-J3",
+            "Gene Symbols": "CDK4",
+            "Molecular weight": "33,730 Da",
+            "Basal Isoelectric point": "6.52 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 1LD2 2W96 2W99 2W9F 2W9Z 3G33 5FWK 5FWL 5FWM 5FWP 6P8E 6P8F 6P8G 6P8H 7SJ3 | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "679",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=679&showAllSites=true",
+          "gene_symbol": "CDK6",
+          "uniprot_id": "Q00534",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q00534",
+          "protein_name": "Serine/threonine-protein kinase involved in the control of the cell cycle and differentiation; promotes G1/S transition. Phosphorylates pRB/RB1 and NPM1. Interacts with D-type G1 cyclins during interphase at G1 to form a pRB/RB1 kinase and controls the entrance into the cell cycle. Involved in initiation and maintenance of cell cycle exit during cell differentiation; prevents cell proliferation and regulates negatively cell differentiation, but is required for the proliferation of specific cell types (e.g. erythroid and hematopoietic cells). Essential for cell proliferation within the dentate gyrus of the hippocampus and the subventricular zone of the lateral ventricles. Required during thymocyte development. Promotes the production of newborn neurons, probably by modulating G1 length. Promotes, at least in astrocytes, changes in patterns of gene expression, changes in the actin cytoskeleton including loss of stress fibers, and enhanced motility during cell differentiation. Prevents myeloid differentiation by interfering with RUNX1 and reducing its transcription transactivation activity, but promotes proliferation of normal myeloid progenitors. Delays senescence. Promotes the proliferation of beta-cells in pancreatic islets of Langerhans. May play a role in the centrosome organization during the cell cycle phases. Belongs to the protein kinase superfamily. CMGC Ser/Thr protein kinase family. CDC2/CDKX subfamily. Expressed ubiquitously. Accumulates in squamous cell carcinomas, proliferating hematopoietic progenitor cells, beta-cells of pancreatic islets of Langerhans, and neuroblastomas. Reduced levels in differentiating cells. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q00534 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CDK family; CDK/CDK4 subfamily; CDK4 subfamily; CMGC group; Cell cycle regulation; EC 2.7.11.22; Kinase, protein; Protein kinase, CMGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "7q21.2",
+            "Cellular Component": "centrosome; cyclin D2-CDK6 complex; cyclin-dependent protein kinase holoenzyme complex; cytoplasm; cytosol; nucleoplasm; nucleus; ruffle",
+            "Molecular Function": "ATP binding; cyclin binding; cyclin-dependent protein serine/threonine kinase activity; FBXO family protein binding; kinase activity; nucleotide binding; protein binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "astrocyte development; cell dedifferentiation; cell differentiation; cell division; dentate gyrus development; DNA damage response; G1/S transition of mitotic cell cycle; G2/M transition of mitotic cell cycle; generation of neurons; gliogenesis; hemopoiesis; lateral ventricle development; negative regulation of cell cycle; negative regulation of cell differentiation; negative regulation of cell population proliferation; negative regulation of cellular senescence; negative regulation of epithelial cell proliferation; negative regulation of monocyte differentiation; negative regulation of myeloid cell differentiation; negative regulation of osteoblast differentiation; positive regulation of cell-matrix adhesion; positive regulation of fibroblast proliferation; regulation of cell cycle; regulation of cell motility; regulation of cell population proliferation; regulation of erythrocyte differentiation; regulation of gene expression; response to virus; signal transduction; type B pancreatic cell development",
+            "Disease": "Microcephaly 12, Primary, Autosomal Recessive",
+            "Reference #": "Q00534 (UniProtKB)",
+            "Alt. Names/Synonyms": "CDK6; CDKN6; Cell division protein kinase 6; cyclin dependent kinase 6; Cyclin-dependent kinase 6; MCPH12; MGC59692; PLSTIRE; Serine/threonine-protein kinase PLSTIRE",
+            "Gene Symbols": "CDK6",
+            "Molecular weight": "36,938 Da",
+            "Basal Isoelectric point": "6.02 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 1BI7 1BI8 1BLX 1G3N 1JOW 1XO2 2EUF 2F2C 3NUP 3NUX 4AUA 4EZ5 4P41 4TTH 5L2I 5L2S 5L2T 6OQL 6OQO 8I0M | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P11802",
+        "Q00534"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P11802",
+        "https://www.uniprot.org/uniprot/Q00534"
+      ],
+      "psp_gene_symbols": [
+        "CDK4",
+        "CDK6"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "CDK2",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=cdk2&site-search-type=Products",
+      "phosphositeplus_id": "583",
+      "phosphositeplus_ids": [
+        "583"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=583",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=583"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "583",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=583&showAllSites=true",
+          "gene_symbol": "CDK2",
+          "uniprot_id": "P24941",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P24941",
+          "protein_name": "Serine/threonine-protein kinase involved in the control of the cell cycle; essential for meiosis, but dispensable for mitosis. Phosphorylates CTNNB1, USP37, p53/TP53, NPM1, CDK7, RB1, BRCA2, MYC, NPAT, EZH2. Triggers duplication of centrosomes and DNA. Acts at the G1-S transition to promote the E2F transcriptional program and the initiation of DNA synthesis, and modulates G2 progression; controls the timing of entry into mitosis/meiosis by controlling the subsequent activation of cyclin B/CDK1 by phosphorylation, and coordinates the activation of cyclin B/CDK1 at the centrosome and in the nucleus. Crucial role in orchestrating a fine balance between cellular proliferation, cell death, and DNA repair in human embryonic stem cells (hESCs). Activity of CDK2 is maximal during S phase and G2; activated by interaction with cyclin E during the early stages of DNA synthesis to permit G1-S transition, and subsequently activated by cyclin A2 (cyclin A1 in germ cells) during the late stages of DNA replication to drive the transition from S phase to mitosis, the G2 phase. EZH2 phosphorylation promotes H3K27me3 maintenance and epigenetic gene silencing. Phosphorylates CABLES1. Cyclin E/CDK2 prevents oxidative stress-mediated Ras-induced senescence by phosphorylating MYC. Involved in G1-S phase DNA damage checkpoint that prevents cells with damaged DNA from initiating mitosis; regulates homologous recombination-dependent repair by phosphorylating BRCA2, this phosphorylation is low in S phase when recombination is active, but increases as cells progress towards mitosis. In response to DNA damage, double-strand break repair by homologous recombination a reduction of CDK2-mediated BRCA2 phosphorylation. Phosphorylation of RB1 disturbs its interaction with E2F1. NPM1 phosphorylation by cyclin E/CDK2 promotes its dissociates from unduplicated centrosomes, thus initiating centrosome duplication. Cyclin E/CDK2-mediated phosphorylation of NPAT at G1-S transition and until prophase stimulates the NPAT-mediated activation of histone gene transcription during S phase. Required for vitamin D-mediated growth inhibition by being itself inactivated. Involved in the nitric oxide- (NO) mediated signaling in a nitrosylation/activation-dependent manner. USP37 is activated by phosphorylation and thus triggers G1-S transition. CTNNB1 phosphorylation regulates insulin internalization. Phosphorylates FOXP3 and negatively regulates its transcriptional activity and protein stability. Phosphorylates CDK2AP2. Belongs to the protein kinase superfamily. CMGC Ser/Thr protein kinase family. CDC2/CDKX subfamily. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P24941 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "CDK family; CDK/CDK1 subfamily; CDK2 subfamily; CMGC group; Cell cycle regulation; EC 2.7.11.22; Kinase, protein; Protein kinase, CMGC; Protein kinase, Ser/Thr (non-receptor)",
+            "Chromosomal Location of human Ortholog": "12q13.2",
+            "Cellular Component": "Cajal body; centrosome; chromosome, telomeric region; ciliary basal body; condensed chromosome; cyclin A1-CDK2 complex; cyclin A2-CDK2 complex; cyclin E1-CDK2 complex; cyclin E2-CDK2 complex; cyclin-dependent protein kinase holoenzyme complex; cytoplasm; cytosol; endosome; nuclear envelope; nucleoplasm; nucleus; transcription regulator complex; X chromosome; Y chromosome",
+            "Molecular Function": "ATP binding; cyclin binding; cyclin-dependent protein kinase activity; cyclin-dependent protein serine/threonine kinase activity; histone kinase activity; kinase activity; magnesium ion binding; metal ion binding; nucleotide binding; protein binding; protein domain specific binding; protein kinase activity; protein serine kinase activity; protein serine/threonine kinase activity; transferase activity",
+            "Biological Process": "cell division; cellular response to nitric oxide; cellular senescence; centriole replication; centrosome duplication; chromatin remodeling; DNA damage response; DNA repair; DNA replication; G1/S transition of mitotic cell cycle; G2/M transition of mitotic cell cycle; meiotic cell cycle; mitotic G1 DNA damage checkpoint signaling; negative regulation of protein localization to chromatin; peptidyl-serine phosphorylation; positive regulation of cell population proliferation; positive regulation of DNA replication; positive regulation of heterochromatin formation; post-translational protein modification; protein phosphorylation; Ras protein signal transduction; regulation of anaphase-promoting complex-dependent catabolic process; regulation of heterochromatin organization; regulation of mitotic cell cycle; signal transduction; telomere maintenance in response to DNA damage",
+            "Reference #": "P24941 (UniProtKB)",
+            "Alt. Names/Synonyms": "cdc2-related protein kinase; CDK2; CDKN2; cell devision kinase 2; Cell division protein kinase 2; cyclin dependent kinase 2; Cyclin-dependent kinase 2; p33 protein kinase; p33(CDK2)",
+            "Gene Symbols": "CDK2",
+            "Molecular weight": "33,930 Da",
+            "Basal Isoelectric point": "8.8 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 1AQ1 1B38 1B39 1BUH 1CKP 1DI8 1DM2 1E1V 1E1X 1E9H 1F5Q 1FIN 1FQ1 1FVT 1FVV 1G5S 1GIH 1GII 1GIJ 1GY3 1GZ8 1H00 1H01 1H07 1H08 1H0U 1H0V 1H0W 1H1P 1H1Q 1H1R 1H1S 1H24 1H25 1H26 1H27 1H28 1HCK 1HCL 1JST 1JSU 1JSV 1JVP 1KE5 1KE6 1KE7 1KE8 1KE9 1OGU 1OI9 1OIQ 1OIR 1OIT 1OIU 1OIY 1OKV 1OKW 1OL1 1OL2 1P2A 1P5E 1PF8 1PKD 1PW2 1PXI 1PXJ 1PXK 1PXL 1PXM 1PXN 1PXO 1PXP 1PYE 1QMZ 1R78 1URC 1URW 1V1K 1VYW 1VYZ 1W0X 1W8C 1W98 1WCC 1Y8Y 1Y91 1YKR 2A0C 2A4L 2B52 2B53 2B54 2B55 2BHE 2BHH 2BKZ 2BPM 2BTR 2BTS 2C4G 2C5N 2C5O 2C5P 2C5V 2C5X 2C5Y 2C68 2C69 2C6I 2C6K 2C6L 2C6M 2C6O 2C6T 2CCH 2CCI 2CJM 2CLX 2DS1 2DUV 2EXM 2FVD 2G9X 2HIC 2I40 2IW6 2IW8 2IW9 2J9M 2JGZ 2R3F 2R3G 2R3H 2R3I 2R3J 2R3K 2R3L 2R3M 2R3N 2R3O 2R3P 2R3Q 2R3R 2R64 2UUE 2UZB 2UZD 2UZE 2UZL 2UZN 2UZO 2V0D 2V22 2VTA 2VTH 2VTI 2VTJ 2VTL 2VTM 2VTN 2VTO 2VTP 2VTQ 2VTR 2VTS 2VTT 2VU3 2VV9 2W05 2W06 2W17 2W1H 2WEV 2WFY 2WHB 2WIH 2WIP 2WMA 2WMB 2WPA 2WXV 2X1N 2XMY 2XNB 3BHT 3BHU 3BHV 3DDP 3DDQ 3DOG 3EID 3EJ1 3EOC 3EZR 3EZV 3F5X 3FZ1 3IG7 3IGG 3LE6 3LFN 3LFQ 3LFS 3MY5 3NS9 3PJ8 3PXF 3PXQ 3PXR 3PXY 3PXZ 3PY0 3PY1 3QHR 3QHW 3QL8 3QQF 3QQG 3QQH 3QQJ 3QQK 3QQL 3QRT 3QRU 3QTQ 3QTR 3QTS 3QTU 3QTW 3QTX 3QTZ 3QU0 3QWJ 3QWK 3QX2 3QX4 3QXO 3QXP 3QZF 3QZG 3QZH 3QZI 3R1Q 3R1S 3R1Y 3R28 3R6X 3R71 3R73 3R7E 3R7I 3R7U 3R7V 3R7Y 3R83 3R8L 3R8M 3R8P 3R8U 3R8V 3R8Z 3R9D 3R9H 3R9N 3R9O 3RAH 3RAI 3RAK 3RAL 3RJC 3RK5 3RK7 3RK9 3RKB 3RM6 3RM7 3RMF 3RNI 3ROY 3RPO 3RPR 3RPV 3RPY 3RZB 3S00 3S0O 3S1H 3S2P 3SQQ 3SW4 3SW7 3TI1 3TIY 3TIZ 3TNW 3ULI 3UNJ 3UNK 3WBL 4ACM 4BCK 4BCM 4BCN 4BCO 4BCP 4BCQ 4BGH 4BZD 4CFM 4CFN 4CFU 4CFV 4CFW 4CFX 4D1X 4D1Z 4EK3 4EK4 4EK5 4EK6 4EK8 4EOI 4EOJ 4EOK 4EOL 4EOM 4EON 4EOO 4EOP 4EOQ 4EOR 4EOS 4ERW 4EZ3 4EZ7 4FKG 4FKI 4FKJ 4FKL 4FKO 4FKP 4FKQ 4FKR 4FKS 4FKT 4FKU 4FKV 4FKW 4FX3 4GCJ 4I3Z 4II5 4KD1 4LYN 4NJ3 4RJ3 5A14 5AND 5ANE 5ANG 5ANI 5ANJ 5ANK 5ANO 5CYI 5D1J 5FP5 5FP6 5IEV 5IEX 5IEY 5IF1 5JQ5 5JQ8 5K4J 5L2W 5LMK 5LQE 5MHQ 5NEV 5OO0 5OO1 5OO3 5OSJ 5OSM 5UQ1 5UQ2 5UQ3 6ATH 6GUB 6GUC 6GUE 6GUF 6GUH 6GUK 6GVA 6INL 6JGM 6OQI 6P3W 6Q3B 6Q3C 6Q3F 6Q48 6Q49 6Q4A 6Q4B 6Q4C 6Q4D 6Q4E 6Q4F 6Q4G 6Q4H 6Q4I 6Q4J 6Q4K 6RIJ 6SG4 6YL1 6YL6 6YLK 7ACK 7B5L 7B5R 7B7S 7E34 7KJS 7M2F 7MKX 7NVQ 7QHL 7RA5 7RWE 7RWF 7RXO 7S4T 7S7A 7S84 7S85 7S9X 7SA0 7UG1 7UXI 7UXK 7VDU 7ZPC 8B54 8BYA 8BZO 8CUR 8ERD 8ERN 8FOW 8FP0 8FP5 8H6P 8H6T 8OR0 8OR4 8OY2 8ROZ 8RU8 8UV0 9ESJ 9ESK 9ESL 9ESN 9ESO 9ESP 9ESQ 9ESS 9ESU 9ESW 9ESY 9ESZ 9ET1 9ET2 9ET3 9ET5 9ET6 9ET7 9ET8 9ET9 9ETA 9ETB 9ETP 9GLA | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P24941"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P24941"
+      ],
+      "psp_gene_symbols": [
+        "CDK2"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Cyclin E",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=Cyclin E&site-search-type=Products",
+      "phosphositeplus_id": "1167",
+      "phosphositeplus_ids": [
+        "1167"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=1167",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1167"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1167",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1167&showAllSites=true",
+          "gene_symbol": "CCNE1",
+          "uniprot_id": "P24864",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P24864",
+          "protein_name": "Essential for the control of the cell cycle at the G1/S (start) transition. Belongs to the cyclin family. Cyclin E subfamily. Highly expressed in testis and placenta. Low levels in bronchial epithelial cells. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P24864 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Activator; Cell cycle regulation; Nuclear receptor co-regulator",
+            "Chromosomal Location of human Ortholog": "19q12",
+            "Cellular Component": "cyclin E1-CDK2 complex; cyclin-dependent protein kinase holoenzyme complex; cytoplasm; cytosol; microtubule organizing center; nucleoplasm; nucleus",
+            "Molecular Function": "cyclin-dependent protein serine/threonine kinase regulator activity; kinase activity; protein binding; protein kinase binding",
+            "Biological Process": "cell division; G1/S transition of mitotic cell cycle; positive regulation of G1/S transition of mitotic cell cycle; positive regulation of mesenchymal stem cell proliferation; protein phosphorylation",
+            "Reference #": "P24864 (UniProtKB)",
+            "Alt. Names/Synonyms": "CCNE; CCNE1; cyclin E1; cyclin Es; cyclin Et; G1/S-specific cyclin-E1; pCCNE1",
+            "Gene Symbols": "CCNE1",
+            "Molecular weight": "47,077 Da",
+            "Basal Isoelectric point": "5.7 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1W98 5L2W 7KJS 7XQK 8H4R 8H6P 8H6T | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | NURSA | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P24864"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P24864"
+      ],
+      "psp_gene_symbols": [
+        "CCNE1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "Abl",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=abl&site-search-type=Products",
+      "phosphositeplus_id": "4577",
+      "phosphositeplus_ids": [
+        "4577"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=4577",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=4577"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "4577",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=4577&showAllSites=true",
+          "gene_symbol": "ABL1",
+          "uniprot_id": "P00519",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P00519",
+          "protein_name": "an ubiquitous and highly conserved, proto-oncogenic non-receptor tyrosine kinase that plays a role in many key processes including cell growth and survival, actin remodeling, cell motility and adhesion, receptor endocytosis, autophagy, DNA damage response and apoptosis. Negatively regulated by its SH3 domain. Deletion of the SH3 domain turns ABL1 into an oncogene. The Philadelphia chromosome translocation t(9;22)(q34;q11) creates a Bcr-Abl fusion protein, responsible for 90% of chronic myelogenous leukemia (CML) and ~25% of acute lymphoblastic leukemia (ALL). Is inhibited by active-site binding small molecules such as imatinib (Gleevec), Dasatinib, Nilotinib, Bosutinib, Ponatinib, and Bafetinib. Compounds such as GNF-2 that bind the myristate-binding pocket of Abl allosterically inhibit Abl kinase activity. Modulates the endocytosis of activated B-cell receptor complexes. Regulates the CBL family of ubiquitin ligases that drive receptor down-regulation and actin remodeling. Phosphorylation of CBL leads to increased EGFR stability. Mitochondrial dysfunction and cell death in response to oxidative stress. Translocates to the nucleus where it has DNA-binding activity and is involved in DNA-damage response and apoptosis. Regulates T-cell differentiation in a TBX21-dependent manner. Two alternatively-spliced human isoforms have been described: one that is N-terminally myristoylated and the other not due to an alternative splicing of the first exon. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P00519 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Abl family; EC 2.7.10.2; Kinase, protein; Oncoprotein; Protein kinase, TK; Protein kinase, tyrosine (non-receptor); TK group",
+            "Chromosomal Location of human Ortholog": "9q34.12",
+            "Cellular Component": "actin cytoskeleton; cell leading edge; cytoplasm; cytoskeleton; cytosol; dendrite; glutamatergic synapse; growth cone; mitochondrion; neuronal cell body; nuclear body; nuclear membrane; nucleolus; nucleoplasm; nucleus; perinuclear region of cytoplasm; plasma membrane; postsynapse; postsynaptic density; protein-containing complex; ruffle",
+            "Molecular Function": "actin filament binding; actin monomer binding; ATP binding; bubble DNA binding; delta-catenin binding; DNA binding; enzyme activator activity; enzyme binding; ephrin receptor binding; four-way junction DNA binding; kinase activity; magnesium ion binding; manganese ion binding; metal ion binding; mitogen-activated protein kinase binding; neuropilin binding; nicotinate-nucleotide adenylyltransferase activity; non-membrane spanning protein tyrosine kinase activity; nucleotide binding; phosphotyrosine residue binding; proline-rich region binding; protein binding; protein domain specific binding; protein kinase activity; protein kinase binding; protein kinase C binding; protein serine/threonine kinase activator activity; protein serine/threonine kinase activity; protein tyrosine kinase activity; sequence-specific double-stranded DNA binding; SH2 domain binding; supercoiled DNA binding; syntaxin binding; transcription coactivator activity; transferase activity",
+            "Biological Process": "actin cytoskeleton organization; actin filament polymerization; apoptotic process; associative learning; autophagy; cardiac muscle cell proliferation; cell adhesion; cellular response to dopamine; cellular response to hydrogen peroxide; cellular response to oxidative stress; cellular response to oxygen-containing compound; cellular response to transforming growth factor beta stimulus; DNA conformation change; DNA damage response; DNA repair; endocytosis; endothelial cell migration; ephrin receptor signaling pathway; epidermal growth factor receptor signaling pathway; Fc-gamma receptor signaling pathway involved in phagocytosis; immune effector process; immune response-activating cell surface receptor signaling pathway; integrin-mediated signaling pathway; intracellular signal transduction; intrinsic apoptotic signaling pathway in response to DNA damage; learning or memory; mismatch repair; mitochondrial depolarization; mitotic cell cycle; myoblast proliferation; negative regulation of double-strand break repair via homologous recombination; negative regulation of long-term synaptic potentiation; negative regulation of ubiquitin-protein transferase activity; neuropilin signaling pathway; phagocytosis; phospholipase C-inhibiting G protein-coupled receptor signaling pathway; platelet-derived growth factor receptor signaling pathway; platelet-derived growth factor receptor-beta signaling pathway; podocyte apoptotic process; positive regulation of apoptotic process; positive regulation of blood vessel branching; positive regulation of cell adhesion; positive regulation of cell migration involved in sprouting angiogenesis; positive regulation of cytosolic calcium ion concentration; positive regulation of dendrite development; positive regulation of endothelial cell migration; positive regulation of establishment of T cell polarity; positive regulation of extracellular matrix organization; positive regulation of fibroblast proliferation; positive regulation of focal adhesion assembly; positive regulation of macromolecule biosynthetic process; positive regulation of neuron apoptotic process; positive regulation of phospholipase C/protein kinase C signal transduction; positive regulation of stress fiber assembly; positive regulation of substrate adhesion-dependent cell spreading; positive regulation of T cell migration; positive regulation of transcription by RNA polymerase II; positive regulation of vasoconstriction; protein localization to cytoplasmic microtubule plus-end; protein modification process; regulation of actin cytoskeleton organization; regulation of autophagy; regulation of axon extension; regulation of Cdc42 protein signal transduction; regulation of cell adhesion; regulation of cell cycle; regulation of cell differentiation; regulation of cell motility; regulation of DNA-templated transcription; regulation of endocytosis; regulation of gene expression; regulation of hematopoietic stem cell differentiation; regulation of intracellular signal transduction; regulation of microtubule polymerization; regulation of modification of synaptic structure; regulation of postsynaptic specialization assembly; regulation of T cell differentiation; response to endoplasmic reticulum stress; response to epinephrine; response to oxidative stress; response to xenobiotic stimulus; signal transduction in response to DNA damage; vascular endothelial cell response to oscillatory fluid shear stress",
+            "Disease": "Leukemia, Chronic Myeloid",
+            "Reference #": "P00519 (UniProtKB)",
+            "Alt. Names/Synonyms": "Abelson murine leukemia viral oncogene homolog 1; Abelson tyrosine-protein kinase 1; ABL; ABL proto-oncogene 1, non-receptor tyrosine kinase; ABL protooncogene 1 nonreceptor tyrosine kinase; ABL1; BCR-ABL; bcr/abl; bcr/c-abl oncogene protein; c-ABL; c-abl oncogene 1, receptor tyrosine kinase; c-ABL1; CHDSKM; JTK7; p150; Proto-oncogene c-Abl; proto-oncogene tyrosine-protein kinase ABL1; truncated ABL protooncogene 1 nonreceptor tyrosine kinase; Tyrosine-protein kinase ABL1; v-abl; v-abl Abelson murine leukemia viral oncogene homolog 1",
+            "Gene Symbols": "ABL1",
+            "Molecular weight": "122,873 Da",
+            "Basal Isoelectric point": "8.84 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | G1/S Checkpoint | G2/M DNA Damage Checkpoint | Microtubule Dynamics | SAPK/JNK Signaling Cascades | TGF-ß Signaling | Tyrosine Kinases & Substrates",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1AB2 1ABL 1AWO 1BBZ 1JU5 1OPL 1ZZP 2ABL 2E2B 2F4J 2FO0 2G1T 2G2F 2G2H 2G2I 2GQG 2HIW 2HYY 2HZ0 2HZ4 2HZI 2O88 2V7A 3CS9 3EG0 3EG1 3EG2 3EG3 3EGU 3K2M 3PYY 3QRI 3QRJ 3QRK 3T04 3UE4 3UYO 4J9B 4J9C 4J9D 4J9E 4J9F 4J9G 4J9H 4J9I 4JJB 4JJC 4JJD 4TWP 4WA9 4XEY 4YC8 4ZOG 5DC0 5DC4 5DC9 5HU9 5MO4 5NP2 5OAZ 6AMV 6AMW 6BL8 6NPE 6NPU 6NPV 6XR6 6XR7 6XRG 7CC2 7DT2 7N9G 7PVQ 7PVR 7PVS 7PVV 7PW2 7W7X 7W7Y 8H7F 8H7H 8I7S 8I7T 8I7Z 8SSN | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | Ensembl Gene"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P00519"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P00519"
+      ],
+      "psp_gene_symbols": [
+        "ABL1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "E2F",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=e2f&site-search-type=Products",
+      "phosphositeplus_id": "1087;12302;12304;2495;1534;17989;21602;16257",
+      "phosphositeplus_ids": [
+        "1087",
+        "12302",
+        "12304",
+        "2495",
+        "1534",
+        "17989",
+        "21602",
+        "16257"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1087",
+        "https://www.phosphosite.org/proteinAction.action?id=12302",
+        "https://www.phosphosite.org/proteinAction.action?id=12304",
+        "https://www.phosphosite.org/proteinAction.action?id=2495",
+        "https://www.phosphosite.org/proteinAction.action?id=1534",
+        "https://www.phosphosite.org/proteinAction.action?id=17989",
+        "https://www.phosphosite.org/proteinAction.action?id=21602",
+        "https://www.phosphosite.org/proteinAction.action?id=16257"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1087",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1087&showAllSites=true",
+          "gene_symbol": "E2F1",
+          "uniprot_id": "Q01094",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q01094",
+          "protein_name": "Transcription activator that binds DNA cooperatively with DP proteins through the E2 recognition site, 5'-TTTC[CG]CGC-3' found in the promoter region of a number of genes whose products are involved in cell cycle regulation or in DNA replication. The DRTF1/E2F complex functions in the control of cell-cycle progression from G1 to S phase. E2F1 binds preferentially RB1 in a cell-cycle dependent manner. It can mediate both cell proliferation and TP53/p53-dependent apoptosis. Blocks adipocyte differentiation by binding to specific promoters repressing CEBPA binding to its target gene promoters. Positively regulates transcription of RRP1B. Belongs to the E2F/DP family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q01094 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "DNA-binding; Transcription factor",
+            "Chromosomal Location of human Ortholog": "20q11.22",
+            "Cellular Component": "chromatin; cytoplasm; nuclear chromosome; nucleoplasm; nucleus; protein-containing complex; Rb-E2F complex; transcription regulator complex",
+            "Molecular Function": "cis-regulatory region sequence-specific DNA binding; DNA binding; DNA-binding transcription activator activity; DNA-binding transcription activator activity, RNA polymerase II-specific; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; DNA-binding transcription factor binding; molecular adaptor activity; protein binding; protein dimerization activity; protein kinase binding; RNA polymerase II cis-regulatory region sequence-specific DNA binding; sequence-specific DNA binding; sequence-specific double-stranded DNA binding; transcription cis-regulatory region binding",
+            "Biological Process": "apoptotic process; cellular response to fatty acid; cellular response to hypoxia; cellular response to nerve growth factor stimulus; DNA damage checkpoint signaling; DNA-templated transcription; intrinsic apoptotic signaling pathway in response to DNA damage; mRNA stabilization; negative regulation of DNA binding; negative regulation of DNA-templated transcription; negative regulation of fat cell differentiation; negative regulation of fat cell proliferation; negative regulation of transcription by RNA polymerase II; positive regulation of apoptotic process; positive regulation of DNA-templated transcription; positive regulation of fibroblast proliferation; positive regulation of gene expression; positive regulation of glial cell proliferation; positive regulation of transcription by RNA polymerase II; regulation of DNA-templated transcription; regulation of G1/S transition of mitotic cell cycle; regulation of transcription by RNA polymerase II; response to lipopolysaccharide; spermatogenesis",
+            "Reference #": "Q01094 (UniProtKB)",
+            "Alt. Names/Synonyms": "E2F transcription factor 1; E2F-1; E2F1; PBR3; PRB-binding protein E2F-1; RBAP-1; RBAP1; RBBP-3; RBBP3; RBP3; Retinoblastoma-associated protein 1; Retinoblastoma-binding protein 3; Transcription factor E2F1",
+            "Gene Symbols": "E2F1",
+            "Molecular weight": "46,920 Da",
+            "Basal Isoelectric point": "4.79 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1H24 1O9K 2AZE 5M9N 5M9O 6G0P 6ULS 9CB3 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "12302",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=12302&showAllSites=true",
+          "gene_symbol": "E2F2",
+          "uniprot_id": "Q14209",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q14209",
+          "protein_name": "Transcription activator that binds DNA cooperatively with DP proteins through the E2 recognition site, 5'-TTTC[CG]CGC-3' found in the promoter region of a number of genes whose products are involved in cell cycle regulation or in DNA replication. The DRTF1/E2F complex functions in the control of cell-cycle progression from g1 to s phase. E2F2 binds specifically to RB1 in a cell-cycle dependent manner. Belongs to the E2F/DP family. Highest level of expression is found in placenta, low levels are found in lung. Found as well in many immortalized cell lines derived from tumor samples. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q14209 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "DNA-binding",
+            "Chromosomal Location of human Ortholog": "1p36.12",
+            "Cellular Component": "chromatin; nucleoplasm; nucleus; RNA polymerase II transcription regulator complex; transcription regulator complex",
+            "Molecular Function": "cis-regulatory region sequence-specific DNA binding; DNA binding; DNA-binding transcription activator activity, RNA polymerase II-specific; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; protein binding; protein dimerization activity; RNA polymerase II cis-regulatory region sequence-specific DNA binding; RNA polymerase II transcription regulatory region sequence-specific DNA binding; sequence-specific DNA binding; sequence-specific double-stranded DNA binding",
+            "Biological Process": "negative regulation of sprouting angiogenesis; positive regulation of transcription by RNA polymerase II; regulation of DNA-templated transcription; regulation of transcription by RNA polymerase II; transcription initiation at RNA polymerase II promoter",
+            "Reference #": "Q14209 (UniProtKB)",
+            "Alt. Names/Synonyms": "E2F transcription factor 2; E2F-2; E2F2; Transcription factor E2F2",
+            "Gene Symbols": "E2F2",
+            "Molecular weight": "47,506 Da",
+            "Basal Isoelectric point": "4.75 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "12304",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=12304&showAllSites=true",
+          "gene_symbol": "E2F3",
+          "uniprot_id": "O00716",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O00716",
+          "protein_name": "Transcription activator that binds DNA cooperatively with DP proteins through the E2 recognition site, 5'-TTTC[CG]CGC-3' found in the promoter region of a number of genes whose products are involved in cell cycle regulation or in DNA replication. The DRTF1/E2F complex functions in the control of cell-cycle progression from G1 to S phase. E2F3 binds specifically to RB1 in a cell-cycle dependent manner. Inhibits adipogenesis, probably through the repression of CEBPA binding to its target gene promoters. Belongs to the E2F/DP family. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O00716 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Cell cycle regulation; DNA-binding; Transcription factor",
+            "Chromosomal Location of human Ortholog": "6p22.3",
+            "Cellular Component": "chromatin; nucleoplasm; nucleus; RNA polymerase II transcription regulator complex; transcription regulator complex",
+            "Molecular Function": "cis-regulatory region sequence-specific DNA binding; DNA binding; DNA-binding transcription activator activity, RNA polymerase II-specific; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; protein binding; protein dimerization activity; RNA polymerase II cis-regulatory region sequence-specific DNA binding; RNA polymerase II transcription regulatory region sequence-specific DNA binding; sequence-specific DNA binding; sequence-specific double-stranded DNA binding",
+            "Biological Process": "G1/S transition of mitotic cell cycle; negative regulation of fat cell proliferation; positive regulation of transcription by RNA polymerase II; positive regulation of vascular associated smooth muscle cell apoptotic process; protein import into nucleus; regulation of DNA-templated transcription; regulation of transcription by RNA polymerase II; transcription initiation at RNA polymerase II promoter",
+            "Reference #": "O00716 (UniProtKB)",
+            "Alt. Names/Synonyms": "DKFZp686C18211; E2F transcription factor 3; E2F-3; E2F3; KIAA0075; MGC104598; Transcription factor E2F3",
+            "Gene Symbols": "E2F3",
+            "Molecular weight": "49,162 Da",
+            "Basal Isoelectric point": "5.29 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "2495",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2495&showAllSites=true",
+          "gene_symbol": "E2F4",
+          "uniprot_id": "Q16254",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q16254",
+          "protein_name": "Transcription activator that binds DNA cooperatively with DP proteins through the E2 recognition site, 5'-TTTC[CG]CGC-3' found in the promoter region of a number of genes whose products are involved in cell cycle regulation or in DNA replication. The DRTF1/E2F complex functions in the control of cell-cycle progression from G1 to S phase. E2F4 binds with high affinity to RBL1 and RBL2. In some instances can also bind RB1. Specifically required for multiciliate cell differentiation: together with MCIDAS and E2F5, binds and activate genes required for centriole biogenesis. Belongs to the E2F/DP family. Found in all tissue examined including heart, brain, placenta, lung, liver, skeletal muscle, kidney and pancreas. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q16254 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "DNA-binding",
+            "Chromosomal Location of human Ortholog": "16q22.1",
+            "Cellular Component": "chromatin; cytoplasm; nucleoplasm; nucleus; RNA polymerase II transcription regulator complex; transcription regulator complex",
+            "Molecular Function": "chromatin binding; DNA binding; DNA-binding transcription activator activity, RNA polymerase II-specific; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; promoter-specific chromatin binding; protein binding; protein dimerization activity; protein domain specific binding; RNA polymerase II cis-regulatory region sequence-specific DNA binding; sequence-specific double-stranded DNA binding",
+            "Biological Process": "cell projection organization; centriole assembly; motile cilium assembly; multi-ciliated epithelial cell differentiation; negative regulation of DNA-templated transcription; positive regulation of transcription by RNA polymerase II; regulation of DNA-templated transcription; regulation of transcription by RNA polymerase II",
+            "Reference #": "Q16254 (UniProtKB)",
+            "Alt. Names/Synonyms": "E2F transcription factor 4; E2F transcription factor 4, p107/p130-binding; E2F-4; E2F4; p107/p130-binding protein; Transcription factor E2F4",
+            "Gene Symbols": "E2F4",
+            "Molecular weight": "43,960 Da",
+            "Basal Isoelectric point": "4.66 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1CF7 5TUU | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "1534",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1534&showAllSites=true",
+          "gene_symbol": "E2F5",
+          "uniprot_id": "Q15329",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q15329",
+          "protein_name": "Transcriptional activator that binds to E2F sites, these sites are present in the promoter of many genes whose products are involved in cell proliferation. May mediate growth factor-initiated signal transduction. It is likely involved in the early responses of resting cells to growth factor stimulation. Specifically required for multiciliate cell differentiation: together with MCIDAS and E2F5, binds and activate genes required for centriole biogenesis. Belongs to the E2F/DP family. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q15329 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "DNA-binding; Transcription factor",
+            "Chromosomal Location of human Ortholog": "8q21.2",
+            "Cellular Component": "chromatin; cytoplasm; nucleoplasm; nucleus; RNA polymerase II transcription regulator complex; transcription regulator complex",
+            "Molecular Function": "DNA binding; DNA-binding transcription activator activity; DNA-binding transcription activator activity, RNA polymerase II-specific; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; protein binding; protein dimerization activity; RNA polymerase II cis-regulatory region sequence-specific DNA binding",
+            "Biological Process": "cell projection organization; negative regulation of DNA-templated transcription; positive regulation of DNA-templated transcription; positive regulation of transcription by RNA polymerase II; regulation of DNA-templated transcription; regulation of transcription by RNA polymerase II",
+            "Reference #": "Q15329 (UniProtKB)",
+            "Alt. Names/Synonyms": "E2F transcription factor 5; E2F transcription factor 5, p130-binding; E2F-5; E2F5; Transcription factor E2F5",
+            "Gene Symbols": "E2F5",
+            "Molecular weight": "37,610 Da",
+            "Basal Isoelectric point": "4.94 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "17989",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=17989&showAllSites=true",
+          "gene_symbol": "E2F6",
+          "uniprot_id": "O75461",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O75461",
+          "protein_name": "Inhibitor of E2F-dependent transcription. Binds DNA cooperatively with DP proteins through the E2 recognition site, 5'-TTTC[CG]CGC-3'. Has a preference for the 5'-TTTCCCGC-3' E2F recognition site. E2F6 lacks the transcriptional activation and pocket protein binding domains. Appears to regulate a subset of E2F-dependent genes whose products are required for entry into the cell cycle but not for normal cell cycle progression. May silence expression via the recruitment of a chromatin remodeling complex containing histone H3-K9 methyltransferase activity. Overexpression delays the exit of cells from the S-phase. Belongs to the E2F/DP family. Expressed in all tissues examined. Highest levels in placenta, skeletal muscle, heart, ovary, kidney, small intestine and spleen. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O75461 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "DNA-binding; Transcription factor",
+            "Chromosomal Location of human Ortholog": "2p25.1",
+            "Cellular Component": "chromatin; MLL1 complex; nucleoplasm; nucleus; RNA polymerase II transcription regulator complex; transcription regulator complex",
+            "Molecular Function": "DNA binding; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; DNA-binding transcription repressor activity, RNA polymerase II-specific; protein binding; protein dimerization activity; RNA polymerase II cis-regulatory region sequence-specific DNA binding; RNA polymerase II transcription regulatory region sequence-specific DNA binding; sequence-specific DNA binding",
+            "Biological Process": "heterochromatin formation; negative regulation of DNA-templated transcription; negative regulation of transcription by RNA polymerase II; regulation of DNA-templated transcription; regulation of transcription by RNA polymerase II",
+            "Reference #": "O75461 (UniProtKB)",
+            "Alt. Names/Synonyms": "E2F transcription factor 6; E2F transcription factor 6, isoform 1; E2F-6; E2F6; MGC111545; Transcription factor E2F6",
+            "Gene Symbols": "E2F6",
+            "Molecular weight": "31,844 Da",
+            "Basal Isoelectric point": "5.35 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "21602",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=21602&showAllSites=true",
+          "gene_symbol": "E2F7",
+          "uniprot_id": "Q96AV8",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q96AV8",
+          "protein_name": "Atypical E2F transcription factor that participates in various processes such as angiogenesis, polyploidization of specialized cells and DNA damage response. Mainly acts as a transcription repressor that binds DNA independently of DP proteins and specifically recognizes the E2 recognition site 5'-TTTC[CG]CGC-3'. Directly represses transcription of classical E2F transcription factors such as E2F1. Acts as a regulator of S-phase by recognizing and binding the E2-related site 5'-TTCCCGCC-3' and mediating repression of G1/S-regulated genes. Plays a key role in polyploidization of cells in placenta and liver by regulating the endocycle, probably by repressing genes promoting cytokinesis and antagonizing action of classical E2F proteins (E2F1, E2F2 and/or E2F3). Required for placental development by promoting polyploidization of trophoblast giant cells. Also involved in DNA damage response: up-regulated by p53/TP53 following genotoxic stress and acts as a downstream effector of p53/TP53-dependent repression by mediating repression of indirect p53/TP53 target genes involved in DNA replication. Acts as a promoter of sprouting angiogenesis, possibly by acting as a transcription activator: associates with HIF1A, recognizes and binds the VEGFA promoter, which is different from canonical E2 recognition site, and activates expression of the VEGFA gene. Acts as a negative regulator of keratinocyte differentiation. Belongs to the E2F/DP family. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q96AV8 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Cell cycle regulation; DNA-binding; Transcription factor",
+            "Chromosomal Location of human Ortholog": "12q21.2",
+            "Cellular Component": "chromatin; nucleoplasm; nucleus; RNA polymerase II transcription regulator complex; transcription regulator complex",
+            "Molecular Function": "cis-regulatory region sequence-specific DNA binding; DNA binding; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; DNA-binding transcription repressor activity; DNA-binding transcription repressor activity, RNA polymerase II-specific; identical protein binding; protein binding; RNA polymerase II cis-regulatory region sequence-specific DNA binding; RNA polymerase II transcription regulatory region sequence-specific DNA binding; sequence-specific double-stranded DNA binding",
+            "Biological Process": "chorionic trophoblast cell differentiation; DNA damage response; DNA damage response, signal transduction by p53 class mediator; hepatocyte differentiation; negative regulation of cytokinesis; negative regulation of G1/S transition of mitotic cell cycle; negative regulation of transcription by RNA polymerase II; placenta development; positive regulation of DNA endoreduplication; positive regulation of macromolecule metabolic process; positive regulation of transcription by RNA polymerase II; regulation of DNA-templated transcription; regulation of transcription by RNA polymerase II; sprouting angiogenesis; trophoblast giant cell differentiation",
+            "Reference #": "Q96AV8 (UniProtKB)",
+            "Alt. Names/Synonyms": "E2F transcription factor 7; E2F-7; E2F7; FLJ12981; Transcription factor E2F7",
+            "Gene Symbols": "E2F7",
+            "Molecular weight": "99,888 Da",
+            "Basal Isoelectric point": "8.33 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "16257",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=16257&showAllSites=true",
+          "gene_symbol": "E2F8",
+          "uniprot_id": "A0AVK6",
+          "uniprot_url": "https://www.uniprot.org/uniprot/A0AVK6",
+          "protein_name": "Atypical E2F transcription factor that participates in various processes such as angiogenesis and polyploidization of specialized cells. Mainly acts as a transcription repressor that binds DNA independently of DP proteins and specifically recognizes the E2 recognition site 5'-TTTC[CG]CGC-3'. Directly represses transcription of classical E2F transcription factors such as E2F1: component of a feedback loop in S phase by repressing the expression of E2F1, thereby preventing p53/TP53-dependent apoptosis. Plays a key role in polyploidization of cells in placenta and liver by regulating the endocycle, probably by repressing genes promoting cytokinesis and antagonizing action of classical E2F proteins (E2F1, E2F2 and/or E2F3). Required for placental development by promoting polyploidization of trophoblast giant cells. Acts as a promoter of sprouting angiogenesis, possibly by acting as a transcription activator: associates with HIF1A, recognizes and binds the VEGFA promoter, which is different from canonical E2 recognition site, and activates expression of the VEGFA gene. Belongs to the E2F/DP family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "A0AVK6 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "DNA-binding; Transcription factor",
+            "Chromosomal Location of human Ortholog": "11p15.1",
+            "Cellular Component": "chromatin; nucleolus; nucleoplasm; nucleus; RNA polymerase II transcription regulator complex; transcription regulator complex",
+            "Molecular Function": "cis-regulatory region sequence-specific DNA binding; DNA binding; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; DNA-binding transcription repressor activity; DNA-binding transcription repressor activity, RNA polymerase II-specific; identical protein binding; protein binding; RNA polymerase II cis-regulatory region sequence-specific DNA binding; sequence-specific double-stranded DNA binding",
+            "Biological Process": "cell cycle comprising mitosis without cytokinesis; chorionic trophoblast cell differentiation; hepatocyte differentiation; negative regulation of cytokinesis; negative regulation of transcription by RNA polymerase II; placenta development; positive regulation of DNA endoreduplication; positive regulation of macromolecule metabolic process; positive regulation of transcription by RNA polymerase II; regulation of DNA-templated transcription; regulation of transcription by RNA polymerase II; sprouting angiogenesis; trophoblast giant cell differentiation",
+            "Reference #": "A0AVK6 (UniProtKB)",
+            "Alt. Names/Synonyms": "E2F family member 8; E2F transcription factor 8; E2F-8; E2F8; FLJ23311; Transcription factor E2F8",
+            "Gene Symbols": "E2F8",
+            "Molecular weight": "94,166 Da",
+            "Basal Isoelectric point": "9.11 Predict pI for various phosphorylation states",
+            "CST Pathways": "ErbB/HER Signaling | G1/S Checkpoint",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q01094",
+        "Q14209",
+        "O00716",
+        "Q16254",
+        "Q15329",
+        "O75461",
+        "Q96AV8",
+        "A0AVK6"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q01094",
+        "https://www.uniprot.org/uniprot/Q14209",
+        "https://www.uniprot.org/uniprot/O00716",
+        "https://www.uniprot.org/uniprot/Q16254",
+        "https://www.uniprot.org/uniprot/Q15329",
+        "https://www.uniprot.org/uniprot/O75461",
+        "https://www.uniprot.org/uniprot/Q96AV8",
+        "https://www.uniprot.org/uniprot/A0AVK6"
+      ],
+      "psp_gene_symbols": [
+        "E2F1",
+        "E2F2",
+        "E2F3",
+        "E2F4",
+        "E2F5",
+        "E2F6",
+        "E2F7",
+        "E2F8"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "FoxO1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=foxO1&site-search-type=Products",
+      "phosphositeplus_id": "973",
+      "phosphositeplus_ids": [
+        "973"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=973",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=973"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "973",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=973&showAllSites=true",
+          "gene_symbol": "FOXO1",
+          "uniprot_id": "Q12778",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q12778",
+          "protein_name": "Transcription factor that is the main target of insulin signaling and regulates metabolic homeostasis in response to oxidative stress. Binds to the insulin response element (IRE) with consensus sequence 5'-TT[G/A]TTTTG-3' and the related Daf-16 family binding element (DBE) with consensus sequence 5'-TT[G/A]TTTAC-3'. Activity suppressed by insulin. Main regulator of redox balance and osteoblast numbers and controls bone mass. Orchestrates the endocrine function of the skeleton in regulating glucose metabolism. Acts synergistically with ATF4 to suppress osteocalcin/BGLAP activity, increasing glucose levels and triggering glucose intolerance and insulin insensitivity. Also suppresses the transcriptional activity of RUNX2, an upstream activator of osteocalcin/BGLAP. In hepatocytes, promotes gluconeogenesis by acting together with PPARGC1A and CEBPA to activate the expression of genes such as IGFBP1, G6PC and PCK1. Important regulator of cell death acting downstream of CDK1, PKB/AKT1 and STK4/MST1. Promotes neural cell death. Mediates insulin action on adipose tissue. Regulates the expression of adipogenic genes such as PPARG during preadipocyte differentiation and, adipocyte size and adipose tissue-specific gene expression in response to excessive calorie intake. Regulates the transcriptional activity of GADD45A and repair of nitric oxide-damaged DNA in beta-cells. Required for the autophagic cell death induction in response to starvation or oxidative stress in a transcription-independent manner. Mediates the function of MLIP in cardiomyocytes hypertrophy and cardiac remodeling. Ubiquitous. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q12778 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "DNA-binding; Nuclear receptor co-regulator; Oncoprotein; Transcription factor",
+            "Chromosomal Location of human Ortholog": "13q14.11",
+            "Cellular Component": "chromatin; cytoplasm; cytosol; mitochondrion; nucleoplasm; nucleus",
+            "Molecular Function": "beta-catenin binding; chromatin binding; chromatin DNA binding; DNA binding; DNA-binding transcription activator activity, RNA polymerase II-specific; DNA-binding transcription factor activity; DNA-binding transcription factor activity, RNA polymerase II-specific; DNA-binding transcription repressor activity, RNA polymerase II-specific; nucleic acid binding; promoter-specific chromatin binding; protein binding; protein phosphatase 2A binding; RNA polymerase II cis-regulatory region sequence-specific DNA binding; sequence-specific DNA binding; ubiquitin protein ligase binding",
+            "Biological Process": "apoptotic process; autophagy; cell differentiation; cellular response to cold; cellular response to hyperoxia; cellular response to insulin stimulus; cellular response to nitric oxide; cellular response to oxidative stress; cellular response to starvation; DNA damage response; energy homeostasis; fat cell differentiation; insulin receptor signaling pathway; intracellular glucose homeostasis; negative regulation of apoptotic process; negative regulation of cardiac muscle hypertrophy in response to stress; negative regulation of DNA-templated transcription; negative regulation of fat cell differentiation; negative regulation of insulin secretion; negative regulation of stress-activated MAPK cascade; negative regulation of transcription by RNA polymerase II; positive regulation of apoptotic process; positive regulation of autophagy; positive regulation of DNA-templated transcription; positive regulation of gluconeogenesis; positive regulation of protein catabolic process; positive regulation of smooth muscle cell apoptotic process; positive regulation of transcription by RNA polymerase II; protein acetylation; regulation of DNA-templated transcription; regulation of transcription by RNA polymerase II; regulation of transcription initiation by RNA polymerase II; response to fatty acid; temperature homeostasis",
+            "Disease": "Rhabdomyosarcoma 2",
+            "Reference #": "Q12778 (UniProtKB)",
+            "Alt. Names/Synonyms": "FKH1; FKHR; forkhead box O1; forkhead box O1A (rhabdomyosarcoma); Forkhead box protein O1; Forkhead box protein O1A; forkhead homolog in rhabdomyosarcoma; Forkhead in rhabdomyosarcoma; forkhead, Drosophila, homolog of, in rhabdomyosarcoma; FOXO1; FOXO1A",
+            "Gene Symbols": "FOXO1",
+            "Molecular weight": "69,662 Da",
+            "Basal Isoelectric point": "6.28 Predict pI for various phosphorylation states",
+            "CST Pathways": "Apoptosis Regulation | B Cell Receptor Signaling | ErbB/HER Signaling | G1/S Checkpoint | Inhibition of Apoptosis | Insulin Receptor Signaling | PI3K/Akt Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 3CO6 3CO7 3COA 4LG0 5DUI 6LBI 6QVW 6QZR 6QZS 8A62 8A65 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | NURSA | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q12778"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q12778"
+      ],
+      "psp_gene_symbols": [
+        "FOXO1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "HDAC",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=hdac&site-search-type=Products",
+      "phosphositeplus_id": "1133;2472828;20788;3693;7494;985;986;5991;3021;4294;987",
+      "phosphositeplus_ids": [
+        "1133",
+        "2472828",
+        "20788",
+        "3693",
+        "7494",
+        "985",
+        "986",
+        "5991",
+        "3021",
+        "4294",
+        "987"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1133",
+        "https://www.phosphosite.org/proteinAction.action?id=2472828",
+        "https://www.phosphosite.org/proteinAction.action?id=20788",
+        "https://www.phosphosite.org/proteinAction.action?id=3693",
+        "https://www.phosphosite.org/proteinAction.action?id=7494",
+        "https://www.phosphosite.org/proteinAction.action?id=985",
+        "https://www.phosphosite.org/proteinAction.action?id=986",
+        "https://www.phosphosite.org/proteinAction.action?id=5991",
+        "https://www.phosphosite.org/proteinAction.action?id=3021",
+        "https://www.phosphosite.org/proteinAction.action?id=4294",
+        "https://www.phosphosite.org/proteinAction.action?id=987"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1133",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1133&showAllSites=true",
+          "gene_symbol": "HDAC1",
+          "uniprot_id": "Q13547",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q13547",
+          "protein_name": "a ubiquitous deacetylase enzyme responsible for the deacetylation of lysine residues on the N-terminal part of the core histones (H2A, H2B, H3 and H4). Histone deacetylation epigenetically represses transcription, regulating fundamental processes such as growth and development, cell cycle progression, etc. Histone deacetylases act via the formation of large multiprotein complexes such as the BRG1-RB1-HDAC1 complex, which negatively regulates the CREST-mediated transcription in resting neurons. Upon calcium stimulation, HDAC1 is released from the complex and CREBBP is recruited, which facilitates transcriptional activation. Component of a RCOR/GFI/KDM1A/HDAC complex that suppresses a number of genes implicated in multilineage blood cell development. Involved in CIART-mediated transcriptional repression of the circadian transcriptional activator CLOCK-ARNTL/BMAL1 heterodimer. Required for the transcriptional repression of circadian target genes, such as PER1. Belongs to the histone deacetylase family, HD type 1 subfamily. Expressed at elevated levels in heart, pancreas and testis, and lower levels in kidney and brain. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q13547 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Deacetylase; EC 3.5.1.98; Hydrolase; Nuclear receptor co-regulator",
+            "Chromosomal Location of human Ortholog": "1p35.2-p35.1",
+            "Cellular Component": "chromatin; cytoplasm; cytosol; heterochromatin; histone deacetylase complex; neuronal cell body; nucleoplasm; nucleus; NuRD complex; protein-containing complex; ribonucleoprotein complex; Sin3-type complex; transcription regulator complex; transcription repressor complex",
+            "Molecular Function": "chromatin binding; core promoter sequence-specific DNA binding; DNA binding; DNA-binding transcription factor binding; E-box binding; enzyme binding; histone deacetylase activity; histone deacetylase activity, hydrolytic mechanism; histone deacetylase binding; histone decrotonylase activity; hydrolase activity; hydrolase activity, acting on carbon-nitrogen (but not peptide) bonds, in linear amides; Krueppel-associated box domain binding; metal ion binding; NF-kappaB binding; p53 binding; promoter-specific chromatin binding; protein binding; protein decrotonylase activity; protein lysine deacetylase activity; protein lysine delactylase activity; RNA polymerase II cis-regulatory region sequence-specific DNA binding; RNA polymerase II core promoter sequence-specific DNA binding; RNA polymerase II-specific DNA-binding transcription factor binding; transcription cis-regulatory region binding; transcription corepressor activity; transcription corepressor binding",
+            "Biological Process": "cellular response to platelet-derived growth factor stimulus; chromatin organization; chromatin remodeling; circadian regulation of gene expression; circadian rhythm; DNA methylation-dependent constitutive heterochromatin formation; embryonic digit morphogenesis; epidermal cell differentiation; eyelid development in camera-type eye; fungiform papilla formation; hair follicle placode formation; heterochromatin formation; host-mediated suppression of viral transcription; negative regulation of androgen receptor signaling pathway; negative regulation of apoptotic process; negative regulation of canonical Wnt signaling pathway; negative regulation of cell migration; negative regulation of DNA-templated transcription; negative regulation of gene expression; negative regulation of gene expression, epigenetic; negative regulation of myotube differentiation; negative regulation of stem cell population maintenance; negative regulation of transcription by RNA polymerase II; negative regulation of transforming growth factor beta receptor signaling pathway; odontogenesis of dentin-containing tooth; positive regulation of cell population proliferation; positive regulation of DNA-templated transcription; positive regulation of gene expression; positive regulation of intracellular estrogen receptor signaling pathway; positive regulation of smooth muscle cell proliferation; positive regulation of stem cell population maintenance; positive regulation of transcription by RNA polymerase II; regulation of cell fate specification; regulation of embryonic development; regulation of stem cell differentiation; regulation of transcription by RNA polymerase II; rhythmic process",
+            "Reference #": "Q13547 (UniProtKB)",
+            "Alt. Names/Synonyms": "DKFZp686H12203; GON-10; HD1; HDAC 1; HDAC1; Histone deacetylase 1; KDAC1; reduced potassium dependency, yeast homolog-like 1; RPD3; RPD3L1",
+            "Gene Symbols": "HDAC1",
+            "Molecular weight": "55,103 Da",
+            "Basal Isoelectric point": "5.31 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | NF-kB Signaling | Protein Acetylation | Wnt/ß-Catenin Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1TYI 4BKX 5ICN 6Z2J 6Z2K 7AO8 7AO9 7AOA 7SME 8VPQ 8VRT | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | NURSA | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "2472828",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2472828&showAllSites=true",
+          "gene_symbol": "HDAC10",
+          "uniprot_id": "Q969S8",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q969S8",
+          "protein_name": "Polyamine deacetylase (PDAC), which acts preferentially on N(8)-acetylspermidine, and also on acetylcadaverine and acetylputrescine. Exhibits attenuated catalytic activity toward N(1),N(8)-diacetylspermidine and very low activity, if any, toward N(1)-acetylspermidine. Histone deacetylase activity has been observed in vitro. Has also been shown to be involved in MSH2 deacetylation. The physiological relevance of protein/histone deacetylase activity is unclear and could be very weak. May play a role in the promotion of late stages of autophagy, possibly autophagosome-lysosome fusion and/or lysosomal exocytosis in neuroblastoma cells. May play a role in homologous recombination. May promote DNA mismatch repair. Belongs to the histone deacetylase family. HD type 2 subfamily. Widely expressed with high levels in liver and kidney. 4 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q969S8 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Deacetylase; EC 3.5.1.98; Transcription factor",
+            "Chromosomal Location of human Ortholog": "22q13.33",
+            "Cellular Component": "cytoplasm; cytosol; histone deacetylase complex; nucleoplasm; nucleus",
+            "Molecular Function": "acetylputrescine deacetylase activity; acetylspermidine deacetylase activity; deacetylase activity; enzyme binding; histone deacetylase activity; histone deacetylase binding; hydrolase activity; metal ion binding; protein binding; protein lysine deacetylase activity; zinc ion binding",
+            "Biological Process": "autophagy; chromatin organization; chromatin remodeling; DNA damage response; DNA recombination; DNA repair; homologous recombination; macroautophagy; macromolecule deacylation; negative regulation of DNA-templated transcription; negative regulation of transcription by RNA polymerase II; polyamine deacetylation; positive regulation of mismatch repair; regulation of DNA-templated transcription; spermidine deacetylation",
+            "Reference #": "Q969S8 (UniProtKB)",
+            "Alt. Names/Synonyms": "DKFZp761B039; HD10; HDA10; HDAC10; Histone deacetylase 10; MGC149722; Polyamine deacetylase HDAC10",
+            "Gene Symbols": "HDAC10",
+            "Molecular weight": "71,445 Da",
+            "Basal Isoelectric point": "5.44 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | NF-kB Signaling | Protein Acetylation | Wnt/ß-Catenin Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "20788",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=20788&showAllSites=true",
+          "gene_symbol": "HDAC11",
+          "uniprot_id": "Q96DB2",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q96DB2",
+          "protein_name": "Responsible for the deacetylation of lysine residues on the N-terminal part of the core histones (H2A, H2B, H3 and H4). Histone deacetylation gives a tag for epigenetic repression and plays an important role in transcriptional regulation, cell cycle progression and developmental events. Histone deacetylases act via the formation of large multiprotein complexes. Belongs to the histone deacetylase family. Weakly expressed in most tissues. Strongly expressed in brain, heart, skeletal muscle, kidney and testis. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q96DB2 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Deacetylase; EC 3.5.1.98",
+            "Chromosomal Location of human Ortholog": "3p25.1",
+            "Cellular Component": "histone deacetylase complex; nucleoplasm; nucleus; plasma membrane",
+            "Molecular Function": "DNA-binding transcription factor binding; histone deacetylase activity; histone deacetylase activity, hydrolytic mechanism; hydrolase activity; protein binding",
+            "Biological Process": "chromatin organization; epigenetic regulation of gene expression",
+            "Reference #": "Q96DB2 (UniProtKB)",
+            "Alt. Names/Synonyms": "FLJ22237; HD11; HDA11; HDAC11; Histone deacetylase 11",
+            "Gene Symbols": "HDAC11",
+            "Molecular weight": "39,183 Da",
+            "Basal Isoelectric point": "7.17 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | NF-kB Signaling | Protein Acetylation | Wnt/ß-Catenin Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | ENZYME | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "3693",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=3693&showAllSites=true",
+          "gene_symbol": "HDAC2",
+          "uniprot_id": "Q92769",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q92769",
+          "protein_name": "Responsible for the deacetylation of lysine residues on the N-terminal part of the core histones (H2A, H2B, H3 and H4). Histone deacetylation gives a tag for epigenetic repression and plays an important role in transcriptional regulation, cell cycle progression and developmental events. Histone deacetylases act via the formation of large multiprotein complexes. Forms transcriptional repressor complexes by associating with MAD, SIN3, YY1 and N-COR. Interacts in the late S-phase of DNA-replication with DNMT1 in the other transcriptional repressor complex composed of DNMT1, DMAP1, PCNA, CAF1. Deacetylates TSHZ3 and regulates its transcriptional repressor activity. Component of a RCOR/GFI/KDM1A/HDAC complex that suppresses, via histone deacetylase (HDAC) recruitment, a number of genes implicated in multilineage blood cell development. May be involved in the transcriptional repression of circadian target genes, such as PER1, mediated by CRY1 through histone deacetylation. Involved in MTA1-mediated transcriptional corepression of TFF1 and CDKN1A. Belongs to the histone deacetylase family. HD type 1 subfamily. Widely expressed; lower levels in brain and lung. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q92769 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Deacetylase; EC 3.5.1.98; Nuclear receptor co-regulator; Transcription, coactivator/corepressor",
+            "Chromosomal Location of human Ortholog": "6q21",
+            "Cellular Component": "chromatin; chromosome, telomeric region; cytoplasm; ESC/E(Z) complex; histone deacetylase complex; nucleoplasm; nucleus; NuRD complex; protein-containing complex; Sin3-type complex",
+            "Molecular Function": "chromatin binding; deacetylase activity; DNA-binding transcription factor binding; enzyme binding; heat shock protein binding; histone binding; histone deacetylase activity; histone deacetylase activity, hydrolytic mechanism; histone deacetylase binding; histone decrotonylase activity; hydrolase activity; hydrolase activity, acting on carbon-nitrogen (but not peptide) bonds, in linear amides; NF-kappaB binding; promoter-specific chromatin binding; protein binding; protein de-2-hydroxyisobutyrylase activity; protein decrotonylase activity; protein lysine deacetylase activity; protein lysine delactylase activity; RNA polymerase II-specific DNA-binding transcription factor binding; transcription coregulator binding",
+            "Biological Process": "behavioral response to ethanol; cardiac muscle hypertrophy; cellular response to dopamine; cellular response to heat; cellular response to hydrogen peroxide; cellular response to retinoic acid; cellular response to transforming growth factor beta stimulus; chromatin organization; chromatin remodeling; circadian regulation of gene expression; dendrite development; embryonic digit morphogenesis; epidermal cell differentiation; eyelid development in camera-type eye; fungiform papilla formation; hair follicle placode formation; heterochromatin formation; negative regulation of apoptotic process; negative regulation of cell migration; negative regulation of dendritic spine development; negative regulation of DNA-templated transcription; negative regulation of neuron projection development; negative regulation of stem cell population maintenance; negative regulation of transcription by competitive promoter binding; negative regulation of transcription by RNA polymerase II; negative regulation of transforming growth factor beta receptor signaling pathway; odontogenesis of dentin-containing tooth; positive regulation of cell population proliferation; positive regulation of DNA-templated transcription; positive regulation of epithelial to mesenchymal transition; positive regulation of interleukin-1 production; positive regulation of intracellular estrogen receptor signaling pathway; positive regulation of male mating behavior; positive regulation of oligodendrocyte differentiation; positive regulation of proteolysis; positive regulation of stem cell population maintenance; positive regulation of transcription by RNA polymerase II; positive regulation of tumor necrosis factor production; progesterone receptor signaling pathway; regulation of cell fate specification; regulation of embryonic development; regulation of stem cell differentiation; response to alcohol; response to amphetamine; response to amyloid-beta; response to caffeine; response to cocaine; response to hyperoxia; response to lipopolysaccharide; response to nicotine; response to xenobiotic stimulus; rhythmic process",
+            "Reference #": "Q92769 (UniProtKB)",
+            "Alt. Names/Synonyms": "HD2; HDAC 2; HDAC2; Histone deacetylase 2; KDAC2; RPD3; transcriptional regulator homolog RPD3; YAF1; YY1-associated factor 1",
+            "Gene Symbols": "HDAC2",
+            "Molecular weight": "55,364 Da",
+            "Basal Isoelectric point": "5.59 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | NF-kB Signaling | Protein Acetylation | Wnt/ß-Catenin Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | CCLE | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 3MAX 4LXZ 4LY1 5IWG 5IX0 6G3O 6WBW 6WBZ 6WHN 6WHO 6WHQ 6WHZ 6WI3 6XDM 6XEB 6XEC 7JS8 7KBG 7KBH 7LTG 7LTK 7LTL 7MOS 7MOT 7MOX 7MOY 7MOZ 7ZZO 7ZZP 7ZZR 7ZZS 7ZZT 7ZZU 7ZZW 8A0B 8BPA 8BPB 8BPC 8C60 9DTQ 9GGM | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | NURSA | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "7494",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=7494&showAllSites=true",
+          "gene_symbol": "HDAC3",
+          "uniprot_id": "O15379",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O15379",
+          "protein_name": "Responsible for the deacetylation of lysine residues on the N-terminal part of the core histones (H2A, H2B, H3 and H4), and some other non-histone substrates. Histone deacetylation gives a tag for epigenetic repression and plays an important role in transcriptional regulation, cell cycle progression and developmental events. Histone deacetylases act via the formation of large multiprotein complexes. Participates in the BCL6 transcriptional repressor activity by deacetylating the H3 'Lys-27' (H3K27) on enhancer elements, antagonizing EP300 acetyltransferase activity and repressing proximal gene expression. Probably participates in the regulation of transcription through its binding to the zinc-finger transcription factor YY1; increases YY1 repression activity. Required to repress transcription of the POU1F1 transcription factor. Acts as a molecular chaperone for shuttling phosphorylated NR2C1 to PML bodies for sumoylation. Contributes, together with XBP1 isoform 1, to the activation of NFE2L2-mediated HMOX1 transcription factor gene expression in a PI(3)K/mTORC2/Akt-dependent signaling pathway leading to endothelial cell (EC) survival under disturbed flow/oxidative stress. Regulates both the transcriptional activation and repression phases of the circadian clock in a deacetylase activity-independent manner. During the activation phase, promotes the accumulation of ubiquitinated ARNTL/BMAL1 at the E-boxes and during the repression phase, blocks FBXL3-mediated CRY1/2 ubiquitination and promotes the interaction of CRY1 and ARNTL/BMAL1. The NCOR1-HDAC3 complex regulates the circadian expression of the core clock gene ARTNL/BMAL1 and the genes involved in lipid metabolism in the liver. Serves as a corepressor of RARA, causing its deacetylation and inhibition of RARE DNA element binding. In association with RARA, plays a role in the repression of microRNA-10a and thereby in the inflammatory response. Belongs to the histone deacetylase family. HD type 1 subfamily. Widely expressed. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O15379 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Apoptosis; Cell cycle regulation; Deacetylase; EC 3.5.1.98; Nuclear receptor co-regulator; Transcription, coactivator/corepressor",
+            "Chromosomal Location of human Ortholog": "5q31.3",
+            "Cellular Component": "chromatin; chromosome; cytoplasm; cytosol; histone deacetylase complex; mitotic spindle; nucleoplasm; nucleus; transcription repressor complex",
+            "Molecular Function": "chromatin binding; chromatin DNA binding; cyclin binding; deacetylase activity; DNA binding; DNA-binding transcription factor binding; enzyme binding; GTPase binding; histone deacetylase activity; histone deacetylase activity, hydrolytic mechanism; histone deacetylase binding; histone decrotonylase activity; histone isonicotinyllysine deisonicotinylase activity; hydrolase activity; NF-kappaB binding; protein binding; protein de-2-hydroxyisobutyrylase activity; protein decrotonylase activity; protein lysine deacetylase activity; protein lysine delactylase activity; transcription corepressor activity; transcription corepressor binding; ubiquitin-specific protease binding",
+            "Biological Process": "cellular response to fluid shear stress; cellular response to mechanical stimulus; cellular response to parathyroid hormone stimulus; chromatin organization; circadian regulation of gene expression; cornified envelope assembly; DNA repair-dependent chromatin remodeling; epidermis development; epigenetic regulation of gene expression; establishment of mitotic spindle orientation; establishment of skin barrier; gene expression; in utero embryonic development; negative regulation of apoptotic process; negative regulation of DNA-templated transcription; negative regulation of interleukin-1 production; negative regulation of JNK cascade; negative regulation of myotube differentiation; negative regulation of protein export from nucleus; negative regulation of transcription by RNA polymerase II; negative regulation of transcription initiation by RNA polymerase II; negative regulation of tumor necrosis factor production; positive regulation of cold-induced thermogenesis; positive regulation of ferroptosis; positive regulation of neuron apoptotic process; positive regulation of protein import into nucleus; positive regulation of protein phosphorylation; positive regulation of protein ubiquitination; positive regulation of TOR signaling; positive regulation of transcription by RNA polymerase II; positive regulation of type B pancreatic cell apoptotic process; protein deacetylation; random inactivation of X chromosome; regulation of circadian rhythm; regulation of protein stability; response to dexamethasone; response to nutrient levels; response to xenobiotic stimulus; rhythmic process; spindle assembly",
+            "Reference #": "O15379 (UniProtKB)",
+            "Alt. Names/Synonyms": "HD3; HDAC3; Histone deacetylase 3; KDAC3; RPD3; RPD3-2; SMAP45",
+            "Gene Symbols": "HDAC3",
+            "Molecular weight": "48,848 Da",
+            "Basal Isoelectric point": "4.98 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | NF-kB Signaling | Protein Acetylation | Wnt/ß-Catenin Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | NURSA | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "985",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=985&showAllSites=true",
+          "gene_symbol": "HDAC4",
+          "uniprot_id": "P56524",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P56524",
+          "protein_name": "Responsible for the deacetylation of lysine residues on the N-terminal part of the core histones (H2A, H2B, H3 and H4). Histone deacetylation gives a tag for epigenetic repression and plays an important role in transcriptional regulation, cell cycle progression and developmental events. Histone deacetylases act via the formation of large multiprotein complexes. Involved in muscle maturation via its interaction with the myocyte enhancer factors such as MEF2A, MEF2C and MEF2D. Involved in the MTA1-mediated epigenetic regulation of ESR1 expression in breast cancer. Deacetylates HSPA1A and HSPA1B at 'Lys-77' leading to their preferential binding to co-chaperone STUB1. Belongs to the histone deacetylase family. HD type 2 subfamily. Ubiquitous. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P56524 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Deacetylase; EC 3.5.1.98; Hydrolase; Nuclear receptor co-regulator",
+            "Chromosomal Location of human Ortholog": "2q37.3",
+            "Cellular Component": "chromatin; cytoplasm; cytosol; histone deacetylase complex; nuclear speck; nucleoplasm; nucleus; transcription repressor complex",
+            "Molecular Function": "DNA-binding transcription activator activity; DNA-binding transcription factor binding; histone binding; histone deacetylase activity; histone deacetylase activity, hydrolytic mechanism; histone deacetylase binding; hydrolase activity; identical protein binding; metal ion binding; molecular adaptor activity; potassium ion binding; protein binding; protein lysine deacetylase activity; RNA polymerase II cis-regulatory region sequence-specific DNA binding; RNA polymerase II-specific DNA-binding transcription factor binding; SUMO transferase activity; transcription cis-regulatory region binding; zinc ion binding",
+            "Biological Process": "B cell activation; B cell differentiation; cardiac muscle hypertrophy in response to stress; chromatin organization; chromatin remodeling; epigenetic regulation of gene expression; inflammatory response; negative regulation of gene expression, epigenetic; negative regulation of glycolytic process; negative regulation of myotube differentiation; negative regulation of protein refolding; negative regulation of transcription by competitive promoter binding; negative regulation of transcription by RNA polymerase II; nervous system development; positive regulation of cell population proliferation; positive regulation of DNA-templated transcription; positive regulation of protein sumoylation; positive regulation of transcription by RNA polymerase II; protein sumoylation; response to denervation involved in regulation of muscle adaptation; response to interleukin-1; type I interferon-mediated signaling pathway",
+            "Disease": "Chromosome 2q37 Deletion Syndrome ; Neurodevelopmental Disorder With Central Hypotonia And Dysmorphic Facies",
+            "Reference #": "P56524 (UniProtKB)",
+            "Alt. Names/Synonyms": "AHO3; BDMR; HA6116; HD4; HDAC-4; HDAC-A; HDAC4; HDACA; Histone deacetylase 4; histone deacetylase A; KIAA0288",
+            "Gene Symbols": "HDAC4",
+            "Molecular weight": "119,040 Da",
+            "Basal Isoelectric point": "6.49 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | NF-kB Signaling | Protein Acetylation | Wnt/ß-Catenin Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2H8N 2O94 2VQJ 2VQM 2VQO 2VQQ 2VQV 2VQW 3UXG 3UZD 3V31 4CBT 4CBY 5A2S 5ZOO 5ZOP 6FYZ 7XUZ 8PDE | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "986",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=986&showAllSites=true",
+          "gene_symbol": "HDAC5",
+          "uniprot_id": "Q9UQL6",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9UQL6",
+          "protein_name": "Responsible for the deacetylation of lysine residues on the N-terminal part of the core histones (H2A, H2B, H3 and H4). Histone deacetylation gives a tag for epigenetic repression and plays an important role in transcriptional regulation, cell cycle progression and developmental events. Histone deacetylases act via the formation of large multiprotein complexes. Involved in muscle maturation by repressing transcription of myocyte enhancer MEF2C. During muscle differentiation, it shuttles into the cytoplasm, allowing the expression of myocyte enhancer factors. Involved in the MTA1-mediated epigenetic regulation of ESR1 expression in breast cancer. Serves as a corepressor of RARA and causes its deacetylation. In association with RARA, plays a role in the repression of microRNA-10a and thereby in the inflammatory response. Belongs to the histone deacetylase family. HD type 2 subfamily. Ubiquitous. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9UQL6 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Deacetylase; EC 3.5.1.98; Hydrolase",
+            "Chromosomal Location of human Ortholog": "17q21.31",
+            "Cellular Component": "cytoplasm; cytosol; histone deacetylase complex; nuclear speck; nucleoplasm; nucleus; protein-containing complex",
+            "Molecular Function": "chromatin binding; DNA-binding transcription activator activity; DNA-binding transcription factor binding; histone deacetylase activity; histone deacetylase activity, hydrolytic mechanism; histone deacetylase binding; hydrolase activity; identical protein binding; metal ion binding; protein binding; protein kinase C binding; protein lysine deacetylase activity; RNA polymerase II cis-regulatory region sequence-specific DNA binding; RNA polymerase II-specific DNA-binding transcription factor binding; transcription cis-regulatory region binding; transcription corepressor binding",
+            "Biological Process": "B cell activation; B cell differentiation; cellular response to insulin stimulus; cellular response to lipopolysaccharide; chromatin organization; epigenetic regulation of gene expression; inflammatory response; negative regulation of cell migration involved in sprouting angiogenesis; negative regulation of DNA-templated transcription; negative regulation of gene expression, epigenetic; negative regulation of myotube differentiation; negative regulation of transcription by RNA polymerase II; neuron differentiation; positive regulation of transcription by RNA polymerase II; regulation of myotube differentiation; response to activity; response to cocaine; response to xenobiotic stimulus",
+            "Reference #": "Q9UQL6 (UniProtKB)",
+            "Alt. Names/Synonyms": "Antigen NY-CO-9; FLJ90614; HD5; HDAC5; Histone deacetylase 5; KIAA0600; NY-CO-9",
+            "Gene Symbols": "HDAC5",
+            "Molecular weight": "121,978 Da",
+            "Basal Isoelectric point": "5.83 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | NF-kB Signaling | Protein Acetylation | Wnt/ß-Catenin Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 5UWI 8Q9P | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "5991",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=5991&showAllSites=true",
+          "gene_symbol": "HDAC6",
+          "uniprot_id": "Q9UBN7",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9UBN7",
+          "protein_name": "Deacetylates a wide range of non-histone substrates. Plays a central role in microtubule-dependent cell motility by mediating deacetylation of tubulin. Required for cilia disassembly via deacetylation of alpha-tubulin. Alpha-tubulin deacetylation results in destabilization of dynamic microtubules. Promotes deacetylation of CTTN, leading to actin polymerization, promotion of autophagosome-lysosome fusion and completion of autophagy. Deacetylates SQSTM1. Deacetylates peroxiredoxins PRDX1 and PRDX2, decreasing their reducing activity. Deacetylates antiviral protein RIGI in the presence of viral mRNAs which is required for viral RNA detection by RIG. Sequentially deacetylates and polyubiquitinates DNA mismatch repair protein MSH2 which leads to MSH2 degradation, reducing cellular sensitivity to DNA-damaging agents and decreasing cellular DNA mismatch repair activities. Deacetylates DNA mismatch repair protein MLH1 which prevents recruitment of the MutL alpha complex (formed by the MLH1-PMS2 heterodimer) to the MutS alpha complex (formed by the MSH2-MSH6 heterodimer), leading to tolerance of DNA damage. Deacetylates RHOT1/MIRO1 which blocks mitochondrial transport and mediates axon growth inhibition. Deacetylates transcription factor SP1 which leads to increased expression of ENG, positively regulating angiogenesis. Deacetylates KHDRBS1/SAM68 which regulates alternative splicing by inhibiting the inclusion of CD44 alternate exons. Acts as a valine sensor by binding to valine through the primate-specific SE14 repeat region. In valine deprivation conditions, translocates from the cytoplasm to the nucleus where it deacetylates TET2 which promotes TET2-dependent DNA demethylation, leading to DNA damage. Promotes odontoblast differentiation following IPO7-mediated nuclear import and subsequent repression of RUNX2 expression. In addition to its protein deacetylase activity, plays a key role in the degradation of misfolded proteins: when misfolded proteins are too abundant to be degraded by the chaperone refolding system and the ubiquitin-proteasome, mediates the transport of misfolded proteins to a cytoplasmic juxtanuclear structure called aggresome. Probably acts as an adapter that recognizes polyubiquitinated misfolded proteins and targets them to the aggresome, facilitating their clearance by autophagy. Involved in the MTA1-mediated epigenetic regulation of ESR1 expression in breast cancer. (Microbial infection) Deacetylates the SARS-CoV-2 N protein which promotes association of the viral N protein with human G3BP1, leading to disruption of cellular stress granule formation and facilitating viral replication. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9UBN7 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Deacetylase; EC 3.5.1.98; Nuclear receptor co-regulator; Ubiquitin conjugating system",
+            "Chromosomal Location of human Ortholog": "Xp11.23",
+            "Cellular Component": "aggresome; axon; axon cytoplasm; caveola; cell body; cell leading edge; centrosome; ciliary basal body; cilium; cytoplasm; cytoplasmic ubiquitin ligase complex; cytoskeleton; cytosol; dendrite; histone deacetylase complex; inclusion body; microtubule; microtubule associated complex; microtubule cytoskeleton; multivesicular body; neuron projection; nucleus; perikaryon; perinuclear region of cytoplasm; plasma membrane bounded cell projection; protein-containing complex",
+            "Molecular Function": "acetylspermidine deacetylase activity; actin binding; alpha-tubulin binding; ATPase inhibitor activity; beta-catenin binding; beta-tubulin binding; deacetylase activity; dynein complex binding; enzyme binding; histone deacetylase activity; histone deacetylase binding; Hsp90 protein binding; hydrolase activity; metal ion binding; microtubule binding; misfolded protein binding; peroxidase inhibitor activity; polyubiquitin modification-dependent protein binding; protein binding; protein lysine deacetylase activity; RNA polymerase II cis-regulatory region sequence-specific DNA binding; tau protein binding; transcription corepressor binding; transferase activity; tubulin deacetylase activity; ubiquitin binding; ubiquitin protein ligase activity; ubiquitin protein ligase binding; zinc ion binding",
+            "Biological Process": "aggresome assembly; autophagy; axonal transport of mitochondrion; cellular response to heat; cellular response to hydrogen peroxide; cellular response to topologically incorrect protein; chromatin organization; cilium assembly; cilium disassembly; epidermal growth factor receptor signaling pathway; intracellular protein transport; lysosome localization; macroautophagy; macromolecule deacylation; mitochondrion localization; negative regulation of aggrephagy; negative regulation of cellular component organization; negative regulation of DNA-templated transcription; negative regulation of gene expression, epigenetic; negative regulation of hydrogen peroxide metabolic process; negative regulation of protein-containing complex assembly; negative regulation of protein-containing complex disassembly; negative regulation of proteolysis; polyamine deacetylation; polyubiquitinated misfolded protein transport; positive regulation of cellular component organization; positive regulation of epithelial cell migration; positive regulation of intracellular estrogen receptor signaling pathway; positive regulation of protein oligomerization; positive regulation of type 2 mitophagy; protein deacetylation; protein destabilization; protein quality control for misfolded or incompletely synthesized proteins; regulation of androgen receptor signaling pathway; regulation of autophagy; regulation of autophagy of mitochondrion; regulation of macroautophagy; regulation of microtubule-based movement; regulation of microtubule-based process; regulation of protein stability; response to misfolded protein; response to stress; spermidine deacetylation; tubulin deacetylation; type 2 mitophagy",
+            "Disease": "Chondrodysplasia With Platyspondyly, Distinctive Brachydactyly, Hydrocephaly, And Microphthalmia",
+            "Reference #": "Q9UBN7 (UniProtKB)",
+            "Alt. Names/Synonyms": "CPBHM; FLJ16239; HD6; HDAC6; Histone deacetylase 6; JM21; KIAA0901; PPP1R90; protein phosphatase 1, regulatory subunit 90; Tubulin-lysine deacetylase HDAC6",
+            "Gene Symbols": "HDAC6",
+            "Molecular weight": "131,419 Da",
+            "Basal Isoelectric point": "5.14 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | NF-kB Signaling | Protein Acetylation | Wnt/ß-Catenin Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 3C5K 3GV4 3PHD 5B8D 5EDU 5KH3 5KH7 5KH9 5WBN 5WPB 6CE6 6CE8 6CEA 6CEC 6CED 6CEE 6CEF 7ZYU 8G43 8G44 8G45 | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | NURSA | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "3021",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=3021&showAllSites=true",
+          "gene_symbol": "HDAC7",
+          "uniprot_id": "Q8WUI4",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q8WUI4",
+          "protein_name": "Responsible for the deacetylation of lysine residues on the N-terminal part of the core histones (H2A, H2B, H3 and H4). Histone deacetylation gives a tag for epigenetic repression and plays an important role in transcriptional regulation, cell cycle progression and developmental events. Histone deacetylases act via the formation of large multiprotein complexes. Involved in muscle maturation by repressing transcription of myocyte enhancer factors such as MEF2A, MEF2B and MEF2C. During muscle differentiation, it shuttles into the cytoplasm, allowing the expression of myocyte enhancer factors. May be involved in Epstein-Barr virus (EBV) latency, possibly by repressing the viral BZLF1 gene. Positively regulates the transcriptional repressor activity of FOXP3. Serves as a corepressor of RARA, causing its deacetylation and inhibition of RARE DNA element binding. In association with RARA, plays a role in the repression of microRNA-10a and thereby in the inflammatory response. Belongs to the histone deacetylase family. HD type 2 subfamily. 10 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q8WUI4 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Deacetylase; EC 3.5.1.98; Hydrolase",
+            "Chromosomal Location of human Ortholog": "12q13.11",
+            "Cellular Component": "cytoplasm; cytosol; histone deacetylase complex; nucleoplasm; nucleus",
+            "Molecular Function": "14-3-3 protein binding; chromatin binding; DNA-binding transcription factor binding; histone deacetylase activity; histone deacetylase activity, hydrolytic mechanism; hydrolase activity; metal ion binding; protein binding; protein kinase binding; protein kinase C binding; protein lysine deacetylase activity; SUMO transferase activity; transcription corepressor activity",
+            "Biological Process": "chromatin organization; epigenetic regulation of gene expression; negative regulation of interleukin-2 production; negative regulation of non-canonical NF-kappaB signal transduction; negative regulation of osteoblast differentiation; negative regulation of transcription by RNA polymerase II; positive regulation of cell migration involved in sprouting angiogenesis; protein deacetylation; protein sumoylation; regulation of mRNA processing",
+            "Reference #": "Q8WUI4 (UniProtKB)",
+            "Alt. Names/Synonyms": "DKFZp586J0917; FLJ99588; HD7; HD7a; HDAC7; HDAC7A; Histone deacetylase 7; Histone deacetylase 7A",
+            "Gene Symbols": "HDAC7",
+            "Molecular weight": "102,927 Da",
+            "Basal Isoelectric point": "7.24 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | NF-kB Signaling | Protein Acetylation | Wnt/ß-Catenin Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2NVR 2PQO 2PQP 3C0Y 3C0Z 3C10 3ZNR 3ZNS 8Q9Q | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "4294",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=4294&showAllSites=true",
+          "gene_symbol": "HDAC8",
+          "uniprot_id": "Q9BY41",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9BY41",
+          "protein_name": "Responsible for the deacetylation of lysine residues on the N-terminal part of the core histones (H2A, H2B, H3 and H4). Histone deacetylation gives a tag for epigenetic repression and plays an important role in transcriptional regulation, cell cycle progression and developmental events. Histone deacetylases act via the formation of large multiprotein complexes. Also involved in the deacetylation of cohesin complex protein SMC3 regulating release of cohesin complexes from chromatin. May play a role in smooth muscle cell contractility. Belongs to the histone deacetylase family. HD type 1 subfamily. Weakly expressed in most tissues. Expressed at higher level in heart, brain, kidney and pancreas and also in liver, lung, placenta, prostate and kidney. 6 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9BY41 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Deacetylase; EC 3.5.1.98; Hydrolase",
+            "Chromosomal Location of human Ortholog": "Xq13.1",
+            "Cellular Component": "chromosome; cytoplasm; histone deacetylase complex; nuclear chromosome; nucleoplasm; nucleus",
+            "Molecular Function": "DNA-binding transcription factor binding; histone deacetylase activity; histone deacetylase activity, hydrolytic mechanism; histone decrotonylase activity; Hsp70 protein binding; Hsp90 protein binding; hydrolase activity; metal ion binding; protein binding; protein decrotonylase activity; protein lysine deacetylase activity",
+            "Biological Process": "chromatin organization; heterochromatin formation; mitotic sister chromatid cohesion; negative regulation of protein ubiquitination; negative regulation of transcription by RNA polymerase II; regulation of protein stability; regulation of telomere maintenance",
+            "Disease": "Cornelia De Lange Syndrome 5",
+            "Reference #": "Q9BY41 (UniProtKB)",
+            "Alt. Names/Synonyms": "CDA07; CDLS5; HD8; HDAC8; HDACL1; Histone deacetylase 8; histone deacetylase-like 1; KDAC8; MRXS6; RPD3; WTS",
+            "Gene Symbols": "HDAC8",
+            "Molecular weight": "41,758 Da",
+            "Basal Isoelectric point": "5.36 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | NF-kB Signaling | Protein Acetylation | Wnt/ß-Catenin Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1T64 1T67 1T69 1VKG 1W22 2V5W 2V5X 3EW8 3EWF 3EZP 3EZT 3F06 3F07 3F0R 3MZ3 3MZ4 3MZ6 3MZ7 3RQD 3SFF 3SFH 4QA0 4QA1 4QA2 4QA3 4QA4 4QA5 4QA6 4QA7 4RN0 4RN1 4RN2 5BWZ 5D1B 5D1C 5D1D 5DC5 5DC6 5DC7 5DC8 5FCW 5THS 5THT 5THU 5THV 5VI6 6HSK 6ODA 6ODB 6ODC 7JVU 7JVV 7JVW | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "987",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=987&showAllSites=true",
+          "gene_symbol": "HDAC9",
+          "uniprot_id": "Q9UKV0",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9UKV0",
+          "protein_name": "Responsible for the deacetylation of lysine residues on the N-terminal part of the core histones (H2A, H2B, H3 and H4). Histone deacetylation gives a tag for epigenetic repression and plays an important role in transcriptional regulation, cell cycle progression and developmental events. Represses MEF2-dependent transcription. Isoform 3 lacks active site residues and therefore is catalytically inactive. Represses MEF2-dependent transcription by recruiting HDAC1 and/or HDAC3. Seems to inhibit skeletal myogenesis and to be involved in heart development. Protects neurons from apoptosis, both by inhibiting JUN phosphorylation by MAPK10 and by repressing JUN transcription via HDAC1 recruitment to JUN promoter. Belongs to the histone deacetylase family. HD type 2 subfamily. Broadly expressed, with highest levels in brain, heart, muscle and testis. Isoform 3 is present in human bladder carcinoma cells (at protein level). 11 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9UKV0 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Deacetylase; EC 3.5.1.98; Transcription, coactivator/corepressor",
+            "Chromosomal Location of human Ortholog": "7p21.1",
+            "Cellular Component": "cytoplasm; histone deacetylase complex; histone methyltransferase complex; nucleoplasm; nucleus; transcription regulator complex",
+            "Molecular Function": "DNA-binding transcription factor binding; histone deacetylase activity; histone deacetylase activity, hydrolytic mechanism; histone deacetylase binding; histone H3K14 deacetylase activity, hydrolytic mechanism; histone H3K9 deacetylase activity, hydrolytic mechanism; histone H4K16 deacetylase activity, hydrolytic mechanism; hydrolase activity; metal ion binding; protein binding; protein kinase C binding; protein lysine deacetylase activity; RNA polymerase II-specific DNA-binding transcription factor binding; transcription corepressor activity",
+            "Biological Process": "B cell activation; B cell differentiation; cellular response to insulin stimulus; cholesterol homeostasis; chromatin organization; epigenetic regulation of gene expression; heart development; inflammatory response; negative regulation of cytokine production; negative regulation of DNA-templated transcription; negative regulation of gene expression, epigenetic; negative regulation of transcription by RNA polymerase II; positive regulation of cell migration involved in sprouting angiogenesis; regulation of skeletal muscle fiber development; regulation of striated muscle cell differentiation",
+            "Disease": "Auriculocondylar Syndrome 4",
+            "Reference #": "Q9UKV0 (UniProtKB)",
+            "Alt. Names/Synonyms": "DKFZp779K1053; HD7; HD7b; HD9; HDAC; HDAC7; HDAC7B; HDAC9; HDAC9B; HDAC9FL; HDRP; histone deacetylase 4/5-related protein; histone deacetylase 7; Histone deacetylase 7B; Histone deacetylase 9; Histone deacetylase-related protein; KIAA0744; MEF-2 interacting transcription repressor (MITR) protein; MEF2-interacting transcription repressor MITR; MITR",
+            "Gene Symbols": "HDAC9",
+            "Molecular weight": "111,297 Da",
+            "Basal Isoelectric point": "6.4 Predict pI for various phosphorylation states",
+            "CST Pathways": "G1/S Checkpoint | Notch Signaling | Protein Acetylation | Wnt/ß-Catenin Signaling",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 8Q9N 8Q9R | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q13547",
+        "Q969S8",
+        "Q96DB2",
+        "Q92769",
+        "O15379",
+        "P56524",
+        "Q9UQL6",
+        "Q9UBN7",
+        "Q8WUI4",
+        "Q9BY41",
+        "Q9UKV0"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q13547",
+        "https://www.uniprot.org/uniprot/Q969S8",
+        "https://www.uniprot.org/uniprot/Q96DB2",
+        "https://www.uniprot.org/uniprot/Q92769",
+        "https://www.uniprot.org/uniprot/O15379",
+        "https://www.uniprot.org/uniprot/P56524",
+        "https://www.uniprot.org/uniprot/Q9UQL6",
+        "https://www.uniprot.org/uniprot/Q9UBN7",
+        "https://www.uniprot.org/uniprot/Q8WUI4",
+        "https://www.uniprot.org/uniprot/Q9BY41",
+        "https://www.uniprot.org/uniprot/Q9UKV0"
+      ],
+      "psp_gene_symbols": [
+        "HDAC1",
+        "HDAC10",
+        "HDAC11",
+        "HDAC2",
+        "HDAC3",
+        "HDAC4",
+        "HDAC5",
+        "HDAC6",
+        "HDAC7",
+        "HDAC8",
+        "HDAC9"
+      ],
+      "has_uniprot_match": true
+    }
+  ],
+  "protein_module_count": 16,
+  "scraped_at_utc": "2026-03-24T15:30:52.514005+00:00",
+  "uniprot_enriched_at": "2026-03-24T17:09:45.730089+00:00"
+}

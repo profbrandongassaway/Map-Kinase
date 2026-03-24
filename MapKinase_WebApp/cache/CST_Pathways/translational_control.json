@@ -1,0 +1,1344 @@
+{
+  "pathway_name": "Translational Control",
+  "pathway_url": "https://www.cellsignal.com/pathways/translational-control",
+  "source_sections": [
+    "RNA Regulation, Translational Control, and Protein Synthesis"
+  ],
+  "protein_modules": [
+    {
+      "label": "48S",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=48s&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "eIF5",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=eIF5&site-search-type=Products",
+      "phosphositeplus_id": "1205;12280;5768",
+      "phosphositeplus_ids": [
+        "1205",
+        "12280",
+        "5768"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1205",
+        "https://www.phosphosite.org/proteinAction.action?id=12280",
+        "https://www.phosphosite.org/proteinAction.action?id=5768"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1205",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1205&showAllSites=true",
+          "gene_symbol": "EIF5",
+          "uniprot_id": "P55010",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P55010",
+          "protein_name": "Catalyzes the hydrolysis of GTP bound to the 40S ribosomal initiation complex (40S.mRNA.Met-tRNA[F].eIF-2.GTP) with the subsequent joining of a 60S ribosomal subunit resulting in the release of eIF-2 and the guanine nucleotide. The subsequent joining of a 60S ribosomal subunit results in the formation of a functional 80S initiation complex (80S.mRNA.Met-tRNA[F]). Belongs to the eIF-2-beta/eIF-5 family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P55010 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "14q32.32",
+            "Cellular Component": "cytoplasm; cytosol; nucleus; synapse",
+            "Molecular Function": "eukaryotic initiation factor eIF2 binding; GDP-dissociation inhibitor activity; GTP binding; GTPase activator activity; nucleotide binding; protein binding; translation initiation factor activity",
+            "Biological Process": "formation of cytoplasmic translation initiation complex; regulation of translational initiation; ribosome assembly; translation; translational initiation",
+            "Reference #": "P55010 (UniProtKB)",
+            "Alt. Names/Synonyms": "eIF-5; EIF-5A; EIF5; Eukaryotic translation initiation factor 5; IF5",
+            "Gene Symbols": "EIF5",
+            "Molecular weight": "49,223 Da",
+            "Basal Isoelectric point": "5.41 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translation: eIF2 | Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2E9H 2G2K 2IU1 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "12280",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=12280&showAllSites=true",
+          "gene_symbol": "EIF5A",
+          "uniprot_id": "P63241",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P63241",
+          "protein_name": "mRNA-binding protein involved in translation elongation. Has an important function at the level of mRNA turnover, probably acting downstream of decapping. Involved in actin dynamics and cell cycle progression, mRNA decay and probably in a pathway involved in stress response and maintenance of cell wall integrity. With syntenin SDCBP, functions as a regulator of p53/TP53 and p53/TP53-dependent apoptosis. Regulates also TNF-alpha-mediated apoptosis. Mediates effects of polyamines on neuronal process extension and survival. May play an important role in brain development and function, and in skeletal muscle stem cell differentiation. Also described as a cellular cofactor of human T-cell leukemia virus type I (HTLV-1) Rex protein and of human immunodeficiency virus type 1 (HIV-1) Rev protein, essential for mRNA export of retroviral transcripts. Belongs to the eIF-5A family. Expressed in umbilical vein endothelial cells and several cancer cell lines (at protein level). 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P63241 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "17p13.1",
+            "Cellular Component": "annulate lamellae; cytoplasm; cytosol; endoplasmic reticulum membrane; nuclear pore; nucleoplasm; nucleus; synapse",
+            "Molecular Function": "protein binding; ribosome binding; RNA binding; translation elongation factor activity; U6 snRNA binding",
+            "Biological Process": "cellular response to virus; positive regulation of intrinsic apoptotic signaling pathway by p53 class mediator; positive regulation of transcription by RNA polymerase II; positive regulation of translational elongation; translation; translational elongation; tumor necrosis factor-mediated signaling pathway",
+            "Disease": "Faundes-banka Syndrome",
+            "Reference #": "P63241 (UniProtKB)",
+            "Alt. Names/Synonyms": "eIF-4D; eIF-5A; eIF-5A-1; eIF-5A1; EIF5A; EIF5A1; eIF5AI; eukaryotic initiation factor 5A; Eukaryotic initiation factor 5A isoform 1; eukaryotic translation initiation factor 5A; Eukaryotic translation initiation factor 5A-1; IF5A1; MGC104255; MGC99547; Rev-binding factor",
+            "Gene Symbols": "EIF5A",
+            "Molecular weight": "16,832 Da",
+            "Basal Isoelectric point": "5.07 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translation: eIF2 | Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1FH4 3CPF 5DLQ | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "5768",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=5768&showAllSites=true",
+          "gene_symbol": "EIF5B",
+          "uniprot_id": "O60841",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O60841",
+          "protein_name": "Plays a role in translation initiation. Translational GTPase that catalyzes the joining of the 40S and 60S subunits to form the 80S initiation complex with the initiator methionine-tRNA in the P-site base paired to the start codon. GTP binding and hydrolysis induces conformational changes in the enzyme that renders it active for productive interactions with the ribosome. The release of the enzyme after formation of the initiation complex is a prerequisite to form elongation-competent ribosomes. Belongs to the TRAFAC class translation factor GTPase superfamily. Classic translation factor GTPase family. IF-2 subfamily. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O60841 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "2q11.2",
+            "Cellular Component": "cytoplasm; cytosol; nucleus; synapse",
+            "Molecular Function": "GTP binding; GTPase activity; hydrolase activity; metal ion binding; nucleotide binding; protein binding; translation initiation factor activity; tRNA binding",
+            "Biological Process": "regulation of translational initiation; ribosome assembly; translation; translational initiation",
+            "Reference #": "O60841 (UniProtKB)",
+            "Alt. Names/Synonyms": "DKFZp434I036; eIF-5B; EIF5B; Eukaryotic translation initiation factor 5B; FLJ10524; IF2; IF2P; KIAA0741; Translation initiation factor IF-2; translation initiation factor IF2",
+            "Gene Symbols": "EIF5B",
+            "Molecular weight": "138,827 Da",
+            "Basal Isoelectric point": "5.39 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translation: eIF2 | Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P55010",
+        "P63241",
+        "O60841"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P55010",
+        "https://www.uniprot.org/uniprot/P63241",
+        "https://www.uniprot.org/uniprot/O60841"
+      ],
+      "psp_gene_symbols": [
+        "EIF5",
+        "EIF5A",
+        "EIF5B"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "40S",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=40S&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "60S",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=60S&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "43S",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=43s&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "eIF6",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=eIF6&site-search-type=Products",
+      "phosphositeplus_id": "3975",
+      "phosphositeplus_ids": [
+        "3975"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=3975",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=3975"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "3975",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=3975&showAllSites=true",
+          "gene_symbol": "EIF6",
+          "uniprot_id": "P56537",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P56537",
+          "protein_name": "Binds to the 60S ribosomal subunit and prevents its association with the 40S ribosomal subunit to form the 80S initiation complex in the cytoplasm. Behaves as a stimulatory translation initiation factor downstream insulin/growth factors. Is also involved in ribosome biogenesis. Associates with pre-60S subunits in the nucleus and is involved in its nuclear export. Cytoplasmic release of TIF6 from 60S subunits and nuclear relocalization is promoted by a RACK1 (RACK1)-dependent protein kinase C activity. In tissues responsive to insulin, controls fatty acid synthesis and glycolysis by exerting translational control of adipogenic transcription factors such as CEBPB, CEBPD and ATF4 that have G/C rich or uORF in their 5'UTR. Required for ROS-dependent megakaryocyte maturation and platelets formation, controls the expression of mitochondrial respiratory chain genes involved in reactive oxygen species (ROS) synthesis. Involved in miRNA-mediated gene silencing by the RNA-induced silencing complex (RISC). Required for both miRNA-mediated translational repression and miRNA-mediated cleavage of complementary mRNAs by RISC. Modulates cell cycle progression and global translation of pre-B cells, its activation seems to be rate-limiting in tumorigenesis and tumor growth. Belongs to the eIF-6 family. Expressed at very high levels in colon carcinoma with lower levels in normal colon and ileum and lowest levels in kidney and muscle (at protein level). 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P56537 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Nucleolus; Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "20q11.22",
+            "Cellular Component": "cytoplasm; cytosol; intermediate filament; lamin filament; nucleolus; nucleoplasm; nucleus; synapse",
+            "Molecular Function": "protein binding; ribosomal large subunit binding; ribosome binding; translation initiation factor activity",
+            "Biological Process": "assembly of large subunit precursor of preribosome; cytosolic ribosome assembly; maturation of 5.8S rRNA; maturation of LSU-rRNA; miRNA-mediated gene silencing by inhibition of translation; miRNA-mediated post-transcriptional gene silencing; positive regulation of translation; regulation of fatty acid biosynthetic process; regulation of glycolytic process; regulation of megakaryocyte differentiation; regulation of reactive oxygen species metabolic process; response to insulin; ribosomal large subunit biogenesis; ribosomal subunit export from nucleus; ribosome biogenesis; translation; translational initiation",
+            "Reference #": "P56537 (UniProtKB)",
+            "Alt. Names/Synonyms": "2; b; b(2)gcn; B(2)GCN homolog; B4 integrin interactor; CAB; eIF-6; EIF3A; EIF6; eukaryotic translation initiation factor 3A; Eukaryotic translation initiation factor 6; gcn; IF6; integrin beta 4 binding protein; ITGB4BP; p27 beta-4 integrin-binding protein; p27(BBP); p27BBP",
+            "Gene Symbols": "EIF6",
+            "Molecular weight": "26,599 Da",
+            "Basal Isoelectric point": "4.56 Predict pI for various phosphorylation states",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P56537"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P56537"
+      ],
+      "psp_gene_symbols": [
+        "EIF6"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "DHX29",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=DHX29&site-search-type=Products",
+      "phosphositeplus_id": "6233",
+      "phosphositeplus_ids": [
+        "6233"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=6233",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=6233"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "6233",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=6233&showAllSites=true",
+          "gene_symbol": "DHX29",
+          "uniprot_id": "Q7Z478",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q7Z478",
+          "protein_name": "ATP-binding RNA helicase involved in translation initiation. Part of the 43S pre-initiation complex that is required for efficient initiation on mRNAs of higher eukaryotes with structured 5'-UTRs by promoting efficient NTPase-dependent 48S complex formation. Specifically binds to the 40S ribosome near the mRNA entrance. Does not possess a processive helicase activity. Belongs to the DEAD box helicase family. DEAH subfamily. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q7Z478 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 3.6.4.13; Helicase; Translation",
+            "Chromosomal Location of human Ortholog": "5q11.2",
+            "Cellular Component": "cytoplasm; cytosolic small ribosomal subunit; eukaryotic 43S preinitiation complex",
+            "Molecular Function": "ATP binding; ATP hydrolysis activity; helicase activity; hydrolase activity; hydrolase activity, acting on acid anhydrides, in phosphorus-containing anhydrides; nucleic acid binding; nucleotide binding; ribonucleoside triphosphate phosphatase activity; ribosomal small subunit binding; RNA binding; RNA helicase activity; translation activator activity; translation initiation factor activity",
+            "Biological Process": "formation of translation preinitiation complex; positive regulation of translation; positive regulation of translational initiation; ribosome assembly; translation; translational initiation",
+            "Reference #": "Q7Z478 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATP-dependent RNA helicase DHX29; DDX29; DEAD/H (Asp-Glu-Ala-Asp/His) box polypeptide 29; DEAH (Asp-Glu-Ala-His) box polypeptide 29; DEAH box protein 29; DEAH-box helicase 29; DExH-box helicase 29; DHX29; FLJ21492; Nucleic acid helicase DDXx",
+            "Gene Symbols": "DHX29",
+            "Molecular weight": "155,236 Da",
+            "Basal Isoelectric point": "8.3 Predict pI for various phosphorylation states",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | ENZYME | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q7Z478"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q7Z478"
+      ],
+      "psp_gene_symbols": [
+        "DHX29"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "eIF3",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=eIF3&site-search-type=Products",
+      "phosphositeplus_id": "8554;4179;2893;2503;4165;8029;5769;4092;5737;7988204;4543;2318466;17303",
+      "phosphositeplus_ids": [
+        "8554",
+        "4179",
+        "2893",
+        "2503",
+        "4165",
+        "8029",
+        "5769",
+        "4092",
+        "5737",
+        "7988204",
+        "4543",
+        "2318466",
+        "17303"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=8554",
+        "https://www.phosphosite.org/proteinAction.action?id=4179",
+        "https://www.phosphosite.org/proteinAction.action?id=2893",
+        "https://www.phosphosite.org/proteinAction.action?id=2503",
+        "https://www.phosphosite.org/proteinAction.action?id=4165",
+        "https://www.phosphosite.org/proteinAction.action?id=8029",
+        "https://www.phosphosite.org/proteinAction.action?id=5769",
+        "https://www.phosphosite.org/proteinAction.action?id=4092",
+        "https://www.phosphosite.org/proteinAction.action?id=5737",
+        "https://www.phosphosite.org/proteinAction.action?id=7988204",
+        "https://www.phosphosite.org/proteinAction.action?id=4543",
+        "https://www.phosphosite.org/proteinAction.action?id=2318466",
+        "https://www.phosphosite.org/proteinAction.action?id=17303"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "8554",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=8554&showAllSites=true",
+          "gene_symbol": "EIF3J",
+          "uniprot_id": "O75822",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O75822",
+          "protein_name": "Component of the eukaryotic translation initiation factor 3 (eIF-3) complex, which is required for several steps in the initiation of protein synthesis. The eIF-3 complex associates with the 40S ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC and scanning of the mRNA for AUG recognition. The eIF-3 complex is also required for disassembly and recycling of post-termination ribosomal complexes and subsequently prevents premature joining of the 40S and 60S ribosomal subunits prior to initiation. The eIF-3 complex specifically targets and initiates translation of a subset of mRNAs involved in cell proliferation, including cell cycling, differentiation and apoptosis, and uses different modes of RNA stem-loop binding to exert either translational activation or repression. Belongs to the eIF-3 subunit J family. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O75822 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "15q21.1",
+            "Cellular Component": "cytoplasm; cytosol; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; eukaryotic translation initiation factor 3 complex",
+            "Molecular Function": "identical protein binding; protein binding; translation initiation factor activity",
+            "Biological Process": "cytoplasmic translational initiation; formation of cytoplasmic translation initiation complex; translation; translational initiation",
+            "Reference #": "O75822 (UniProtKB)",
+            "Alt. Names/Synonyms": "eIF-3-alpha; eIF3 p35; eIF3-alpha; eIF3-p35; EIF3J; EIF3S1; Eukaryotic translation initiation factor 3 subunit 1; Eukaryotic translation initiation factor 3 subunit J; eukaryotic translation initiation factor 3, subunit 1 (alpha, 35kD); eukaryotic translation initiation factor 3, subunit 1 alpha, 35kDa; eukaryotic translation initiation factor 3, subunit J",
+            "Gene Symbols": "EIF3J",
+            "Molecular weight": "29,062 Da",
+            "Basal Isoelectric point": "4.72 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2KRB 3BPJ 6YBW | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "4179",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=4179&showAllSites=true",
+          "gene_symbol": "EIF3I",
+          "uniprot_id": "Q13347",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q13347",
+          "protein_name": "Component of the eukaryotic translation initiation factor 3 (eIF-3) complex, which is required for several steps in the initiation of protein synthesis. The eIF-3 complex associates with the 40S ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC and scanning of the mRNA for AUG recognition. The eIF-3 complex is also required for disassembly and recycling of post-termination ribosomal complexes and subsequently prevents premature joining of the 40S and 60S ribosomal subunits prior to initiation. The eIF-3 complex specifically targets and initiates translation of a subset of mRNAs involved in cell proliferation, including cell cycling, differentiation and apoptosis, and uses different modes of RNA stem-loop binding to exert either translational activation or repression. Belongs to the eIF-3 subunit I family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q13347 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "1p35.2",
+            "Cellular Component": "cytoplasm; cytosol; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; eukaryotic translation initiation factor 3 complex; eukaryotic translation initiation factor 3 complex, eIF3m; synapse",
+            "Molecular Function": "protein binding; RNA binding; translation initiation factor activity",
+            "Biological Process": "cytoplasmic translational initiation; formation of cytoplasmic translation initiation complex; translation; translational initiation",
+            "Reference #": "Q13347 (UniProtKB)",
+            "Alt. Names/Synonyms": "eIF-3-beta; eIF3 p36; eIF3-beta; eIF3-p36; EIF3I; EIF3S2; Eukaryotic translation initiation factor 3 subunit 2; Eukaryotic translation initiation factor 3 subunit I; eukaryotic translation initiation factor 3, subunit 2 (beta, 36kD); eukaryotic translation initiation factor 3, subunit 2 beta, 36kDa; eukaryotic translation initiation factor 3, subunit I; predicted protein of HQ2242; PRO2242; TGF-beta receptor-interacting protein 1; TGFbeta receptor-interacting protein 1; TRIP-1; TRIP1",
+            "Gene Symbols": "EIF3I",
+            "Molecular weight": "36,502 Da",
+            "Basal Isoelectric point": "5.38 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "2893",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2893&showAllSites=true",
+          "gene_symbol": "EIF3G",
+          "uniprot_id": "O75821",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O75821",
+          "protein_name": "RNA-binding component of the eukaryotic translation initiation factor 3 (eIF-3) complex, which is required for several steps in the initiation of protein synthesis. The eIF-3 complex associates with the 40S ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC and scanning of the mRNA for AUG recognition. The eIF-3 complex is also required for disassembly and recycling of post-termination ribosomal complexes and subsequently prevents premature joining of the 40S and 60S ribosomal subunits prior to initiation. The eIF-3 complex specifically targets and initiates translation of a subset of mRNAs involved in cell proliferation, including cell cycling, differentiation and apoptosis, and uses different modes of RNA stem-loop binding to exert either translational activation or repression. This subunit can bind 18S rRNA. (Microbial infection) In case of FCV infection, plays a role in the ribosomal termination-reinitiation event leading to the translation of VP2. Belongs to the eIF-3 subunit G family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O75821 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "RNA-binding; Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "19p13.2",
+            "Cellular Component": "cytoplasm; cytosol; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; eukaryotic translation initiation factor 3 complex; nucleus; perinuclear region of cytoplasm",
+            "Molecular Function": "nucleic acid binding; protein binding; RNA binding; translation initiation factor activity",
+            "Biological Process": "cytoplasmic translational initiation; formation of cytoplasmic translation initiation complex; translation; translational initiation; viral translational termination-reinitiation",
+            "Reference #": "O75821 (UniProtKB)",
+            "Alt. Names/Synonyms": "eIF-3 RNA-binding subunit; eIF-3-delta; eIF3 p42; eIF3 p44; eIF3-delta; EIF3-P42; eIF3-p44; EIF3G; EIF3S4; Eukaryotic translation initiation factor 3 RNA-binding subunit; Eukaryotic translation initiation factor 3 subunit 4; Eukaryotic translation initiation factor 3 subunit G; eukaryotic translation initiation factor 3 subunit p42; eukaryotic translation initiation factor 3, subunit 4 (delta, 44kD); eukaryotic translation initiation factor 3, subunit 4 delta, 44kDa; eukaryotic translation initiation factor 3, subunit G",
+            "Gene Symbols": "EIF3G",
+            "Molecular weight": "35,611 Da",
+            "Basal Isoelectric point": "5.87 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2CQ0 2MJC 5K0Y 6YBS | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "2503",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2503&showAllSites=true",
+          "gene_symbol": "EIF3F",
+          "uniprot_id": "O00303",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O00303",
+          "protein_name": "Component of the eukaryotic translation initiation factor 3 (eIF-3) complex, which is required for several steps in the initiation of protein synthesis. The eIF-3 complex associates with the 40S ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC and scanning of the mRNA for AUG recognition. The eIF-3 complex is also required for disassembly and recycling of post-termination ribosomal complexes and subsequently prevents premature joining of the 40S and 60S ribosomal subunits prior to initiation. The eIF-3 complex specifically targets and initiates translation of a subset of mRNAs involved in cell proliferation, including cell cycling, differentiation and apoptosis, and uses different modes of RNA stem-loop binding to exert either translational activation or repression. Deubiquitinates activated NOTCH1, promoting its nuclear import, thereby acting as a positive regulator of Notch signaling. Belongs to the eIF-3 subunit F family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O00303 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 3.4.19.12; Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "11p15.4",
+            "Cellular Component": "cytoplasm; cytosol; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; eukaryotic translation initiation factor 3 complex; eukaryotic translation initiation factor 3 complex, eIF3m; synapse",
+            "Molecular Function": "cysteine-type deubiquitinase activity; cysteine-type peptidase activity; deubiquitinase activity; hydrolase activity; identical protein binding; metal-dependent deubiquitinase activity; metallopeptidase activity; peptidase activity; protein binding; translation initiation factor activity; translation initiation factor binding",
+            "Biological Process": "cytoplasmic translational initiation; formation of cytoplasmic translation initiation complex; IRES-dependent viral translational initiation; proteolysis; translation; translational initiation",
+            "Disease": "Intellectual Developmental Disorder, Autosomal Recessive 67",
+            "Reference #": "O00303 (UniProtKB)",
+            "Alt. Names/Synonyms": "Deubiquitinating enzyme eIF3f; eIF-3-epsilon; eIF3 p47; eIF3-epsilon; eIF3-p47; EIF3F; EIF3S5; Eukaryotic translation initiation factor 3 subunit 5; Eukaryotic translation initiation factor 3 subunit F; eukaryotic translation initiation factor 3, subunit 5 (epsilon, 47kD); eukaryotic translation initiation factor 3, subunit 5 epsilon, 47kDa; eukaryotic translation initiation factor 3, subunit F; MRT67",
+            "Gene Symbols": "EIF3F",
+            "Molecular weight": "37,564 Da",
+            "Basal Isoelectric point": "5.24 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 3J8B 3J8C 6YBD 8RG0 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "4165",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=4165&showAllSites=true",
+          "gene_symbol": "EIF3B",
+          "uniprot_id": "P55884",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P55884",
+          "protein_name": "RNA-binding component of the eukaryotic translation initiation factor 3 (eIF-3) complex, which is required for several steps in the initiation of protein synthesis. The eIF-3 complex associates with the 40S ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC and scanning of the mRNA for AUG recognition. The eIF-3 complex is also required for disassembly and recycling of post-termination ribosomal complexes and subsequently prevents premature joining of the 40S and 60S ribosomal subunits prior to initiation. The eIF-3 complex specifically targets and initiates translation of a subset of mRNAs involved in cell proliferation, including cell cycling, differentiation and apoptosis, and uses different modes of RNA stem-loop binding to exert either translational activation or repression. (Microbial infection) In case of FCV infection, plays a role in the ribosomal termination-reinitiation event leading to the translation of VP2. Belongs to the eIF-3 subunit B family. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P55884 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "7p22.3",
+            "Cellular Component": "cytoplasm; cytoplasmic stress granule; cytosol; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; eukaryotic translation initiation factor 3 complex; eukaryotic translation initiation factor 3 complex, eIF3m; synapse",
+            "Molecular Function": "molecular adaptor activity; nucleic acid binding; protein binding; RNA binding; translation initiation factor activity; translation initiation factor binding",
+            "Biological Process": "cytoplasmic translational initiation; formation of cytoplasmic translation initiation complex; IRES-dependent viral translational initiation; regulation of translational initiation; translation; translational initiation; viral translational termination-reinitiation",
+            "Reference #": "P55884 (UniProtKB)",
+            "Alt. Names/Synonyms": "eIF-3-eta; eIF3 p110; eIF3 p116; EIF3-ETA; EIF3-P110; EIF3-P116; EIF3B; EIF3S9; Eukaryotic translation initiation factor 3 subunit 9; Eukaryotic translation initiation factor 3 subunit B; eukaryotic translation initiation factor 3, subunit 9 (eta, 116kD); eukaryotic translation initiation factor 3, subunit 9 eta, 116kDa; eukaryotic translation initiation factor 3, subunit B; hPrt1; MGC104664; MGC131875; protein synthesis 1; PRT1; Prt1 homolog",
+            "Gene Symbols": "EIF3B",
+            "Molecular weight": "92,482 Da",
+            "Basal Isoelectric point": "4.89 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2KRB 2NLW 5K1H 6YBT | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "8029",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=8029&showAllSites=true",
+          "gene_symbol": "EIF3A",
+          "uniprot_id": "Q14152",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q14152",
+          "protein_name": "RNA-binding component of the eukaryotic translation initiation factor 3 (eIF-3) complex, which is required for several steps in the initiation of protein synthesis. The eIF-3 complex associates with the 40S ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC and scanning of the mRNA for AUG recognition. The eIF-3 complex is also required for disassembly and recycling of post-termination ribosomal complexes and subsequently prevents premature joining of the 40S and 60S ribosomal subunits prior to initiation. The eIF-3 complex specifically targets and initiates translation of a subset of mRNAs involved in cell proliferation, including cell cycling, differentiation and apoptosis, and uses different modes of RNA stem-loop binding to exert either translational activation or repression. (Microbial infection) Essential for the initiation of translation on type-1 viral ribosomal entry sites (IRESs), like for HCV, PV, EV71 or BEV translation. (Microbial infection) In case of FCV infection, plays a role in the ribosomal termination-reinitiation event leading to the translation of VP2. Belongs to the eIF-3 subunit A family. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q14152 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "RNA-binding; Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "10q26.11",
+            "Cellular Component": "cytoplasm; cytosol; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; eukaryotic translation initiation factor 3 complex; eukaryotic translation initiation factor 3 complex, eIF3e; eukaryotic translation initiation factor 3 complex, eIF3m; microtubule; organelle; postsynaptic density; protein-containing complex",
+            "Molecular Function": "protein binding; receptor tyrosine kinase binding; RNA binding; structural molecule activity; translation initiation factor activity",
+            "Biological Process": "cytoplasmic translational initiation; formation of cytoplasmic translation initiation complex; IRES-dependent viral translational initiation; negative regulation of ERK1 and ERK2 cascade; translation; translation reinitiation; translational initiation; viral translational termination-reinitiation",
+            "Reference #": "Q14152 (UniProtKB)",
+            "Alt. Names/Synonyms": "centrosomin homolog; cytoplasmic protein p167; eIF-3-theta; EIF3; eIF3 p167; eIF3 p180; eIF3 p185; EIF3, p180 subunit; eIF3-p170; eIF3-theta; EIF3A; EIF3S10; Eukaryotic translation initiation factor 3 subunit 10; Eukaryotic translation initiation factor 3 subunit A; eukaryotic translation initiation factor 3, subunit 10 (theta, 150/170kD); eukaryotic translation initiation factor 3, subunit 10 (theta, 170kD); eukaryotic translation initiation factor 3, subunit 10 theta, 150/170kDa; eukaryotic translation initiation factor 3, subunit 10, 170kD; eukaryotic translation initiation factor 3, subunit A; KIAA0139; P167; p180; p185; TIF32",
+            "Gene Symbols": "EIF3A",
+            "Molecular weight": "166,569 Da",
+            "Basal Isoelectric point": "6.38 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | CCLE | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 3J8B 3J8C 6YBD 6YBT 8RG0 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "5769",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=5769&showAllSites=true",
+          "gene_symbol": "CLUH",
+          "uniprot_id": "O75153",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O75153",
+          "protein_name": "mRNA-binding protein involved in proper cytoplasmic distribution of mitochondria. Specifically binds mRNAs of nuclear-encoded mitochondrial proteins in the cytoplasm and regulates transport or translation of these transcripts close to mitochondria, playing a role in mitochondrial biogenesis. Belongs to the CLU family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O75153 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation",
+            "Chromosomal Location of human Ortholog": "17p13.3",
+            "Cellular Component": "cytoplasm",
+            "Molecular Function": "mRNA binding; protein binding; RNA binding",
+            "Biological Process": "intracellular distribution of mitochondria; mitochondrion organization",
+            "Reference #": "O75153 (UniProtKB)",
+            "Alt. Names/Synonyms": "CLU; CLU1; CLUH; clustered mitochondria (cluA/CLU1) homolog; clustered mitochondria homolog; Clustered mitochondria protein homolog; DKFZp686L05242; DKFZp686M09233; eIF3-X; FLJ23672; hypothetical protein LOC23277; K0664; KIAA0664; Protein KIAA0664",
+            "Gene Symbols": "CLUH",
+            "Molecular weight": "146,670 Da",
+            "Basal Isoelectric point": "5.75 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB"
+          }
+        },
+        {
+          "psp_id": "4092",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=4092&showAllSites=true",
+          "gene_symbol": "EIF3D",
+          "uniprot_id": "O15371",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O15371",
+          "protein_name": "mRNA cap-binding component of the eukaryotic translation initiation factor 3 (eIF-3) complex, a complex required for several steps in the initiation of protein synthesis of a specialized repertoire of mRNAs. The eIF-3 complex associates with the 40S ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC and scanning of the mRNA for AUG recognition. The eIF-3 complex is also required for disassembly and recycling of post-termination ribosomal complexes and subsequently prevents premature joining of the 40S and 60S ribosomal subunits prior to initiation. The eIF-3 complex specifically targets and initiates translation of a subset of mRNAs involved in cell proliferation, including cell cycling, differentiation and apoptosis, and uses different modes of RNA stem-loop binding to exert either translational activation or repression. In the eIF-3 complex, EIF3D specifically recognizes and binds the 7-methylguanosine cap of a subset of mRNAs. (Microbial infection) In case of FCV infection, plays a role in the ribosomal termination-reinitiation event leading to the translation of VP2. Belongs to the eIF-3 subunit D family. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O15371 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "RNA-binding; Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "22q12.3",
+            "Cellular Component": "cytoplasm; cytosol; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; eukaryotic translation initiation factor 3 complex; eukaryotic translation initiation factor 3 complex, eIF3m; synapse",
+            "Molecular Function": "mRNA cap binding; protein binding; RNA binding; translation initiation factor activity",
+            "Biological Process": "cap-dependent translational initiation; cytoplasmic translational initiation; formation of cytoplasmic translation initiation complex; IRES-dependent viral translational initiation; translation; translational initiation; viral translational termination-reinitiation",
+            "Reference #": "O15371 (UniProtKB)",
+            "Alt. Names/Synonyms": "eIF-3-zeta; eIF3 p66; eIF3-p66; eIF3-zeta; EIF3D; EIF3S7; Eukaryotic translation initiation factor 3 subunit 7; Eukaryotic translation initiation factor 3 subunit D; eukaryotic translation initiation factor 3, subunit 7 zeta, 66/67kDa; eukaryotic translation initiation factor 3, subunit D; MGC126526; MGC17258; translation initiation factor eIF3 p66 subunit",
+            "Gene Symbols": "EIF3D",
+            "Molecular weight": "63,973 Da",
+            "Basal Isoelectric point": "5.79 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 6YBD 6YBS 8RG0 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "5737",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=5737&showAllSites=true",
+          "gene_symbol": "EIF3C",
+          "uniprot_id": "Q99613",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q99613",
+          "protein_name": "Component of the eukaryotic translation initiation factor 3 (eIF-3) complex, which is required for several steps in the initiation of protein synthesis. The eIF-3 complex associates with the 40S ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC and scanning of the mRNA for AUG recognition. The eIF-3 complex is also required for disassembly and recycling of post-termination ribosomal complexes and subsequently prevents premature joining of the 40S and 60S ribosomal subunits prior to initiation. The eIF-3 complex specifically targets and initiates translation of a subset of mRNAs involved in cell proliferation, including cell cycling, differentiation and apoptosis, and uses different modes of RNA stem-loop binding to exert either translational activation or repression. Belongs to the eIF-3 subunit C family. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q99613 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "RNA-binding; Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "16p11.2",
+            "Cellular Component": "cytoplasm; cytosol; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; eukaryotic translation initiation factor 3 complex",
+            "Molecular Function": "protein binding; ribosome binding; RNA binding; translation initiation factor activity; translation initiation factor binding",
+            "Biological Process": "cytoplasmic translational initiation; formation of cytoplasmic translation initiation complex; positive regulation of translation; translation; translational initiation",
+            "Reference #": "Q99613 (UniProtKB)",
+            "Alt. Names/Synonyms": "cell migration-inducing protein 17; eIF3 p110; eIF3-p110; EIF3C; EIF3CL; EIF3S8; Eukaryotic translation initiation factor 3 subunit 8; Eukaryotic translation initiation factor 3 subunit C; eukaryotic translation initiation factor 3, subunit 8 (110kD); eukaryotic translation initiation factor 3, subunit 8, 110kDa; eukaryotic translation initiation factor 3, subunit C; FLJ78287; MGC189744",
+            "Gene Symbols": "EIF3C",
+            "Molecular weight": "105,344 Da",
+            "Basal Isoelectric point": "5.48 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 3J8B 3J8C 6YBD 6YBW 8RG0 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "7988204",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=7988204&showAllSites=true",
+          "gene_symbol": "EIF3CL",
+          "uniprot_id": "B5ME19",
+          "uniprot_url": "https://www.uniprot.org/uniprot/B5ME19",
+          "protein_name": "Component of the eukaryotic translation initiation factor 3 (eIF-3) complex, which is required for several steps in the initiation of protein synthesis. The eIF-3 complex associates with the 40S ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC and scanning of the mRNA for AUG recognition. The eIF-3 complex is also required for disassembly and recycling of post-termination ribosomal complexes and subsequently prevents premature joining of the 40S and 60S ribosomal subunits prior to initiation. The eIF-3 complex specifically targets and initiates translation of a subset of mRNAs involved in cell proliferation, including cell cycling, differentiation and apoptosis, and uses different modes of RNA stem-loop binding to exert either translational activation or repression. Belongs to the eIF-3 subunit C family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "B5ME19 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "16p12.1",
+            "Cellular Component": "cytoplasm; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; eukaryotic translation initiation factor 3 complex",
+            "Molecular Function": "protein binding; RNA binding; translation initiation factor activity; translation initiation factor binding",
+            "Biological Process": "cytoplasmic translational initiation; formation of cytoplasmic translation initiation complex; translation; translational initiation",
+            "Reference #": "B5ME19 (UniProtKB)",
+            "Alt. Names/Synonyms": "eIF3 p110; eIF3c; EIF3CL; EIFCL; eukaryotic translation initiation factor 3 subunit 8; eukaryotic translation initiation factor 3 subunit C; eukaryotic translation initiation factor 3 subunit C like; Eukaryotic translation initiation factor 3 subunit C-like protein; eukaryotic translation initiation factor 3, subunit 8, 110kDa-like; eukaryotic translation initiation factor 3, subunit C-like",
+            "Gene Symbols": "EIF3CL",
+            "Molecular weight": "105,473 Da",
+            "Basal Isoelectric point": "5.45 Predict pI for various phosphorylation states",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "4543",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=4543&showAllSites=true",
+          "gene_symbol": "EIF3E",
+          "uniprot_id": "P60228",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P60228",
+          "protein_name": "Component of the eukaryotic translation initiation factor 3 (eIF-3) complex, which is required for several steps in the initiation of protein synthesis. The eIF-3 complex associates with the 40S ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC and scanning of the mRNA for AUG recognition. The eIF-3 complex is also required for disassembly and recycling of post-termination ribosomal complexes and subsequently prevents premature joining of the 40S and 60S ribosomal subunits prior to initiation. The eIF-3 complex specifically targets and initiates translation of a subset of mRNAs involved in cell proliferation, including cell cycling, differentiation and apoptosis, and uses different modes of RNA stem-loop binding to exert either translational activation or repression. Required for nonsense-mediated mRNA decay (NMD); may act in conjunction with UPF2 to divert mRNAs from translation to the NMD pathway. May interact with MCM7 and EPAS1 and regulate the proteasome-mediated degradation of these proteins. Belongs to the eIF-3 subunit E family. Ubiquitously expressed. Expressed at highest levels in appendix, lymph, pancreas, skeletal muscle, spleen and thymus. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P60228 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "8q23.1",
+            "Cellular Component": "chromatin; cytoplasm; cytosol; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; eukaryotic translation initiation factor 3 complex; eukaryotic translation initiation factor 3 complex, eIF3e; nucleoplasm; nucleus; PML body; postsynaptic density; protein-containing complex",
+            "Molecular Function": "protein binding; translation initiation factor activity",
+            "Biological Process": "cytoplasmic translational initiation; formation of cytoplasmic translation initiation complex; negative regulation of translational initiation; nuclear-transcribed mRNA catabolic process, nonsense-mediated decay; positive regulation of translation; regulation of translational initiation; translation; translational initiation",
+            "Reference #": "P60228 (UniProtKB)",
+            "Alt. Names/Synonyms": "eIF-3 p48; eIF3-p46; EIF3-P48; EIF3E; EIF3S6; Eukaryotic translation initiation factor 3 subunit 6; Eukaryotic translation initiation factor 3 subunit E; eukaryotic translation initiation factor 3, subunit 6 (48kD); eukaryotic translation initiation factor 3, subunit 6 48kDa; eukaryotic translation initiation factor 3, subunit E; INT6; mammary tumor-associated protein INT6; murine mammary tumor integration site 6 (oncogene homolog); Viral integration site protein INT-6 homolog",
+            "Gene Symbols": "EIF3E",
+            "Molecular weight": "52,221 Da",
+            "Basal Isoelectric point": "5.71 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 3J8B 3J8C 6YBD 8RG0 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "2318466",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=2318466&showAllSites=true",
+          "gene_symbol": "EIF3K",
+          "uniprot_id": "Q9UBQ5",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q9UBQ5",
+          "protein_name": "Component of the eukaryotic translation initiation factor 3 (eIF-3) complex, which is required for several steps in the initiation of protein synthesis. The eIF-3 complex associates with the 40S ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC and scanning of the mRNA for AUG recognition. The eIF-3 complex is also required for disassembly and recycling of post-termination ribosomal complexes and subsequently prevents premature joining of the 40S and 60S ribosomal subunits prior to initiation. The eIF-3 complex specifically targets and initiates translation of a subset of mRNAs involved in cell proliferation, including cell cycling, differentiation and apoptosis, and uses different modes of RNA stem-loop binding to exert either translational activation or repression. Belongs to the eIF-3 subunit K family. Ubiquitous, with the highest levels of expression in brain, testis and kidney. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q9UBQ5 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "19q13.2",
+            "Cellular Component": "cytoplasm; cytosol; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; eukaryotic translation initiation factor 3 complex; nucleus",
+            "Molecular Function": "protein binding; ribosome binding; RNA binding; translation initiation factor activity",
+            "Biological Process": "cytoplasmic translational initiation; formation of cytoplasmic translation initiation complex; regulation of translational initiation; translation; translational initiation",
+            "Reference #": "Q9UBQ5 (UniProtKB)",
+            "Alt. Names/Synonyms": "ARG134; eIF-3 p25; eIF-3 p28; EIF3-p28; EIF3K; EIF3S12; Eukaryotic translation initiation factor 3 subunit 12; Eukaryotic translation initiation factor 3 subunit K; eukaryotic translation initiation factor 3, subunit 12; eukaryotic translation initiation factor 3, subunit K; HSPC029; M9; MSTP001; muscle specific; Muscle-specific gene M9 protein; PLAC-24; PLAC24; PRO1474; PTD001",
+            "Gene Symbols": "EIF3K",
+            "Molecular weight": "25,060 Da",
+            "Basal Isoelectric point": "4.81 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1RZ4 3J8B 3J8C 6YBD 8RG0 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "17303",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=17303&showAllSites=true",
+          "gene_symbol": "EIF3H",
+          "uniprot_id": "O15372",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O15372",
+          "protein_name": "Component of the eukaryotic translation initiation factor 3 (eIF-3) complex, which is required for several steps in the initiation of protein synthesis. The eIF-3 complex associates with the 40S ribosome and facilitates the recruitment of eIF-1, eIF-1A, eIF-2:GTP:methionyl-tRNAi and eIF-5 to form the 43S pre-initiation complex (43S PIC). The eIF-3 complex stimulates mRNA recruitment to the 43S PIC and scanning of the mRNA for AUG recognition. The eIF-3 complex is also required for disassembly and recycling of post-termination ribosomal complexes and subsequently prevents premature joining of the 40S and 60S ribosomal subunits prior to initiation. The eIF-3 complex specifically targets and initiates translation of a subset of mRNAs involved in cell proliferation, including cell cycling, differentiation and apoptosis, and uses different modes of RNA stem-loop binding to exert either translational activation or repression. Belongs to the eIF-3 subunit H family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O15372 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "8q23.3-q24.11",
+            "Cellular Component": "cytoplasm; cytosol; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; eukaryotic translation initiation factor 3 complex; eukaryotic translation initiation factor 3 complex, eIF3m",
+            "Molecular Function": "metal-dependent deubiquitinase activity; metallopeptidase activity; peptidase activity; protein binding; translation initiation factor activity",
+            "Biological Process": "cytoplasmic translational initiation; formation of cytoplasmic translation initiation complex; negative regulation of proteasomal ubiquitin-dependent protein catabolic process; regulation of translational initiation; translation; translational initiation",
+            "Reference #": "O15372 (UniProtKB)",
+            "Alt. Names/Synonyms": "eIF-3-gamma; eIF3 p40 subunit; eIF3-gamma; eIF3-p40; EIF3H; EIF3S3; Eukaryotic translation initiation factor 3 subunit 3; Eukaryotic translation initiation factor 3 subunit H; eukaryotic translation initiation factor 3, subunit 2 (beta, 36kD); eukaryotic translation initiation factor 3, subunit 3 (gamma, 40kD); eukaryotic translation initiation factor 3, subunit 3 gamma, 40kDa; eukaryotic translation initiation factor 3, subunit H; MGC102958",
+            "Gene Symbols": "EIF3H",
+            "Molecular weight": "39,930 Da",
+            "Basal Isoelectric point": "6.09 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 3J8B 3J8C 6YBD 8RG0 | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "O75822",
+        "Q13347",
+        "O75821",
+        "O00303",
+        "P55884",
+        "Q14152",
+        "O75153",
+        "O15371",
+        "Q99613",
+        "B5ME19",
+        "P60228",
+        "Q9UBQ5",
+        "O15372"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/O75822",
+        "https://www.uniprot.org/uniprot/Q13347",
+        "https://www.uniprot.org/uniprot/O75821",
+        "https://www.uniprot.org/uniprot/O00303",
+        "https://www.uniprot.org/uniprot/P55884",
+        "https://www.uniprot.org/uniprot/Q14152",
+        "https://www.uniprot.org/uniprot/O75153",
+        "https://www.uniprot.org/uniprot/O15371",
+        "https://www.uniprot.org/uniprot/Q99613",
+        "https://www.uniprot.org/uniprot/B5ME19",
+        "https://www.uniprot.org/uniprot/P60228",
+        "https://www.uniprot.org/uniprot/Q9UBQ5",
+        "https://www.uniprot.org/uniprot/O15372"
+      ],
+      "psp_gene_symbols": [
+        "EIF3J",
+        "EIF3I",
+        "EIF3G",
+        "EIF3F",
+        "EIF3B",
+        "EIF3A",
+        "CLUH",
+        "EIF3D",
+        "EIF3C",
+        "EIF3CL",
+        "EIF3E",
+        "EIF3K",
+        "EIF3H"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "eIF1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=eif1&site-search-type=Products",
+      "phosphositeplus_id": "4152",
+      "phosphositeplus_ids": [
+        "4152"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=4152",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=4152"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "4152",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=4152&showAllSites=true",
+          "gene_symbol": "EIF1",
+          "uniprot_id": "P41567",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P41567",
+          "protein_name": "Necessary for scanning and involved in initiation site selection. Promotes the assembly of 48S ribosomal complexes at the authentic initiation codon of a conventional capped mRNA. Belongs to the SUI1 family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P41567 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "17q21.2",
+            "Cellular Component": "cytoplasm; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; multi-eIF complex; nucleus",
+            "Molecular Function": "protein binding; ribosomal small subunit binding; RNA binding; translation factor activity, RNA binding; translation initiation factor activity",
+            "Biological Process": "regulation of gene expression; regulation of primary metabolic process; regulation of translational initiation; translation; translational initiation",
+            "Reference #": "P41567 (UniProtKB)",
+            "Alt. Names/Synonyms": "A121; EIF-1; EIF1; EIF1A; Eukaryotic translation initiation factor 1; ISO1; Protein translation factor SUI1 homolog; SUI1; Sui1iso1",
+            "Gene Symbols": "EIF1",
+            "Molecular weight": "12,732 Da",
+            "Basal Isoelectric point": "6.9 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translation: eIF2 | Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 2IF1 4KZX 4KZY 6YBW 8PPK 9NPX | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P41567"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P41567"
+      ],
+      "psp_gene_symbols": [
+        "EIF1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "eIF1A",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=eif1a&site-search-type=Products",
+      "phosphositeplus_id": "4152",
+      "phosphositeplus_ids": [
+        "4152"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=4152",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=4152"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "4152",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=4152&showAllSites=true",
+          "gene_symbol": "EIF1",
+          "uniprot_id": "P41567",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P41567",
+          "protein_name": "Necessary for scanning and involved in initiation site selection. Promotes the assembly of 48S ribosomal complexes at the authentic initiation codon of a conventional capped mRNA. Belongs to the SUI1 family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P41567 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "17q21.2",
+            "Cellular Component": "cytoplasm; eukaryotic 43S preinitiation complex; eukaryotic 48S preinitiation complex; multi-eIF complex; nucleus",
+            "Molecular Function": "protein binding; ribosomal small subunit binding; RNA binding; translation factor activity, RNA binding; translation initiation factor activity",
+            "Biological Process": "regulation of gene expression; regulation of primary metabolic process; regulation of translational initiation; translation; translational initiation",
+            "Reference #": "P41567 (UniProtKB)",
+            "Alt. Names/Synonyms": "A121; EIF-1; EIF1; EIF1A; Eukaryotic translation initiation factor 1; ISO1; Protein translation factor SUI1 homolog; SUI1; Sui1iso1",
+            "Gene Symbols": "EIF1",
+            "Molecular weight": "12,732 Da",
+            "Basal Isoelectric point": "6.9 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translation: eIF2 | Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 2IF1 4KZX 4KZY 6YBW 8PPK 9NPX | Phospho.ELM | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P41567"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P41567"
+      ],
+      "psp_gene_symbols": [
+        "EIF1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "eIF2",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=eIF2&site-search-type=Products",
+      "phosphositeplus_id": "",
+      "phosphositeplus_ids": [],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [],
+      "psp_uniprot_lookups": [],
+      "uniprot_ids": [],
+      "uniprot_urls": [],
+      "psp_gene_symbols": [],
+      "has_uniprot_match": false
+    },
+    {
+      "label": "PABP",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=pabp&site-search-type=Products",
+      "phosphositeplus_id": "4121",
+      "phosphositeplus_ids": [
+        "4121"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=4121",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=4121"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "4121",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=4121&showAllSites=true",
+          "gene_symbol": "PABPC1",
+          "uniprot_id": "P11940",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P11940",
+          "protein_name": "Binds the poly(A) tail of mRNA, including that of its own transcript. May be involved in cytoplasmic regulatory processes of mRNA metabolism such as pre-mRNA splicing. Its function in translational initiation regulation can either be enhanced by PAIP1 or repressed by PAIP2. Can probably bind to cytoplasmic RNA sequences other than poly(A) in vivo. Involved in translationally coupled mRNA turnover. Implicated with other RNA-binding proteins in the cytoplasmic deadenylation/translational and decay interplay of the FOS mRNA mediated by the major coding-region determinant of instability (mCRD) domain. Involved in regulation of nonsense-mediated decay (NMD) of mRNAs containing premature stop codons; for the recognition of premature termination codons (PTC) and initiation of NMD a competitive interaction between UPF1 and PABPC1 with the ribosome-bound release factors is proposed. By binding to long poly(A) tails, may protect them from uridylation by ZCCHC6/ZCCHC11 and hence contribute to mRNA stability. (Microbial infection) Positively regulates the replication of dengue virus (DENV). Belongs to the polyadenylate-binding protein type-1 family. Ubiquitous. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P11940 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Motility/polarity/chemotaxis; RNA splicing; RNA-binding; Spliceosome; Translation",
+            "Chromosomal Location of human Ortholog": "8q22.3",
+            "Cellular Component": "catalytic step 2 spliceosome; cell leading edge; cytoplasm; cytoplasmic ribonucleoprotein granule; cytoplasmic stress granule; cytosol; lamellipodium; nucleus; ribonucleoprotein complex; spliceosomal complex",
+            "Molecular Function": "mRNA 3'-UTR binding; mRNA binding; nucleic acid binding; poly(A) binding; poly(U) RNA binding; protein binding; RNA binding; translation activator activity",
+            "Biological Process": "CRD-mediated mRNA stabilization; mRNA processing; mRNA splicing, via spliceosome; mRNA stabilization; negative regulation of nuclear-transcribed mRNA catabolic process, deadenylation-dependent decay; negative regulation of nuclear-transcribed mRNA catabolic process, nonsense-mediated decay; nuclear-transcribed mRNA catabolic process, nonsense-mediated decay; positive regulation of cytoplasmic translation; positive regulation of nuclear-transcribed mRNA catabolic process, deadenylation-dependent decay; positive regulation of nuclear-transcribed mRNA poly(A) tail shortening; positive regulation of viral genome replication; regulatory ncRNA-mediated gene silencing; RNA splicing",
+            "Reference #": "P11940 (UniProtKB)",
+            "Alt. Names/Synonyms": "PAB1; PABP; PABP 1; PABP-1; PABP1; PABPC1; PABPC2; PABPL1; poly(A) binding protein cytoplasmic 1; poly(A) binding protein, cytoplasmic 1; poly(A) binding protein, cytoplasmic 2; Poly(A)-binding protein 1; Polyadenylate-binding protein 1",
+            "Gene Symbols": "PABPC1",
+            "Molecular weight": "70,671 Da",
+            "Basal Isoelectric point": "9.52 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translation: eIF4E and p70S6K | Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1CVJ 1G9L 1JGN 1JH4 2K8G 2RQG 2RQH 2X04 3KTP 3KTR 3KUI 3KUJ 3KUR 3KUS 3KUT 3PKN 3PTH 4F02 4F25 4F26 5DX1 5DX8 5DXA 5LGP 5LGQ 5LGR 5LGS 7BN3 8SMO | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P11940"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P11940"
+      ],
+      "psp_gene_symbols": [
+        "PABPC1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "eIF4F",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=eif4f&site-search-type=Products",
+      "phosphositeplus_id": "1304593;962;3566",
+      "phosphositeplus_ids": [
+        "1304593",
+        "962",
+        "3566"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1304593",
+        "https://www.phosphosite.org/proteinAction.action?id=962",
+        "https://www.phosphosite.org/proteinAction.action?id=3566"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1304593",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1304593&showAllSites=true",
+          "gene_symbol": "EIF4A2",
+          "uniprot_id": "Q14240",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q14240",
+          "protein_name": "ATP-dependent RNA helicase which is a subunit of the eIF4F complex involved in cap recognition and is required for mRNA binding to ribosome. In the current model of translation initiation, eIF4A unwinds RNA secondary structures in the 5'-UTR of mRNAs which is necessary to allow efficient binding of the small ribosomal subunit, and subsequent scanning for the initiator codon. Belongs to the DEAD box helicase family. eIF4A subfamily. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q14240 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "EC 3.6.4.13; Helicase; RNA-binding; Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "3q27.3",
+            "Cellular Component": "cytosol; eukaryotic translation initiation factor 4F complex; perinuclear region of cytoplasm",
+            "Molecular Function": "ATP binding; ATP hydrolysis activity; helicase activity; hydrolase activity; nucleic acid binding; nucleotide binding; protein binding; RNA binding; RNA helicase activity; translation initiation factor activity",
+            "Biological Process": "cytoplasmic translational initiation; negative regulation of RNA-dependent RNA polymerase activity; regulation of translational initiation; translation; translational initiation",
+            "Disease": "Neurodevelopmental Disorder With Hypotonia And Speech Delay, With Or Without Seizures",
+            "Reference #": "Q14240 (UniProtKB)",
+            "Alt. Names/Synonyms": "ATP-dependent RNA helicase eIF4A-2; BM-010; DDX2B; eIF-4A-II; EIF4A; eIF4A-II; EIF4A2; EIF4F; Eukaryotic initiation factor 4A-II; eukaryotic translation initiation factor 4A, isoform 2; eukaryotic translation initiation factor 4A2; IF4A2",
+            "Gene Symbols": "EIF4A2",
+            "Molecular weight": "46,402 Da",
+            "Basal Isoelectric point": "5.33 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translation: eIF4E and p70S6K | Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "962",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=962&showAllSites=true",
+          "gene_symbol": "EIF4E",
+          "uniprot_id": "P06730",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P06730",
+          "protein_name": "Recognizes and binds the 7-methylguanosine-containing mRNA cap during an early step in the initiation of protein synthesis and facilitates ribosome binding by inducing the unwinding of the mRNAs secondary structures. Component of the CYFIP1-EIF4E-FMR1 complex which binds to the mRNA cap and mediates translational repression. In the CYFIP1-EIF4E-FMR1 complex this subunit mediates the binding to the mRNA cap. Belongs to the eukaryotic initiation factor 4E family. 3 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P06730 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "4q23",
+            "Cellular Component": "chromatoid body; cytoplasm; cytoplasmic ribonucleoprotein granule; cytoplasmic stress granule; cytosol; eukaryotic translation initiation factor 4F complex; excitatory synapse; glutamatergic synapse; nuclear body; nuclear speck; nucleoplasm; nucleus; P-body; perinuclear region of cytoplasm; postsynapse; RISC complex",
+            "Molecular Function": "DNA-binding transcription factor binding; enzyme binding; eukaryotic initiation factor 4G binding; mRNA cap binding; protein binding; RNA 7-methylguanosine cap binding; RNA binding; RNA cap binding; translation initiation factor activity",
+            "Biological Process": "G1/S transition of mitotic cell cycle; mRNA export from nucleus; mRNA transport; negative regulation of autophagy; negative regulation of translation; nuclear export; positive regulation of mitotic cell cycle; regulation of translation; regulation of translation at postsynapse, modulating synaptic transmission; translation; translational initiation",
+            "Disease": "Autism, Susceptibility To, 19",
+            "Reference #": "P06730 (UniProtKB)",
+            "Alt. Names/Synonyms": "AUTS19; CBP; eIF-4E; eIF-4F 25 kDa subunit; EIF4E; EIF4E1; EIF4EL1; EIF4F; Eukaryotic translation initiation factor 4E; eukaryotic translation initiation factor 4E-like 1; IF4E; MGC111573; mRNA cap-binding protein",
+            "Gene Symbols": "EIF4E",
+            "Molecular weight": "25,097 Da",
+            "Basal Isoelectric point": "5.79 Predict pI for various phosphorylation states",
+            "CST Pathways": "Angiogenesis | Insulin Receptor Signaling | Translation: eIF4E and p70S6K | Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1IPB 1IPC 1WKW 2GPQ 2V8W 2V8X 2V8Y 2W97 3AM7 3SMU 3TF2 3U7X 4AZA 4BEA 4DT6 4DUM 4TPW 4TQB 4TQC 4UED 5ABI 5EHC 5EI3 5EIR 5EKV 5GW6 5T46 5ZJY 5ZJZ 5ZK5 5ZK7 5ZK9 5ZML 7D6Y 7D8B 7EZW 7F07 7MEU 7XTP 8QM4 8QM5 8QM6 8QM7 8QM8 8QM9 8SX4 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "3566",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=3566&showAllSites=true",
+          "gene_symbol": "EIF4G1",
+          "uniprot_id": "Q04637",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q04637",
+          "protein_name": "Component of the protein complex eIF4F, which is involved in the recognition of the mRNA cap, ATP-dependent unwinding of 5'-terminal secondary structure and recruitment of mRNA to the ribosome. Belongs to the eukaryotic initiation factor 4G family. 8 alternative splicing and alternative initiation human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q04637 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "RNA-binding; Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "3q27.1",
+            "Cellular Component": "cytoplasm; cytoplasmic stress granule; cytosol; eukaryotic translation initiation factor 4F complex; nucleus; ribosome",
+            "Molecular Function": "ATP binding; eukaryotic initiation factor 4E binding; molecular adaptor activity; mRNA binding; protein binding; RNA binding; translation factor activity, RNA binding; translation initiation factor activity; translation initiation factor binding",
+            "Biological Process": "cap-dependent translational initiation; cellular response to nutrient levels; energy homeostasis; miRNA-mediated gene silencing by inhibition of translation; negative regulation of autophagy; positive regulation of cell growth; positive regulation of eukaryotic translation initiation factor 4F complex assembly; positive regulation of G1/S transition of mitotic cell cycle; positive regulation of protein localization to cell periphery; positive regulation of protein metabolic process; positive regulation of translation in response to endoplasmic reticulum stress; regulation of cellular response to stress; regulation of presynapse assembly; regulation of translation; regulation of translational initiation; translation; translational initiation",
+            "Reference #": "Q04637 (UniProtKB)",
+            "Alt. Names/Synonyms": "DKFZp686A1451; eIF-4-gamma 1; eIF-4G 1; eIF-4G1; EIF4-gamma; EIF4F; EIF4G; EIF4G1; EIF4GI; eucaryotic translation initiation factor 4G; Eukaryotic translation initiation factor 4 gamma 1; eukaryotic translation initiation factor 4 gamma, 1; IF4G1; p220; PARK18",
+            "Gene Symbols": "EIF4G1",
+            "Molecular weight": "175,491 Da",
+            "Basal Isoelectric point": "5.25 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translation: eIF4E and p70S6K | Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | CCLE | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1LJ2 1UG3 2W97 4AZA 4F02 5EHC 5EI3 5EIR 5T46 5ZK5 8HUJ 8J7R | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "Q14240",
+        "P06730",
+        "Q04637"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/Q14240",
+        "https://www.uniprot.org/uniprot/P06730",
+        "https://www.uniprot.org/uniprot/Q04637"
+      ],
+      "psp_gene_symbols": [
+        "EIF4A2",
+        "EIF4E",
+        "EIF4G1"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "eRF1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=erf1&site-search-type=Products",
+      "phosphositeplus_id": "#",
+      "phosphositeplus_ids": [
+        "#"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=#",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=#"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "#",
+          "overview_url": "https://www.phosphosite.org/proteinAction.action?id=#",
+          "gene_symbol": "eRF1",
+          "uniprot_id": "P62495",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P62495",
+          "reference_label": "P62495 (manual override)",
+          "source": "manual_override"
+        }
+      ],
+      "uniprot_ids": [
+        "P62495"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P62495"
+      ],
+      "psp_gene_symbols": [
+        "eRF1"
+      ],
+      "has_uniprot_match": true,
+      "manual_uniprot_override": true
+    },
+    {
+      "label": "eRF3",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=erf3&site-search-type=Products",
+      "phosphositeplus_id": "#",
+      "phosphositeplus_ids": [
+        "#"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=#",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=#"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "#",
+          "overview_url": "https://www.phosphosite.org/proteinAction.action?id=#",
+          "gene_symbol": "eRF3",
+          "uniprot_id": "P15170",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P15170",
+          "reference_label": "P15170 (manual override)",
+          "source": "manual_override"
+        },
+        {
+          "psp_id": "#",
+          "overview_url": "https://www.phosphosite.org/proteinAction.action?id=#",
+          "gene_symbol": "eRF3",
+          "uniprot_id": "Q13283",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q13283",
+          "reference_label": "Q13283 (manual override)",
+          "source": "manual_override"
+        }
+      ],
+      "uniprot_ids": [
+        "P15170",
+        "Q13283"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P15170",
+        "https://www.uniprot.org/uniprot/Q13283"
+      ],
+      "psp_gene_symbols": [
+        "eRF3"
+      ],
+      "has_uniprot_match": true,
+      "manual_uniprot_override": true
+    },
+    {
+      "label": "eEF1",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=eef1&site-search-type=Products",
+      "phosphositeplus_id": "3315;3316;5816;7535;11772;9164",
+      "phosphositeplus_ids": [
+        "3315",
+        "3316",
+        "5816",
+        "7535",
+        "11772",
+        "9164"
+      ],
+      "phosphositeplus_url": "",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=3315",
+        "https://www.phosphosite.org/proteinAction.action?id=3316",
+        "https://www.phosphosite.org/proteinAction.action?id=5816",
+        "https://www.phosphosite.org/proteinAction.action?id=7535",
+        "https://www.phosphosite.org/proteinAction.action?id=11772",
+        "https://www.phosphosite.org/proteinAction.action?id=9164"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "3315",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=3315&showAllSites=true",
+          "gene_symbol": "EEF1A1",
+          "uniprot_id": "P68104",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P68104",
+          "protein_name": "This protein promotes the GTP-dependent binding of aminoacyl-tRNA to the A-site of ribosomes during protein biosynthesis. With PARP1 and TXK, forms a complex that acts as a T helper 1 (Th1) cell-specific transcription factor and binds the promoter of IFN-gamma to directly regulate its transcription, and is thus involved importantly in Th1 cytokine production. Belongs to the TRAFAC class translation factor GTPase superfamily. Classic translation factor GTPase family. EF-Tu/EF-1A subfamily. Brain, placenta, lung, liver, kidney, pancreas but barely detectable in heart and skeletal muscle. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P68104 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Nucleolus; Translation; Translation elongation",
+            "Chromosomal Location of human Ortholog": "6q13",
+            "Cellular Component": "cortical actin cytoskeleton; cytoplasm; cytoplasmic side of lysosomal membrane; cytosol; cytosolic ribosome; eukaryotic translation elongation factor 1 complex; extracellular region; ficolin-1-rich granule lumen; nucleolus; nucleus; plasma membrane; ribosome; ruffle membrane; secretory granule lumen",
+            "Molecular Function": "GTP binding; GTPase activity; hydrolase activity; kinase activator activity; kinase binding; molecular adaptor activity; nucleotide binding; protein binding; protein kinase binding; translation elongation factor activity; tRNA binding",
+            "Biological Process": "cellular response to epidermal growth factor stimulus; host-mediated activation of viral genome replication; regulation of chaperone-mediated autophagy; translation; translational elongation",
+            "Reference #": "P68104 (UniProtKB)",
+            "Alt. Names/Synonyms": "CCS-3; CCS3; cervical cancer suppressor 3; CTCL tumor antigen; EE1A1; EEF-1; EEF1A; eEF1A-1; EEF1A1; EF-1-alpha-1; EF-Tu; EF1A; EF1a-like protein; EF1A1; elongation factor 1 alpha subunit; Elongation factor 1-alpha 1; Elongation factor Tu; epididymis secretory sperm binding protein; Eukaryotic elongation factor 1 A-1; eukaryotic translation elongation factor 1 alpha 1; eukaryotic translation elongation factor 1 alpha 1-like 14; FLJ25721; glucocorticoid receptor AF-1 specific elongation factor; GRAF-1EF; HNGC:16303; LENG7; leukocyte receptor cluster (LRC) member 7; Leukocyte receptor cluster member 7; MGC102687; MGC131894; MGC16224; prostate tumor-inducing protein 1; PTI1; translation elongation factor 1 alpha 1-like 14",
+            "Gene Symbols": "EEF1A1",
+            "Molecular weight": "50,141 Da",
+            "Basal Isoelectric point": "9.1 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1SYW 3C5J | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "3316",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=3316&showAllSites=true",
+          "gene_symbol": "EEF1A2",
+          "uniprot_id": "Q05639",
+          "uniprot_url": "https://www.uniprot.org/uniprot/Q05639",
+          "protein_name": "This protein promotes the GTP-dependent binding of aminoacyl-tRNA to the A-site of ribosomes during protein biosynthesis. Belongs to the TRAFAC class translation factor GTPase superfamily. Classic translation factor GTPase family. EF-Tu/EF-1A subfamily. Brain, heart, and skeletal muscle. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "Q05639 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation elongation",
+            "Chromosomal Location of human Ortholog": "20q13.33",
+            "Cellular Component": "cytoplasm; cytoplasmic side of lysosomal membrane; endoplasmic reticulum membrane; eukaryotic translation elongation factor 1 complex; nucleus; synapse",
+            "Molecular Function": "GTP binding; GTPase activity; hydrolase activity; metal ion binding; nucleotide binding; protein binding; protein kinase binding; translation elongation factor activity; translation factor activity, RNA binding",
+            "Biological Process": "positive regulation of lipid kinase activity; regulation of chaperone-mediated autophagy; translation; translational elongation",
+            "Disease": "Epileptic Encephalopathy, Early Infantile, 33 ; Mental Retardation, Autosomal Dominant 38",
+            "Reference #": "Q05639 (UniProtKB)",
+            "Alt. Names/Synonyms": "eEF1A-2; EEF1A2; EEF1AL; EF-1-alpha-2; EF1A; EF1A2; EIEE33; Elongation factor 1-alpha 2; elongation factor-1 alpha; Eukaryotic elongation factor 1 A-2; eukaryotic translation elongation factor 1 alpha 2; FLJ41696; HS1; MRD38; statin S1; statin-like; Statin-S1; STN; STNL",
+            "Gene Symbols": "EEF1A2",
+            "Molecular weight": "50,470 Da",
+            "Basal Isoelectric point": "9.11 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Protein Atlas | BioGPS | Pfam | RCSB PDB 3C5J 8B6Z | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "5816",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=5816&showAllSites=true",
+          "gene_symbol": "EEF1B2",
+          "uniprot_id": "P24534",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P24534",
+          "protein_name": "Catalytic subunit of the guanine nucleotide exchange factor (GEF) (eEF1B subcomplex) of the eukaryotic elongation factor 1 complex (eEF1). Stimulates the exchange of GDP for GTP on elongation factor 1A (eEF1A), probably by displacing GDP from the nucleotide binding pocket in eEF1A. EF-1 is composed of 4 subunits: alpha, beta (alpha subunit of the eEF1B subcomplex), delta (beta subunit of the eEF1B subcomplex), and gamma (gamma subunit of the eEF1B subcomplex) (Probable). Interacts with elongation factor EEF1A1. Belongs to the EF-1-beta/EF-1-delta family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P24534 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation elongation",
+            "Chromosomal Location of human Ortholog": "2q33.3",
+            "Cellular Component": "cytoplasm; cytosol; endoplasmic reticulum; eukaryotic translation elongation factor 1 complex; nucleus",
+            "Molecular Function": "guanyl-nucleotide exchange factor activity; protein binding; translation elongation factor activity",
+            "Biological Process": "response to ethanol; translation; translational elongation",
+            "Reference #": "P24534 (UniProtKB)",
+            "Alt. Names/Synonyms": "EEF1B; EEF1B1; EEF1B2; EF-1-beta; EF1B; Elongation factor 1-beta; eukaryotic translation elongation factor 1 beta 1; eukaryotic translation elongation factor 1 beta 2",
+            "Gene Symbols": "EEF1B2",
+            "Molecular weight": "24,764 Da",
+            "Basal Isoelectric point": "4.5 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1B64 5DQS | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "7535",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=7535&showAllSites=true",
+          "gene_symbol": "EEF1D",
+          "uniprot_id": "P29692",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P29692",
+          "protein_name": "Isoform 1: EF-1-beta and EF-1-delta stimulate the exchange of GDP bound to EF-1-alpha to GTP, regenerating EF-1-alpha for another round of transfer of aminoacyl-tRNAs to the ribosome. Isoform 2: Regulates induction of heat-shock-responsive genes through association with heat shock transcription factors and direct DNA-binding at heat shock promoter elements (HSE). Belongs to the EF-1-beta/EF-1-delta family. Isoform 2 is specifically expressed in brain, cerebellum and testis. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P29692 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation elongation",
+            "Chromosomal Location of human Ortholog": "8q24.3",
+            "Cellular Component": "cytoplasm; cytosol; endoplasmic reticulum; eukaryotic translation elongation factor 1 complex; fibrillar center; nucleoplasm; nucleus",
+            "Molecular Function": "DNA binding; DNA-binding transcription factor binding; guanyl-nucleotide exchange factor activity; heat shock protein binding; protein binding; RNA polymerase II cis-regulatory region sequence-specific DNA binding; translation elongation factor activity; translation factor activity, RNA binding",
+            "Biological Process": "cellular response to heat; cellular response to ionizing radiation; cytoplasmic translational elongation; positive regulation of transcription by RNA polymerase II; translation; translational elongation",
+            "Reference #": "P29692 (UniProtKB)",
+            "Alt. Names/Synonyms": "Antigen NY-CO-4; EEF1D; EF-1-delta; EF-1D; EF1D; Elongation factor 1-delta; eukaryotic translation elongation factor 1 delta; eukaryotic translation elongation factor 1 delta (guanine nucleotide exchange protein); FLJ20897; FP1047; guanine nucleotide exchange protein",
+            "Gene Symbols": "EEF1D",
+            "Molecular weight": "31,122 Da",
+            "Basal Isoelectric point": "4.9 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2MVM 2MVN 2N51 5JPO | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene"
+          }
+        },
+        {
+          "psp_id": "11772",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=11772&showAllSites=true",
+          "gene_symbol": "EEF1E1",
+          "uniprot_id": "O43324",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O43324",
+          "protein_name": "Positive modulator of ATM response to DNA damage. Down-regulated in various cancer tissues. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O43324 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation elongation; Translation regulation",
+            "Chromosomal Location of human Ortholog": "6p24.3",
+            "Cellular Component": "aminoacyl-tRNA synthetase multienzyme complex; cytoplasm; cytosol; nucleoplasm; nucleus",
+            "Molecular Function": "protein binding",
+            "Biological Process": "negative regulation of cell population proliferation; positive regulation of apoptotic process; positive regulation of cellular senescence; positive regulation of DNA damage response, signal transduction by p53 class mediator; translation; tRNA aminoacylation for protein translation",
+            "Reference #": "O43324 (UniProtKB)",
+            "Alt. Names/Synonyms": "AIMP3; Aminoacyl tRNA synthetase complex-interacting multifunctional protein 3; ARS-interacting multifunctional protein 3; EEF1E1; Elongation factor p18; eukaryotic translation elongation factor 1 epsilon 1; Eukaryotic translation elongation factor 1 epsilon-1; MCA3; Multisynthase complex auxiliary component p18; P18; p18 component of aminoacyl-tRNA synthetase complex",
+            "Gene Symbols": "EEF1E1",
+            "Molecular weight": "19,811 Da",
+            "Basal Isoelectric point": "8.55 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 2UZ8 4BJV 4BJW 4BL7 4BVX 4BVY 5BMU 5Y6L | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        },
+        {
+          "psp_id": "9164",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=9164&showAllSites=true",
+          "gene_symbol": "EEF1G",
+          "uniprot_id": "P26641",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P26641",
+          "protein_name": "Probably plays a role in anchoring the complex to other cellular components. Highly expressed in pancreatic tumor tissue and to a lesser extent in normal kidney, intestine, pancreas, stomach, lung, brain, spleen and liver. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P26641 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation elongation",
+            "Chromosomal Location of human Ortholog": "11q12.3",
+            "Cellular Component": "cytoplasm; cytosol; endoplasmic reticulum; nucleus",
+            "Molecular Function": "protein binding; translation elongation factor activity",
+            "Biological Process": "response to virus; translation; translational elongation",
+            "Reference #": "P26641 (UniProtKB)",
+            "Alt. Names/Synonyms": "eEF-1B gamma; EEF1G; EF-1-gamma; EF1G; Elongation factor 1-gamma; eukaryotic translation elongation factor 1 gamma; GIG35; pancreatic tumor-related protein; PRO1608; translation elongation factor eEF-1 gamma chain",
+            "Gene Symbols": "EEF1G",
+            "Molecular weight": "50,119 Da",
+            "Basal Isoelectric point": "6.25 Predict pI for various phosphorylation states",
+            "CST Pathways": "Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1PBU 5DQS 5JPO | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P68104",
+        "Q05639",
+        "P24534",
+        "P29692",
+        "O43324",
+        "P26641"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P68104",
+        "https://www.uniprot.org/uniprot/Q05639",
+        "https://www.uniprot.org/uniprot/P24534",
+        "https://www.uniprot.org/uniprot/P29692",
+        "https://www.uniprot.org/uniprot/O43324",
+        "https://www.uniprot.org/uniprot/P26641"
+      ],
+      "psp_gene_symbols": [
+        "EEF1A1",
+        "EEF1A2",
+        "EEF1B2",
+        "EEF1D",
+        "EEF1E1",
+        "EEF1G"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "eEF2",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=eef2&site-search-type=Products",
+      "phosphositeplus_id": "960",
+      "phosphositeplus_ids": [
+        "960"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=960",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=960"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "960",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=960&showAllSites=true",
+          "gene_symbol": "EEF2",
+          "uniprot_id": "P13639",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P13639",
+          "protein_name": "Catalyzes the GTP-dependent ribosomal translocation step during translation elongation. During this step, the ribosome changes from the pre-translocational (PRE) to the post-translocational (POST) state as the newly formed A-site-bound peptidyl-tRNA and P-site-bound deacylated tRNA move to the P and E sites, respectively. Catalyzes the coordinated movement of the two tRNA molecules, the mRNA and conformational changes in the ribosome. Belongs to the TRAFAC class translation factor GTPase superfamily. Classic translation factor GTPase family. EF-G/EF-2 subfamily. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P13639 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "Translation; Translation elongation",
+            "Chromosomal Location of human Ortholog": "19p13.3",
+            "Cellular Component": "cytoplasm; cytosol; extracellular region; ficolin-1-rich granule lumen; glutamatergic synapse; nucleus; postsynapse; ribonucleoprotein complex; ribosome; secretory granule lumen; synapse",
+            "Molecular Function": "5S rRNA binding; actin filament binding; GTP binding; GTPase activity; hydrolase activity; lncRNA binding; nucleotide binding; p53 binding; protein binding; protein kinase binding; ribosome binding; RNA binding; translation elongation factor activity",
+            "Biological Process": "cellular response to brain-derived neurotrophic factor stimulus; glial cell proliferation; positive regulation of cytoplasmic translation; positive regulation of translation; response to endoplasmic reticulum stress; response to estradiol; response to ethanol; response to folic acid; response to hydrogen peroxide; response to ischemia; response to xenobiotic stimulus; skeletal muscle cell differentiation; skeletal muscle contraction; translation; translation at postsynapse; translational elongation",
+            "Disease": "Spinocerebellar Ataxia 26",
+            "Reference #": "P13639 (UniProtKB)",
+            "Alt. Names/Synonyms": "EEF-2; EEF2; EF-2; EF2; Elongation factor 2; epididymis secretory sperm binding protein; eukaryotic translation elongation factor 2; polypeptidyl-tRNA translocase; SCA26",
+            "Gene Symbols": "EEF2",
+            "Molecular weight": "95,338 Da",
+            "Basal Isoelectric point": "6.41 Predict pI for various phosphorylation states",
+            "CST Pathways": "AMPK Signaling | Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P13639"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P13639"
+      ],
+      "psp_gene_symbols": [
+        "EEF2"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "eEF2K",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=eef2k&site-search-type=Products",
+      "phosphositeplus_id": "591",
+      "phosphositeplus_ids": [
+        "591"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=591",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=591"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "591",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=591&showAllSites=true",
+          "gene_symbol": "EEF2K",
+          "uniprot_id": "O00418",
+          "uniprot_url": "https://www.uniprot.org/uniprot/O00418",
+          "protein_name": "Threonine kinase that regulates protein synthesis by controlling the rate of peptide chain elongation. Upon activation by a variety of upstream kinases including AMPK or TRPM7, phosphorylates the elongation factor EEF2 at a single site, renders it unable to bind ribosomes and thus inactive. In turn, the rate of protein synthesis is reduced. Belongs to the protein kinase superfamily. Alpha-type protein kinase family. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "O00418 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "ATYPICAL group; Alpha family; EC 2.7.11.20; Kinase, protein; Protein kinase, Ser/Thr (non-receptor); Protein kinase, atypical; Translation; eEF2K subfamily",
+            "Chromosomal Location of human Ortholog": "16p12.2",
+            "Cellular Component": "cytoplasm; cytosol; dendritic spine; glutamatergic synapse; postsynaptic density",
+            "Molecular Function": "ATP binding; calcium ion binding; calmodulin binding; elongation factor-2 kinase activity; kinase activity; nucleotide binding; protein kinase activity; protein serine/threonine kinase activity; transferase activity; translation factor activity, RNA binding",
+            "Biological Process": "cellular response to anoxia; cellular response to brain-derived neurotrophic factor stimulus; cellular response to calcium ion; cellular response to cAMP; cellular response to insulin stimulus; negative regulation of apoptotic process; positive regulation of dendritic spine morphogenesis; positive regulation of endocytosis; positive regulation of synapse assembly; protein autophosphorylation; regulation of translation at postsynapse; response to ischemia; response to prolactin; translational elongation",
+            "Reference #": "O00418 (UniProtKB)",
+            "Alt. Names/Synonyms": "alternative protein EEF2K; Calcium/calmodulin-dependent eukaryotic elongation factor 2 kinase; calcium/calmodulin-dependent eukaryotic elongation factor-2 kinase; calmodulin-dependent protein kinase III; CaMKIII; eEF-2 kinase; eEF-2K; EEF2K; EF2K; elongation factor 2 kinase; elongation factor-2 kinase; eukaroytic elongation factor 2 kinase; Eukaryotic elongation factor 2 kinase; eukaryotic elongation factor-2 kinase; HSU93850; MGC45041",
+            "Gene Symbols": "EEF2K",
+            "Molecular weight": "82,144 Da",
+            "Basal Isoelectric point": "5.16 Predict pI for various phosphorylation states",
+            "CST Pathways": "AMPK Signaling | Growth And Differentiation Control by MAPKs | Regulation of P38 MAPKs | Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | KinBase | Pfam | RCSB PDB 5J8H 5KS5 6NX4 7SHQ 8FNY 8FO6 8GM4 8GM5 | ENZYME | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | InnateDB | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "O00418"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/O00418"
+      ],
+      "psp_gene_symbols": [
+        "EEF2K"
+      ],
+      "has_uniprot_match": true
+    },
+    {
+      "label": "eIF4B",
+      "cst_url": "https://www.cellsignal.com/browse/?Ntk=Products&N=4294956287&Ntt=eif4b&site-search-type=Products",
+      "phosphositeplus_id": "1088",
+      "phosphositeplus_ids": [
+        "1088"
+      ],
+      "phosphositeplus_url": "https://www.phosphosite.org/proteinAction.action?id=1088",
+      "phosphositeplus_urls": [
+        "https://www.phosphosite.org/proteinAction.action?id=1088"
+      ],
+      "psp_uniprot_lookups": [
+        {
+          "psp_id": "1088",
+          "overview_url": "https://www.phosphosite.org/overviewExecuteAction?id=1088&showAllSites=true",
+          "gene_symbol": "EIF4B",
+          "uniprot_id": "P23588",
+          "uniprot_url": "https://www.uniprot.org/uniprot/P23588",
+          "protein_name": "Required for the binding of mRNA to ribosomes. Functions in close association with EIF4-F and EIF4-A. Binds near the 5'-terminal cap of mRNA in presence of EIF-4F and ATP. Promotes the ATPase activity and the ATP-dependent RNA unwinding activity of both EIF4-A and EIF4-F. 2 alternatively spliced human isoforms have been reported. Note: This description may include information from UniProtKB.",
+          "organism": "",
+          "reference_label": "P23588 (UniProtKB)",
+          "raw_fields": {
+            "Protein type": "RNA-binding; Translation; Translation initiation",
+            "Chromosomal Location of human Ortholog": "12q13.13",
+            "Cellular Component": "cytosol; eukaryotic translation initiation factor 4F complex; nucleus",
+            "Molecular Function": "nucleic acid binding; protein binding; RNA binding; translation initiation factor activity",
+            "Biological Process": "regulation of translational initiation; translation; translational initiation",
+            "Reference #": "P23588 (UniProtKB)",
+            "Alt. Names/Synonyms": "eIF-4B; EIF4B; Eukaryotic translation initiation factor 4B; IF4B; PRO1843",
+            "Gene Symbols": "EIF4B",
+            "Molecular weight": "69,151 Da",
+            "Basal Isoelectric point": "5.55 Predict pI for various phosphorylation states",
+            "CST Pathways": "Growth And Differentiation Control by MAPKs | Translation: eIF4E and p70S6K | Translational Control",
+            "Cross-references to other databases": "AlphaFold | STRING | cBioPortal | Wikipedia | Reactome | Protein Atlas | BioGPS | Pfam | RCSB PDB 1WI8 2J76 | Phospho.ELM | GeneCards | UniProtKB | Entrez-Gene | GenPept | Ensembl Gene | Ensembl Protein"
+          }
+        }
+      ],
+      "uniprot_ids": [
+        "P23588"
+      ],
+      "uniprot_urls": [
+        "https://www.uniprot.org/uniprot/P23588"
+      ],
+      "psp_gene_symbols": [
+        "EIF4B"
+      ],
+      "has_uniprot_match": true
+    }
+  ],
+  "protein_module_count": 19,
+  "scraped_at_utc": "2026-03-24T15:31:35.554288+00:00",
+  "uniprot_enriched_at": "2026-03-24T17:35:39.142674+00:00"
+}
