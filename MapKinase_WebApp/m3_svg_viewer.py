@@ -215,6 +215,9 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
     var protboxLinks = protboxLinks || {{}};
     var shiftKeyDown = typeof shiftKeyDown === 'boolean' ? shiftKeyDown : false;
     var activeDragProtboxId = typeof activeDragProtboxId === 'string' ? activeDragProtboxId : null;
+    var protboxSnapEnabled = typeof protboxSnapEnabled === 'boolean' ? protboxSnapEnabled : false;
+    var protboxAlignmentSnapEnabled = typeof protboxAlignmentSnapEnabled === 'boolean' ? protboxAlignmentSnapEnabled : false;
+    var arrowSideSnapEnabled = typeof arrowSideSnapEnabled === 'boolean' ? arrowSideSnapEnabled : true;
     var TEXT_HIT_PADDING = typeof TEXT_HIT_PADDING === 'number' ? TEXT_HIT_PADDING : 6;
     var labelDefaults = labelDefaults || {{'N1': [-5, -5, 'right'],'N2': [0, -11, 'center'],'N3': [5, -5, 'left'],'S1': [-3, 5, 'right'],'S2': [0, 12, 'center'],'S3': [3, 5, 'left'],'W1': [-3, -2, 'right'],'W2': [-3, 2, 'right'],'E1': [3, -2, 'left'],'E2': [3, 2, 'left']}};
     var anchorMap = anchorMap || {{'left': 'start','center': 'middle','right': 'end'}};
@@ -223,9 +226,16 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
     var textHandleGroups = textHandleGroups || {{}};
     var activeTextEditorId = typeof activeTextEditorId === 'string' ? activeTextEditorId : null;
     var isTextEditing = typeof isTextEditing === 'boolean' ? isTextEditing : false;
+    var rootContainer = (document.currentScript && document.currentScript.closest('.svg-container')) || document.querySelector('.svg-container');
+    function getScopedNodeById(id) {{
+        return rootContainer ? rootContainer.querySelector(`#${{id}}`) : document.getElementById(id);
+    }}
+    function getCanvasEl() {{
+        return getScopedNodeById('svgCanvas');
+    }}
     var proteinCatalog = (function() {{
         try {{
-            var catalogNode = document.getElementById('global-protein-catalog');
+            var catalogNode = getScopedNodeById('global-protein-catalog');
             if (catalogNode) {{
                 var parsedPayload = JSON.parse(catalogNode.textContent || '{{}}') || {{}};
                 if (typeof parsedPayload === 'object' && !Array.isArray(parsedPayload)) {{
@@ -241,8 +251,8 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
     var ptmSnapRadius = 12;
     var currentSelected = currentSelected || {{}};
     function initializeSvg() {{
-            const container = document.querySelector('.svg-container');
-            const canvas = document.getElementById('svgCanvas');
+            const container = rootContainer || document.querySelector('.svg-container');
+            const canvas = getCanvasEl();
             if (!container || !canvas) return;
             while (canvas.firstChild) {{canvas.removeChild(canvas.firstChild);}}
             // Reset client-side caches so switching pathways/modes doesn't keep stale geometry data
@@ -258,6 +268,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             protboxHandleDists = {{}};
             protboxLinks = {{}};
             autoConnectSelectedProtboxes = null;
+            autoConnectSelectedProtboxesShortest = null;
             shiftKeyDown = false;
             activeDragProtboxId = null;
             currentSelected = {{}};
@@ -269,7 +280,58 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     // data will be parsed below; we'll operate after parsing
                 }}
             }} catch (e) {{ console.log('bg pre-check failed', e); }}
-            const draw = SVG().addTo('#svgCanvas').size({max_x}, {max_y}).viewbox(viewBox.x, viewBox.y, viewBox.width, viewBox.height);
+            const draw = SVG().addTo(canvas).size({max_x}, {max_y}).viewbox(viewBox.x, viewBox.y, viewBox.width, viewBox.height);
+            const fullWidthCanvas = {str(full_width).lower()};
+            const syncSvgCanvasSize = () => {{
+                const canvasEl = getCanvasEl();
+                if (!canvasEl) return;
+                try {{
+                    const inFullscreen = !!(document.fullscreenElement && document.fullscreenElement.contains(canvasEl));
+                    if (fullWidthCanvas) {{
+                        const nextWidth = Math.max(canvasEl.clientWidth || 0, 1);
+                        const nextHeight = Math.max(canvasEl.clientHeight || 0, 1);
+                        draw.size(nextWidth, nextHeight);
+                        draw.attr({{ preserveAspectRatio: inFullscreen ? 'none' : 'xMidYMid meet' }});
+                    }} else {{
+                        draw.size({max_x}, {max_y});
+                        draw.attr({{ preserveAspectRatio: 'xMidYMid meet' }});
+                    }}
+                    draw.viewbox(viewBox.x, viewBox.y, viewBox.width, viewBox.height);
+                }} catch (resizeErr) {{
+                    console.log('svg resize sync failed', resizeErr);
+                }}
+            }};
+            try {{
+                window.__mkResizeObservers = window.__mkResizeObservers || {{}};
+                if (window.__mkResizeObservers[exportKey]) {{
+                    try {{ window.__mkResizeObservers[exportKey].disconnect(); }} catch (disconnectErr) {{ /* ignore */ }}
+                }}
+                const canvasEl = getCanvasEl();
+                if (canvasEl && typeof ResizeObserver !== 'undefined') {{
+                    const observer = new ResizeObserver(() => {{
+                        window.requestAnimationFrame(syncSvgCanvasSize);
+                    }});
+                    observer.observe(canvasEl);
+                    window.__mkResizeObservers[exportKey] = observer;
+                }}
+                if (!window.__mkFullscreenResizeBound) {{
+                    window.__mkFullscreenResizeBound = true;
+                    window.addEventListener('resize', () => window.requestAnimationFrame(() => {{
+                        Object.keys(window.__mkViewerControls || {{}}).forEach((key) => {{
+                            const api = window.__mkViewerControls[key];
+                            if (api && typeof api.syncCanvasSize === 'function') api.syncCanvasSize();
+                        }});
+                    }}));
+                    document.addEventListener('fullscreenchange', () => window.requestAnimationFrame(() => {{
+                        Object.keys(window.__mkViewerControls || {{}}).forEach((key) => {{
+                            const api = window.__mkViewerControls[key];
+                            if (api && typeof api.syncCanvasSize === 'function') api.syncCanvasSize();
+                        }});
+                    }}));
+                }}
+            }} catch (observerErr) {{
+                console.log('svg resize observer setup failed', observerErr);
+            }}
             const defaultPtmPositionPriority = ['N1','N3','S1','S3','W1','E1','W2','E2','N2','S2'];
             const ksPtmPositionPriority = ['W1','W2','E1','E2','N1','S1','N2','S2','N3','S3'];
             let ptmPositionPriority = defaultPtmPositionPriority;
@@ -303,7 +365,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             }};
             let data = null;
             try {{
-                data = JSON.parse(document.getElementById('pathway-data').textContent);
+                data = JSON.parse(getScopedNodeById('pathway-data').textContent);
             }} catch (parseErr) {{
                 console.error('m3: failed to parse pathway JSON', parseErr);
                 const dbg = document.getElementById('debug_json');
@@ -483,6 +545,20 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             const debugMode = !!settings.debug_mode;
             const activeFcIndex = Number(data._active_fc_index || 1);
             const colorPreview = data._color_preview_override || {{}};
+            const overlayStateDefaults = {{
+                background: true,
+                protboxes: true,
+                ptms: true,
+                ptmLabels: true,
+                ptmSymbols: true,
+                arrows: true,
+                compounds: true,
+                groups: true,
+                tooltips: true
+            }};
+            window.__mkViewerOverlayState = window.__mkViewerOverlayState || {{}};
+            const overlayState = Object.assign({{}}, overlayStateDefaults, window.__mkViewerOverlayState[exportKey] || {{}});
+            let tooltipsEnabled = overlayState.tooltips !== false;
             const searchSource = Object.keys(proteinCatalog).length ? proteinCatalog : (proteinData || {{}});
             const proteinSearchIndex = Object.entries(searchSource).map(([uniprot, protein]) => {{
                 const geneSymbol = protein?.gene_symbol || protein?.label || protein?.backup_label || uniprot || 'Unknown';
@@ -492,6 +568,42 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     searchText: `${{uniprot}}|${{geneSymbol}}`
                 }};
             }});
+            const getViewportCenter = () => {{
+                const width = Number(viewBox?.width) || {max_x};
+                const height = Number(viewBox?.height) || {max_y};
+                const originX = Number(viewBox?.x) || 0;
+                const originY = Number(viewBox?.y) || 0;
+                return {{
+                    x: originX + width / 2,
+                    y: originY + height / 2
+                }};
+            }};
+            const searchProteinCatalog = (query, limit = 40) => {{
+                const trimmed = String(query || '').trim();
+                if (!trimmed) {{
+                    return {{ results: [], error: null }};
+                }}
+                let regex = null;
+                try {{
+                    regex = new RegExp(trimmed, 'i');
+                }} catch (err) {{
+                    return {{ results: [], error: 'Invalid regex pattern.' }};
+                }}
+                const matches = [];
+                const maxResults = Math.max(1, Number(limit) || 40);
+                for (const entry of proteinSearchIndex) {{
+                    if (regex.test(entry.searchText)) {{
+                        const protein = searchSource[entry.uniprot] || {{}};
+                        matches.push({{
+                            uniprot: entry.uniprot,
+                            geneSymbol: entry.geneSymbol,
+                            color: entityColor(protein)
+                        }});
+                    }}
+                    if (matches.length >= maxResults) break;
+                }}
+                return {{ results: matches, error: null }};
+            }};
             let protboxCounter = protBoxes.reduce((max, pb) => {{
                 const val = Number(pb?.protbox_id);
                 if (Number.isFinite(val)) {{
@@ -742,14 +854,26 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 }}
                 return toRgbString(entity && entity[`outline_color_${{idx}}`], 'black');
             }};
-            const trackableMoveTypes = new Set(['prot-box','ptm-shape','ptm-label','ptm-symbol','compound','text-box','figure-key','arrow','arrow-start','arrow-end']);
+            const trackableMoveTypes = new Set(['prot-box','group','ptm-shape','ptm-label','ptm-symbol','compound','text-box','figure-key','arrow','arrow-start','arrow-end']);
             const toCoordinateNumber = (value, fallback = 0) => {{
                 const num = Number(value);
                 return Number.isFinite(num) ? num : fallback;
             }};
+            const elementByIdCache = new Map();
             const ensureElementForId = (elementId) => {{
                 if (!elementId) return null;
-                return draw.find(`[data-id="${{elementId}}"]`)[0] || null;
+                const key = String(elementId);
+                const cached = elementByIdCache.get(key);
+                if (cached && cached.node && cached.node.isConnected) {{
+                    return cached;
+                }}
+                const found = draw.find(`[data-id="${{key}}"]`)[0] || null;
+                if (found && found.node && found.node.isConnected) {{
+                    elementByIdCache.set(key, found);
+                }} else {{
+                    elementByIdCache.delete(key);
+                }}
+                return found;
             }};
             const applyPositionForEntry = (entry, which = 'before') => {{
                 if (!entry) return;
@@ -991,6 +1115,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     if (endHandle) {{
                         endHandle.cx(x2).cy(y2);
                     }}
+                    updateArrowHeadHitbox(snap.arrowId, x2, y2);
                     const arrowHead = draw.find(`[data-id="${{snap.arrowId}}_head"]`)[0];
                     if (!arrowHead) return;
                     const dx = x2 - x1;
@@ -1027,6 +1152,41 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     }}
                 }});
             }};
+            const warmMovableElements = () => {{
+                let warmed = false;
+                const nodes = draw.find('[data-id]');
+                const queue = [];
+                nodes.forEach(el => {{
+                    const elementId = el?.attr ? el.attr('data-id') : null;
+                    const elementType = el?.attr ? el.attr('data-type') : null;
+                    if (!elementId || !elementType) return;
+                    if (!trackableMoveTypes.has(elementType) && elementType !== 'prot-label') return;
+                    queue.push({{ elementId, elementType }});
+                }});
+                const pump = (startIdx = 0) => {{
+                    const endIdx = Math.min(startIdx + 24, queue.length);
+                    for (let idx = startIdx; idx < endIdx; idx += 1) {{
+                        const item = queue[idx];
+                        const element = ensureElementForId(item.elementId);
+                        if (!element) continue;
+                        if (trackableMoveTypes.has(item.elementType)) {{
+                            captureElementPosition(element, item.elementType);
+                        }} else if (item.elementType === 'prot-label') {{
+                            try {{
+                                if (typeof element.bbox === 'function') element.bbox();
+                            }} catch (err) {{}}
+                        }}
+                    }}
+                    if (endIdx < queue.length) {{
+                        window.requestAnimationFrame(() => pump(endIdx));
+                    }}
+                }};
+                return () => {{
+                    if (warmed) return;
+                    warmed = true;
+                    window.requestAnimationFrame(() => pump(0));
+                }};
+            }};
             const createHistoryManager = () => {{
                 const undoStack = [];
                 const redoStack = [];
@@ -1034,6 +1194,11 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 let activeMove = null;
                 let undoButton = null;
                 let redoButton = null;
+                const emitHistoryState = () => {{
+                    document.dispatchEvent(new CustomEvent('mk-viewer-history-state', {{
+                        detail: {{ key: exportKey, canUndo: !!undoStack.length, canRedo: !!redoStack.length }}
+                    }}));
+                }};
                 const detachButtons = () => {{
                     if (undoButton) {{
                         undoButton.removeEventListener('click', undoAction);
@@ -1047,6 +1212,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 const updateButtons = () => {{
                     if (undoButton) undoButton.disabled = !undoStack.length;
                     if (redoButton) redoButton.disabled = !redoStack.length;
+                    emitHistoryState();
                 }};
                 const applyMoveEntry = (entry, direction) => {{
                     const target = direction === 'undo' ? entry.before : entry.after;
@@ -1252,6 +1418,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     undo: undoAction,
                     redo: redoAction,
                     isSuppressed: () => suppress,
+                    getState: () => ({{ canUndo: !!undoStack.length, canRedo: !!redoStack.length }}),
                     dispose
                 }};
             }};
@@ -1345,8 +1512,29 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             }};
             Object.assign(tooltip.style, {{position: 'absolute', backgroundColor: 'rgba(0,0,0,0.8)', color: 'white',padding: '5px 10px', borderRadius: '4px', fontSize: '12px', pointerEvents: 'none',display: 'none', maxWidth: '300px', whiteSpace: 'normal', wordWrap: 'break-word'}});
             if (!document.getElementById('mk-tooltip')) container.appendChild(tooltip);
+            const tooltipShowDelayMs = 1000;
+            let tooltipShowTimer = null;
+            let tooltipPending = null;
+            const clearTooltipTimer = () => {{
+                if (tooltipShowTimer) {{
+                    window.clearTimeout(tooltipShowTimer);
+                    tooltipShowTimer = null;
+                }}
+            }};
+            const hideTooltipNow = () => {{
+                clearTooltipTimer();
+                tooltipPending = null;
+                if (!tooltip) return;
+                tooltip.style.display = 'none';
+                clearTooltipContent();
+            }};
+            const hoverTooltipsAllowed = () => tooltipsEnabled && !suppressHoverTooltips;
             const setTooltipContent = (content, useHtml = false) => {{
                 if (!tooltip) return;
+                if (!hoverTooltipsAllowed()) {{
+                    hideTooltipNow();
+                    return;
+                }}
                 if (useHtml) {{
                     tooltip.innerHTML = content || '';
                 }} else {{
@@ -1355,6 +1543,67 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 if (!content) {{
                     tooltip.innerHTML = '';
                 }}
+            }};
+            const scheduleTooltipShow = (content, useHtml, evt) => {{
+                if (!hoverTooltipsAllowed() || !content || !evt) {{
+                    hideTooltipNow();
+                    return false;
+                }}
+                const pos = toContainerPosition(evt);
+                const hoverTarget = evt.currentTarget || evt.target || null;
+                tooltipPending = {{
+                    content,
+                    useHtml: !!useHtml,
+                    left: pos.x + tooltipOffsetX,
+                    top: pos.y + tooltipOffsetY,
+                    clientX: evt.clientX,
+                    clientY: evt.clientY,
+                    target: hoverTarget,
+                }};
+                clearTooltipTimer();
+                tooltipShowTimer = window.setTimeout(() => {{
+                    tooltipShowTimer = null;
+                    if (!hoverTooltipsAllowed() || !tooltipPending || !tooltipPending.content) {{
+                        tooltipPending = null;
+                        return;
+                    }}
+                    const pending = tooltipPending;
+                    const liveTarget = (typeof document.elementFromPoint === 'function' && Number.isFinite(pending.clientX) && Number.isFinite(pending.clientY))
+                        ? document.elementFromPoint(pending.clientX, pending.clientY)
+                        : null;
+                    if (!liveTarget || isBackgroundTarget(liveTarget)) {{
+                        tooltipPending = null;
+                        return;
+                    }}
+                    if (pending.target && liveTarget && pending.target !== liveTarget && !pending.target.contains(liveTarget) && !liveTarget.contains(pending.target)) {{
+                        tooltipPending = null;
+                        return;
+                    }}
+                    setTooltipContent(pending.content, pending.useHtml);
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = `${{pending.left}}px`;
+                    tooltip.style.top = `${{pending.top}}px`;
+                }}, tooltipShowDelayMs);
+                return true;
+            }};
+            const moveTooltipFromEvent = (evt) => {{
+                if (tooltipPending && evt) {{
+                    const pos = toContainerPosition(evt);
+                    tooltipPending.left = pos.x + tooltipOffsetX;
+                    tooltipPending.top = pos.y + tooltipOffsetY;
+                    tooltipPending.clientX = evt.clientX;
+                    tooltipPending.clientY = evt.clientY;
+                    tooltipPending.target = evt.currentTarget || evt.target || tooltipPending.target || null;
+                }}
+                if (!tooltip || tooltip.style.display !== 'block') return false;
+                if (!hoverTooltipsAllowed()) {{
+                    hideTooltipNow();
+                    return false;
+                }}
+                const pos = toContainerPosition(evt);
+                tooltip.style.left = `${{pos.x + tooltipOffsetX}}px`;
+                tooltip.style.top = `${{pos.y + tooltipOffsetY}}px`;
+                return true;
             }};
             const clearTooltipContent = () => {{
                 if (!tooltip) return;
@@ -1381,20 +1630,21 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             }};
             const updateTooltipFromEvent = (evt) => {{
                 if (!evt || (typeof evt.buttons === 'number' && evt.buttons > 0)) return false;
+                if (!hoverTooltipsAllowed()) {{
+                    hideTooltipNow();
+                    return false;
+                }}
                 const point = evt && evt.touches && evt.touches[0] ? evt.touches[0] : evt;
                 if (!point) return false;
                 const info = resolveTooltipFromPoint(point.clientX, point.clientY);
                 if (!info || !info.tip) {{
-                    tooltip.style.display = 'none';
-                    clearTooltipContent();
+                    hideTooltipNow();
                     return false;
                 }}
-                const pos = toContainerPosition(evt);
-                setTooltipContent(info.tip, info.useHtml);
-                tooltip.style.display = 'block';
-                tooltip.style.left = `${{pos.x + tooltipOffsetX}}px`;
-                tooltip.style.top = `${{pos.y + tooltipOffsetY}}px`;
-                return true;
+                if (tooltip.style.display === 'block') {{
+                    return moveTooltipFromEvent(evt);
+                }}
+                return scheduleTooltipShow(info.tip, info.useHtml, evt);
             }};
             const elementGroups = {{}};
             const selectionMap = new Map();
@@ -1484,6 +1734,142 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             const compoundGroup = draw.group();  
             const textGroup = foregroundGroup.group();     
             const alignmentGuideGroup = foregroundGroup.group();
+            const setSelectorVisibility = (selector, visible) => {{
+                const nodes = draw.find(selector);
+                for (let i = 0; i < nodes.length; i++) {{
+                    if (visible) {{
+                        nodes[i].show();
+                    }} else {{
+                        nodes[i].hide();
+                    }}
+                }}
+            }};
+            const syncViewerOverlayState = () => {{
+                window.__mkViewerOverlayState[exportKey] = Object.assign({{}}, overlayState);
+            }};
+            const emitViewerOverlayState = () => {{
+                try {{
+                    document.dispatchEvent(new CustomEvent('mk-viewer-controls-ready', {{
+                        detail: {{ key: exportKey, state: Object.assign({{}}, overlayState) }}
+                    }}));
+                }} catch (err) {{
+                    console.log('viewer overlay state event failed', err);
+                }}
+            }};
+            const applyViewerOverlayState = () => {{
+                setSelectorVisibility('[data-kegg-bg="1"]', overlayState.background !== false);
+                setSelectorVisibility('[data-type="prot-box"], [data-type="prot-label"]', overlayState.protboxes !== false);
+                setSelectorVisibility('[data-type="ptm-shape"]', overlayState.ptms !== false);
+                setSelectorVisibility('[data-type="ptm-label"]', overlayState.ptms !== false && overlayState.ptmLabels !== false);
+                setSelectorVisibility('[data-type="ptm-symbol"]', overlayState.ptms !== false && overlayState.ptmSymbols !== false);
+                if (overlayState.arrows === false) {{
+                    arrowGroup.hide();
+                }} else {{
+                    arrowGroup.show();
+                }}
+                if (overlayState.compounds === false) {{
+                    compoundGroup.hide();
+                }} else {{
+                    compoundGroup.show();
+                }}
+                if (overlayState.groups === false) {{
+                    groupBackgroundLayer.hide();
+                    groupOverlay.hide();
+                }} else {{
+                    groupBackgroundLayer.show();
+                    groupOverlay.show();
+                }}
+                tooltipsEnabled = overlayState.tooltips !== false;
+                if (!tooltipsEnabled && tooltip) {{
+                    tooltip.style.display = 'none';
+                    clearTooltipContent();
+                }}
+                syncViewerOverlayState();
+                emitViewerOverlayState();
+            }};
+            window.__mkViewerControls = window.__mkViewerControls || {{}};
+            const viewerControlApi = window.__mkViewerControls[exportKey] = {{
+                toggle: (key) => {{
+                    if (!(key in overlayState)) return Object.assign({{}}, overlayState);
+                    overlayState[key] = !(overlayState[key] !== false);
+                    applyViewerOverlayState();
+                    return Object.assign({{}}, overlayState);
+                }},
+                set: (key, value) => {{
+                    if (!(key in overlayState)) return Object.assign({{}}, overlayState);
+                    overlayState[key] = !!value;
+                    applyViewerOverlayState();
+                    return Object.assign({{}}, overlayState);
+                }},
+                getState: () => Object.assign({{}}, overlayState),
+                apply: () => {{
+                    applyViewerOverlayState();
+                    return Object.assign({{}}, overlayState);
+                }}
+            }};
+            let mouseMode = 'drag';
+            const canDeleteSelection = () => {{
+                if (!selectedElement || !selectedType || !selectedId) return false;
+                return new Set(['prot-box', 'group', 'arrow', 'arrow-start', 'arrow-end', 'compound', 'figure-key', 'text-box', 'ptm-shape', 'ptm-label', 'ptm-symbol']).has(selectedType);
+            }};
+            function resolveSelectedArrowActionId() {{
+                const selectedProtIds = typeof getSelectedProtboxes === 'function' ? getSelectedProtboxes() : [];
+                if (selectedType === 'arrow' || selectedType === 'arrow-hitbox') {{
+                    return selectedId || null;
+                }}
+                if (selectedType === 'arrow-start' || selectedType === 'arrow-end') {{
+                    return (selectedId || '').replace(/_(start|end)$/, '') || null;
+                }}
+                if (Array.isArray(selectedProtIds) && selectedProtIds.length === 2 && typeof findArrowBetweenProtboxes === 'function') {{
+                    return findArrowBetweenProtboxes(selectedProtIds[0], selectedProtIds[1]) || null;
+                }}
+                return null;
+            }}
+            function getSelectionInteractionState() {{
+                const selectedProtIds = typeof getSelectedProtboxes === 'function' ? getSelectedProtboxes() : [];
+                const selectedArrowId = resolveSelectedArrowActionId();
+                return {{
+                    selectedProtboxCount: Array.isArray(selectedProtIds) ? selectedProtIds.length : 0,
+                    selectedArrowId: selectedArrowId || '',
+                    canAutoConnect: Array.isArray(selectedProtIds) && selectedProtIds.length >= 2,
+                    canModifyInteractor: !!selectedArrowId,
+                }};
+            }}
+            const emitSelectionState = () => {{
+                const interactionState = getSelectionInteractionState();
+                document.dispatchEvent(new CustomEvent('mk-viewer-selection-state', {{
+                    detail: Object.assign({{ key: exportKey, canDelete: canDeleteSelection(), type: selectedType || '', id: selectedId || '' }}, interactionState)
+                }}));
+            }};
+            const emitSnapState = () => {{
+                document.dispatchEvent(new CustomEvent('mk-viewer-snap-state', {{
+                    detail: {{
+                        key: exportKey,
+                        protboxSnap: !!protboxSnapEnabled,
+                        protboxAlign: !!protboxAlignmentSnapEnabled,
+                        arrowSnap: !!arrowSideSnapEnabled
+                    }}
+                }}));
+            }};
+            const emitMouseModeState = () => {{
+                document.dispatchEvent(new CustomEvent('mk-viewer-mouse-mode', {{
+                    detail: {{ key: exportKey, mode: mouseMode }}
+                }}));
+            }};
+            const shouldUseSelectionBoxEvent = (evt) => {{
+                const modifier = !!(evt && (evt.ctrlKey || evt.metaKey));
+                return mouseMode === 'selection' ? !modifier : modifier;
+            }};
+            const shouldUseProtboxSnap = (protboxId = null) => {{
+                const activeForThisProtbox = !!(activeDragProtboxId && (!protboxId || activeDragProtboxId === protboxId));
+                const shiftOverride = !!(shiftKeyDown && activeForThisProtbox);
+                return protboxSnapEnabled ? !shiftOverride : shiftOverride;
+            }};
+            const shouldUseProtboxAlignmentSnap = (protboxId = null) => {{
+                const activeForThisProtbox = !!(activeDragProtboxId && (!protboxId || activeDragProtboxId === protboxId));
+                const shiftOverride = !!(shiftKeyDown && activeForThisProtbox);
+                return protboxAlignmentSnapEnabled ? !shiftOverride : shiftOverride;
+            }};
             let selectionBoxActive = false;
             let selectionBoxRect = null;
             let selectionBoxStart = null;
@@ -1491,6 +1877,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             let selectionBoxStartScreen = null;
             let selectionBoxEndScreen = null;
             let suppressNextBackgroundClick = false;
+            let suppressHoverTooltips = false;
             const normalizeBounds = (a, b) => {{
                 if (!a || !b) return null;
                 const left = Math.min(a.x, b.x);
@@ -2384,6 +2771,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 visited.add(arrowId);
                 const group = arrowHandleGroups[arrowId];
                 if (group) {{
+                    group.headHitbox?.attr({{ 'pointer-events': 'none' }});
                     group.startHandle?.show();
                     group.endHandle?.show();
                 }}
@@ -2418,6 +2806,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 visited.add(arrowId);
                 const group = arrowHandleGroups[arrowId];
                 if (group) {{
+                    group.headHitbox?.attr({{ 'pointer-events': 'all' }});
                     group.startHandle?.hide();
                     group.endHandle?.hide();
                 }}
@@ -2445,6 +2834,29 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                             }});
                         }}
                     }});
+                }}
+            }};
+            const refreshArrowSideHandleVisibility = () => {{
+                Object.values(elementGroups || {{}}).forEach(group => {{
+                    group.forEach(el => {{
+                        const dtype = el?.element?.attr && el.element.attr('data-type');
+                        if (typeof dtype === 'string' && dtype.startsWith('handle-')) {{
+                            el.element.hide();
+                        }}
+                    }});
+                }});
+                if (selectedType === 'prot-box' && selectedId && elementGroups[selectedId]) {{
+                    if (!arrowSideSnapEnabled) return;
+                    elementGroups[selectedId].forEach(el => {{
+                        const dtype = el?.element?.attr && el.element.attr('data-type');
+                        if (typeof dtype === 'string' && dtype.startsWith('handle-')) {{
+                            el.element.show();
+                        }}
+                    }});
+                }} else if (selectedType === 'arrow' && selectedId) {{
+                    showRelatedHandles(selectedId);
+                }} else if ((selectedType === 'arrow-start' || selectedType === 'arrow-end') && selectedId) {{
+                    showRelatedHandles(selectedId.replace(/_(start|end)$/, ''));
                 }}
             }};
             const setGroupStrokeColor = (group, role, color = null) => {{
@@ -2524,7 +2936,8 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     selectionVisual = vis.box;
                 }} else if (type === 'arrow') {{
                     selectionVisual = draw.findOne(`[data-id="${{id}}"]`);
-                    selectionVisual?.stroke({{ color: 'red', width: 1 }});
+                    const arrow = getArrowById(id);
+                    selectionVisual?.stroke({{ color: arrow?.color || 'black', width: 2 }});
                 }} else if (type === 'arrow-start' || type === 'arrow-end') {{
                     element.fill('red').stroke({{ color: 'red', width: 2 }});
                 }} else if (type === 'ptm-label') {{
@@ -2533,7 +2946,12 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     element.stroke({{ color: 'red', width: 1 }});
                 }}
                 if (asPrimary && type === 'prot-box' && id && elementGroups[id]) {{
-                    elementGroups[id].forEach(el => (el.element.attr('data-type').startsWith('handle-') || el.element.attr('data-type') === 'ptm-snap-circle') && el.element.show());
+                    elementGroups[id].forEach(el => {{
+                        const dtype = el.element.attr('data-type');
+                        if (dtype === 'ptm-snap-circle' || (arrowSideSnapEnabled && dtype.startsWith('handle-'))) {{
+                            el.element.show();
+                        }}
+                    }});
                 }}
                 if (asPrimary && type === 'arrow') {{
                     const arrowId = id;
@@ -2563,7 +2981,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     const radiusPx = 50;
                     Object.values(elementGroups).forEach(group => group.forEach(el => {{
                         if (!el.element.attr('data-type').startsWith('handle-')) return;
-                        if (!arrowEnds.length) {{ el.element.hide(); return; }}
+                        if (!arrowSideSnapEnabled || !arrowEnds.length) {{ el.element.hide(); return; }}
                         const hb = getScreenBounds(el.element);
                         if (!hb) {{ el.element.hide(); return; }}
                         const hx = (hb.left + hb.right) / 2;
@@ -2588,7 +3006,8 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                         vis.box.stroke({{ color: '#666', width: 1, dasharray: '5,5' }});
                     }}
                 }} else if (type === 'arrow') {{
-                    entry.visual?.stroke({{ color: 'black', width: 1 }});
+                    const arrow = getArrowById(id);
+                    entry.visual?.stroke({{ color: arrow?.color || 'black', width: 1 }});
                 }} else if (type === 'arrow-start' || type === 'arrow-end') {{
                     element.stroke({{ color: 'black', width: 1 }});
                 }} else if (type === 'ptm-label') {{
@@ -2849,6 +3268,7 @@ function rebuildGroupIndexes() {{
                 const head = draw.find(`[data-id="${{arrowId}}_head"]`)[0];
                 const startHandle = arrowHandleGroups[arrowId]?.startHandle;
                 const endHandle = arrowHandleGroups[arrowId]?.endHandle;
+                const arrowData = getArrowById(arrowId);
                 if (!line) return;
                 let x1 = parseFloat(line.attr('x1') || 0) + deltaX;
                 let y1 = parseFloat(line.attr('y1') || 0) + deltaY;
@@ -2859,7 +3279,12 @@ function rebuildGroupIndexes() {{
                 if (startHandle) startHandle.cx(x1).cy(y1);
                 if (endHandle) endHandle.cx(x2).cy(y2);
                 const lineType = line.attr('data-line-type') || 'arrow';
-                const arrowData = getArrowById(arrowId);
+                if (arrowData) {{
+                    arrowData.x1 = x1;
+                    arrowData.y1 = y1;
+                    arrowData.x2 = x2;
+                    arrowData.y2 = y2;
+                }}
                 if (head) {{
                     const dx = x2 - x1, dy = y2 - y1, angle = Math.atan2(dy, dx), arrowSize = 5;
                     if (lineType === 'arrow') {{
@@ -3117,6 +3542,7 @@ function rebuildGroupIndexes() {{
                     }}
                 }});
                 renderGroupEditIndicator();
+                emitSelectionState();
             }}
             function refreshGroupsForProtbox(protboxId) {{
                 const pid = normalizeProtboxId(protboxId);
@@ -3224,13 +3650,36 @@ function rebuildGroupIndexes() {{
                 refreshGroupVisual(newId);
                 updateGroupSelectionDisplay();
                 syncGroupsToServer();
+                if (mkHistory) {{
+                    const entry = {{
+                        kind: 'group-create',
+                        snapshot: cloneData(newGroup)
+                    }};
+                    entry.handlers = {{
+                        undo: () => mkHistory.runWithoutRecording(() => {{
+                            ungroupGroup(newId, {{ suppressHistory: true }});
+                        }}),
+                        redo: () => mkHistory.runWithoutRecording(() => {{
+                            const snapshot = cloneData(entry.snapshot);
+                            if (!snapshot) return;
+                            groups?.push(snapshot);
+                            groupMap[newId] = snapshot;
+                            rebuildGroupIndexes();
+                            refreshGroupVisual(newId);
+                            updateGroupSelectionDisplay();
+                            syncGroupsToServer();
+                        }})
+                    }};
+                    mkHistory.recordAction(entry);
+                }}
                 deselectElement();
                 const vis = ensureGroupVisual(newId);
                 selectElement(vis.hit || vis.box, 'group', newId, null);
             }}
-            function ungroupGroup(groupId) {{
+            function ungroupGroup(groupId, options = {{}}) {{
                 const gid = `${{groupId}}`;
                 if (!groupMap[gid]) return;
+                const snapshot = cloneData(groupMap[gid]);
                 delete groupMap[gid];
                 if (Array.isArray(groups)) {{
                     for (let i = groups.length - 1; i >= 0; i--) {{
@@ -3259,6 +3708,28 @@ function rebuildGroupIndexes() {{
                 updateGroupSelectionDisplay();
                 syncGroupsToServer();
                 deselectElement();
+                if (mkHistory && options.suppressHistory !== true && snapshot) {{
+                    const entry = {{
+                        kind: 'group-delete',
+                        snapshot
+                    }};
+                    entry.handlers = {{
+                        undo: () => mkHistory.runWithoutRecording(() => {{
+                            const restored = cloneData(entry.snapshot);
+                            if (!restored) return;
+                            groups?.push(restored);
+                            groupMap[gid] = restored;
+                            rebuildGroupIndexes();
+                            refreshGroupVisual(gid);
+                            updateGroupSelectionDisplay();
+                            syncGroupsToServer();
+                        }}),
+                        redo: () => mkHistory.runWithoutRecording(() => {{
+                            ungroupGroup(gid, {{ suppressHistory: true }});
+                        }})
+                    }};
+                    mkHistory.recordAction(entry);
+                }}
             }}
             function adjustGroupStacking(groupId, direction = 'front') {{
                 const ids = collectProtboxesForGroup(groupId);
@@ -3290,7 +3761,7 @@ function rebuildGroupIndexes() {{
                         const rect = draw.findOne(`[data-id="${{pid}}"]`);
                         const delta = translateProtbox(pid, deltaX, deltaY, {{ rect, skipRectMove: false }}, visitedHandles) || {{ dx: deltaX, dy: deltaY }};
                         propagateLinkedMove(pid, delta.dx, delta.dy, new Set([pid]), visitedHandles);
-                        if (options.snap !== false && !(shiftKeyDown && activeDragProtboxId === pid)) {{
+                        if (options.snap !== false && shouldUseProtboxSnap(pid)) {{
                             maybeSnapProtbox(pid, rect);
                         }}
                     }} else if (m.type === 'text-box') {{
@@ -3543,7 +4014,8 @@ function rebuildGroupIndexes() {{
                 addItem('Flip Interaction', flipArrow);
                 const liType = document.createElement('div');
                 liType.textContent = 'Change Type';
-                liType.style.padding = '6px 10px';
+                liType.style.padding = '4px 8px';
+                liType.style.fontSize = '12px';
                 liType.style.cursor = 'pointer';
                 liType.style.position = 'relative';
                 liType.addEventListener('mouseenter', () => {{
@@ -3568,7 +4040,8 @@ function rebuildGroupIndexes() {{
                 ['arrow','line','inhibition'].forEach(t => {{
                     const opt = document.createElement('div');
                     opt.textContent = t === 'arrow' ? 'Arrow' : (t === 'line' ? 'Line' : 'Inhibitor');
-                    opt.style.padding = '6px 10px';
+                    opt.style.padding = '4px 8px';
+                    opt.style.fontSize = '12px';
                     opt.style.cursor = t === arrow.line ? 'default' : 'pointer';
                     opt.style.color = t === arrow.line ? '#999' : '#000';
                     if (t !== arrow.line) {{
@@ -3580,6 +4053,73 @@ function rebuildGroupIndexes() {{
                 }});
                 liType.appendChild(typeSub);
                 menu.appendChild(liType);
+                const liColor = document.createElement('div');
+                liColor.textContent = 'Color';
+                liColor.style.padding = '4px 8px';
+                liColor.style.fontSize = '12px';
+                liColor.style.cursor = 'pointer';
+                liColor.style.position = 'relative';
+                liColor.addEventListener('mouseenter', () => {{
+                    liColor.style.backgroundColor = '#eef';
+                    colorSub.style.display = 'block';
+                }});
+                liColor.addEventListener('mouseleave', () => {{
+                    liColor.style.backgroundColor = 'transparent';
+                    colorSub.style.display = 'none';
+                }});
+                const colorSub = document.createElement('div');
+                colorSub.style.display = 'none';
+                colorSub.style.position = 'absolute';
+                colorSub.style.left = '100%';
+                colorSub.style.top = '0';
+                colorSub.style.background = '#fff';
+                colorSub.style.border = '1px solid #ccc';
+                colorSub.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+                colorSub.style.minWidth = '170px';
+                colorSub.style.padding = '6px';
+                colorSub.style.zIndex = '1201';
+                const colorRow = document.createElement('div');
+                colorRow.style.display = 'flex';
+                colorRow.style.alignItems = 'center';
+                colorRow.style.gap = '6px';
+                const currentArrowColor = (() => {{
+                    try {{ return SVG.Color.toHex(arrow.color || '#000000'); }} catch (e) {{ return '#000000'; }}
+                }})();
+                const colorInput = document.createElement('input');
+                colorInput.type = 'color';
+                colorInput.value = currentArrowColor;
+                const hexInput = document.createElement('input');
+                hexInput.type = 'text';
+                hexInput.value = currentArrowColor;
+                hexInput.maxLength = 7;
+                hexInput.style.width = '80px';
+                const applyArrowColor = (val) => {{
+                    arrow.color = val || '#000000';
+                    updateArrowVisual(arrowId);
+                    Shiny?.setInputValue('element_moved', {{ type: 'arrow', id: arrowId, color: arrow.color }}, {{ priority: 'event' }});
+                }};
+                const applyHex = () => {{
+                    let val = hexInput.value.trim();
+                    if (!val.startsWith('#')) val = '#' + val;
+                    if (/^#([0-9a-fA-F]{{3}}|[0-9a-fA-F]{{6}})$/.test(val)) {{
+                        colorInput.value = val;
+                        hexInput.value = val;
+                        applyArrowColor(val);
+                    }}
+                }};
+                colorInput.addEventListener('input', () => {{
+                    hexInput.value = colorInput.value;
+                    applyArrowColor(colorInput.value);
+                }});
+                hexInput.addEventListener('change', applyHex);
+                hexInput.addEventListener('keydown', (e) => {{
+                    if (e.key === 'Enter') applyHex();
+                }});
+                [colorInput, hexInput].forEach(el => el.addEventListener('mousedown', (e) => e.stopPropagation()));
+                colorRow.append(colorInput, hexInput);
+                colorSub.appendChild(colorRow);
+                liColor.appendChild(colorSub);
+                menu.appendChild(liColor);
                 addItem('Disconnect', disconnectArrow);
                 container.appendChild(menu);
                 setTimeout(() => document.addEventListener('click', () => menu.remove(), {{ once: true }}), 0);
@@ -3603,7 +4143,7 @@ function rebuildGroupIndexes() {{
                     const newZoom = zoomLevel * delta;
                     if (newZoom < minZoom || newZoom > maxZoom) return;
                     zoomLevel = newZoom;
-                    const rect = document.getElementById('svgCanvas').getBoundingClientRect();
+                    const rect = getCanvasEl().getBoundingClientRect();
                     const mouseX = (e.clientX - rect.left) / zoomLevel;
                     const mouseY = (e.clientY - rect.top) / zoomLevel;
                     const newWidth = {max_x} / zoomLevel;
@@ -3625,8 +4165,10 @@ function rebuildGroupIndexes() {{
             }};
             const startPanning = e => {{
                 if (!isBackgroundTarget(e.target)) return;
-                if (e.ctrlKey || e.metaKey) {{
+                if (shouldUseSelectionBoxEvent(e)) {{
                     e.preventDefault();
+                    suppressHoverTooltips = true;
+                    hideTooltipNow();
                     const pt = draw.point(e.clientX, e.clientY);
                     selectionBoxActive = true;
                     selectionBoxStart = pt;
@@ -3635,16 +4177,18 @@ function rebuildGroupIndexes() {{
                     selectionBoxEndScreen = {{ x: e.clientX, y: e.clientY }};
                     if (selectionBoxRect) selectionBoxRect.remove();
                     selectionBoxRect = handleGroup.rect(0, 0).move(pt.x, pt.y).fill({{ color: '#4da3ff', opacity: 0.12 }}).stroke({{ color: '#4da3ff', width: 1, dasharray: '4,2' }});
-                    document.getElementById('svgCanvas').style.cursor = 'crosshair';
+                    getCanvasEl().style.cursor = 'crosshair';
                     return;
                 }}
                 e.preventDefault();
+                suppressHoverTooltips = true;
+                hideTooltipNow();
                 isPanning = true;
                 startPanX = e.clientX;
                 startPanY = e.clientY;
                 startViewBoxX = viewBox.x;
                 startViewBoxY = viewBox.y;
-                document.getElementById('svgCanvas').style.cursor = 'grab';
+                getCanvasEl().style.cursor = 'grab';
             }};
             const pan = e => {{
                 if (selectionBoxActive && selectionBoxRect && selectionBoxStart) {{
@@ -3668,7 +4212,8 @@ function rebuildGroupIndexes() {{
             const endPanning = (e) => {{
                 if (selectionBoxActive) {{
                     selectionBoxActive = false;
-                    document.getElementById('svgCanvas').style.cursor = 'default';
+                    suppressHoverTooltips = false;
+                    getCanvasEl().style.cursor = 'default';
                     if (selectionBoxRect) {{
                         const latestPt = e ? draw.point(e.clientX, e.clientY) : null;
                         selectionBoxEnd = latestPt || selectionBoxEnd || selectionBoxStart;
@@ -3733,7 +4278,8 @@ function rebuildGroupIndexes() {{
         }}
                 if (isPanning) {{
                     isPanning = false;
-                    document.getElementById('svgCanvas').style.cursor = 'default';
+                    suppressHoverTooltips = false;
+                    getCanvasEl().style.cursor = 'default';
                 }}
             }};
             const resetView = () => {{
@@ -3798,6 +4344,7 @@ function rebuildGroupIndexes() {{
                 return point;
             }};
             var isPointNearProtboxSnapZone = typeof isPointNearProtboxSnapZone === 'function' ? isPointNearProtboxSnapZone : function(x, y, arrow) {{
+                if (!arrowSideSnapEnabled) return false;
                 if (!arrow) return false;
                 for (const protboxId in protboxMap) {{
                     for (const side of ['North', 'South', 'West', 'East']) {{
@@ -3868,6 +4415,10 @@ function rebuildGroupIndexes() {{
                     if (slaveHandle) {{
                         slaveHandle.cx(masterX).cy(masterY);
                     }}
+                    const slaveHeadHitbox = arrowHandleGroups[slaveArrowId]?.headHitbox;
+                    if (slaveHeadHitbox) {{
+                        slaveHeadHitbox.cx(sX2).cy(sY2);
+                    }}
                 }});
             }};
             const updateArrowAttachments = (arrowId, endType, x, y) => {{
@@ -3884,15 +4435,17 @@ function rebuildGroupIndexes() {{
                     }}
                 }}
                 let snapped = {{ x, y, isSnapped: false }};
-                for (let protboxId in protboxMap) {{
-                    for (let side of ['North', 'South', 'West', 'East']) {{
-                        const result = snapToHandle(x, y, protboxId, side, arrow.line === 'dashed_arrow');
-                        if (result.isSnapped) {{
-                            snapped = result;
-                            break;
+                if (arrowSideSnapEnabled) {{
+                    for (let protboxId in protboxMap) {{
+                        for (let side of ['North', 'South', 'West', 'East']) {{
+                            const result = snapToHandle(x, y, protboxId, side, arrow.line === 'dashed_arrow');
+                            if (result.isSnapped) {{
+                                snapped = result;
+                                break;
+                            }}
                         }}
+                        if (snapped.isSnapped) break;
                     }}
-                    if (snapped.isSnapped) break;
                 }}
                 if (!snapped.isSnapped && arrow.line === 'line') {{
                     for (let otherIndex = 0; otherIndex < arrows.length; otherIndex++) {{
@@ -3919,6 +4472,7 @@ function rebuildGroupIndexes() {{
                 const arrowHead = draw.find(`[data-id="${{arrowId}}_head"]`)[0];
                 const startHandle = arrowHandleGroups[arrowId]?.startHandle;
                 const endHandle = arrowHandleGroups[arrowId]?.endHandle;
+                const headHitbox = arrowHandleGroups[arrowId]?.headHitbox;
                 let x1 = parseFloat(arrowElement.attr('x1') || 0);
                 let y1 = parseFloat(arrowElement.attr('y1') || 0);
                 let x2 = parseFloat(arrowElement.attr('x2') || 0);
@@ -3932,8 +4486,13 @@ function rebuildGroupIndexes() {{
                     y2 = snapped.y;
                     if (endHandle) endHandle.cx(x2).cy(y2);
                 }}
+                if (headHitbox) headHitbox.cx(x2).cy(y2);
                 arrowElement.plot(x1, y1, x2, y2);
                 if (arrowHitbox) arrowHitbox.plot(x1, y1, x2, y2);
+                arrow.x1 = x1;
+                arrow.y1 = y1;
+                arrow.x2 = x2;
+                arrow.y2 = y2;
                 if (snapped.isSnapped) {{
                     if (snapped.protbox_id) {{
                         const {{ protbox_id, side }} = snapped;
@@ -3989,7 +4548,6 @@ function rebuildGroupIndexes() {{
                 const endSide = arrow.protbox_id_2_side;
                 if (startProtboxId && startSide) updateArrowPositions(startProtboxId, startSide);
                 if (endProtboxId && endSide) updateArrowPositions(endProtboxId, endSide);
-                Shiny?.setInputValue('arrow_moved', {{ id: arrowId, end: endType, x: endType === 'start' ? x1 : x2, y: endType === 'start' ? y1 : y2 }}, {{ priority: 'event' }});
                 return snapped;
             }};
             const updateArrowPositions = (protboxId, side) => {{
@@ -4031,8 +4589,8 @@ function rebuildGroupIndexes() {{
                         else if (side1 === 'West') {{ x1 = box1.x - handleDist1; y1 = box1.y + frac1 * height1; }}
                         else if (side1 === 'East') {{ x1 = box1.x + width1 + handleDist1; y1 = box1.y + frac1 * height1; }}
                     }} else {{
-                        x1 = arrow.x1 || parseFloat(arrowElement.attr('x1') || 0);
-                        y1 = arrow.y1 || parseFloat(arrowElement.attr('y1') || 0);
+                        x1 = parseFloat(arrowElement.attr('x1') || arrow.x1 || 0);
+                        y1 = parseFloat(arrowElement.attr('y1') || arrow.y1 || 0);
                     }}
                     let x2, y2;
                     if (arrow.attached_arrow_2) {{
@@ -4050,15 +4608,21 @@ function rebuildGroupIndexes() {{
                         else if (side2 === 'West') {{ x2 = box2.x - handleDist2; y2 = box2.y + frac2 * height2; }}
                         else if (side2 === 'East') {{ x2 = box2.x + width2 + handleDist2; y2 = box2.y + frac2 * height2; }}
                     }} else {{
-                        x2 = arrow.x2 || parseFloat(arrowElement.attr('x2') || 0);
-                        y2 = arrow.y2 || parseFloat(arrowElement.attr('y2') || 0);
+                        x2 = parseFloat(arrowElement.attr('x2') || arrow.x2 || 0);
+                        y2 = parseFloat(arrowElement.attr('y2') || arrow.y2 || 0);
                     }}
                     arrowElement.plot(x1, y1, x2, y2);
                     if (arrowHitbox && arrowHitbox.plot) arrowHitbox.plot(x1, y1, x2, y2);
+                    arrow.x1 = x1;
+                    arrow.y1 = y1;
+                    arrow.x2 = x2;
+                    arrow.y2 = y2;
                     const startHandle = arrowHandleGroups[arrowId]?.startHandle;
                     const endHandle = arrowHandleGroups[arrowId]?.endHandle;
+                    const headHitbox = arrowHandleGroups[arrowId]?.headHitbox;
                     if (startHandle) startHandle.cx(x1).cy(y1);
                     if (endHandle) endHandle.cx(x2).cy(y2);
+                    if (headHitbox) headHitbox.cx(x2).cy(y2);
                     if (arrowHead && arrowHead.plot) {{
                         const dx = x2 - x1, dy = y2 - y1, angle = Math.atan2(dy, dx), arrowSize = 5;
                         const lineType = arrowElement.attr('data-line-type') || 'arrow';
@@ -4078,7 +4642,21 @@ function rebuildGroupIndexes() {{
             const PROTBOX_SNAP_DISTANCE = 2;
             const PROTBOX_UNSNAP_OFFSET = 5;
             const ALIGNMENT_TOLERANCE = 2;
+            const SNAP_SEARCH_MARGIN = 24;
+            let protboxDragInProgress = false;
+            const dirtyProtboxIds = new Set();
             const alignmentGuides = [];
+            const markProtboxDirty = (protboxId) => {{
+                if (protboxId !== undefined && protboxId !== null) {{
+                    dirtyProtboxIds.add(String(protboxId));
+                }}
+            }};
+            const flushDirtyProtboxes = () => {{
+                if (!dirtyProtboxIds.size) return;
+                const ids = Array.from(dirtyProtboxIds);
+                dirtyProtboxIds.clear();
+                ids.forEach(pid => refreshGroupsForProtbox(pid));
+            }};
             const clearAlignmentGuides = () => {{
                 while (alignmentGuides.length) {{
                     const g = alignmentGuides.pop();
@@ -4146,6 +4724,235 @@ function rebuildGroupIndexes() {{
                 const map = {{ East: 'West', West: 'East', North: 'South', South: 'North' }};
                 return map[side] || side;
             }};
+            const chooseShortestProtboxSides = (idA, idB, buffer = 3) => {{
+                const a = protboxMap[idA], b = protboxMap[idB];
+                if (!a || !b) return null;
+                const sideCenters = (pb, side) => {{
+                    const x = pb.x || 0, y = pb.y || 0, w = pb.width || 0, h = pb.height || 0;
+                    switch (side) {{
+                        case 'North': return {{ x: x + w / 2, y: y - buffer }};
+                        case 'South': return {{ x: x + w / 2, y: y + h + buffer }};
+                        case 'West': return {{ x: x - buffer, y: y + h / 2 }};
+                        case 'East': return {{ x: x + w + buffer, y: y + h / 2 }};
+                        default: return {{ x: x + w / 2, y: y + h / 2 }};
+                    }}
+                }};
+                const sides = ['North', 'South', 'West', 'East'];
+                let best = null;
+                sides.forEach(sideA => {{
+                    sides.forEach(sideB => {{
+                        const p1 = sideCenters(a, sideA);
+                        const p2 = sideCenters(b, sideB);
+                        const dx = p2.x - p1.x;
+                        const dy = p2.y - p1.y;
+                        const dist = Math.hypot(dx, dy);
+                        if (!best || dist < best.dist) {{
+                            best = {{ sideA, sideB, dist }};
+                        }}
+                    }});
+                }});
+                return best ? {{ sideA: best.sideA, sideB: best.sideB }} : null;
+            }};
+            const chooseShortestProtboxPoints = (idA, idB, buffer = 3) => {{
+                const a = protboxMap[idA], b = protboxMap[idB];
+                if (!a || !b) return null;
+                const ax1 = (a.x || 0) - buffer, ay1 = (a.y || 0) - buffer;
+                const ax2 = (a.x || 0) + (a.width || 0) + buffer, ay2 = (a.y || 0) + (a.height || 0) + buffer;
+                const bx1 = (b.x || 0) - buffer, by1 = (b.y || 0) - buffer;
+                const bx2 = (b.x || 0) + (b.width || 0) + buffer, by2 = (b.y || 0) + (b.height || 0) + buffer;
+                const shortestRectPoints = (ra, rb) => {{
+                    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+                    let xA = 0, yA = 0, xB = 0, yB = 0;
+                    if (ra.x2 < rb.x1) {{
+                        xA = ra.x2;
+                        xB = rb.x1;
+                    }} else if (rb.x2 < ra.x1) {{
+                        xA = ra.x1;
+                        xB = rb.x2;
+                    }} else {{
+                        const overlapMin = Math.max(ra.x1, rb.x1);
+                        const overlapMax = Math.min(ra.x2, rb.x2);
+                        const sharedX = clamp((ra.cx + rb.cx) / 2, overlapMin, overlapMax);
+                        xA = sharedX;
+                        xB = sharedX;
+                    }}
+                    if (ra.y2 < rb.y1) {{
+                        yA = ra.y2;
+                        yB = rb.y1;
+                    }} else if (rb.y2 < ra.y1) {{
+                        yA = ra.y1;
+                        yB = rb.y2;
+                    }} else {{
+                        const overlapMin = Math.max(ra.y1, rb.y1);
+                        const overlapMax = Math.min(ra.y2, rb.y2);
+                        const sharedY = clamp((ra.cy + rb.cy) / 2, overlapMin, overlapMax);
+                        yA = sharedY;
+                        yB = sharedY;
+                    }}
+                    return {{ p1: {{ x: xA, y: yA }}, p2: {{ x: xB, y: yB }} }};
+                }};
+                return shortestRectPoints(
+                    {{ x1: ax1, y1: ay1, x2: ax2, y2: ay2, cx: (a.x || 0) + (a.width || 0) / 2, cy: (a.y || 0) + (a.height || 0) / 2 }},
+                    {{ x1: bx1, y1: by1, x2: bx2, y2: by2, cx: (b.x || 0) + (b.width || 0) / 2, cy: (b.y || 0) + (b.height || 0) / 2 }}
+                );
+            }};
+            const shortestRectPoints = (rectA, rectB, buffer = 3) => {{
+                const a = {{
+                    x1: (rectA.x || 0) - buffer,
+                    y1: (rectA.y || 0) - buffer,
+                    x2: (rectA.x || 0) + (rectA.width || 0) + buffer,
+                    y2: (rectA.y || 0) + (rectA.height || 0) + buffer,
+                    cx: (rectA.x || 0) + (rectA.width || 0) / 2,
+                    cy: (rectA.y || 0) + (rectA.height || 0) / 2,
+                }};
+                const b = {{
+                    x1: (rectB.x || 0) - buffer,
+                    y1: (rectB.y || 0) - buffer,
+                    x2: (rectB.x || 0) + (rectB.width || 0) + buffer,
+                    y2: (rectB.y || 0) + (rectB.height || 0) + buffer,
+                    cx: (rectB.x || 0) + (rectB.width || 0) / 2,
+                    cy: (rectB.y || 0) + (rectB.height || 0) / 2,
+                }};
+                const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+                let xA = 0, yA = 0, xB = 0, yB = 0;
+                if (a.x2 < b.x1) {{
+                    xA = a.x2;
+                    xB = b.x1;
+                }} else if (b.x2 < a.x1) {{
+                    xA = a.x1;
+                    xB = b.x2;
+                }} else {{
+                    const overlapMin = Math.max(a.x1, b.x1);
+                    const overlapMax = Math.min(a.x2, b.x2);
+                    const sharedX = clamp((a.cx + b.cx) / 2, overlapMin, overlapMax);
+                    xA = sharedX;
+                    xB = sharedX;
+                }}
+                if (a.y2 < b.y1) {{
+                    yA = a.y2;
+                    yB = b.y1;
+                }} else if (b.y2 < a.y1) {{
+                    yA = a.y1;
+                    yB = b.y2;
+                }} else {{
+                    const overlapMin = Math.max(a.y1, b.y1);
+                    const overlapMax = Math.min(a.y2, b.y2);
+                    const sharedY = clamp((a.cy + b.cy) / 2, overlapMin, overlapMax);
+                    yA = sharedY;
+                    yB = sharedY;
+                }}
+                return {{ p1: {{ x: xA, y: yA }}, p2: {{ x: xB, y: yB }} }};
+            }};
+            const rectAnchorPoint = (rect, side, buffer = 5) => {{
+                const x = rect.x || 0, y = rect.y || 0, w = rect.width || 0, h = rect.height || 0;
+                switch (side) {{
+                    case 'North': return {{ x: x + w / 2, y: y - buffer }};
+                    case 'South': return {{ x: x + w / 2, y: y + h + buffer }};
+                    case 'West': return {{ x: x - buffer, y: y + h / 2 }};
+                    case 'East': return {{ x: x + w + buffer, y: y + h / 2 }};
+                    default: return {{ x: x + w / 2, y: y + h / 2 }};
+                }}
+            }};
+            const groupCollapseTolerance = 8;
+            const buildSelectionConnectNodes = () => {{
+                const nodes = [];
+                const usedProtboxes = new Set();
+                const usedGroups = new Set();
+                const tryCollapseGroup = (groupId) => {{
+                    const members = collectMembersForGroup(groupId);
+                    if (!Array.isArray(members) || members.length < 2) return null;
+                    if (members.some(member => !member || member.type !== 'prot-box')) return null;
+                    const boxes = members.map(member => {{
+                        const pid = normalizeProtboxId(member.id);
+                        const pb = pid ? protboxMap[pid] : null;
+                        return pid && pb ? {{ id: pid, x: pb.x || 0, y: pb.y || 0, width: pb.width || 0, height: pb.height || 0, cx: (pb.x || 0) + (pb.width || 0) / 2, cy: (pb.y || 0) + (pb.height || 0) / 2 }} : null;
+                    }}).filter(Boolean);
+                    if (boxes.length !== members.length) return null;
+                    const horizontal = [...boxes].sort((a, b) => a.x - b.x || a.y - b.y);
+                    const vertical = [...boxes].sort((a, b) => a.y - b.y || a.x - b.x);
+                    const isHorizontal = horizontal.every((box, idx) => {{
+                        if (idx === 0) return true;
+                        const prev = horizontal[idx - 1];
+                        const gap = box.x - (prev.x + prev.width);
+                        return Math.abs(box.cy - prev.cy) <= groupCollapseTolerance && gap >= -2 && gap <= groupCollapseTolerance;
+                    }});
+                    const isVertical = vertical.every((box, idx) => {{
+                        if (idx === 0) return true;
+                        const prev = vertical[idx - 1];
+                        const gap = box.y - (prev.y + prev.height);
+                        return Math.abs(box.cx - prev.cx) <= groupCollapseTolerance && gap >= -2 && gap <= groupCollapseTolerance;
+                    }});
+                    if (!isHorizontal && !isVertical) return null;
+                    const minX = Math.min(...boxes.map(box => box.x));
+                    const minY = Math.min(...boxes.map(box => box.y));
+                    const maxX = Math.max(...boxes.map(box => box.x + box.width));
+                    const maxY = Math.max(...boxes.map(box => box.y + box.height));
+                    return {{
+                        key: `group:${{groupId}}`,
+                        kind: 'group',
+                        id: `${{groupId}}`,
+                        members: boxes.map(box => box.id),
+                        x: minX,
+                        y: minY,
+                        width: maxX - minX,
+                        height: maxY - minY,
+                        cx: (minX + maxX) / 2,
+                        cy: (minY + maxY) / 2,
+                    }};
+                }};
+                selectionMap.forEach(entry => {{
+                    if (!entry) return;
+                    if (entry.type === 'prot-box') {{
+                        const pid = normalizeProtboxId(entry.id);
+                        const pb = pid ? protboxMap[pid] : null;
+                        if (!pid || !pb || usedProtboxes.has(pid)) return;
+                        usedProtboxes.add(pid);
+                        nodes.push({{
+                            key: `prot:${{pid}}`,
+                            kind: 'prot-box',
+                            id: pid,
+                            members: [pid],
+                            x: pb.x || 0,
+                            y: pb.y || 0,
+                            width: pb.width || 0,
+                            height: pb.height || 0,
+                            cx: (pb.x || 0) + (pb.width || 0) / 2,
+                            cy: (pb.y || 0) + (pb.height || 0) / 2,
+                        }});
+                        return;
+                    }}
+                    if (entry.type === 'group') {{
+                        const gid = `${{entry.id}}`;
+                        if (usedGroups.has(gid)) return;
+                        usedGroups.add(gid);
+                        const collapsed = tryCollapseGroup(gid);
+                        if (collapsed) {{
+                            collapsed.members.forEach(pid => usedProtboxes.add(pid));
+                            nodes.push(collapsed);
+                            return;
+                        }}
+                        collectProtboxesForGroup(gid).forEach(pid => {{
+                            const norm = normalizeProtboxId(pid);
+                            const pb = norm ? protboxMap[norm] : null;
+                            if (!norm || !pb || usedProtboxes.has(norm)) return;
+                            usedProtboxes.add(norm);
+                            nodes.push({{
+                                key: `prot:${{norm}}`,
+                                kind: 'prot-box',
+                                id: norm,
+                                members: [norm],
+                                x: pb.x || 0,
+                                y: pb.y || 0,
+                                width: pb.width || 0,
+                                height: pb.height || 0,
+                                cx: (pb.x || 0) + (pb.width || 0) / 2,
+                                cy: (pb.y || 0) + (pb.height || 0) / 2,
+                            }});
+                        }});
+                    }}
+                }});
+                return nodes;
+            }};
             const protboxAnchorPoint = (pid, side) => {{
                 const pb = protboxMap[pid];
                 if (!pb) return {{ x: 0, y: 0 }};
@@ -4162,43 +4969,65 @@ function rebuildGroupIndexes() {{
             const createInteractionBetweenProtboxes = (idA, idB, type = 'arrow', options = {{}}) => {{
                 const a = protboxMap[idA], b = protboxMap[idB];
                 if (!a || !b) return;
-                const acx = (a.x || 0) + (a.width || 0) / 2;
-                const acy = (a.y || 0) + (a.height || 0) / 2;
-                const bcx = (b.x || 0) + (b.width || 0) / 2;
-                const bcy = (b.y || 0) + (b.height || 0) / 2;
-                const theta = Math.atan2(bcy - acy, bcx - acx) * 180 / Math.PI;
-                const sideA = pickSideFromTheta(theta);
-                const sideB = oppositeSide(sideA);
-                const p1 = protboxAnchorPoint(idA, sideA);
-                const p2 = protboxAnchorPoint(idB, sideB);
+                const useShortestFree = options.side_mode === 'shortest_free';
+                let sideA = null;
+                let sideB = null;
+                if (options.side_mode === 'shortest') {{
+                    const pair = chooseShortestProtboxSides(idA, idB, Number.isFinite(Number(options.buffer)) ? Number(options.buffer) : 3);
+                    if (pair) {{
+                        sideA = pair.sideA;
+                        sideB = pair.sideB;
+                    }}
+                }}
+                if (!useShortestFree && (!sideA || !sideB)) {{
+                    const acx = (a.x || 0) + (a.width || 0) / 2;
+                    const acy = (a.y || 0) + (a.height || 0) / 2;
+                    const bcx = (b.x || 0) + (b.width || 0) / 2;
+                    const bcy = (b.y || 0) + (b.height || 0) / 2;
+                    const theta = Math.atan2(bcy - acy, bcx - acx) * 180 / Math.PI;
+                    sideA = pickSideFromTheta(theta);
+                    sideB = oppositeSide(sideA);
+                }}
+                const shortestPoints = useShortestFree
+                    ? chooseShortestProtboxPoints(idA, idB, Number.isFinite(Number(options.buffer)) ? Number(options.buffer) : 3)
+                    : null;
+                const p1 = shortestPoints ? shortestPoints.p1 : protboxAnchorPoint(idA, sideA);
+                const p2 = shortestPoints ? shortestPoints.p2 : protboxAnchorPoint(idB, sideB);
                 const newArrow = {{
                     line: type,
                     dashed: options.dashed === true,
-                    protbox_id_1: idA,
-                    protbox_id_1_side: sideA,
-                    protbox_id_2: idB,
-                    protbox_id_2_side: sideB,
                     x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y
                 }};
+                if (!useShortestFree) {{
+                    newArrow.protbox_id_1 = idA;
+                    newArrow.protbox_id_1_side = sideA;
+                    newArrow.protbox_id_2 = idB;
+                    newArrow.protbox_id_2_side = sideB;
+                }}
                 arrows.push(newArrow);
                 drawArrows([newArrow], {{ force: true }});
                 rebuildAttachmentsIndex();
-                updateArrowPositions(idA, sideA);
-                updateArrowPositions(idB, sideB);
+                if (!useShortestFree) {{
+                    updateArrowPositions(idA, sideA);
+                    updateArrowPositions(idB, sideB);
+                }}
                 updateAttachedArrows(arrowIdFromIndex(arrows.length - 1), 'start');
                 updateAttachedArrows(arrowIdFromIndex(arrows.length - 1), 'end');
-                Shiny?.setInputValue('add_arrow', {{
+                const arrowPayload = {{
                     line: type,
-                    protbox_id_1: idA,
-                    protbox_id_1_side: sideA,
-                    protbox_id_2: idB,
-                    protbox_id_2_side: sideB,
                     x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y
-                }}, {{ priority: 'event' }});
+                }};
+                if (!useShortestFree) {{
+                    arrowPayload.protbox_id_1 = idA;
+                    arrowPayload.protbox_id_1_side = sideA;
+                    arrowPayload.protbox_id_2 = idB;
+                    arrowPayload.protbox_id_2_side = sideB;
+                }}
+                Shiny?.setInputValue('add_arrow', arrowPayload, {{ priority: 'event' }});
                 return arrowIdFromIndex(arrows.length - 1);
             }};
             const findAlignmentSnap = (movingId, movingRect) => {{
-                if (!movingId || !movingRect || !shiftKeyDown) return null;
+                if (!movingId || !movingRect || !shouldUseProtboxAlignmentSnap(movingId)) return null;
                 const ignore = new Set([`${{movingId}}`]);
                 const moving = {{
                     x: movingRect.x,
@@ -4223,6 +5052,15 @@ function rebuildGroupIndexes() {{
                     }};
                     otherGeom.cx = otherGeom.x + otherGeom.width / 2;
                     otherGeom.cy = otherGeom.y + otherGeom.height / 2;
+                    const closeHorizontally =
+                        Math.abs((moving.x + moving.width) - otherGeom.x) <= SNAP_SEARCH_MARGIN ||
+                        Math.abs(moving.x - (otherGeom.x + otherGeom.width)) <= SNAP_SEARCH_MARGIN ||
+                        Math.abs(moving.cx - otherGeom.cx) <= SNAP_SEARCH_MARGIN;
+                    const closeVertically =
+                        Math.abs((moving.y + moving.height) - otherGeom.y) <= SNAP_SEARCH_MARGIN ||
+                        Math.abs(moving.y - (otherGeom.y + otherGeom.height)) <= SNAP_SEARCH_MARGIN ||
+                        Math.abs(moving.cy - otherGeom.cy) <= SNAP_SEARCH_MARGIN;
+                    if (!closeHorizontally && !closeVertically) return;
                     const localIgnore = new Set(ignore);
                     localIgnore.add(`${{otherId}}`);
                     const guideX = (moving.cx + otherGeom.cx) / 2;
@@ -4390,7 +5228,11 @@ function rebuildGroupIndexes() {{
                     protboxMap[protboxId].x = pbX;
                     protboxMap[protboxId].y = pbY;
                 }}
-                refreshGroupsForProtbox(protboxId);
+                if (protboxDragInProgress) {{
+                    markProtboxDirty(protboxId);
+                }} else {{
+                    refreshGroupsForProtbox(protboxId);
+                }}
                 return {{ dx: actualDX, dy: actualDY }};
             }};
             const propagateLinkedMove = (anchorId, deltaX, deltaY, visited = new Set(), visitedHandles = new Set()) => {{
@@ -4405,7 +5247,9 @@ function rebuildGroupIndexes() {{
                 }});
             }};
             const maybeSnapProtbox = (movingId, rectRef = null) => {{
-                cleanupBrokenLinks();
+                if (!protboxDragInProgress) {{
+                    cleanupBrokenLinks();
+                }}
                 const rect = rectRef || draw.findOne(`[data-id="${{movingId}}"]`);
                 if (!movingId || !rect) return;
                 const movingWidth = rect.width();
@@ -4531,18 +5375,25 @@ function rebuildGroupIndexes() {{
                             const handleVisit = new Set();
                             const delta = translateProtbox(entry.id, deltaX, deltaY, {{ rect: entry.element, skipRectMove: false }}, handleVisit) || {{ dx: deltaX, dy: deltaY }};
                             propagateLinkedMove(entry.id, delta.dx, delta.dy, new Set([entry.id]), handleVisit);
-                            cleanupBrokenLinks();
-                            if (!isGroupDrag && !(shiftKeyDown && activeDragProtboxId === entry.id)) {{
-                                maybeSnapProtbox(entry.id, entry.element);
+                            if (!protboxDragInProgress) {{
+                                cleanupBrokenLinks();
                             }}
-                            refreshGroupsForProtbox(entry.id);
+                            if (!isGroupDrag && !(shiftKeyDown && activeDragProtboxId === entry.id)) {{
+                                if (!protboxDragInProgress && shouldUseProtboxSnap(entry.id)) {{
+                                    maybeSnapProtbox(entry.id, entry.element);
+                                }}
+                            }}
+                            if (protboxDragInProgress) {{
+                                markProtboxDirty(entry.id);
+                            }} else {{
+                                refreshGroupsForProtbox(entry.id);
+                            }}
                         }} else if (entry.type === 'text-box') {{
                             const tb = findTextBlockByDomId(entry.id);
                             if (tb) {{
                                 tb.x = toCoordinateNumber((tb.x || 0) + deltaX, 0);
                                 tb.y = toCoordinateNumber((tb.y || 0) + deltaY, 0);
                                 applyTextBoxLayout(entry.id, tb);
-                                Shiny?.setInputValue('element_moved', {{ type: 'text-box', id: entry.id, x: tb.x, y: tb.y, width: tb.width, height: tb.height }}, {{ priority: 'event' }});
                             }} else {{
                                 entry.element.dmove(deltaX, deltaY);
                                 positionTextHandles(entry.id);
@@ -4582,8 +5433,8 @@ function rebuildGroupIndexes() {{
                             x: parseFloat(arrowElement.attr(anchorAttrX) || 0),
                             y: parseFloat(arrowElement.attr(anchorAttrY) || 0)
                         }};
-                        if (arrowData && arrowHandleContext.anchor) {{
-                            const nearProtbox = isPointNearProtboxSnapZone(newX, newY, arrowData);
+                    if (arrowData && arrowHandleContext.anchor) {{
+                        const nearProtbox = isPointNearProtboxSnapZone(newX, newY, arrowData);
                             const nearArrow = arrowData.line === 'line' ? isPointNearArrowSnapZone(newX, newY, arrowId) : false;
                             if (!nearProtbox && !nearArrow) {{
                                 const snappedPoint = snapPointToPreferredAxis({{ x: newX, y: newY }}, arrowHandleContext.anchor);
@@ -4597,7 +5448,7 @@ function rebuildGroupIndexes() {{
                     moveGroupMembers(selectedId, deltaX, deltaY, {{ snap: false }});
                     return;
                 }}
-                if (selectedType === 'prot-box' && shiftKeyDown && activeDragProtboxId === selectedProtboxId) {{
+                if (selectedType === 'prot-box' && shouldUseProtboxAlignmentSnap(selectedProtboxId)) {{
                     const w = selectedElement.width ? selectedElement.width() : 0;
                     const h = selectedElement.height ? selectedElement.height() : 0;
                     const movingRect = {{ x: newX, y: newY, width: w, height: h }};
@@ -4626,8 +5477,7 @@ function rebuildGroupIndexes() {{
                         if (tb) {{
                             tb.x = toCoordinateNumber((tb.x || 0) + deltaX, 0);
                             tb.y = toCoordinateNumber((tb.y || 0) + deltaY, 0);
-                                applyTextBoxLayout(m.id, tb);
-                                Shiny?.setInputValue('element_moved', {{ type: 'text-box', id: m.id, x: tb.x, y: tb.y, width: tb.width, height: tb.height }}, {{ priority: 'event' }});
+                            applyTextBoxLayout(m.id, tb);
                             }} else {{
                                 const grp = draw.findOne(`[data-id="${{m.id}}"]`);
                                 if (grp) grp.dmove(deltaX, deltaY);
@@ -4651,7 +5501,6 @@ function rebuildGroupIndexes() {{
                         tb.x = toCoordinateNumber((tb.x || 0) + deltaX, 0);
                         tb.y = toCoordinateNumber((tb.y || 0) + deltaY, 0);
                         applyTextBoxLayout(selectedId, tb);
-                        Shiny?.setInputValue('element_moved', {{ type: 'text-box', id: selectedId, x: tb.x, y: tb.y, width: tb.width, height: tb.height }}, {{ priority: 'event' }});
                     }}
                     return;
                 }}
@@ -4660,6 +5509,7 @@ function rebuildGroupIndexes() {{
                     const hitbox = selectedElement;
                     const visual = selectedVisual;
                     const arrowHead = draw.find(`[data-id="${{arrowId}}_head"]`)[0];
+                    const headHitbox = arrowHandleGroups[arrowId]?.headHitbox;
                     const startHandle = arrowHandleGroups[arrowId]?.startHandle;
                     const endHandle = arrowHandleGroups[arrowId]?.endHandle;
                     let x1 = parseFloat(hitbox.attr('x1') || 0) + deltaX;
@@ -4670,6 +5520,7 @@ function rebuildGroupIndexes() {{
                     visual.plot(x1, y1, x2, y2);
                     if (startHandle) startHandle.cx(x1).cy(y1);
                     if (endHandle) endHandle.cx(x2).cy(y2);
+                    if (headHitbox) headHitbox.cx(x2).cy(y2);
                     if (arrowHead) {{
                         const lineType = visual.attr('data-line-type') || 'arrow';
                         const baseLineType = lineType.startsWith('dashed_') ? lineType.replace(/^dashed_/, '') : lineType;
@@ -4721,7 +5572,6 @@ function rebuildGroupIndexes() {{
                                 }}
                             }}
                             updateAttachedArrows(masterId, masterEnd);
-                            Shiny?.setInputValue('arrow_moved', {{ id: masterId, end: masterEnd, x: masterEnd === 'start' ? mx1 : mx2, y: masterEnd === 'start' ? my1 : my2 }}, {{ priority: 'event' }});
                         }}
                     }});
                     updateAttachedArrows(arrowId, 'start');
@@ -4789,7 +5639,7 @@ function rebuildGroupIndexes() {{
                     const delta = translateProtbox(selectedProtboxId, deltaX, deltaY, {{ rect: selectedElement, skipRectMove: false }}, handleVisit) || {{ dx: deltaX, dy: deltaY }};
                     propagateLinkedMove(selectedProtboxId, delta.dx, delta.dy, new Set([selectedProtboxId]), handleVisit);
                     cleanupBrokenLinks();
-                    const snapAllowed = !(shiftKeyDown && activeDragProtboxId === selectedProtboxId);
+                    const snapAllowed = shouldUseProtboxSnap(selectedProtboxId);
                     if (snapAllowed) {{
                         maybeSnapProtbox(selectedProtboxId, selectedElement);
                     }}
@@ -4807,6 +5657,7 @@ function rebuildGroupIndexes() {{
                     const arrowElement = context?.arrowElement || draw.find(`[data-id="${{arrowId}}"]`)[0];
                     const arrowHitbox = context?.arrowHitbox || draw.find(`[data-id="${{arrowId}}_hit"]`)[0];
                     const arrowHead = context?.arrowHead || draw.find(`[data-id="${{arrowId}}_head"]`)[0];
+                    const headHitbox = arrowHandleGroups[arrowId]?.headHitbox;
                     const arrowData = context?.arrowData || getArrowById(arrowId);
                     if (arrowElement) {{
                         selectedElement?.cx(newX).cy(newY); // keep handle with cursor/snap
@@ -4817,6 +5668,7 @@ function rebuildGroupIndexes() {{
                         if (selectedType === 'arrow-start') {{ x1 = newX; y1 = newY; }} else {{ x2 = newX; y2 = newY; }}
                         arrowElement.plot(x1, y1, x2, y2);
                         if (arrowHitbox) arrowHitbox.plot(x1, y1, x2, y2);
+                        if (headHitbox) headHitbox.cx(x2).cy(y2);
                         if (arrowHead) {{
                             const dx = x2 - x1, dy = y2 - y1, angle = Math.atan2(dy, dx), arrowSize = 5;
                             const lineType = arrowElement.attr('data-line-type') || 'arrow';
@@ -4840,6 +5692,26 @@ function rebuildGroupIndexes() {{
                 let isDragging = false;
                 let prevPointX, prevPointY;
                 let multiMoveBefore = null;
+                let pendingPoint = null;
+                let dragFrameId = null;
+                const flushPendingDrag = () => {{
+                    if (!pendingPoint) {{
+                        dragFrameId = null;
+                        return;
+                    }}
+                    const point = pendingPoint;
+                    pendingPoint = null;
+                    const deltaX = point.x - prevPointX;
+                    const deltaY = point.y - prevPointY;
+                    prevPointX = point.x;
+                    prevPointY = point.y;
+                    if (deltaX !== 0 || deltaY !== 0) {{
+                        moveSelectedElement(deltaX, deltaY, point.x, point.y);
+                    }}
+                    dragFrameId = pendingPoint && isDragging
+                        ? window.requestAnimationFrame(flushPendingDrag)
+                        : null;
+                }};
                 element.node.style.cursor = 'pointer';
                 element.node.addEventListener('mousedown', e => {{
                     if (e.button === 2) {{
@@ -4856,11 +5728,8 @@ function rebuildGroupIndexes() {{
                     if (type !== 'text-box' && isTextEditing) {{
                         exitTextEditMode(true);
                     }}
-                    isDragging = true;
-                    if (type === 'prot-box') {{
-                        activeDragProtboxId = protboxId || id;
-                    }}
-                    const additiveSelect = e.ctrlKey || e.metaKey;
+                    const modifierDown = e.ctrlKey || e.metaKey;
+                    const additiveSelect = !!modifierDown;
                     let selectTarget = element;
                     let selectType = type;
                     let selectId = id;
@@ -4880,30 +5749,69 @@ function rebuildGroupIndexes() {{
                         ensureTextHandles(selectId, findTextBlockByDomId(selectId));
                         toggleTextHandles(selectId, true);
                     }}
-                    if (mkHistory && selectionMap.size > 1) {{
+                    if (additiveSelect) {{
+                        isDragging = false;
+                        activeDragProtboxId = null;
+                        multiMoveBefore = null;
+                        return;
+                    }}
+                    isDragging = true;
+                    suppressHoverTooltips = true;
+                    hideTooltipNow();
+                    if (type === 'prot-box' || type === 'group') {{
+                        protboxDragInProgress = true;
+                    }}
+                    if (type === 'prot-box') {{
+                        activeDragProtboxId = protboxId || id;
+                    }}
+                    if (mkHistory && (selectionMap.size > 1 || type === 'group')) {{
                         multiMoveBefore = [];
-                        selectionMap.forEach(entry => {{
-                            if (!entry || !trackableMoveTypes.has(entry.type)) return;
-                            const el = ensureElementForId(entry.id);
-                            const before = captureElementPosition(el, entry.type);
-                            if (!before) return;
-                            const snap = {{
-                                id: entry.id,
-                                type: entry.type,
-                                protboxId: entry.protboxId || (entry.type === 'prot-box' ? entry.id : null),
-                                before
-                            }};
-                            if (snap.protboxId && snap.type === 'prot-box') {{
-                                snap.attached = {{ before: captureAttachedArrowSnapshots(snap.protboxId) }};
-                            }}
-                            multiMoveBefore.push(snap);
-                        }});
+                        if (type === 'group') {{
+                            collectMembersForGroup(id).forEach(member => {{
+                                if (!member || !trackableMoveTypes.has(member.type)) return;
+                                const el = ensureElementForId(member.id);
+                                const before = captureElementPosition(el, member.type);
+                                if (!before) return;
+                                const snap = {{
+                                    id: member.id,
+                                    type: member.type,
+                                    protboxId: member.type === 'prot-box' ? member.id : null,
+                                    before
+                                }};
+                                if (snap.protboxId) {{
+                                    snap.attached = {{ before: captureAttachedArrowSnapshots(snap.protboxId) }};
+                                }}
+                                multiMoveBefore.push(snap);
+                            }});
+                        }} else {{
+                            selectionMap.forEach(entry => {{
+                                if (!entry || !trackableMoveTypes.has(entry.type)) return;
+                                const el = ensureElementForId(entry.id);
+                                const before = captureElementPosition(el, entry.type);
+                                if (!before) return;
+                                const snap = {{
+                                    id: entry.id,
+                                    type: entry.type,
+                                    protboxId: entry.protboxId || (entry.type === 'prot-box' ? entry.id : null),
+                                    before
+                                }};
+                                if (snap.protboxId && snap.type === 'prot-box') {{
+                                    snap.attached = {{ before: captureAttachedArrowSnapshots(snap.protboxId) }};
+                                }}
+                                multiMoveBefore.push(snap);
+                            }});
+                        }}
                     }} else {{
                         multiMoveBefore = null;
                     }}
                     const point = draw.point(e.clientX, e.clientY);
                     prevPointX = point.x;
                     prevPointY = point.y;
+                    pendingPoint = null;
+                    if (dragFrameId !== null) {{
+                        window.cancelAnimationFrame(dragFrameId);
+                        dragFrameId = null;
+                    }}
                     if (mkHistory && trackableMoveTypes.has(type)) {{
                         mkHistory.beginMoveSession({{
                             element,
@@ -4918,16 +5826,21 @@ function rebuildGroupIndexes() {{
                     e.preventDefault();
                     e.stopPropagation();
                     const point = draw.point(e.clientX, e.clientY);
-                    const deltaX = point.x - prevPointX;
-                    const deltaY = point.y - prevPointY;
-                    prevPointX = point.x;
-                    prevPointY = point.y;
-                    moveSelectedElement(deltaX, deltaY, point.x, point.y);
+                    pendingPoint = point;
+                    if (dragFrameId === null) {{
+                        dragFrameId = window.requestAnimationFrame(flushPendingDrag);
+                    }}
                 }};
                 const endDragging = e => {{
                     if (!isDragging) return;
+                    if (dragFrameId !== null) {{
+                        window.cancelAnimationFrame(dragFrameId);
+                        dragFrameId = null;
+                    }}
+                    flushPendingDrag();
                     isDragging = false;
-                    if (mkHistory && multiMoveBefore && selectionMap.size > 1) {{
+                    suppressHoverTooltips = false;
+                    if (mkHistory && multiMoveBefore && (selectionMap.size > 1 || type === 'group')) {{
                         const items = [];
                         multiMoveBefore.forEach(prev => {{
                             const el = ensureElementForId(prev.id);
@@ -4969,6 +5882,14 @@ function rebuildGroupIndexes() {{
                         activeDragProtboxId = null;
                         clearAlignmentGuides();
                     }}
+                    if (type === 'prot-box' && selectedProtboxId && shouldUseProtboxSnap(selectedProtboxId)) {{
+                        maybeSnapProtbox(selectedProtboxId, selectedElement);
+                    }}
+                    if (protboxDragInProgress) {{
+                        protboxDragInProgress = false;
+                        cleanupBrokenLinks();
+                        flushDirtyProtboxes();
+                    }}
                     if (mkHistory && trackableMoveTypes.has(type)) {{
                         mkHistory.finalizeMoveSession();
                     }}
@@ -4992,7 +5913,6 @@ function rebuildGroupIndexes() {{
                         }}
                         updateAttachedArrows(arrowId, end);
                         if (handle) {{
-                            Shiny?.setInputValue('arrow_moved', {{ id: arrowId, end, x: handle.cx(), y: handle.cy() }}, {{ priority: 'event' }});
                         }}
                         const lineEl = draw.findOne(`[data-id="${{arrowId}}"]`);
                         if (arrow && lineEl) {{
@@ -5013,7 +5933,6 @@ function rebuildGroupIndexes() {{
                         const startHandle = arrowHandleGroups[arrowId]?.startHandle;
                         const endHandle = arrowHandleGroups[arrowId]?.endHandle;
                         if (startHandle && endHandle) {{
-                            Shiny?.setInputValue('arrow_moved', {{ id: arrowId, end: 'both', x1: startHandle.cx(), y1: startHandle.cy(), x2: endHandle.cx(), y2: endHandle.cy() }}, {{ priority: 'event' }});
                         }}
                 }} else if (selectedType === 'group') {{
                     const ids = collectProtboxesForGroup(selectedId);
@@ -5240,7 +6159,8 @@ function rebuildGroupIndexes() {{
                 if (!arrow || !line) return;
                 const type = arrow.line || 'arrow';
                 const baseType = type.startsWith('dashed_') ? type.replace(/^dashed_/, '') : type;
-                const strokeOpts = {{ color: 'black', width: 1 }};
+                const arrowColor = arrow.color || 'black';
+                const strokeOpts = {{ color: arrowColor, width: 1 }};
                 if (type.startsWith('dashed') || arrow.dashed) strokeOpts.dasharray = '5,5'; else strokeOpts.dasharray = null;
                 line.attr('data-line-type', type);
                 line.stroke(strokeOpts);
@@ -5257,11 +6177,18 @@ function rebuildGroupIndexes() {{
                 const y2 = parseFloat(line.attr('y2') || 0);
                 const dx = x2 - x1, dy = y2 - y1, angle = Math.atan2(dy, dx), arrowSize = 5;
                 if (baseType === 'arrow') {{
-                    head = arrowGroup.polygon([[x2, y2],[x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)],[x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)]]).fill('black').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': `${{arrowId}}_head`, 'data-type': 'arrow-head' }});
+                    head = arrowGroup.polygon([[x2, y2],[x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)],[x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)]]).fill(arrowColor).stroke({{ color: arrowColor, width: 1 }}).attr({{ 'data-id': `${{arrowId}}_head`, 'data-type': 'arrow-head' }});
                 }} else if (baseType === 'inhibition') {{
-                    head = arrowGroup.line(x2 - arrowSize, y2, x2 + arrowSize, y2).stroke({{ color: 'black', width: 2 }}).attr({{ 'data-id': `${{arrowId}}_head`, 'data-type': 'arrow-head' }});
+                    head = arrowGroup.line(x2 - arrowSize, y2, x2 + arrowSize, y2).stroke({{ color: arrowColor, width: 2 }}).attr({{ 'data-id': `${{arrowId}}_head`, 'data-type': 'arrow-head' }});
                 }}
+                updateArrowHeadHitbox(arrowId, x2, y2);
                 return head;
+            }};
+            const updateArrowHeadHitbox = (arrowId, x, y) => {{
+                const headHitbox = arrowHandleGroups[arrowId]?.headHitbox;
+                if (headHitbox) {{
+                    headHitbox.cx(x).cy(y);
+                }}
             }};
             const rebuildAttachmentsIndex = () => {{
                 attachments = {{}};
@@ -5594,6 +6521,344 @@ function rebuildGroupIndexes() {{
                     }}
                 }}
             }};
+            const applyToArrowId = (arrowId, action) => {{
+                if (!arrowId || typeof action !== 'function') return null;
+                const arrow = getArrowById(arrowId);
+                if (!arrow) return null;
+                const result = action(arrowId, arrow);
+                emitSelectionState();
+                return result === undefined ? arrowId : result;
+            }};
+            const toggleDashForArrowId = (arrowId) => applyToArrowId(arrowId, () => setArrowDashState(arrowId, !getArrowById(arrowId)?.dashed));
+            const flipArrowId = (arrowId) => applyToArrowId(arrowId, (aid, ar) => {{
+                const line = draw.findOne(`[data-id="${{aid}}"]`);
+                const hit = draw.findOne(`[data-id="${{aid}}_hit"]`);
+                if (line) {{
+                    const x1 = line.attr('x1'), y1 = line.attr('y1'), x2 = line.attr('x2'), y2 = line.attr('y2');
+                    line.attr({{ x1: x2, y1: y2, x2: x1, y2: y1 }});
+                    if (hit) hit.attr({{ x1: x2, y1: y2, x2: x1, y2: y1 }});
+                }}
+                const swapFields = (obj, a, b) => {{ const tmp = obj[a]; obj[a] = obj[b]; obj[b] = tmp; }};
+                swapFields(ar, 'x1', 'x2'); swapFields(ar, 'y1', 'y2');
+                swapFields(ar, 'protbox_id_1', 'protbox_id_2');
+                swapFields(ar, 'protbox_id_1_side', 'protbox_id_2_side');
+                swapFields(ar, 'attached_arrow_1', 'attached_arrow_2');
+                swapFields(ar, 'attached_end_1', 'attached_end_2');
+                updateArrowVisual(aid);
+                rebuildAttachmentsIndex();
+                updateAttachedArrows(aid, 'start');
+                updateAttachedArrows(aid, 'end');
+            }});
+            const cycleTypeForArrowId = (arrowId) => applyToArrowId(arrowId, (aid, ar) => {{
+                const order = ['arrow', 'inhibition', 'line'];
+                const cur = ar.line === 'dashed_arrow' ? 'arrow' : (ar.line || 'arrow');
+                const idx = order.indexOf(cur);
+                const next = order[(idx + 1) % order.length];
+                ar.line = next;
+                updateArrowVisual(aid);
+                translateArrowByDelta(aid, 0, 0);
+                rebuildAttachmentsIndex();
+                updateAttachedArrows(aid, 'start');
+                updateAttachedArrows(aid, 'end');
+            }});
+            const createInteractionBetweenConnectNodes = (fromNode, toNode, type = 'arrow', options = {{}}) => {{
+                if (!fromNode || !toNode) return null;
+                if (fromNode.kind === 'prot-box' && toNode.kind === 'prot-box') {{
+                    return createInteractionBetweenProtboxes(fromNode.id, toNode.id, type, options);
+                }}
+                const useShortest = options.side_mode === 'shortest_free';
+                let p1 = null;
+                let p2 = null;
+                if (useShortest) {{
+                    const points = shortestRectPoints(fromNode, toNode, Number.isFinite(Number(options.buffer)) ? Number(options.buffer) : 3);
+                    p1 = points?.p1 || null;
+                    p2 = points?.p2 || null;
+                }} else {{
+                    const theta = Math.atan2((toNode.cy || 0) - (fromNode.cy || 0), (toNode.cx || 0) - (fromNode.cx || 0)) * 180 / Math.PI;
+                    const sideA = pickSideFromTheta(theta);
+                    const sideB = oppositeSide(sideA);
+                    const buffer = Number.isFinite(Number(options.buffer)) ? Number(options.buffer) : 5;
+                    p1 = rectAnchorPoint(fromNode, sideA, buffer);
+                    p2 = rectAnchorPoint(toNode, sideB, buffer);
+                }}
+                if (!p1 || !p2) return null;
+                const newArrow = {{ line: type, dashed: options.dashed === true, x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y }};
+                arrows.push(newArrow);
+                drawArrows([newArrow], {{ force: true }});
+                rebuildAttachmentsIndex();
+                const arrowId = arrowIdFromIndex(arrows.length - 1);
+                updateAttachedArrows(arrowId, 'start');
+                updateAttachedArrows(arrowId, 'end');
+                Shiny?.setInputValue('add_arrow', {{ line: type, x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y }}, {{ priority: 'event' }});
+                return arrowId;
+            }};
+            const orderConnectNodes = (first, second) => {{
+                if (!first || !second) return {{ from: first, to: second }};
+                let from = first;
+                let to = second;
+                const dx = (second.cx || 0) - (first.cx || 0);
+                const dy = (second.cy || 0) - (first.cy || 0);
+                if (Math.abs(dx) > 5) {{
+                    if (dx < 0) {{
+                        from = second;
+                        to = first;
+                    }}
+                }} else if (dy < 0) {{
+                    from = second;
+                    to = first;
+                }}
+                return {{ from, to }};
+            }};
+            const autoConnectSelectedProtboxesWith = (createArrowFn, resultKey = 'auto_connect_result') => {{
+                const nodes = buildSelectionConnectNodes();
+                if (!Array.isArray(nodes) || nodes.length < 2) return 0;
+                let created = 0;
+                const createdEntries = [];
+                const deg = {{}};
+                const connSet = new Set();
+                const addConnKey = (a, b) => connSet.add(a < b ? `${{a}}|${{b}}` : `${{b}}|${{a}}`);
+                const hasConn = (a, b) => connSet.has(a < b ? `${{a}}|${{b}}` : `${{b}}|${{a}}`) || !!findArrowBetweenProtboxes(a, b);
+                const memberToNode = {{}};
+                nodes.forEach(node => {{
+                    (node.members || []).forEach(memberId => {{
+                        if (memberId !== undefined && memberId !== null) {{
+                            memberToNode[String(memberId)] = node.key;
+                        }}
+                    }});
+                }});
+                (arrows || []).forEach(ar => {{
+                    if (!ar) return;
+                    const a = ar.protbox_id_1, b = ar.protbox_id_2;
+                    const keyA = a !== undefined && a !== null ? memberToNode[String(a)] : null;
+                    const keyB = b !== undefined && b !== null ? memberToNode[String(b)] : null;
+                    if (keyA) deg[keyA] = (deg[keyA] || 0) + 1;
+                    if (keyB) deg[keyB] = (deg[keyB] || 0) + 1;
+                    if (keyA && keyB && keyA !== keyB) addConnKey(keyA, keyB);
+                }});
+                const recordConn = (fromId, toId) => {{
+                    addConnKey(fromId, toId);
+                    deg[fromId] = (deg[fromId] || 0) + 1;
+                    deg[toId] = (deg[toId] || 0) + 1;
+                }};
+                const canAttach = (node) => (deg[node.key] || 0) < 2;
+                const tryConnect = (from, to) => {{
+                    if (!from || !to) return false;
+                    if (to.cx <= from.cx - 5) return false;
+                    if (!canAttach(from) || !canAttach(to)) return false;
+                    if (hasConn(from.key, to.key)) return false;
+                    const newId = typeof createArrowFn === 'function'
+                        ? createArrowFn(from, to)
+                        : createInteractionBetweenConnectNodes(from, to, 'arrow');
+                    if (newId) {{
+                        const idx = parseArrowIndex(newId);
+                        const snap = idx !== null ? cloneData(arrows[idx]) : null;
+                        if (snap) createdEntries.push({{ id: newId, idx, snapshot: snap }});
+                    }}
+                    recordConn(from.key, to.key);
+                    created += 1;
+                    return true;
+                }};
+                if (nodes.length === 2) {{
+                    const ordered = orderConnectNodes(nodes[0], nodes[1]);
+                    tryConnect(ordered.from, ordered.to);
+                }} else {{
+                const rowThreshold = 30;
+                const rows = [];
+                [...nodes].sort((a, b) => a.cy - b.cy).forEach(n => {{
+                    const row = rows.find(r => Math.abs(r.centerY - n.cy) <= rowThreshold);
+                    if (row) {{
+                        row.nodes.push(n);
+                        row.centerY = row.nodes.reduce((s, v) => s + v.cy, 0) / row.nodes.length;
+                    }} else {{
+                        rows.push({{ nodes: [n], centerY: n.cy }});
+                    }}
+                }});
+                rows.forEach(r => r.nodes.sort((a, b) => a.cx - b.cx || a.cy - b.cy));
+                rows.forEach(r => {{
+                    const chain = r.nodes;
+                    for (let i = 0; i < chain.length - 1; i++) {{
+                        tryConnect(chain[i], chain[i + 1]);
+                    }}
+                    chain.forEach((n, idx) => {{
+                        if ((deg[n.id] || 0) === 0) {{
+                            const right = idx < chain.length - 1 ? chain[idx + 1] : null;
+                            const left = idx > 0 ? chain[idx - 1] : null;
+                            if (right && tryConnect(n, right)) return;
+                            if (left) tryConnect(left, n);
+                        }}
+                    }});
+                    chain.forEach((n, idx) => {{
+                        if (!canAttach(n)) return;
+                        const right = idx < chain.length - 1 ? chain[idx + 1] : null;
+                        const left = idx > 0 ? chain[idx - 1] : null;
+                        if (right && tryConnect(n, right)) return;
+                        if (left) tryConnect(left, n);
+                    }});
+                }});
+                }}
+                try {{
+                    Shiny?.setInputValue(resultKey, {{ count: created, protboxes: nodes.flatMap(node => node.members || []) }}, {{ priority: 'event' }});
+                    if (mkHistory && createdEntries.length) {{
+                        const entry = {{
+                            kind: 'auto-connect',
+                            arrows: cloneData(createdEntries)
+                        }};
+                        entry.handlers = {{
+                            undo: () => mkHistory.runWithoutRecording(() => {{
+                                createdEntries.slice().reverse().forEach(e => deleteArrowById(e.id, {{ silent: true }}));
+                                rebuildAttachmentsIndex();
+                            }}),
+                            redo: () => mkHistory.runWithoutRecording(() => {{
+                                createdEntries.forEach(e => {{
+                                    if (typeof e.idx === 'number' && e.idx >= arrows.length) {{
+                                        while (arrows.length <= e.idx) arrows.push(null);
+                                    }}
+                                    const clone = cloneData(e.snapshot);
+                                    arrows[e.idx] = clone;
+                                    drawArrows([clone], {{ force: true }});
+                                    rebuildAttachmentsIndex();
+                                    if (clone.protbox_id_1 && clone.protbox_id_1_side) updateArrowPositions(clone.protbox_id_1, clone.protbox_id_1_side);
+                                    if (clone.protbox_id_2 && clone.protbox_id_2_side) updateArrowPositions(clone.protbox_id_2, clone.protbox_id_2_side);
+                                    const aid = arrowIdFromIndex(e.idx);
+                                    updateAttachedArrows(aid, 'start');
+                                    updateAttachedArrows(aid, 'end');
+                                }});
+                            }})
+                        }};
+                        mkHistory.recordAction(entry);
+                    }}
+                }} catch (err) {{}}
+                return created;
+            }};
+            autoConnectSelectedProtboxes = () => autoConnectSelectedProtboxesWith(
+                (fromNode, toNode) => createInteractionBetweenConnectNodes(fromNode, toNode, 'arrow'),
+                'auto_connect_result'
+            );
+            autoConnectSelectedProtboxesShortest = () => {{
+                const nodes = buildSelectionConnectNodes();
+                if (!Array.isArray(nodes) || nodes.length < 2) return 0;
+                let created = 0;
+                const createdEntries = [];
+                const deg = {{}};
+                const connSet = new Set();
+                const addConnKey = (a, b) => connSet.add(a < b ? `${{a}}|${{b}}` : `${{b}}|${{a}}`);
+                const hasConn = (a, b) => connSet.has(a < b ? `${{a}}|${{b}}` : `${{b}}|${{a}}`) || !!findArrowBetweenProtboxes(a, b);
+                const memberToNode = {{}};
+                nodes.forEach(node => {{
+                    (node.members || []).forEach(memberId => {{
+                        if (memberId !== undefined && memberId !== null) {{
+                            memberToNode[String(memberId)] = node.key;
+                        }}
+                    }});
+                }});
+                (arrows || []).forEach(ar => {{
+                    if (!ar) return;
+                    const a = ar.protbox_id_1, b = ar.protbox_id_2;
+                    const keyA = a !== undefined && a !== null ? memberToNode[String(a)] : null;
+                    const keyB = b !== undefined && b !== null ? memberToNode[String(b)] : null;
+                    if (keyA) deg[keyA] = (deg[keyA] || 0) + 1;
+                    if (keyB) deg[keyB] = (deg[keyB] || 0) + 1;
+                    if (keyA && keyB && keyA !== keyB) addConnKey(keyA, keyB);
+                }});
+                if (nodes.length === 2) {{
+                    const ordered = orderConnectNodes(nodes[0], nodes[1]);
+                    if ((deg[ordered.from.key] || 0) < 2 && (deg[ordered.to.key] || 0) < 2 && !hasConn(ordered.from.key, ordered.to.key)) {{
+                        const newId = createInteractionBetweenConnectNodes(ordered.from, ordered.to, 'arrow', {{ side_mode: 'shortest_free', buffer: 3 }});
+                        if (newId) {{
+                            const idx = parseArrowIndex(newId);
+                            const snap = idx !== null ? cloneData(arrows[idx]) : null;
+                            if (snap) createdEntries.push({{ id: newId, idx, snapshot: snap }});
+                            addConnKey(ordered.from.key, ordered.to.key);
+                            deg[ordered.from.key] = (deg[ordered.from.key] || 0) + 1;
+                            deg[ordered.to.key] = (deg[ordered.to.key] || 0) + 1;
+                            created += 1;
+                        }}
+                    }}
+                }} else {{
+                const candidates = [];
+                for (let i = 0; i < nodes.length - 1; i += 1) {{
+                    for (let j = i + 1; j < nodes.length; j += 1) {{
+                        const first = nodes[i];
+                        const second = nodes[j];
+                        let from = first;
+                        let to = second;
+                        const dx = second.cx - first.cx;
+                        const dy = second.cy - first.cy;
+                        if (Math.abs(dx) > 5) {{
+                            if (dx < 0) {{ from = second; to = first; }}
+                        }} else if (dy < 0) {{
+                            from = second;
+                            to = first;
+                        }}
+                        const points = shortestRectPoints(from, to, 3);
+                        if (!points) continue;
+                        const p1 = points.p1;
+                        const p2 = points.p2;
+                        candidates.push({{
+                            fromNode: from,
+                            toNode: to,
+                            dist: Math.hypot((p2.x || 0) - (p1.x || 0), (p2.y || 0) - (p1.y || 0)),
+                            fromCx: from.cx,
+                            fromCy: from.cy,
+                            toCx: to.cx,
+                            toCy: to.cy,
+                        }});
+                    }}
+                }}
+                candidates.sort((a, b) => {{
+                    if (Math.abs(a.dist - b.dist) > 0.01) return a.dist - b.dist;
+                    if (Math.abs(a.fromCx - b.fromCx) > 0.01) return a.fromCx - b.fromCx;
+                    if (Math.abs(a.fromCy - b.fromCy) > 0.01) return a.fromCy - b.fromCy;
+                    return a.toCy - b.toCy;
+                }});
+                candidates.forEach(candidate => {{
+                    if ((deg[candidate.fromNode.key] || 0) >= 2 || (deg[candidate.toNode.key] || 0) >= 2) return;
+                    if (hasConn(candidate.fromNode.key, candidate.toNode.key)) return;
+                    const newId = createInteractionBetweenConnectNodes(candidate.fromNode, candidate.toNode, 'arrow', {{ side_mode: 'shortest_free', buffer: 3 }});
+                    if (!newId) return;
+                    const idx = parseArrowIndex(newId);
+                    const snap = idx !== null ? cloneData(arrows[idx]) : null;
+                    if (snap) createdEntries.push({{ id: newId, idx, snapshot: snap }});
+                    addConnKey(candidate.fromNode.key, candidate.toNode.key);
+                    deg[candidate.fromNode.key] = (deg[candidate.fromNode.key] || 0) + 1;
+                    deg[candidate.toNode.key] = (deg[candidate.toNode.key] || 0) + 1;
+                    created += 1;
+                }});
+                }}
+                try {{
+                    Shiny?.setInputValue('auto_connect_shortest_result', {{ count: created, protboxes: nodes.flatMap(node => node.members || []) }}, {{ priority: 'event' }});
+                    if (mkHistory && createdEntries.length) {{
+                        const entry = {{
+                            kind: 'auto-connect',
+                            arrows: cloneData(createdEntries)
+                        }};
+                        entry.handlers = {{
+                            undo: () => mkHistory.runWithoutRecording(() => {{
+                                createdEntries.slice().reverse().forEach(e => deleteArrowById(e.id, {{ silent: true }}));
+                                rebuildAttachmentsIndex();
+                            }}),
+                            redo: () => mkHistory.runWithoutRecording(() => {{
+                                createdEntries.forEach(e => {{
+                                    if (typeof e.idx === 'number' && e.idx >= arrows.length) {{
+                                        while (arrows.length <= e.idx) arrows.push(null);
+                                    }}
+                                    const clone = cloneData(e.snapshot);
+                                    arrows[e.idx] = clone;
+                                    drawArrows([clone], {{ force: true }});
+                                    rebuildAttachmentsIndex();
+                                    if (clone.protbox_id_1 && clone.protbox_id_1_side) updateArrowPositions(clone.protbox_id_1, clone.protbox_id_1_side);
+                                    if (clone.protbox_id_2 && clone.protbox_id_2_side) updateArrowPositions(clone.protbox_id_2, clone.protbox_id_2_side);
+                                    const aid = arrowIdFromIndex(e.idx);
+                                    updateAttachedArrows(aid, 'start');
+                                    updateAttachedArrows(aid, 'end');
+                                }});
+                            }})
+                        }};
+                        mkHistory.recordAction(entry);
+                    }}
+                }} catch (err) {{}}
+                return created;
+            }};
             document.addEventListener('keydown', e => {{
                 if (e.key === 'Shift') {{
                     shiftKeyDown = true;
@@ -5625,49 +6890,8 @@ function rebuildGroupIndexes() {{
                     return;
                 }}
                 const selectedProtIds = getSelectedProtboxes();
-                const selectedArrowId = (selectedType === 'arrow' || selectedType === 'arrow-hitbox')
-                    ? selectedId
-                    : ((selectedType === 'arrow-start' || selectedType === 'arrow-end') ? selectedId.replace(/_(start|end)$/, '') : null);
-                const applyToArrowId = (arrowId, action) => {{
-                    if (!arrowId) return null;
-                    const arrow = getArrowById(arrowId);
-                    if (!arrow) return null;
-                    const result = action(arrowId, arrow);
-                    return result === undefined ? arrowId : result;
-                }};
-                const toggleDashForArrowId = (arrowId) => applyToArrowId(arrowId, () => setArrowDashState(arrowId, !getArrowById(arrowId)?.dashed));
-                const flipArrowId = (arrowId) => applyToArrowId(arrowId, (aid, ar) => {{
-                    const line = draw.findOne(`[data-id=\"${{aid}}\"]`);
-                    const hit = draw.findOne(`[data-id=\"${{aid}}_hit\"]`);
-                    if (line) {{
-                        const x1 = line.attr('x1'), y1 = line.attr('y1'), x2 = line.attr('x2'), y2 = line.attr('y2');
-                        line.attr({{ x1: x2, y1: y2, x2: x1, y2: y1 }});
-                        if (hit) hit.attr({{ x1: x2, y1: y2, x2: x1, y2: y1 }});
-                    }}
-                    const swapFields = (obj, a, b) => {{ const tmp = obj[a]; obj[a] = obj[b]; obj[b] = tmp; }};
-                    swapFields(ar, 'x1', 'x2'); swapFields(ar, 'y1', 'y2');
-                    swapFields(ar, 'protbox_id_1', 'protbox_id_2');
-                    swapFields(ar, 'protbox_id_1_side', 'protbox_id_2_side');
-                    swapFields(ar, 'attached_arrow_1', 'attached_arrow_2');
-                    swapFields(ar, 'attached_end_1', 'attached_end_2');
-                    updateArrowVisual(aid);
-                    rebuildAttachmentsIndex();
-                    updateAttachedArrows(aid, 'start');
-                    updateAttachedArrows(aid, 'end');
-                }});
-                const cycleTypeForArrowId = (arrowId) => applyToArrowId(arrowId, (aid, ar) => {{
-                    const order = ['arrow', 'inhibition', 'line'];
-                    const cur = ar.line === 'dashed_arrow' ? 'arrow' : (ar.line || 'arrow');
-                    const idx = order.indexOf(cur);
-                    const next = order[(idx + 1) % order.length];
-                    ar.line = next;
-                    updateArrowVisual(aid);
-                    translateArrowByDelta(aid, 0, 0);
-                    rebuildAttachmentsIndex();
-                    updateAttachedArrows(aid, 'start');
-                    updateAttachedArrows(aid, 'end');
-                }});
-                autoConnectSelectedProtboxes = () => {{
+                const selectedArrowId = resolveSelectedArrowActionId();
+                const autoConnectSelectedProtboxesWith = (createArrowFn, resultKey = 'auto_connect_result') => {{
                     const protIds = getSelectedProtboxes();
                     if (!Array.isArray(protIds) || protIds.length < 2) return 0;
                     let created = 0;
@@ -5701,7 +6925,9 @@ function rebuildGroupIndexes() {{
                         if (to.cx <= from.cx - 5) return false;
                         if (!canAttach(from) || !canAttach(to)) return false;
                         if (hasConn(from.id, to.id)) return false;
-                        const newId = createInteractionBetweenProtboxes(from.id, to.id, 'arrow');
+                        const newId = typeof createArrowFn === 'function'
+                            ? createArrowFn(from.id, to.id)
+                            : createInteractionBetweenProtboxes(from.id, to.id, 'arrow');
                         if (newId) {{
                             const idx = parseArrowIndex(newId);
                             const snap = idx !== null ? cloneData(arrows[idx]) : null;
@@ -5750,7 +6976,7 @@ function rebuildGroupIndexes() {{
                     }});
                     try {{
                         console.log('mk: autoConnect created', created, 'arrows for', protIds);
-                        Shiny?.setInputValue('auto_connect_result', {{ count: created, protboxes: protIds }}, {{ priority: 'event' }});
+                        Shiny?.setInputValue(resultKey, {{ count: created, protboxes: protIds }}, {{ priority: 'event' }});
                         if (mkHistory && createdEntries.length) {{
                             const entry = {{
                                 kind: 'auto-connect',
@@ -5783,6 +7009,14 @@ function rebuildGroupIndexes() {{
                     }} catch (err) {{}}
                     return created;
                 }};
+                autoConnectSelectedProtboxes = autoConnectSelectedProtboxes || (() => autoConnectSelectedProtboxesWith(
+                    (fromId, toId) => createInteractionBetweenProtboxes(fromId, toId, 'arrow'),
+                    'auto_connect_result'
+                ));
+                autoConnectSelectedProtboxesShortest = autoConnectSelectedProtboxesShortest || (() => autoConnectSelectedProtboxesWith(
+                    (fromId, toId) => createInteractionBetweenProtboxes(fromId, toId, 'arrow', {{ side_mode: 'shortest', buffer: 3 }}),
+                    'auto_connect_shortest_result'
+                ));
                 const ensureArrowBetweenSelected = (type, opts = {{}}) => {{
                     if (selectedProtIds.length !== 2) return null;
                     const [a, b] = selectedProtIds;
@@ -5805,6 +7039,7 @@ function rebuildGroupIndexes() {{
                     return arrowId;
                 }};
                 if (e.ctrlKey && !targetEditable) {{
+                    if (keyLower === 'a' && e.shiftKey && selectedProtIds.length >= 2) {{ e.preventDefault(); autoConnectSelectedProtboxesShortest?.(); return; }}
                     if (keyLower === 'a' && selectedProtIds.length >= 2) {{ e.preventDefault(); autoConnectSelectedProtboxes(); return; }}
                     if (keyLower === 'i' && selectedProtIds.length === 2) {{ e.preventDefault(); ensureArrowBetweenSelected('inhibition'); return; }}
                     if (keyLower === 'l' && selectedProtIds.length === 2) {{ e.preventDefault(); ensureArrowBetweenSelected('line'); return; }}
@@ -5905,7 +7140,7 @@ function rebuildGroupIndexes() {{
             draw.node.addEventListener('mousedown', startPanning);
             document.addEventListener('mousemove', pan);
             document.addEventListener('mouseup', endPanning);
-            document.getElementById('svgCanvas').addEventListener('wheel', handleWheel, {{ passive: false }});
+            getCanvasEl().addEventListener('wheel', handleWheel, {{ passive: false }});
             document.getElementById('reset-view')?.addEventListener('click', resetView);
             const controlsContainer = document.querySelector('#svgCanvas .canvas-controls');
             if (controlsContainer) {{
@@ -5958,9 +7193,12 @@ function rebuildGroupIndexes() {{
                 if (symbolEl) {{
                     const rawX = toCoordinateNumber(symbolEl.x && symbolEl.x());
                     const rawY = toCoordinateNumber(symbolEl.y && symbolEl.y());
+                    const isImageSymbol = String(symbolEl.type || symbolEl.node?.nodeName || '').toLowerCase() === 'image';
+                    const symbolWidth = isImageSymbol ? toCoordinateNumber(symbolEl.width && symbolEl.width()) : null;
+                    const symbolHeight = isImageSymbol ? toCoordinateNumber(symbolEl.height && symbolEl.height()) : null;
                     snapshot.symbol = {{
-                        x: rawX,
-                        y: rawY - textOffsetY
+                        x: isImageSymbol && symbolWidth !== null ? rawX + (symbolWidth / 2) : rawX,
+                        y: isImageSymbol && symbolHeight !== null ? rawY + (symbolHeight / 2) : (rawY - textOffsetY)
                     }};
                 }}
                 return snapshot;
@@ -6079,24 +7317,15 @@ function rebuildGroupIndexes() {{
                 shapeObj.node.addEventListener('mouseenter', e => {{
                     const htmlTip = shapeObj.attr('data-tooltip-html') || '';
                     const tip = htmlTip || shapeObj.attr('data-tooltip') || '';
-                    if (tip) {{
-                        const pos = toContainerPosition(e);
-                        setTooltipContent(tip, Boolean(htmlTip));
-                        tooltip.style.display = 'block';
-                        tooltip.style.left = `${{pos.x + tooltipOffsetX}}px`;
-                        tooltip.style.top = `${{pos.y + tooltipOffsetY}}px`;
+                    if (hoverTooltipsAllowed() && tip) {{
+                        scheduleTooltipShow(tip, Boolean(htmlTip), e);
                     }}
                 }});
                 shapeObj.node.addEventListener('mousemove', e => {{
-                    if (tooltip.style.display === 'block') {{
-                        const pos = toContainerPosition(e);
-                        tooltip.style.left = `${{pos.x + tooltipOffsetX}}px`;
-                        tooltip.style.top = `${{pos.y + tooltipOffsetY}}px`;
-                    }}
+                    if (hoverTooltipsAllowed()) moveTooltipFromEvent(e);
                 }});
                 shapeObj.node.addEventListener('mouseleave', () => {{
-                    tooltip.style.display = 'none';
-                    clearTooltipContent();
+                    hideTooltipNow();
                 }});
                 workingEntries.push({{ element: shapeObj, offsetX: newX - pbX, offsetY: newY - pbY, jsonX: newX, jsonY: newY }});
                 makeDraggable(shapeObj, 'ptm-shape', shapeId, protboxId);
@@ -6143,20 +7372,42 @@ function rebuildGroupIndexes() {{
                 const symbolY = (symbolSnapshot && symbolSnapshot.y !== undefined)
                     ? symbolSnapshot.y
                     : resolveCoord(existingOverride?.symbol_y ?? ptm.symbol_y, newY, resetSymbol);
-                if (ptm.symbol) {{
-                    const symbolColor = Array.isArray(ptm.symbol_color) && ptm.symbol_color.length === 3 ? `rgb(${{ptm.symbol_color.join(',')}})` : 'black';
-                const symbolText = protboxGroup.text(ptm.symbol).move(symbolX, symbolY + textOffsetY).font({{
-                    size: ptm.symbol_size || settings.ptm_label_size || 10,
-                    family: ptm.symbol_font || settings.ptm_label_font || 'Arial',
-                    anchor: 'middle',
-                    leading: '1.2em'
-                }}).fill(symbolColor).attr({{
-                    'data-id': ptmElementId(protboxId, uniprot, ptmKey, 'symbol'),
-                    'data-type': 'ptm-symbol',
-                    'pointer-events': 'none',
-                    'data-protbox-id': protboxId
-                }});
-                    workingEntries.push({{ element: symbolText, offsetX: symbolX - pbX, offsetY: (symbolY + textOffsetY) - pbY, jsonX: symbolX, jsonY: symbolY }});
+                if (ptm.symbol || ptm.symbol_icon) {{
+                    const symbolId = ptmElementId(protboxId, uniprot, ptmKey, 'symbol');
+                    const symbolSizeRaw = Number(ptm.symbol_size || settings.ptm_label_size || 10);
+                    const symbolSize = Number.isFinite(symbolSizeRaw) && symbolSizeRaw > 0 ? symbolSizeRaw : 10;
+                    if (ptm.symbol_icon) {{
+                        const symbolImage = protboxGroup.image(ptm.symbol_icon)
+                            .size(symbolSize, symbolSize)
+                            .move(symbolX - (symbolSize / 2), symbolY - (symbolSize / 2))
+                            .attr({{
+                                'data-id': symbolId,
+                                'data-type': 'ptm-symbol',
+                                'pointer-events': 'none',
+                                'data-protbox-id': protboxId
+                            }});
+                        workingEntries.push({{
+                            element: symbolImage,
+                            offsetX: (symbolX - (symbolSize / 2)) - pbX,
+                            offsetY: (symbolY - (symbolSize / 2)) - pbY,
+                            jsonX: symbolX,
+                            jsonY: symbolY
+                        }});
+                    }} else {{
+                        const symbolColor = Array.isArray(ptm.symbol_color) && ptm.symbol_color.length === 3 ? `rgb(${{ptm.symbol_color.join(',')}})` : 'black';
+                        const symbolText = protboxGroup.text(ptm.symbol).move(symbolX, symbolY + textOffsetY).font({{
+                            size: symbolSize,
+                            family: ptm.symbol_font || settings.ptm_label_font || 'Arial',
+                            anchor: 'middle',
+                            leading: '1.2em'
+                        }}).fill(symbolColor).attr({{
+                            'data-id': symbolId,
+                            'data-type': 'ptm-symbol',
+                            'pointer-events': 'none',
+                            'data-protbox-id': protboxId
+                        }});
+                        workingEntries.push({{ element: symbolText, offsetX: symbolX - pbX, offsetY: (symbolY + textOffsetY) - pbY, jsonX: symbolX, jsonY: symbolY }});
+                    }}
                 }}
                 if (isPrimaryForProtein) {{
                     ptm.shape_x = newX;
@@ -6250,22 +7501,14 @@ function rebuildGroupIndexes() {{
                     // Tooltip handlers for prot-box
                     rect.node.addEventListener('mouseenter', e => {{
                         const tip = rect.attr('data-tooltip') || '';
-                        if (tip) {{
-                            const pos = toContainerPosition(e);
-                            setTooltipContent(tip, false);
-                            tooltip.style.display = 'block';
-                            tooltip.style.left = `${{pos.x + tooltipOffsetX}}px`;
-                            tooltip.style.top = `${{pos.y + tooltipOffsetY}}px`;
+                        if (hoverTooltipsAllowed() && tip) {{
+                            scheduleTooltipShow(tip, false, e);
                         }}
                     }});
                     rect.node.addEventListener('mousemove', e => {{
-                        if (tooltip.style.display === 'block') {{
-                            const pos = toContainerPosition(e);
-                            tooltip.style.left = `${{pos.x + tooltipOffsetX}}px`;
-                            tooltip.style.top = `${{pos.y + tooltipOffsetY}}px`;
-                        }}
+                        if (hoverTooltipsAllowed()) moveTooltipFromEvent(e);
                     }});
-                    rect.node.addEventListener('mouseleave', () => {{ tooltip.style.display = 'none'; clearTooltipContent(); }});
+                    rect.node.addEventListener('mouseleave', () => {{ hideTooltipNow(); }});
                     const text = protboxGroup.text(label).move(x + width / 2, yPos + height / 2 + textOffsetY).font({{ size: settings.prot_label_size || 12, family: settings.prot_label_font || 'Arial', anchor: 'middle', leading: '1.2em' }}).fill(labelRgb).attr({{ 'data-id': id + '_label', 'data-type': 'prot-label', 'pointer-events': 'none' }});
                     elementGroups[id].push({{ element: text, offsetX: width / 2, offsetY: height / 2, jsonX: x + width / 2, jsonY: y + height / 2 }});
                     makeDraggable(rect, 'prot-box', id, id);
@@ -6315,22 +7558,14 @@ function rebuildGroupIndexes() {{
                             shapeObj.node.addEventListener('mouseenter', e => {{
                                 const htmlTip = shapeObj.attr('data-tooltip-html') || '';
                                 const tip = htmlTip || shapeObj.attr('data-tooltip') || '';
-                                if (tip) {{
-                                    const pos = toContainerPosition(e);
-                                    setTooltipContent(tip, Boolean(htmlTip));
-                                    tooltip.style.display = 'block';
-                                    tooltip.style.left = `${{pos.x + tooltipOffsetX}}px`;
-                                    tooltip.style.top = `${{pos.y + tooltipOffsetY}}px`;
+                                if (hoverTooltipsAllowed() && tip) {{
+                                    scheduleTooltipShow(tip, Boolean(htmlTip), e);
                                 }}
                             }});
                             shapeObj.node.addEventListener('mousemove', e => {{
-                                if (tooltip.style.display === 'block') {{
-                                    const pos = toContainerPosition(e);
-                                    tooltip.style.left = `${{pos.x + tooltipOffsetX}}px`;
-                                    tooltip.style.top = `${{pos.y + tooltipOffsetY}}px`;
-                                }}
+                                if (hoverTooltipsAllowed()) moveTooltipFromEvent(e);
                             }});
-                            shapeObj.node.addEventListener('mouseleave', () => {{ tooltip.style.display = 'none'; clearTooltipContent(); }});
+                            shapeObj.node.addEventListener('mouseleave', () => {{ hideTooltipNow(); }});
                             elementGroups[id].push({{ element: shapeObj, offsetX: ptmX - x, offsetY: ptmY - y, jsonX: ptmX, jsonY: ptmY }});
                             makeDraggable(shapeObj, 'ptm-shape', ptmElementId(id, selectedUniprot, ptm_key, 'shape'), id);
                             bindPtmContextMenu(shapeObj, id, ptmMeta);
@@ -6357,7 +7592,7 @@ function rebuildGroupIndexes() {{
                                 makeDraggable(labelText, 'ptm-label', ptmElementId(id, selectedUniprot, ptm_key, 'label'), id);
                                 bindPtmContextMenu(labelText, id, ptmMeta);
                             }}
-                            if (ptm.symbol) {{
+                            if (ptm.symbol || ptm.symbol_icon) {{
                                 const fallbackSymbolX = toFiniteNumber(ptm.symbol_x);
                                 const fallbackSymbolY = toFiniteNumber(ptm.symbol_y);
                                 const baseSymbolX = fallbackSymbolX !== null ? fallbackSymbolX : ptmX;
@@ -6365,9 +7600,26 @@ function rebuildGroupIndexes() {{
                                 const symbolX = resolveCoordinate(override?.symbol_x, baseSymbolX) ?? baseSymbolX;
                                 const symbolY = resolveCoordinate(override?.symbol_y, baseSymbolY) ?? baseSymbolY;
                                 const adjSymbolY = Math.round(symbolY * boxYStretch);
-                                const symbolColor = Array.isArray(ptm.symbol_color) && ptm.symbol_color.length === 3 && ptm.symbol_color.every(c => typeof c === 'number' && c >= 0 && c <= 255) ? `rgb(${{ptm.symbol_color.join(',')}})` : 'black';
-                                const symbolText = protboxGroup.text(ptm.symbol).move(symbolX, adjSymbolY + textOffsetY).font({{ size: ptm.symbol_size || settings.ptm_label_size || 10, family: ptm.symbol_font || settings.ptm_label_font || 'Arial', anchor: 'middle', leading: '1.2em' }}).fill(symbolColor).attr({{ 'data-id': ptmElementId(id, selectedUniprot, ptm_key, 'symbol'), 'data-type': 'ptm-symbol', 'pointer-events': 'none', 'data-protbox-id': id }});
-                                elementGroups[id].push({{ element: symbolText, offsetX: symbolX - x, offsetY: (symbolY + textOffsetY) - y, jsonX: symbolX, jsonY: symbolY }});
+                                const symbolId = ptmElementId(id, selectedUniprot, ptm_key, 'symbol');
+                                const symbolSizeRaw = Number(ptm.symbol_size || settings.ptm_label_size || 10);
+                                const symbolSize = Number.isFinite(symbolSizeRaw) && symbolSizeRaw > 0 ? symbolSizeRaw : 10;
+                                if (ptm.symbol_icon) {{
+                                    const symbolImage = protboxGroup.image(ptm.symbol_icon)
+                                        .size(symbolSize, symbolSize)
+                                        .move(symbolX - (symbolSize / 2), adjSymbolY - (symbolSize / 2))
+                                        .attr({{ 'data-id': symbolId, 'data-type': 'ptm-symbol', 'pointer-events': 'none', 'data-protbox-id': id }});
+                                    elementGroups[id].push({{
+                                        element: symbolImage,
+                                        offsetX: (symbolX - (symbolSize / 2)) - x,
+                                        offsetY: (symbolY - (symbolSize / 2)) - y,
+                                        jsonX: symbolX,
+                                        jsonY: symbolY
+                                    }});
+                                }} else {{
+                                    const symbolColor = Array.isArray(ptm.symbol_color) && ptm.symbol_color.length === 3 && ptm.symbol_color.every(c => typeof c === 'number' && c >= 0 && c <= 255) ? `rgb(${{ptm.symbol_color.join(',')}})` : 'black';
+                                    const symbolText = protboxGroup.text(ptm.symbol).move(symbolX, adjSymbolY + textOffsetY).font({{ size: symbolSize, family: ptm.symbol_font || settings.ptm_label_font || 'Arial', anchor: 'middle', leading: '1.2em' }}).fill(symbolColor).attr({{ 'data-id': symbolId, 'data-type': 'ptm-symbol', 'pointer-events': 'none', 'data-protbox-id': id }});
+                                    elementGroups[id].push({{ element: symbolText, offsetX: symbolX - x, offsetY: (symbolY + textOffsetY) - y, jsonX: symbolX, jsonY: symbolY }});
+                                }}
                             }}
                         }}
                     }}
@@ -6478,59 +7730,92 @@ function rebuildGroupIndexes() {{
                         const uniprot = currentSelected[id];
                         const ptms = proteinData[uniprot]?.PTMs || {{}};
                         const overrideMapForMenu = pb?.ptm_overrides?.[uniprot] || {{}};
-                        Object.entries(ptms).forEach(([ptm_key, ptm]) => {{
-                            const subLi = document.createElement('li');
-                            subLi.style.padding = '4px 8px';
-                            subLi.style.cursor = 'pointer';
-                            subLi.style.display = 'flex';
-                            subLi.style.alignItems = 'center';
-                            subLi.style.gap = '8px';
-                            const ptmPreview = document.createElement('span');
-                            ptmPreview.style.display = 'inline-flex';
-                            ptmPreview.style.alignItems = 'center';
-                            ptmPreview.style.justifyContent = 'center';
-                            ptmPreview.style.width = '18px';
-                            ptmPreview.style.height = '18px';
-                            const ptmShape = ptm && typeof ptm.shape === 'string' ? ptm.shape.toLowerCase() : 'circle';
-                            ptmPreview.style.borderRadius = ptmShape === 'circle' ? '50%' : '3px';
-                            ptmPreview.style.border = '1px solid #222';
-                            ptmPreview.style.fontSize = '10px';
-                            ptmPreview.style.fontWeight = 'bold';
-                            ptmPreview.style.color = '#000';
-                            ptmPreview.style.lineHeight = '1';
-                            ptmPreview.style.flexShrink = '0';
-                            try {{
-                                ptmPreview.style.backgroundColor = entityColor(ptm) || '#ccc';
-                            }} catch (err) {{
-                                ptmPreview.style.backgroundColor = '#ccc';
-                            }}
-                            ptmPreview.textContent = ptm.symbol || '';
-                            const ptmLabel = document.createElement('span');
-                            ptmLabel.textContent = ptm.label || ptm_key;
-                            subLi.appendChild(ptmPreview);
-                            subLi.appendChild(ptmLabel);
-                            const override = overrideMapForMenu[ptm_key] || null;
-                            const isHidden = override?.hidden === true;
-                            const hasCoords = toFiniteNumber(ptm.shape_x) !== null && toFiniteNumber(ptm.shape_y) !== null;
-                            const isSpawned = hasCoords && !isHidden;
-                            if (isSpawned) {{
-                                subLi.style.backgroundColor = 'grey';
-                                subLi.style.cursor = 'not-allowed';
-                            }} else {{
-                                subLi.style.backgroundColor = 'white';
-                                subLi.addEventListener('click', () => {{
-                                    if (spawnPtmForProtbox(id, uniprot, ptm_key, {{
-                                        spawnInCenter: true,
-                                        resetLabelPosition: true
-                                    }})) {{
-                                        menu.remove();
-                                    }}
-                                }});
-                            }}
-                            ptmSubmenu.appendChild(subLi);
-                        }});
+                        const ptmEntries = Object.entries(ptms);
+                        const ptmLoading = document.createElement('li');
+                        ptmLoading.textContent = ptmEntries.length ? 'Loading PTMs...' : 'No PTMs available';
+                        ptmLoading.style.padding = '4px 8px';
+                        ptmLoading.style.color = '#666';
+                        ptmSubmenu.appendChild(ptmLoading);
+                        const ensurePtmSubmenu = () => {{
+                            if (ptmSubmenu.dataset.loaded === '1' || ptmSubmenu.dataset.loading === '1') return;
+                            ptmSubmenu.dataset.loading = '1';
+                            const batchSize = 80;
+                            const buildItem = (ptm_key, ptm) => {{
+                                const subLi = document.createElement('li');
+                                subLi.style.padding = '4px 8px';
+                                subLi.style.cursor = 'pointer';
+                                subLi.style.display = 'flex';
+                                subLi.style.alignItems = 'center';
+                                subLi.style.gap = '8px';
+                                const ptmPreview = document.createElement('span');
+                                ptmPreview.style.display = 'inline-flex';
+                                ptmPreview.style.alignItems = 'center';
+                                ptmPreview.style.justifyContent = 'center';
+                                ptmPreview.style.width = '18px';
+                                ptmPreview.style.height = '18px';
+                                const ptmShape = ptm && typeof ptm.shape === 'string' ? ptm.shape.toLowerCase() : 'circle';
+                                ptmPreview.style.borderRadius = ptmShape === 'circle' ? '50%' : '3px';
+                                ptmPreview.style.border = '1px solid #222';
+                                ptmPreview.style.fontSize = '10px';
+                                ptmPreview.style.fontWeight = 'bold';
+                                ptmPreview.style.color = '#000';
+                                ptmPreview.style.lineHeight = '1';
+                                ptmPreview.style.flexShrink = '0';
+                                try {{
+                                    ptmPreview.style.backgroundColor = entityColor(ptm) || '#ccc';
+                                }} catch (err) {{
+                                    ptmPreview.style.backgroundColor = '#ccc';
+                                }}
+                                ptmPreview.textContent = ptm.symbol || '';
+                                const ptmLabel = document.createElement('span');
+                                ptmLabel.textContent = ptm.label || ptm_key;
+                                subLi.appendChild(ptmPreview);
+                                subLi.appendChild(ptmLabel);
+                                const override = overrideMapForMenu[ptm_key] || null;
+                                const isHidden = override?.hidden === true;
+                                const hasCoords = toFiniteNumber(ptm.shape_x) !== null && toFiniteNumber(ptm.shape_y) !== null;
+                                const isSpawned = hasCoords && !isHidden;
+                                if (isSpawned) {{
+                                    subLi.style.backgroundColor = 'grey';
+                                    subLi.style.cursor = 'not-allowed';
+                                }} else {{
+                                    subLi.style.backgroundColor = 'white';
+                                    subLi.addEventListener('click', () => {{
+                                        if (spawnPtmForProtbox(id, uniprot, ptm_key, {{
+                                            spawnInCenter: true,
+                                            resetLabelPosition: true
+                                        }})) {{
+                                            menu.remove();
+                                        }}
+                                    }});
+                                }}
+                                return subLi;
+                            }};
+                            const pump = (startIdx) => {{
+                                if (startIdx === 0) {{
+                                    ptmSubmenu.innerHTML = '';
+                                }}
+                                const frag = document.createDocumentFragment();
+                                const endIdx = Math.min(startIdx + batchSize, ptmEntries.length);
+                                for (let idx = startIdx; idx < endIdx; idx++) {{
+                                    const [ptm_key, ptm] = ptmEntries[idx];
+                                    frag.appendChild(buildItem(ptm_key, ptm));
+                                }}
+                                ptmSubmenu.appendChild(frag);
+                                if (endIdx < ptmEntries.length) {{
+                                    window.requestAnimationFrame(() => pump(endIdx));
+                                }} else {{
+                                    ptmSubmenu.dataset.loading = '0';
+                                    ptmSubmenu.dataset.loaded = '1';
+                                }}
+                            }};
+                            window.requestAnimationFrame(() => pump(0));
+                        }};
                         liPTMs.appendChild(ptmSubmenu);
-                        liPTMs.addEventListener('mouseenter', () => {{ ptmSubmenu.style.display = 'block'; }});
+                        liPTMs.addEventListener('mouseenter', () => {{
+                            ptmSubmenu.style.display = 'block';
+                            ensurePtmSubmenu();
+                        }});
                         liPTMs.addEventListener('mouseleave', () => {{ ptmSubmenu.style.display = 'none'; }});
                         ul.appendChild(liPTMs);
                         const liLinks = document.createElement('li');
@@ -7195,7 +8480,7 @@ function rebuildGroupIndexes() {{
                         bindPtmContextMenu(labelText, protboxId, ptmMeta);
                         Shiny?.setInputValue('element_moved', {{ type: 'ptm-label', id: labelId, x: adjusted_labelX, y: adjusted_labelY, protbox_id: protboxId }}, {{ priority: 'event' }});
                     }}
-                    if (ptm.symbol) {{
+                    if (ptm.symbol || ptm.symbol_icon) {{
                         const fallbackSymbolX = toFiniteNumber(ptm.symbol_x);
                         const fallbackSymbolY = toFiniteNumber(ptm.symbol_y);
                         const baseSymbolX = fallbackSymbolX !== null ? fallbackSymbolX : resolvedShapeX;
@@ -7204,10 +8489,26 @@ function rebuildGroupIndexes() {{
                         const resolvedSymbolY = resolveCoordinate(override?.symbol_y, baseSymbolY) ?? baseSymbolY;
                         const adjusted_symbolX = resolvedSymbolX + deltaX;
                         const adjusted_symbolY = resolvedSymbolY + deltaY;
-                        const symbolColor = Array.isArray(ptm.symbol_color) && ptm.symbol_color.length === 3 ? `rgb(${{ptm.symbol_color.join(',')}})` : 'black';
                         const symbolId = ptmElementId(protboxId, newUniprot, ptm_key, 'symbol');
-                        const symbolText = protboxGroup.text(ptm.symbol).move(adjusted_symbolX, adjusted_symbolY + textOffsetY).font({{ size: ptm.symbol_size || settings.ptm_label_size || 10, family: ptm.symbol_font || settings.ptm_label_font || 'Arial', anchor: 'middle', leading: '1.2em' }}).fill(symbolColor).attr({{ 'data-id': symbolId, 'data-type': 'ptm-symbol', 'pointer-events': 'none', 'data-protbox-id': protboxId }});
-                        elementGroups[protboxId].push({{ element: symbolText, offsetX: adjusted_symbolX - currentX, offsetY: (adjusted_symbolY + textOffsetY) - currentY, jsonX: adjusted_symbolX, jsonY: adjusted_symbolY }});
+                        const symbolSizeRaw = Number(ptm.symbol_size || settings.ptm_label_size || 10);
+                        const symbolSize = Number.isFinite(symbolSizeRaw) && symbolSizeRaw > 0 ? symbolSizeRaw : 10;
+                        if (ptm.symbol_icon) {{
+                            const symbolImage = protboxGroup.image(ptm.symbol_icon)
+                                .size(symbolSize, symbolSize)
+                                .move(adjusted_symbolX - (symbolSize / 2), adjusted_symbolY - (symbolSize / 2))
+                                .attr({{ 'data-id': symbolId, 'data-type': 'ptm-symbol', 'pointer-events': 'none', 'data-protbox-id': protboxId }});
+                            elementGroups[protboxId].push({{
+                                element: symbolImage,
+                                offsetX: (adjusted_symbolX - (symbolSize / 2)) - currentX,
+                                offsetY: (adjusted_symbolY - (symbolSize / 2)) - currentY,
+                                jsonX: adjusted_symbolX,
+                                jsonY: adjusted_symbolY
+                            }});
+                        }} else {{
+                            const symbolColor = Array.isArray(ptm.symbol_color) && ptm.symbol_color.length === 3 ? `rgb(${{ptm.symbol_color.join(',')}})` : 'black';
+                            const symbolText = protboxGroup.text(ptm.symbol).move(adjusted_symbolX, adjusted_symbolY + textOffsetY).font({{ size: symbolSize, family: ptm.symbol_font || settings.ptm_label_font || 'Arial', anchor: 'middle', leading: '1.2em' }}).fill(symbolColor).attr({{ 'data-id': symbolId, 'data-type': 'ptm-symbol', 'pointer-events': 'none', 'data-protbox-id': protboxId }});
+                            elementGroups[protboxId].push({{ element: symbolText, offsetX: adjusted_symbolX - currentX, offsetY: (adjusted_symbolY + textOffsetY) - currentY, jsonX: adjusted_symbolX, jsonY: adjusted_symbolY }});
+                        }}
                         Shiny?.setInputValue('element_moved', {{ type: 'ptm-symbol', id: symbolId, x: adjusted_symbolX, y: adjusted_symbolY, protbox_id: protboxId }}, {{ priority: 'event' }});
                     }}
                     recordPtmOverride(protboxId, newUniprot, ptm_key, {{
@@ -7372,7 +8673,8 @@ function rebuildGroupIndexes() {{
                         }}
                         const lineType = arrow.line || 'arrow';
                         const baseLineType = lineType.startsWith('dashed_') ? lineType.replace(/^dashed_/, '') : lineType;
-                        let strokeOpts = {{ color: 'black', width: 1 }};
+                        const arrowColor = arrow.color || 'black';
+                        let strokeOpts = {{ color: arrowColor, width: 1 }};
                         if (lineType.startsWith('dashed') || arrow.dashed) {{ strokeOpts.dasharray = '5,5'; }}
                         const hitboxWidth = 22; // make hit area larger (approx +6px padding each side)
                         const ctrlPoints = Array.isArray(arrow.control_points) ? arrow.control_points : [];
@@ -7390,13 +8692,13 @@ function rebuildGroupIndexes() {{
                         const dx = x2 - x1, dy = y2 - y1, angle = Math.atan2(dy, dx), arrowSize = 5;
                         let arrowHead = null;
                         if (baseLineType === 'arrow') {{
-                            arrowHead = arrowGroup.polygon([[x2, y2],[x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)],[x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)]]).fill('black').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': arrowId + '_head', 'data-type': 'arrow-head' }});
+                            arrowHead = arrowGroup.polygon([[x2, y2],[x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)],[x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)]]).fill(arrowColor).stroke({{ color: arrowColor, width: 1 }}).attr({{ 'data-id': arrowId + '_head', 'data-type': 'arrow-head' }});
                         }} else if (baseLineType === 'inhibition') {{
                             let barX1, barY1, barX2, barY2;
                             if (side2 === 'North' || side2 === 'South') {{barX1 = x2 - arrowSize;barY1 = y2;barX2 = x2 + arrowSize;barY2 = y2;}} 
                             else if (side2 === 'West' || side2 === 'East') {{barX1 = x2;barY1 = y2 - arrowSize;barX2 = x2;barY2 = y2 + arrowSize;}}
                             else {{const perp = angle + Math.PI / 2;barX1 = x2 + Math.cos(perp) * arrowSize;barY1 = y2 + Math.sin(perp) * arrowSize;barX2 = x2 - Math.cos(perp) * arrowSize;barY2 = y2 - Math.sin(perp) * arrowSize;}}
-                            arrowHead = arrowGroup.line(barX1, barY1, barX2, barY2).stroke({{ color: 'black', width: 2 }}).attr({{ 'data-id': arrowId + '_head', 'data-type': 'arrow-head' }});
+                            arrowHead = arrowGroup.line(barX1, barY1, barX2, barY2).stroke({{ color: arrowColor, width: 2 }}).attr({{ 'data-id': arrowId + '_head', 'data-type': 'arrow-head' }});
                         }}
                         let startHandle = null;
                         if (!arrow.attached_arrow_1) {{
@@ -7406,8 +8708,13 @@ function rebuildGroupIndexes() {{
                         if (!arrow.attached_arrow_2) {{
                             endHandle = arrowGroup.circle(6).cx(x2).cy(y2).fill('red').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': arrowId + '_end', 'data-type': 'arrow-end' }}).hide();
                         }}
-                        arrowHandleGroups[arrowId] = {{ startHandle, endHandle }};
+                        const headHitbox = arrowGroup.circle(18).cx(x2).cy(y2).fill({{ color: 'transparent', opacity: 0 }}).stroke({{ color: 'transparent', width: 0 }}).attr({{ 'data-id': arrowId + '_head_hit', 'data-type': 'arrow-hitbox', 'data-arrow-id': arrowId }});
+                        headHitbox.node.addEventListener('mousedown', () => {{
+                            suppressNextBackgroundClick = true;
+                        }});
+                        arrowHandleGroups[arrowId] = {{ startHandle, endHandle, headHitbox }};
                         makeDraggable(hitbox, 'arrow', arrowId);
+                        makeDraggable(headHitbox, 'arrow', arrowId);
                         if (startHandle) makeDraggable(startHandle, 'arrow-start', arrowId + '_start');
                         if (endHandle) makeDraggable(endHandle, 'arrow-end', arrowId + '_end');
                         const openArrowMenu = (evt) => {{
@@ -7420,6 +8727,7 @@ function rebuildGroupIndexes() {{
                             showArrowMenu(evt, arrowId);
                         }};
                         hitbox.node.addEventListener('contextmenu', openArrowMenu);
+                        headHitbox.node.addEventListener('contextmenu', openArrowMenu);
                         if (line && line.node) line.node.addEventListener('contextmenu', openArrowMenu);
                         if (arrowHead && arrowHead.node) arrowHead.node.addEventListener('contextmenu', openArrowMenu);
                     }} catch (e) {{ }}
@@ -7431,6 +8739,8 @@ function rebuildGroupIndexes() {{
                 drawArrows(nonLines);
                 drawArrows(lines);
             }}
+            const runWarmMovableElements = warmMovableElements();
+            runWarmMovableElements();
             draw.node.addEventListener('contextmenu', e => {{
                 const meta = resolveGroupingMeta(e.target);
                 if (meta) {{
@@ -7637,6 +8947,7 @@ function rebuildGroupIndexes() {{
                 resultsList.style.maxHeight = '200px';
                 resultsList.style.overflowY = 'auto';
                 resultsList.style.borderTop = '1px solid #eee';
+                statusRow.textContent = proteinSearchIndex.length ? 'Type a regex to search proteins.' : 'Protein catalogue unavailable.';
                 const stopEvent = (evt) => {{
                     evt.stopPropagation();
                     evt.stopImmediatePropagation();
@@ -7709,14 +9020,17 @@ function rebuildGroupIndexes() {{
                     }});
                 }};
                 searchInput.addEventListener('input', updateProtboxResults);
+                searchInput.addEventListener('focus', () => {{
+                    if (searchInput.value.trim()) {{
+                        updateProtboxResults();
+                    }}
+                }});
                 protboxSubmenu.appendChild(searchInput);
                 protboxSubmenu.appendChild(statusRow);
                 protboxSubmenu.appendChild(resultsList);
                 liAddProtbox.appendChild(protboxSubmenu);
                 liAddProtbox.addEventListener('mouseenter', () => {{
                     protboxSubmenu.style.display = 'block';
-                    setTimeout(() => searchInput.focus(), 0);
-                    updateProtboxResults();
                 }});
                 liAddProtbox.addEventListener('mouseleave', (evt) => {{
                     if (!liAddProtbox.contains(evt.relatedTarget)) {{
@@ -7816,8 +9130,147 @@ function rebuildGroupIndexes() {{
                 const newArrow = {{ line: type, x1, y1, x2, y2 }};
                 arrows.push(newArrow);
                 drawArrows([newArrow]);
+                if (mkHistory) {{
+                    const idx = arrows.length - 1;
+                    const arrowId = arrowIdFromIndex(idx);
+                    const snapshot = cloneData(newArrow);
+                    const entry = {{
+                        kind: 'arrow-create',
+                        arrowId,
+                        index: idx,
+                        snapshot
+                    }};
+                    entry.handlers = {{
+                        undo: () => mkHistory.runWithoutRecording(() => {{
+                            deleteArrowById(entry.arrowId, {{ silent: true }});
+                            rebuildAttachmentsIndex();
+                        }}),
+                        redo: () => mkHistory.runWithoutRecording(() => {{
+                            if (typeof entry.index === 'number' && entry.index >= arrows.length) {{
+                                while (arrows.length <= entry.index) arrows.push(null);
+                            }}
+                            const clone = cloneData(entry.snapshot);
+                            arrows[entry.index] = clone;
+                            drawArrows([clone], {{ force: true }});
+                            rebuildAttachmentsIndex();
+                            const aid = arrowIdFromIndex(entry.index);
+                            updateAttachedArrows(aid, 'start');
+                            updateAttachedArrows(aid, 'end');
+                        }})
+                    }};
+                    mkHistory.recordAction(entry);
+                }}
                 Shiny?.setInputValue('add_arrow', {{ line: type, x1, y1, x2, y2 }}, {{ priority: 'event' }});
             }};
+            Object.assign(viewerControlApi, {{
+                searchProteins: (query, limit = 40) => searchProteinCatalog(query, limit),
+                addProtbox: (uniprot) => {{
+                    if (!uniprot) return false;
+                    const center = getViewportCenter();
+                    createProtboxAtPosition(uniprot, center.x, center.y);
+                    return true;
+                }},
+                addArrow: (type = 'arrow') => {{
+                    const center = getViewportCenter();
+                    addNewArrow(type, center.x, center.y);
+                    return true;
+                }},
+                addShape: (shapeType = 'square') => {{
+                    const center = getViewportCenter();
+                    addNewShape(shapeType, center.x, center.y);
+                    return true;
+                }},
+                addText: () => {{
+                    const center = getViewportCenter();
+                    addNewTextBox(center.x, center.y);
+                    return true;
+                }},
+                addLegend: (orientation = 'vertical') => {{
+                    const center = getViewportCenter();
+                    createFigureKey(orientation, center.x, center.y);
+                    return true;
+                }},
+                syncCanvasSize: () => {{
+                    syncSvgCanvasSize();
+                    return true;
+                }},
+                getViewportCenter: () => Object.assign({{}}, getViewportCenter()),
+                undo: () => {{
+                    mkHistory?.undo();
+                    return mkHistory?.getState ? mkHistory.getState() : {{ canUndo: false, canRedo: false }};
+                }},
+                redo: () => {{
+                    mkHistory?.redo();
+                    return mkHistory?.getState ? mkHistory.getState() : {{ canUndo: false, canRedo: false }};
+                }},
+                getHistoryState: () => (mkHistory?.getState ? mkHistory.getState() : {{ canUndo: false, canRedo: false }}),
+                deleteSelected: () => {{
+                    deleteSelectedElement();
+                    return Object.assign({{ canDelete: canDeleteSelection(), type: selectedType || '', id: selectedId || '' }}, getSelectionInteractionState());
+                }},
+                getSelectionState: () => (Object.assign({{ canDelete: canDeleteSelection(), type: selectedType || '', id: selectedId || '' }}, getSelectionInteractionState())),
+                autoConnectEdges: () => (autoConnectSelectedProtboxes ? autoConnectSelectedProtboxes() : 0),
+                autoConnectShortestEdges: () => (autoConnectSelectedProtboxesShortest ? autoConnectSelectedProtboxesShortest() : 0),
+                cycleSelectedEdgeType: () => {{
+                    const arrowId = resolveSelectedArrowActionId();
+                    return arrowId ? cycleTypeForArrowId(arrowId) : null;
+                }},
+                toggleSelectedEdgeDash: () => {{
+                    const arrowId = resolveSelectedArrowActionId();
+                    return arrowId ? toggleDashForArrowId(arrowId) : null;
+                }},
+                flipSelectedEdgeDirection: () => {{
+                    const arrowId = resolveSelectedArrowActionId();
+                    return arrowId ? flipArrowId(arrowId) : null;
+                }},
+                setMouseMode: (mode = 'drag') => {{
+                    mouseMode = mode === 'selection' ? 'selection' : 'drag';
+                    emitMouseModeState();
+                    return mouseMode;
+                }},
+                getMouseMode: () => mouseMode,
+                setProtboxSnapEnabled: (enabled = true) => {{
+                    protboxSnapEnabled = !!enabled;
+                    emitSnapState();
+                    return {{
+                        protboxSnap: !!protboxSnapEnabled,
+                        protboxAlign: !!protboxAlignmentSnapEnabled,
+                        arrowSnap: !!arrowSideSnapEnabled
+                    }};
+                }},
+                getProtboxSnapEnabled: () => !!protboxSnapEnabled,
+                setProtboxAlignEnabled: (enabled = true) => {{
+                    protboxAlignmentSnapEnabled = !!enabled;
+                    emitSnapState();
+                    return {{
+                        protboxSnap: !!protboxSnapEnabled,
+                        protboxAlign: !!protboxAlignmentSnapEnabled,
+                        arrowSnap: !!arrowSideSnapEnabled
+                    }};
+                }},
+                getProtboxAlignEnabled: () => !!protboxAlignmentSnapEnabled,
+                setArrowSnapEnabled: (enabled = true) => {{
+                    arrowSideSnapEnabled = !!enabled;
+                    refreshArrowSideHandleVisibility();
+                    emitSnapState();
+                    return {{
+                        protboxSnap: !!protboxSnapEnabled,
+                        protboxAlign: !!protboxAlignmentSnapEnabled,
+                        arrowSnap: !!arrowSideSnapEnabled
+                    }};
+                }},
+                getArrowSnapEnabled: () => !!arrowSideSnapEnabled,
+                getSnapState: () => ({{
+                    protboxSnap: !!protboxSnapEnabled,
+                    protboxAlign: !!protboxAlignmentSnapEnabled,
+                    arrowSnap: !!arrowSideSnapEnabled
+                }})
+            }});
+            emitMouseModeState();
+            emitSelectionState();
+            emitSnapState();
+            applyViewerOverlayState();
+            syncSvgCanvasSize();
         }}
         // Expose initializeSvg for manual invocation from the browser console for debugging
         try {{
@@ -8327,6 +9780,24 @@ def server(input, output, session):
                 'symbol_x': float(x) if x is not None else None,
                 'symbol_y': float(y) if y is not None else None
             })
+        elif element_type == 'arrow':
+            arrow_idx = _parse_arrow_index(element_id)
+            arrows = json_data.get('arrows') or []
+            if arrow_idx is not None and 0 <= arrow_idx < len(arrows):
+                arrow = arrows[arrow_idx]
+                if isinstance(arrow, dict):
+                    for key in ('x1', 'y1', 'x2', 'y2'):
+                        if moved.get(key) is not None:
+                            try:
+                                arrow[key] = float(moved.get(key))
+                            except (TypeError, ValueError):
+                                pass
+                    if 'line' in moved and moved.get('line') is not None:
+                        arrow['line'] = moved.get('line')
+                    if 'dashed' in moved:
+                        arrow['dashed'] = bool(moved.get('dashed'))
+                    if 'color' in moved and moved.get('color') is not None:
+                        arrow['color'] = moved.get('color')
         _set_active_json(json_data)
 
     @reactive.Effect

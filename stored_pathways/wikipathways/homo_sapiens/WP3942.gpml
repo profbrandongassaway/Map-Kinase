@@ -1,0 +1,1070 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Pathway xmlns="http://pathvisio.org/GPML/2013a" Name="PPAR signaling" Organism="Homo sapiens">
+  <Comment Source="WikiPathways-category">Cellular Process</Comment>
+  <Comment Source="WikiPathways-description">Peroxisome proliferator-activated receptors (PPARs) are nuclear hormone receptors that are activated by fatty acids and their derivatives. PPAR has three subtypes (PPARalpha, beta/delta, and gamma) showing different expression patterns in vertebrates. Each of them is encoded in a separate gene and binds fatty acids and eicosanoids. PPARalpha plays a role in the clearance of circulating or cellular lipids via the regulation of gene expression involved in lipid metabolism in liver and skeletal muscle. PPARbeta/delta is involved in lipid oxidation and cell proliferation. PPARgamma promotes adipocyte differentiation to enhance blood glucose uptake.
+
+Proteins on this pathway have targeted assays available via the [CPTAC Assay Portal](https://assays.cancer.gov/available_assays?wp_id=WP3942).</Comment>
+  <BiopaxRef>e52</BiopaxRef>
+  <BiopaxRef>f48</BiopaxRef>
+  <BiopaxRef>ace</BiopaxRef>
+  <BiopaxRef>b20</BiopaxRef>
+  <BiopaxRef>ebc</BiopaxRef>
+  <BiopaxRef>bc6</BiopaxRef>
+  <BiopaxRef>c0c</BiopaxRef>
+  <BiopaxRef>f69</BiopaxRef>
+  <BiopaxRef>e67</BiopaxRef>
+  <BiopaxRef>aec</BiopaxRef>
+  <BiopaxRef>efa</BiopaxRef>
+  <BiopaxRef>f85</BiopaxRef>
+  <Attribute Key="ConversionDate" Value="20110519"/>
+  <Attribute Key="KeggId" Value="path:hsa03320"/>
+  <Graphics BoardWidth="1173.2008168230764" BoardHeight="860.75"/>
+  <DataNode TextLabel="ACAA1" GraphId="a0788" Type="GeneProduct" GroupRef="e8fff">
+    <Comment Source="KeggConverter">Original kegg element: gene;21;mmu:113868 mmu:235674</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:235674</Comment>
+    <Graphics CenterX="808.324296141814" CenterY="528.8544490789014" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000060971"/>
+  </DataNode>
+  <DataNode TextLabel="PPARD" GraphId="a34de" Type="GeneProduct" GroupRef="fb2b3">
+    <Comment Source="KeggConverter">Original kegg element: gene;16;mmu:19015</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:19015</Comment>
+    <Graphics CenterX="567.5408411539792" CenterY="494.129670869478" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000112033"/>
+  </DataNode>
+  <DataNode TextLabel="PPARG" GraphId="a3d73" Type="GeneProduct" GroupRef="e8e2d">
+    <Comment Source="KeggConverter">Original kegg element: gene;18;mmu:19016</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:19016</Comment>
+    <Graphics CenterX="567.5408411539792" CenterY="710.9341327772008" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000132170"/>
+  </DataNode>
+  <DataNode TextLabel="UBC" GraphId="a3fdf" Type="GeneProduct">
+    <Comment Source="KeggConverter">Original kegg element: gene;62;mmu:22190</Comment>
+    <Comment Source="HomologyMapper">No homologues found for original id L:22190</Comment>
+    <Graphics CenterX="809.190476190476" CenterY="745.8571428571413" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000150991"/>
+  </DataNode>
+  <DataNode TextLabel="PCK2" GraphId="a627a" Type="GeneProduct" GroupRef="daf14">
+    <Comment Source="KeggConverter">Original kegg element: gene;9;mmu:18534 mmu:74551</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:74551</Comment>
+    <Graphics CenterX="810.2420009013066" CenterY="776.2903710380031" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000100889"/>
+  </DataNode>
+  <DataNode TextLabel="CYP4A11" GraphId="a94e1" Type="GeneProduct" GroupRef="e8fff">
+    <Comment Source="KeggConverter">Original kegg element: gene;24;mmu:100040843 mmu:13117 mmu:13118 mmu:13119 mmu:230639 mmu:277753 mmu:435802 mmu:640109 mmu:666168</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:666168</Comment>
+    <Graphics CenterX="868.324296141816" CenterY="548.8544490789014" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000187048"/>
+  </DataNode>
+  <DataNode TextLabel="CYP8B1" GraphId="a9ce4" Type="GeneProduct" GroupRef="a8583">
+    <Comment Source="KeggConverter">Original kegg element: gene;58;mmu:13124</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:13124</Comment>
+    <Graphics CenterX="800.4070212026411" CenterY="312.533889468196" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000180432"/>
+  </DataNode>
+  <DataNode TextLabel="UCP1" GraphId="acbd7" Type="GeneProduct">
+    <Comment Source="KeggConverter">Original kegg element: gene;66;mmu:22227</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:22227</Comment>
+    <Graphics CenterX="810.8571428571427" CenterY="676.9761035801193" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000109424"/>
+  </DataNode>
+  <DataNode TextLabel="SLC27A1" GraphId="ae0ac" Type="GeneProduct" GroupRef="b6a92">
+    <Comment Source="KeggConverter">Original kegg element: gene;36;mmu:26457 mmu:26569</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:26457</Comment>
+    <Graphics CenterX="859.190476190478" CenterY="390.2857142857147" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000130304"/>
+  </DataNode>
+  <DataNode TextLabel="HMGCS2" GraphId="aed7e" Type="GeneProduct" GroupRef="cefbe">
+    <Comment Source="KeggConverter">Original kegg element: gene;37;mmu:15360</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:15360</Comment>
+    <Graphics CenterX="803.1904761904758" CenterY="68.14285714285714" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000134240"/>
+  </DataNode>
+  <DataNode TextLabel="RXRB" GraphId="b10e6" Type="GeneProduct" GroupRef="fb2b3">
+    <Comment Source="KeggConverter">Original kegg element: gene;17;mmu:20181 mmu:20182 mmu:20183</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:20182</Comment>
+    <Graphics CenterX="567.5408411539792" CenterY="526.1854362182845" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000204231"/>
+  </DataNode>
+  <DataNode TextLabel="AQP7" GraphId="b1711" Type="GeneProduct" GroupRef="daf14">
+    <Comment Source="KeggConverter">Original kegg element: gene;7;mmu:11832</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:11832</Comment>
+    <Graphics CenterX="870.2420009013086" CenterY="796.2903710380031" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000165269"/>
+  </DataNode>
+  <DataNode TextLabel="ACOX1" GraphId="b3ab5" Type="GeneProduct" GroupRef="e8fff">
+    <Comment Source="KeggConverter">Original kegg element: gene;42;mmu:11430 mmu:80911 mmu:93732</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:11430</Comment>
+    <Graphics CenterX="808.324296141814" CenterY="568.8544490789014" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000161533"/>
+  </DataNode>
+  <DataNode TextLabel="Adipocytokine signaling" GraphId="b542b" Type="Pathway">
+    <Comment Source="KeggConverter">Original kegg element: map;34;path:mmu04920</Comment>
+    <Graphics CenterX="574.1035910829818" CenterY="170.37629562866158" Width="140.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e"/>
+    <Xref Database="" ID=""/>
+  </DataNode>
+  <DataNode TextLabel="SCD" GraphId="b6f4d" Type="GeneProduct" GroupRef="d88aa">
+    <Comment Source="KeggConverter">Original kegg element: gene;55;mmu:20249 mmu:20250 mmu:30049 mmu:329065</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:329065</Comment>
+    <Graphics CenterX="799.1904761904755" CenterY="234.28571428571445" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000099194"/>
+  </DataNode>
+  <DataNode TextLabel="NR1H3" GraphId="b7851" Type="GeneProduct" GroupRef="a8583">
+    <Comment Source="KeggConverter">Original kegg element: gene;59;mmu:22259</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:22259</Comment>
+    <Graphics CenterX="860.4070212026431" CenterY="292.533889468196" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000025434"/>
+  </DataNode>
+  <DataNode TextLabel="RXRA" GraphId="b8189" Type="GeneProduct" GroupRef="e8e2d">
+    <Comment Source="KeggConverter">Original kegg element: gene;19;mmu:20181 mmu:20182 mmu:20183</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:20181</Comment>
+    <Graphics CenterX="567.5408411539792" CenterY="763.182307959682" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000186350"/>
+  </DataNode>
+  <DataNode TextLabel="RXRG" GraphId="bdf89" Type="GeneProduct" GroupRef="e8e2d">
+    <Comment Source="KeggConverter">Original kegg element: gene;19;mmu:20181 mmu:20182 mmu:20183</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:20183</Comment>
+    <Graphics CenterX="567.5408411539792" CenterY="783.182307959682" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000143171"/>
+  </DataNode>
+  <DataNode TextLabel="RXRB" GraphId="bea2e" Type="GeneProduct" GroupRef="e8e2d">
+    <Comment Source="KeggConverter">Original kegg element: gene;19;mmu:20181 mmu:20182 mmu:20183</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:20182</Comment>
+    <Graphics CenterX="567.5408411539792" CenterY="743.182307959682" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000204231"/>
+  </DataNode>
+  <DataNode TextLabel="ANGPTL4" GraphId="bebe6" Type="GeneProduct" GroupRef="d9acd">
+    <Comment Source="KeggConverter">Original kegg element: gene;41;mmu:57875</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:57875</Comment>
+    <Graphics CenterX="809.190476190476" CenterY="601.1428571428564" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000167772"/>
+  </DataNode>
+  <DataNode TextLabel="CYP27A1" GraphId="bf8c2" Type="GeneProduct" GroupRef="a8583">
+    <Comment Source="KeggConverter">Original kegg element: gene;60;mmu:104086</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:104086</Comment>
+    <Graphics CenterX="860.4070212026431" CenterY="312.533889468196" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000135929"/>
+  </DataNode>
+  <DataNode TextLabel="CPT1C" GraphId="c1f79" Type="GeneProduct" GroupRef="e8fff">
+    <Comment Source="KeggConverter">Original kegg element: gene;27;mmu:12894 mmu:12895 mmu:78070</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:78070</Comment>
+    <Graphics CenterX="868.324296141816" CenterY="508.85444907890144" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000169169"/>
+  </DataNode>
+  <DataNode TextLabel="RXRA" GraphId="c3375" Type="GeneProduct" GroupRef="b729a">
+    <Comment Source="KeggConverter">Original kegg element: gene;15;mmu:20181 mmu:20182 mmu:20183</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:20181</Comment>
+    <Graphics CenterX="567.5408411539792" CenterY="265.07030193780986" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000186350"/>
+  </DataNode>
+  <DataNode TextLabel="FABP3" GraphId="c506e" Type="GeneProduct" GroupRef="b6a92">
+    <Comment Source="KeggConverter">Original kegg element: gene;32;mmu:14077</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:14077</Comment>
+    <Graphics CenterX="799.1904761904755" CenterY="410.2857142857147" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000121769"/>
+  </DataNode>
+  <DataNode TextLabel="DBI" GraphId="c6b43" Type="GeneProduct" GroupRef="b6a92">
+    <Comment Source="KeggConverter">Original kegg element: gene;63;mmu:13167</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:13167</Comment>
+    <Graphics CenterX="799.1904761904755" CenterY="370.2857142857147" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000155368"/>
+  </DataNode>
+  <DataNode TextLabel="SLC27A4" GraphId="c86db" Type="GeneProduct" GroupRef="b6a92">
+    <Comment Source="KeggConverter">Original kegg element: gene;36;mmu:26457 mmu:26569</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:26569</Comment>
+    <Graphics CenterX="859.190476190478" CenterY="370.2857142857147" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000167114"/>
+  </DataNode>
+  <DataNode TextLabel="APOA2" GraphId="ca7bc" Type="GeneProduct" GroupRef="a8f1e">
+    <Comment Source="KeggConverter">Original kegg element: gene;46;mmu:11807</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:11807</Comment>
+    <Graphics CenterX="799.1904761904755" CenterY="135.1428571428571" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000158874"/>
+  </DataNode>
+  <DataNode TextLabel="CD36" GraphId="ca9bf" Type="GeneProduct" GroupRef="b6a92">
+    <Comment Source="KeggConverter">Original kegg element: gene;31;mmu:12491</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:12491</Comment>
+    <Graphics CenterX="859.190476190478" CenterY="410.2857142857147" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000135218"/>
+  </DataNode>
+  <DataNode TextLabel="FABP1" GraphId="cef37" Type="GeneProduct" GroupRef="b6a92">
+    <Comment Source="KeggConverter">Original kegg element: gene;44;mmu:14080</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:14080</Comment>
+    <Graphics CenterX="799.1904761904755" CenterY="390.2857142857147" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000163586"/>
+  </DataNode>
+  <DataNode TextLabel="ME1" GraphId="cf6a3" Type="GeneProduct" GroupRef="d88aa">
+    <Comment Source="KeggConverter">Original kegg element: gene;65;mmu:17436</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:17436</Comment>
+    <Graphics CenterX="799.1904761904755" CenterY="214.28571428571422" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000065833"/>
+  </DataNode>
+  <DataNode TextLabel="ADIPOQ" GraphId="cfca5" Type="GeneProduct" GroupRef="d9acd">
+    <Comment Source="KeggConverter">Original kegg element: gene;53;mmu:11450</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:11450</Comment>
+    <Graphics CenterX="869.1904761904776" CenterY="621.1428571428564" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000181092"/>
+  </DataNode>
+  <DataNode TextLabel="APOC3" GraphId="d2400" Type="GeneProduct" GroupRef="a8f1e">
+    <Comment Source="KeggConverter">Original kegg element: gene;57;mmu:11814</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:11814</Comment>
+    <Graphics CenterX="799.1904761904755" CenterY="155.1428571428571" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000110245"/>
+  </DataNode>
+  <DataNode TextLabel="FABP4" GraphId="d3088" Type="GeneProduct">
+    <Comment Source="KeggConverter">Original kegg element: gene;13;mmu:11770 mmu:12140 mmu:14077 mmu:14079 mmu:14080 mmu:16204 mmu:16592</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:11770</Comment>
+    <Graphics CenterX="216.6673606671643" CenterY="317.5894890809583" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000170323"/>
+  </DataNode>
+  <DataNode TextLabel="PPARA" GraphId="d3184" Type="GeneProduct" GroupRef="b729a">
+    <Comment Source="KeggConverter">Original kegg element: gene;14;mmu:19013</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:19013</Comment>
+    <Graphics CenterX="567.540841153979" CenterY="212.14285714285734" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000186951"/>
+  </DataNode>
+  <DataNode TextLabel="FADS2" GraphId="d3f76" Type="GeneProduct" GroupRef="d88aa">
+    <Comment Source="KeggConverter">Original kegg element: gene;56;mmu:56473</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:56473</Comment>
+    <Graphics CenterX="859.190476190478" CenterY="234.28571428571445" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000134824"/>
+  </DataNode>
+  <DataNode TextLabel="RXRG" GraphId="d4b85" Type="GeneProduct" GroupRef="b729a">
+    <Comment Source="KeggConverter">Original kegg element: gene;15;mmu:20181 mmu:20182 mmu:20183</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:20183</Comment>
+    <Graphics CenterX="567.5408411539792" CenterY="285.07030193780986" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000143171"/>
+  </DataNode>
+  <DataNode TextLabel="CYP7A1" GraphId="d6774" Type="GeneProduct" GroupRef="a8583">
+    <Comment Source="KeggConverter">Original kegg element: gene;33;mmu:13122</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:13122</Comment>
+    <Graphics CenterX="800.4070212026411" CenterY="292.533889468196" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000167910"/>
+  </DataNode>
+  <DataNode TextLabel="PLTP" GraphId="d6f57" Type="GeneProduct" GroupRef="a8f1e">
+    <Comment Source="KeggConverter">Original kegg element: gene;47;mmu:18830</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:18830</Comment>
+    <Graphics CenterX="859.190476190478" CenterY="155.1428571428571" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000100979"/>
+  </DataNode>
+  <DataNode TextLabel="PLIN1" GraphId="d9376" Type="GeneProduct" GroupRef="d9acd">
+    <Comment Source="KeggConverter">Original kegg element: gene;10;mmu:103968</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:103968</Comment>
+    <Graphics CenterX="869.1904761904776" CenterY="601.1428571428564" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000166819"/>
+  </DataNode>
+  <DataNode TextLabel="SLC27A5" GraphId="d93ce" Type="GeneProduct">
+    <Comment Source="KeggConverter">Original kegg element: gene;12;mmu:225579 mmu:26457 mmu:26458 mmu:26459 mmu:26569</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:26459</Comment>
+    <Graphics CenterX="102.88312867801463" CenterY="215.43602123436898" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000083807"/>
+  </DataNode>
+  <DataNode TextLabel="APOA5" GraphId="e089b" Type="GeneProduct" GroupRef="a8f1e">
+    <Comment Source="KeggConverter">Original kegg element: gene;64;mmu:66113</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:66113</Comment>
+    <Graphics CenterX="859.190476190478" CenterY="135.1428571428571" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000110243"/>
+  </DataNode>
+  <DataNode TextLabel="PCK1" GraphId="e121d" Type="GeneProduct" GroupRef="daf14">
+    <Comment Source="KeggConverter">Original kegg element: gene;9;mmu:18534 mmu:74551</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:18534</Comment>
+    <Graphics CenterX="810.2420009013066" CenterY="796.2903710380031" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000124253"/>
+  </DataNode>
+  <DataNode TextLabel="CPT2" GraphId="e2ad7" Type="GeneProduct" GroupRef="e8fff">
+    <Comment Source="KeggConverter">Original kegg element: gene;26;mmu:12896</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:12896</Comment>
+    <Graphics CenterX="868.324296141816" CenterY="528.8544490789014" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000157184"/>
+  </DataNode>
+  <DataNode TextLabel="ACSL1" GraphId="e2c90" Type="GeneProduct" GroupRef="b6a92">
+    <Comment Source="KeggConverter">Original kegg element: gene;28;mmu:14081 mmu:216739 mmu:328845 mmu:433256 mmu:50790 mmu:74205 mmu:94180</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:14081</Comment>
+    <Graphics CenterX="799.257413029917" CenterY="450.51153881156984" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000151726"/>
+  </DataNode>
+  <DataNode TextLabel="RXRB" GraphId="e3924" Type="GeneProduct" GroupRef="b729a">
+    <Comment Source="KeggConverter">Original kegg element: gene;15;mmu:20181 mmu:20182 mmu:20183</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:20182</Comment>
+    <Graphics CenterX="567.5408411539792" CenterY="245.07030193780986" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000204231"/>
+  </DataNode>
+  <DataNode TextLabel="MMP1" GraphId="e3b82" Type="GeneProduct" GroupRef="d9acd">
+    <Comment Source="KeggConverter">Original kegg element: gene;39;mmu:83995 mmu:83996</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:83996</Comment>
+    <Graphics CenterX="869.1904761904776" CenterY="641.1428571428564" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000196611"/>
+  </DataNode>
+  <DataNode TextLabel="OLR1" GraphId="e3eec" Type="GeneProduct" GroupRef="b6a92">
+    <Comment Source="KeggConverter">Original kegg element: gene;29;mmu:108078</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:108078</Comment>
+    <Graphics CenterX="859.190476190478" CenterY="430.2857142857147" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000173391"/>
+  </DataNode>
+  <DataNode TextLabel="CD36" GraphId="e8a46" Type="GeneProduct">
+    <Comment Source="KeggConverter">Original kegg element: gene;11;mmu:12491</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:12491</Comment>
+    <Graphics CenterX="105.46049871824735" CenterY="164.40549988347703" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000135218"/>
+  </DataNode>
+  <DataNode TextLabel="Unsaturated fatty acids" GraphId="ea9f3" Type="Metabolite" GroupRef="ebd49">
+    <Graphics CenterX="381.58724365658884" CenterY="171.3121526213004" Width="140.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="ChEBI" ID="CHEBI:27208"/>
+  </DataNode>
+  <DataNode TextLabel="SCP2" GraphId="ec30c" Type="GeneProduct" GroupRef="e8fff">
+    <Comment Source="KeggConverter">Original kegg element: gene;20;mmu:20280</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:20280</Comment>
+    <Graphics CenterX="808.324296141814" CenterY="548.8544490789014" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000116171"/>
+  </DataNode>
+  <DataNode TextLabel="LPL" GraphId="ee49f" Type="GeneProduct" GroupRef="b6a92">
+    <Comment Source="KeggConverter">Original kegg element: gene;30;mmu:16956</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:16956</Comment>
+    <Graphics CenterX="799.1904761904755" CenterY="430.2857142857147" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000175445"/>
+  </DataNode>
+  <DataNode TextLabel="ILK" GraphId="f07bb" Type="GeneProduct" GroupRef="d81ef">
+    <Comment Source="KeggConverter">Original kegg element: gene;43;mmu:16202</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:16202</Comment>
+    <Graphics CenterX="806.3333333333331" CenterY="713.2142857142844" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000166333"/>
+  </DataNode>
+  <DataNode TextLabel="APOA1" GraphId="f14dc" Type="GeneProduct" GroupRef="a8f1e">
+    <Comment Source="KeggConverter">Original kegg element: gene;61;mmu:11806</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:11806</Comment>
+    <Graphics CenterX="799.1904761904755" CenterY="115.14285714285711" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000118137"/>
+  </DataNode>
+  <DataNode TextLabel="GK" GraphId="f62df" Type="GeneProduct" GroupRef="daf14">
+    <Comment Source="KeggConverter">Original kegg element: gene;8;mmu:14626 mmu:14933</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:14626</Comment>
+    <Graphics CenterX="870.2420009013086" CenterY="776.2903710380031" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000198814"/>
+  </DataNode>
+  <DataNode TextLabel="RXRG" GraphId="f7aa4" Type="GeneProduct" GroupRef="fb2b3">
+    <Comment Source="KeggConverter">Original kegg element: gene;17;mmu:20181 mmu:20182 mmu:20183</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:20183</Comment>
+    <Graphics CenterX="567.5408411539792" CenterY="566.1854362182845" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000143171"/>
+  </DataNode>
+  <DataNode TextLabel="RXRA" GraphId="f88d4" Type="GeneProduct" GroupRef="fb2b3">
+    <Comment Source="KeggConverter">Original kegg element: gene;17;mmu:20181 mmu:20182 mmu:20183</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:20181</Comment>
+    <Graphics CenterX="567.5408411539792" CenterY="546.1854362182845" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000186350"/>
+  </DataNode>
+  <DataNode TextLabel="SORBS1" GraphId="f9604" Type="GeneProduct" GroupRef="d9acd">
+    <Comment Source="KeggConverter">Original kegg element: gene;38;mmu:20411</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:20411</Comment>
+    <Graphics CenterX="809.190476190476" CenterY="641.1428571428564" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000095637"/>
+  </DataNode>
+  <DataNode TextLabel="FABP4" GraphId="fa07d" Type="GeneProduct" GroupRef="d9acd">
+    <Comment Source="KeggConverter">Original kegg element: gene;40;mmu:11770</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:11770</Comment>
+    <Graphics CenterX="809.190476190476" CenterY="621.1428571428564" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000170323"/>
+  </DataNode>
+  <DataNode TextLabel="EHHADH" GraphId="fcbc8" Type="GeneProduct" GroupRef="e8fff">
+    <Comment Source="KeggConverter">Original kegg element: gene;25;mmu:74147</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:74147</Comment>
+    <Graphics CenterX="808.324296141814" CenterY="508.85444907890144" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000113790"/>
+  </DataNode>
+  <DataNode TextLabel="PDPK1" GraphId="fcd21" Type="GeneProduct" GroupRef="d81ef">
+    <Comment Source="KeggConverter">Original kegg element: gene;45;mmu:18607</Comment>
+    <Comment Source="HomologyMapper">Homology Mapping from Mus musculus to Homo sapiens: Original ID = L:18607</Comment>
+    <Graphics CenterX="866.3333333333347" CenterY="713.2142857142844" Width="60.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle"/>
+    <Xref Database="Ensembl" ID="ENSG00000140992"/>
+  </DataNode>
+  <DataNode TextLabel="Saturated fatty acids" GraphId="a64d3" Type="Metabolite" GroupRef="ebd49">
+    <Graphics CenterX="381.58724365658884" CenterY="191.3121526213004" Width="140.0" Height="20.0" ZOrder="32772" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="ChEBI" ID="CHEBI:26607"/>
+  </DataNode>
+  <DataNode TextLabel="Eicosanoid" GraphId="fcb43" Type="Metabolite" GroupRef="ebd49">
+    <Graphics CenterX="381.58724365658884" CenterY="211.3121526213004" Width="140.0" Height="20.0" ZOrder="32773" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="ChEBI" ID="CHEBI:23899"/>
+  </DataNode>
+  <DataNode TextLabel="Ciprofibrate" GraphId="b15b0" Type="Metabolite" GroupRef="ebd49">
+    <Graphics CenterX="381.58724365658884" CenterY="231.3121526213004" Width="140.0" Height="20.0" ZOrder="32774" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="ChEBI" ID="CHEBI:50867"/>
+  </DataNode>
+  <DataNode TextLabel="NSAIDs" GraphId="a9c4e" Type="Metabolite" GroupRef="ebd49">
+    <Graphics CenterX="381.58724365658884" CenterY="251.31215262130036" Width="140.0" Height="20.0" ZOrder="32775" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="ChEBI" ID="CHEBI:35475"/>
+  </DataNode>
+  <DataNode TextLabel="9-cis-Retinoic acid" GraphId="ea1cb" Type="Metabolite">
+    <Graphics CenterX="384.08724365658884" CenterY="317.9893345350753" Width="140.0" Height="20.0" ZOrder="32776" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="HMDB" ID="HMDB0002369"/>
+  </DataNode>
+  <DataNode TextLabel="Unsaturated fatty acids" GraphId="d3e68" Type="Metabolite">
+    <Graphics CenterX="384.08724365658884" CenterY="494.129670869478" Width="140.0" Height="20.0" ZOrder="32794" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="ChEBI" ID="CHEBI:27208"/>
+  </DataNode>
+  <DataNode TextLabel="9-cis-Retinoic acid" GraphId="f1e9a" Type="Metabolite">
+    <Graphics CenterX="384.08724365658884" CenterY="597.4723029049053" Width="140.0" Height="20.0" ZOrder="32795" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="HMDB" ID="HMDB0002369"/>
+  </DataNode>
+  <DataNode TextLabel="Unsaturated fatty acids" GraphId="b5202" Type="Metabolite" GroupRef="fac03">
+    <Graphics CenterX="381.58724365658884" CenterY="680.1668623884193" Width="140.0" Height="20.0" ZOrder="32796" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="ChEBI" ID="CHEBI:27208"/>
+  </DataNode>
+  <DataNode TextLabel="Eicosanoid" GraphId="d7e36" Type="Metabolite" GroupRef="fac03">
+    <Graphics CenterX="381.58724365658884" CenterY="700.1668623884193" Width="140.0" Height="20.0" ZOrder="32797" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="ChEBI" ID="CHEBI:23899"/>
+  </DataNode>
+  <DataNode TextLabel="NSAIDs" GraphId="cf5e5" Type="Metabolite" GroupRef="fac03">
+    <Graphics CenterX="381.58724365658884" CenterY="740.1668623884193" Width="140.0" Height="20.0" ZOrder="32798" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="ChEBI" ID="CHEBI:35475"/>
+  </DataNode>
+  <DataNode TextLabel="Thiazolidine derivative" GraphId="a9b4a" Type="Metabolite" GroupRef="fac03">
+    <Graphics CenterX="381.58724365658884" CenterY="720.1668623884193" Width="140.0" Height="20.0" ZOrder="32799" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="ChEBI" ID="CHEBI:35622"/>
+  </DataNode>
+  <DataNode TextLabel="9-cis-Retinoic acid" GraphId="af88d" Type="Metabolite">
+    <Graphics CenterX="384.08724365658884" CenterY="788.3855806247531" Width="140.0" Height="20.0" ZOrder="32800" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="HMDB" ID="HMDB0002369"/>
+  </DataNode>
+  <DataNode TextLabel="Lipid metabolism" GraphId="e3fd5" Type="Pathway">
+    <Comment Source="KeggConverter">Original kegg element: map;52;path:mmu00564</Comment>
+    <Graphics CenterX="1063.2008168230764" CenterY="289.84045881126326" Width="120.0" Height="19.77615571776147" ZOrder="32839" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e"/>
+    <Xref Database="" ID=""/>
+  </DataNode>
+  <DataNode TextLabel="Adipocyte differentiation" GraphId="b0484" Type="Pathway">
+    <Comment Source="KeggConverter">Original kegg element: map;52;path:mmu00564</Comment>
+    <Graphics CenterX="1061.9508168230764" CenterY="620.4499478623579" Width="160.0" Height="19.77615571776147" ZOrder="32840" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e"/>
+    <Xref Database="" ID=""/>
+  </DataNode>
+  <DataNode TextLabel="Adaptive thermogenesis" GraphId="e3a55" Type="Pathway">
+    <Comment Source="KeggConverter">Original kegg element: map;52;path:mmu00564</Comment>
+    <Graphics CenterX="1063.2008168230764" CenterY="676.9761035801193" Width="160.0" Height="19.77615571776147" ZOrder="32841" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e"/>
+    <Xref Database="" ID=""/>
+  </DataNode>
+  <DataNode TextLabel="Cell survival" GraphId="bd044" Type="Pathway">
+    <Comment Source="KeggConverter">Original kegg element: map;52;path:mmu00564</Comment>
+    <Graphics CenterX="1063.2008168230764" CenterY="711.9642857142844" Width="160.0" Height="19.77615571776147" ZOrder="32842" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e"/>
+    <Xref Database="" ID=""/>
+  </DataNode>
+  <DataNode TextLabel="Ubiquitination" GraphId="e0345" Type="Pathway">
+    <Comment Source="KeggConverter">Original kegg element: map;52;path:mmu00564</Comment>
+    <Graphics CenterX="1063.2008168230764" CenterY="745.8571428571413" Width="160.0" Height="19.77615571776147" ZOrder="32843" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e"/>
+    <Xref Database="" ID=""/>
+  </DataNode>
+  <DataNode TextLabel="Gluconeogenesis" GraphId="fe373" Type="Pathway">
+    <Comment Source="KeggConverter">Original kegg element: map;52;path:mmu00564</Comment>
+    <Graphics CenterX="1063.2008168230764" CenterY="785.5545707334036" Width="160.0" Height="19.77615571776147" ZOrder="32844" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e"/>
+    <Xref Database="" ID=""/>
+  </DataNode>
+  <DataNode TextLabel="Chylomicron" GraphId="f02df" Type="Metabolite" GroupRef="ff60f">
+    <Graphics CenterX="46.58724365658884" CenterY="91.31215262130041" Width="80.0" Height="20.0" ZOrder="32851" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="Wikidata" ID="Q423126"/>
+  </DataNode>
+  <DataNode TextLabel="VLDL" GraphId="d5cf0" Type="Metabolite" GroupRef="ff60f">
+    <Graphics CenterX="46.58724365658884" CenterY="111.31215262130041" Width="40.0" Height="20.0" ZOrder="32852" FontSize="12" Valign="Middle" Color="0000ff"/>
+    <Xref Database="Wikidata" ID="Q419074"/>
+  </DataNode>
+  <Interaction GraphId="a5a0f">
+    <Comment Source="KeggConverter">PCrel;1;14</Comment>
+    <Comment Source="KeggConverter">activation; --&gt;</Comment>
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="459.58724365658884" Y="211.31215262130038" GraphRef="ccaaf" RelX="1.0" RelY="0.0"/>
+      <Point X="537.540841153979" Y="212.14285714285734" GraphRef="d3184" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="bde91">
+    <Comment Source="KeggConverter">PCrel;4;15</Comment>
+    <Comment Source="KeggConverter">activation; --&gt;</Comment>
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="454.08724365658884" Y="317.9893345350753" GraphRef="ea1cb" RelX="1.0" RelY="0.0"/>
+      <Point X="525.540841153979" Y="248.6065795403336" GraphRef="cd2f5" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="d0b28">
+    <Comment Source="KeggConverter">PCrel;49;17</Comment>
+    <Comment Source="KeggConverter">activation; --&gt;</Comment>
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="454.08724365658884" Y="597.4723029049053" GraphRef="f1e9a" RelX="1.0" RelY="0.0"/>
+      <Point X="525.5408411539792" Y="530.1575535438812" GraphRef="b2604" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="idc0f50852">
+    <Graphics ConnectorType="Elbow" ZOrder="12288" LineStyle="Broken" LineThickness="1.0">
+      <Point X="135.46049871824735" Y="164.40549988347703" GraphRef="e8a46" RelX="1.0" RelY="0.0"/>
+      <Point X="155.03128258602703" Y="187.85882625238872"/>
+      <Point X="303.58724365658884" Y="211.31215262130038" GraphRef="ccaaf" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+      <Anchor Position="0.5938433536351565" Shape="None" GraphId="b7aae"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="idd47ac02">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="839.190476190476" Y="745.8571428571413" GraphRef="a3fdf" RelX="1.0" RelY="0.0"/>
+      <Point X="983.2008168230764" Y="745.8571428571413" GraphRef="e0345" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="idfd9ee507">
+    <Graphics ConnectorType="Elbow" ZOrder="12288" LineThickness="1.0">
+      <Point X="609.540841153979" Y="248.6065795403336" GraphRef="cd2f5" RelX="1.0" RelY="0.0"/>
+      <Point X="653.3333333333334" Y="152.40513196689952"/>
+      <Point X="760.7586027111558" Y="56.20368439346542" GraphRef="e1d83" RelX="-1.0" RelY="0.0" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="c5cb9">
+    <Graphics ConnectorType="Elbow" ZOrder="32777" LineStyle="Broken" LineThickness="1.0">
+      <Point X="140.88312867801463" Y="215.43602123436898"/>
+      <Point X="153.5" Y="213.3740869278347"/>
+      <Point X="303.58724365658884" Y="211.31215262130038" GraphRef="ccaaf" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="cc653">
+    <Graphics ZOrder="32778" LineThickness="1.0">
+      <Point X="216.6673606671643" Y="307.5894890809583" GraphRef="d3088" RelX="0.0" RelY="-1.0"/>
+      <Point X="216.25" Y="211.31215262130038" GraphRef="b7aae" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="fdc1d">
+    <Graphics ZOrder="32792" LineThickness="1.0">
+      <Point X="904.3333333333347" Y="713.2142857142844" GraphRef="ebf78" RelX="1.0" RelY="0.0"/>
+      <Point X="983.2008168230764" Y="711.9642857142844" GraphRef="bd044" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="ba1c5">
+    <Graphics ZOrder="32793" LineThickness="1.0">
+      <Point X="840.8571428571427" Y="676.9761035801193" GraphRef="acbd7" RelX="1.0" RelY="0.0"/>
+      <Point X="983.2008168230764" Y="676.9761035801193" GraphRef="e3a55" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="e854e">
+    <Comment Source="KeggConverter">PCrel;49;17</Comment>
+    <Comment Source="KeggConverter">activation; --&gt;</Comment>
+    <Graphics ZOrder="32801" LineThickness="1.0">
+      <Point X="454.08724365658884" Y="788.3855806247531" GraphRef="af88d" RelX="1.0" RelY="0.0"/>
+      <Point X="525.5408411539792" Y="747.0582203684414" GraphRef="e5513" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="c4210">
+    <Comment Source="KeggConverter">PCrel;4;15</Comment>
+    <Comment Source="KeggConverter">activation; --&gt;</Comment>
+    <Graphics ZOrder="32802" LineThickness="1.0">
+      <Point X="454.08724365658884" Y="494.129670869478" GraphRef="d3e68" RelX="1.0" RelY="0.0"/>
+      <Point X="537.5408411539792" Y="494.129670869478" GraphRef="a34de" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="d87a9">
+    <Comment Source="KeggConverter">PCrel;4;15</Comment>
+    <Comment Source="KeggConverter">activation; --&gt;</Comment>
+    <Graphics ZOrder="32803" LineThickness="1.0">
+      <Point X="459.58724365658884" Y="710.1668623884193" GraphRef="cfbae" RelX="1.0" RelY="0.0"/>
+      <Point X="537.5408411539792" Y="710.9341327772008" GraphRef="a3d73" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="c120f">
+    <Graphics ConnectorType="Elbow" ZOrder="32804" LineStyle="Broken" LineThickness="1.0">
+      <Point X="132.88312867801463" Y="215.43602123436898" GraphRef="d93ce" RelX="1.0" RelY="0.0"/>
+      <Point X="155.0" Y="354.78284605192346"/>
+      <Point X="314.08724365658884" Y="494.129670869478" GraphRef="d3e68" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="eb591">
+    <Graphics ConnectorType="Elbow" ZOrder="32805" LineStyle="Broken" LineThickness="1.0">
+      <Point X="135.46049871824735" Y="164.40549988347703" GraphRef="e8a46" RelX="1.0" RelY="0.0"/>
+      <Point X="154.0" Y="329.26758537647754"/>
+      <Point X="314.08724365658884" Y="494.129670869478" GraphRef="d3e68" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+      <Anchor Position="0.5138688830478871" Shape="None" GraphId="a1fcd"/>
+      <Anchor Position="0.7731149093203278" Shape="None" GraphId="b30ad"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="ef236">
+    <Graphics ConnectorType="Elbow" ZOrder="32806" LineStyle="Broken" LineThickness="1.0">
+      <Point X="132.88312867801463" Y="215.43602123436898" GraphRef="d93ce" RelX="1.0" RelY="0.0"/>
+      <Point X="154.5" Y="462.80144181139417"/>
+      <Point X="303.58724365658884" Y="710.1668623884193" GraphRef="cfbae" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="ac886">
+    <Graphics ConnectorType="Elbow" ZOrder="32807" LineStyle="Broken" LineThickness="1.0">
+      <Point X="135.46049871824735" Y="164.40549988347703" GraphRef="e8a46" RelX="1.0" RelY="0.0"/>
+      <Point X="153.5" Y="437.2861811359482"/>
+      <Point X="303.58724365658884" Y="710.1668623884193" GraphRef="cfbae" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+      <Anchor Position="0.8995461470431032" Shape="None" GraphId="b11e8"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="f5a2e">
+    <Graphics ZOrder="32808" LineThickness="1.0">
+      <Point X="231.6673606671643" Y="327.5894890809583" GraphRef="d3088" RelX="0.5" RelY="1.0"/>
+      <Point X="231.8744326838039" Y="710.1668623884193" GraphRef="b11e8" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="cf0b6">
+    <Graphics ZOrder="32811" LineThickness="1.0">
+      <Point X="201.6673606671643" Y="327.5894890809583" GraphRef="d3088" RelX="-0.5" RelY="1.0"/>
+      <Point X="198.74999999999994" Y="494.129670869478" GraphRef="b30ad" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="f54f9">
+    <Graphics ConnectorType="Elbow" ZOrder="32815" LineThickness="1.0">
+      <Point X="609.540841153979" Y="248.6065795403336" GraphRef="cd2f5" RelX="1.0" RelY="0.0"/>
+      <Point X="653.3333333333334" Y="186.29503464329855"/>
+      <Point X="760.7586027111558" Y="123.9834897462635" GraphRef="e7bd2" RelX="-1.0" RelY="0.0" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="de65b">
+    <Graphics ConnectorType="Elbow" ZOrder="32816" LineThickness="1.0">
+      <Point X="609.540841153979" Y="248.6065795403336" GraphRef="cd2f5" RelX="1.0" RelY="0.0"/>
+      <Point X="653.3333333333334" Y="230.17485737531112"/>
+      <Point X="760.7586027111558" Y="211.74313521028864" GraphRef="a9635" RelX="-1.0" RelY="0.0" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="b7c85">
+    <Graphics ConnectorType="Elbow" ZOrder="32817" LineThickness="1.0">
+      <Point X="609.540841153979" Y="248.6065795403336" GraphRef="cd2f5" RelX="1.0" RelY="0.0"/>
+      <Point X="653.3333333333334" Y="269.49602525852345"/>
+      <Point X="760.7586027111558" Y="290.3854709767133" GraphRef="b70ca" RelX="-1.0" RelY="0.0" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="d4537">
+    <Graphics ConnectorType="Elbow" ZOrder="32818" LineThickness="1.0">
+      <Point X="609.540841153979" Y="248.6065795403336" GraphRef="cd2f5" RelX="1.0" RelY="0.0"/>
+      <Point X="653.3333333333334" Y="306.61488592766227"/>
+      <Point X="760.7586027111558" Y="364.62319231499094" GraphRef="bee83" RelX="-1.0" RelY="-0.5" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="cf710">
+    <Graphics ConnectorType="Elbow" ZOrder="32819" LineThickness="1.0">
+      <Point X="609.540841153979" Y="248.6065795403336" GraphRef="cd2f5" RelX="1.0" RelY="0.0"/>
+      <Point X="653.3333333333334" Y="373.1502223388158"/>
+      <Point X="760.7586027111558" Y="497.693865137298" GraphRef="c54b0" RelX="-1.0" RelY="-0.5" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="b2fd9">
+    <Graphics ConnectorType="Elbow" ZOrder="32820" LineThickness="1.0">
+      <Point X="609.540841153979" Y="248.6065795403336" GraphRef="cd2f5" RelX="1.0" RelY="0.0"/>
+      <Point X="771.190476190476" Y="602.1428571428564" GraphRef="d38df" RelX="-1.0" RelY="-0.5" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="ab94a">
+    <Graphics ConnectorType="Elbow" ZOrder="32821" LineThickness="1.0">
+      <Point X="609.540841153979" Y="248.6065795403336" GraphRef="cd2f5" RelX="1.0" RelY="0.0"/>
+      <Point X="653.3333333333334" Y="460.29134156022644"/>
+      <Point X="780.8571428571427" Y="671.9761035801193" GraphRef="acbd7" RelX="-1.0" RelY="-0.5" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="f5a3e">
+    <Graphics ConnectorType="Elbow" ZOrder="32822" LineThickness="1.0" Color="999999">
+      <Point X="609.5408411539792" Y="530.1575535438812" GraphRef="b2604" RelX="1.0" RelY="0.0"/>
+      <Point X="642.5" Y="464.7050973455326"/>
+      <Point X="760.7586027111558" Y="399.2526411471839" GraphRef="bee83" RelX="-1.0" RelY="0.0" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="eaaea">
+    <Graphics ConnectorType="Elbow" ZOrder="32823" LineThickness="1.0" Color="999999">
+      <Point X="609.5408411539792" Y="530.1575535438812" GraphRef="b2604" RelX="1.0" RelY="0.0"/>
+      <Point X="642.5" Y="528.7858066641902"/>
+      <Point X="760.7586027111558" Y="527.4140597844992" GraphRef="c54b0" RelX="-1.0" RelY="0.0" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="ecd75">
+    <Graphics ConnectorType="Elbow" ZOrder="32824" LineThickness="1.0" Color="999999">
+      <Point X="609.5408411539792" Y="530.1575535438812" GraphRef="b2604" RelX="1.0" RelY="0.0"/>
+      <Point X="771.190476190476" Y="621.1428571428564" GraphRef="d38df" RelX="-1.0" RelY="0.0" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="f4b03">
+    <Graphics ConnectorType="Elbow" ZOrder="32825" LineThickness="1.0" Color="999999">
+      <Point X="609.5408411539792" Y="530.1575535438812" GraphRef="b2604" RelX="1.0" RelY="0.0"/>
+      <Point X="642.5" Y="603.5668285620003"/>
+      <Point X="780.8571428571427" Y="676.9761035801193" GraphRef="acbd7" RelX="-1.0" RelY="0.0" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="b862c">
+    <Graphics ConnectorType="Elbow" ZOrder="32826" LineThickness="1.0" Color="999999">
+      <Point X="609.5408411539792" Y="530.1575535438812" GraphRef="b2604" RelX="1.0" RelY="0.0"/>
+      <Point X="768.3333333333331" Y="713.2142857142844" GraphRef="ebf78" RelX="-1.0" RelY="0.0" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="ef92b">
+    <Graphics ConnectorType="Elbow" ZOrder="32827" LineThickness="1.0" Color="999999">
+      <Point X="609.5408411539792" Y="530.1575535438812" GraphRef="b2604" RelX="1.0" RelY="0.0"/>
+      <Point X="642.5" Y="638.0073482005113"/>
+      <Point X="779.190476190476" Y="745.8571428571413" GraphRef="a3fdf" RelX="-1.0" RelY="0.0" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="f7b06">
+    <Graphics ConnectorType="Elbow" ZOrder="32828" LineThickness="1.0" Color="00cccc">
+      <Point X="609.5408411539792" Y="747.0582203684414" GraphRef="e5513" RelX="1.0" RelY="0.0"/>
+      <Point X="760.7586027111558" Y="232.01442474800155" GraphRef="a9635" RelX="-1.0" RelY="0.5" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="bbd4f">
+    <Graphics ConnectorType="Elbow" ZOrder="32829" LineThickness="1.0" Color="00cccc">
+      <Point X="609.5408411539792" Y="747.0582203684414" GraphRef="e5513" RelX="1.0" RelY="0.0"/>
+      <Point X="760.7586027111558" Y="310.4596802224546" GraphRef="b70ca" RelX="-1.0" RelY="0.5" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="e84ca">
+    <Graphics ConnectorType="Elbow" ZOrder="32830" LineThickness="1.0" Color="00cccc">
+      <Point X="609.5408411539792" Y="747.0582203684414" GraphRef="e5513" RelX="1.0" RelY="0.0"/>
+      <Point X="760.7586027111558" Y="433.8820899793769" GraphRef="bee83" RelX="-1.0" RelY="0.5" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="c3794">
+    <Graphics ConnectorType="Elbow" ZOrder="32831" LineThickness="1.0" Color="00cccc">
+      <Point X="609.5408411539792" Y="747.0582203684414" GraphRef="e5513" RelX="1.0" RelY="0.0"/>
+      <Point X="760.7586027111558" Y="557.1342544317004" GraphRef="c54b0" RelX="-1.0" RelY="0.5" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="ec99e">
+    <Graphics ConnectorType="Elbow" ZOrder="32832" LineThickness="1.0" Color="00cccc">
+      <Point X="609.5408411539792" Y="747.0582203684414" GraphRef="e5513" RelX="1.0" RelY="0.0"/>
+      <Point X="771.190476190476" Y="640.1428571428564" GraphRef="d38df" RelX="-1.0" RelY="0.5" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="b4383">
+    <Graphics ConnectorType="Elbow" ZOrder="32833" LineThickness="1.0" Color="00cccc">
+      <Point X="609.5408411539792" Y="747.0582203684414" GraphRef="e5513" RelX="1.0" RelY="0.0"/>
+      <Point X="780.8571428571427" Y="681.9761035801193" GraphRef="acbd7" RelX="-1.0" RelY="0.5" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="b1f6e">
+    <Graphics ConnectorType="Elbow" ZOrder="32834" LineThickness="1.0" Color="00cccc">
+      <Point X="609.5408411539792" Y="747.0582203684414" GraphRef="e5513" RelX="1.0" RelY="0.0"/>
+      <Point X="772.2420009013066" Y="786.2903710380031" GraphRef="f49a1" RelX="-1.0" RelY="0.0" ArrowHead="mim-transcription-translation"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="ddee3">
+    <Graphics ZOrder="32837" LineThickness="1.0">
+      <Point X="907.1904761904776" Y="621.1428571428564" GraphRef="d38df" RelX="1.0" RelY="0.0"/>
+      <Point X="981.9508168230764" Y="620.4499478623579" GraphRef="b0484" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="ec08d">
+    <Graphics ZOrder="32838" LineThickness="1.0">
+      <Point X="908.2420009013086" Y="786.2903710380031" GraphRef="f49a1" RelX="1.0" RelY="0.0"/>
+      <Point X="983.2008168230764" Y="785.5545707334036" GraphRef="fe373" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="ff058">
+    <Graphics ConnectorType="Elbow" ZOrder="32845" LineThickness="1.0">
+      <Point X="906.3242961418161" Y="527.4140597844992" GraphRef="c54b0" RelX="1.0" RelY="0.0"/>
+      <Point X="944.5" Y="408.6272592978812"/>
+      <Point X="1003.2008168230764" Y="289.84045881126326" GraphRef="e3fd5" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="bb701">
+    <Graphics ConnectorType="Elbow" ZOrder="32846" LineThickness="1.0">
+      <Point X="901.7586027111558" Y="399.2526411471839" GraphRef="bee83" RelX="1.0" RelY="0.0"/>
+      <Point X="944.5" Y="344.5465499792236"/>
+      <Point X="1003.2008168230764" Y="289.84045881126326" GraphRef="e3fd5" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="ab85f">
+    <Graphics ZOrder="32847" LineThickness="1.0">
+      <Point X="901.7586027111558" Y="290.3854709767133" GraphRef="b70ca" RelX="1.0" RelY="0.0"/>
+      <Point X="1003.2008168230764" Y="289.84045881126326" GraphRef="e3fd5" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="b4a45">
+    <Graphics ConnectorType="Elbow" ZOrder="32848" LineThickness="1.0">
+      <Point X="901.7586027111558" Y="211.74313521028864" GraphRef="a9635" RelX="1.0" RelY="0.0"/>
+      <Point X="944.0" Y="250.79179701077595"/>
+      <Point X="1003.2008168230764" Y="289.84045881126326" GraphRef="e3fd5" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="e93f0">
+    <Graphics ConnectorType="Elbow" ZOrder="32849" LineThickness="1.0">
+      <Point X="901.7586027111558" Y="123.9834897462635" GraphRef="e7bd2" RelX="1.0" RelY="0.0"/>
+      <Point X="944.5" Y="206.91197427876338"/>
+      <Point X="1003.2008168230764" Y="289.84045881126326" GraphRef="e3fd5" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="f5b14">
+    <Graphics ConnectorType="Elbow" ZOrder="32850" LineThickness="1.0">
+      <Point X="901.7586027111558" Y="56.20368439346542" GraphRef="e1d83" RelX="1.0" RelY="0.0"/>
+      <Point X="944.5" Y="173.02207160236435"/>
+      <Point X="1003.2008168230764" Y="289.84045881126326" GraphRef="e3fd5" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="e4c5b">
+    <Graphics ConnectorType="Elbow" ZOrder="32853" LineStyle="Broken" LineThickness="1.0">
+      <Point X="46.58724365658884" Y="129.3121526213004" GraphRef="da1e9" RelX="0.0" RelY="1.0"/>
+      <Point X="75.46049871824735" Y="164.40549988347703" GraphRef="e8a46" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <Interaction GraphId="bd093">
+    <Graphics ConnectorType="Elbow" ZOrder="32854" LineStyle="Broken" LineThickness="1.0">
+      <Point X="46.58724365658884" Y="129.3121526213004" GraphRef="da1e9" RelX="0.0" RelY="1.0"/>
+      <Point X="72.88312867801463" Y="215.43602123436898" GraphRef="d93ce" RelX="-1.0" RelY="0.0" ArrowHead="Arrow"/>
+    </Graphics>
+    <Xref Database="" ID=""/>
+  </Interaction>
+  <GraphicalLine GraphId="id12afdd5f">
+    <Graphics ZOrder="12288" LineStyle="Broken" LineThickness="3.0" Color="999999">
+      <Point X="268.6074535850229" Y="119.00256350501047"/>
+      <Point X="268.6074535850229" Y="349.0188767187138"/>
+    </Graphics>
+  </GraphicalLine>
+  <GraphicalLine GraphId="c6137">
+    <Graphics ZOrder="32835" LineStyle="Broken" LineThickness="3.0" Color="999999">
+      <Point X="268.6074515003189" Y="451.4087625262172"/>
+      <Point X="268.6074515003189" Y="610.0"/>
+    </Graphics>
+  </GraphicalLine>
+  <GraphicalLine GraphId="d741d">
+    <Graphics ZOrder="32836" LineStyle="Broken" LineThickness="3.0" Color="999999">
+      <Point X="268.6074536472528" Y="653.1858571428569"/>
+      <Point X="268.6074536472528" Y="812.5"/>
+    </Graphics>
+  </GraphicalLine>
+  <Label TextLabel="Ketogenesis" GraphId="cb60c" GroupRef="cefbe">
+    <Graphics CenterX="831.2586027111558" CenterY="44.26451164407371" Width="125.0" Height="20.0" ZOrder="28672" FillColor="ffffff" FontSize="12" Valign="Middle"/>
+  </Label>
+  <Label TextLabel="Nucleus" GraphId="d7516">
+    <Graphics CenterX="531.25" CenterY="46.25" Width="60.0" Height="20.0" ZOrder="28672" FillColor="ffffff" FontWeight="Bold" FontSize="12" Valign="Middle" Color="a0a0a0"/>
+  </Label>
+  <Label TextLabel="Lipid transport" GraphId="e61c7" GroupRef="a8f1e">
+    <Graphics CenterX="831.2586027111558" CenterY="92.82412234966989" Width="125.0" Height="20.0" ZOrder="32779" FillColor="ffffff" FontSize="12" Valign="Middle"/>
+  </Label>
+  <Label TextLabel="Lipogenesis" GraphId="bf2d2" GroupRef="d88aa">
+    <Graphics CenterX="831.2586027111558" CenterY="189.20055613486284" Width="125.0" Height="20.0" ZOrder="32780" FillColor="ffffff" FontSize="12" Valign="Middle"/>
+  </Label>
+  <Label TextLabel="Cholesterol metabolism" GraphId="c3711" GroupRef="a8583">
+    <Graphics CenterX="831.2586027111558" CenterY="268.2370524852306" Width="125.0" Height="20.0" ZOrder="32781" FillColor="ffffff" FontSize="12" Valign="Middle"/>
+  </Label>
+  <Label TextLabel="Fatty acid transport" GraphId="a054d" GroupRef="b6a92">
+    <Graphics CenterX="831.2586027111558" CenterY="347.993743482798" Width="125.0" Height="20.0" ZOrder="32782" FillColor="ffffff" FontSize="12" Valign="Middle"/>
+  </Label>
+  <Label TextLabel="Fatty acid oxidation" GraphId="f3e5d" GroupRef="e8fff">
+    <Graphics CenterX="831.2586027111558" CenterY="485.9736704900969" Width="125.0" Height="20.0" ZOrder="32783" FillColor="ffffff" FontSize="12" Valign="Middle"/>
+  </Label>
+  <Label TextLabel="Liver&#10;Skeletal muscle" GraphId="af166">
+    <Graphics CenterX="384.08724365658884" CenterY="134.2961418143904" Width="140.0" Height="27.980535279805395" ZOrder="32812" FillColor="ffffff" FontSize="12" Valign="Middle"/>
+  </Label>
+  <Label TextLabel="Skeletal muscle&#10;Adipocyte" GraphId="afa8d">
+    <Graphics CenterX="384.08724365658884" CenterY="461.8034410844655" Width="140.0" Height="27.980535279805395" ZOrder="32813" FillColor="ffffff" FontSize="12" Valign="Middle"/>
+  </Label>
+  <Label TextLabel="Adipocyte" GraphId="b7bf5">
+    <Graphics CenterX="384.08724365658884" CenterY="652.4278762599977" Width="140.0" Height="27.980535279805395" ZOrder="32814" FillColor="ffffff" FontSize="12" Valign="Middle"/>
+  </Label>
+  <Shape GraphId="c9b3b">
+    <Attribute Key="org.pathvisio.CellularComponentProperty" Value="Nucleus"/>
+    <Attribute Key="org.pathvisio.DoubleLineProperty" Value="Double"/>
+    <Graphics CenterX="705.0" CenterY="420.25" Width="425.0" Height="791.0" ZOrder="-4" FontSize="12" Valign="Middle" ShapeType="RoundedRectangle" LineThickness="3.0" Color="c0c0c0" Rotation="0.0"/>
+  </Shape>
+  <Shape GraphId="cb051">
+    <Attribute Key="org.pathvisio.CellularComponentProperty" Value="Cell"/>
+    <Attribute Key="org.pathvisio.DoubleLineProperty" Value="Double"/>
+    <Graphics CenterX="518.125" CenterY="420.75" Width="826.25" Height="820.0" ZOrder="-2" FontSize="12" Valign="Middle" ShapeType="RoundedRectangle" LineThickness="3.0" Color="c0c0c0" Rotation="0.0"/>
+  </Shape>
+  <Group GroupId="d88aa" GraphId="a9635" Style="Group"/>
+  <Group GroupId="fb2b3" GraphId="b2604" Style="Complex"/>
+  <Group GroupId="a8583" GraphId="b70ca" Style="Group"/>
+  <Group GroupId="b6a92" GraphId="bee83" Style="Group"/>
+  <Group GroupId="e8fff" GraphId="c54b0" Style="Group"/>
+  <Group GroupId="ebd49" GraphId="ccaaf" Style="Group"/>
+  <Group GroupId="b729a" GraphId="cd2f5" Style="Complex"/>
+  <Group GroupId="fac03" GraphId="cfbae" Style="Group"/>
+  <Group GroupId="d9acd" GraphId="d38df" Style="Group"/>
+  <Group GroupId="ff60f" GraphId="da1e9" Style="Group"/>
+  <Group GroupId="cefbe" GraphId="e1d83" Style="Group"/>
+  <Group GroupId="e8e2d" GraphId="e5513" Style="Complex"/>
+  <Group GroupId="a8f1e" GraphId="e7bd2" Style="Group"/>
+  <Group GroupId="d81ef" GraphId="ebf78" Style="Group"/>
+  <Group GroupId="daf14" GraphId="f49a1" Style="Group"/>
+  <InfoBox CenterX="0.0" CenterY="0.0"/>
+  <Biopax>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">hepatocyte</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CL:0000182</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cell Type</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="ace">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">15828222</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[PPARs target genes].</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nihon Rinsho</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2005</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Takada I</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kato S</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="e52">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">15828221</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[PPARs-mediated intracellular signal transduction].</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nihon Rinsho</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2005</bp:YEAR>
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">15828220</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[The structures and functions of peroxisome proliferator-activated receptors (PPARs)].</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nihon Rinsho</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2005</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Takahashi N</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Goto T</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kusudo T</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Moriyama T</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kawada T</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">cell of skeletal muscle</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CL:0000188</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cell Type</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">peroxisome proliferator-activated receptor signaling pathway</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PW:0001355</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pathway Ontology</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="f48">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">15828221</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[PPARs-mediated intracellular signal transduction].</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nihon Rinsho</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2005</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Fujii H</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="bc6">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">16601267</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Transcriptional regulation of metabolism.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Physiol Rev</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2006</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Desvergne B</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Michalik L</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Wahli W</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="b20">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">15828223</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[Endogenous ligands for PPARs].</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nihon Rinsho</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2005</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Inoue H</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">white fat cell</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CL:0000448</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cell Type</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">signaling pathway</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PW:0000003</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pathway Ontology</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">adipocyte</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CL:0000136</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cell Type</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="ebc">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">16476485</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">From molecular action to physiological outputs: peroxisome proliferator-activated receptors are nuclear receptors at the crossroads of key cellular functions.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Prog Lipid Res</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2006</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Feige JN</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Gelman L</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Michalik L</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Desvergne B</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Wahli W</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="c0c">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">14999402</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Peroxisome proliferator-activated receptor alpha target genes.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cell Mol Life Sci</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2004</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Mandard S</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Müller M</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kersten S</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="f69">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">10529898</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Peroxisome proliferator-activated receptors: nuclear control of metabolism.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Endocr Rev</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1999</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Desvergne B</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Wahli W</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="e67">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">15673477</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PPAR gamma as a metabolic regulator: insights from genomics and pharmacology.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Expert Rev Mol Med</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2005</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Savage DB</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="aec">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">16511590</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PPAR gamma and human metabolic disease.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">J Clin Invest</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2006</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Semple RK</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Chatterjee VK</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">O'Rahilly S</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="efa">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">16360030</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The many faces of PPARgamma.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cell</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2005</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Lehrke M</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Lazar MA</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="f85">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">11921433</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The mode of action of thiazolidinediones.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Diabetes Metab Res Rev</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2002</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Hauner H</bp:AUTHORS>
+    </bp:PublicationXref>
+  </Biopax>
+</Pathway>

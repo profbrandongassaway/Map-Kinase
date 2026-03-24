@@ -1,4 +1,5 @@
 import sys
+import base64
 import pandas as pd
 import numpy as np
 import os
@@ -10,6 +11,59 @@ import html
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from MapKinase_WebApp.a1_factory import get_pathway_api
+
+
+def _safe_debug_print(*parts):
+    text = " ".join(str(part) for part in parts)
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
+        safe_text = text.encode(encoding, errors="replace").decode(encoding, errors="replace")
+        print(safe_text)
+
+
+_SYMBOL_ICON_CACHE = {}
+
+
+def _load_symbol_icon_data_uri(icon_name):
+    if not icon_name:
+        return None
+    cache_key = str(icon_name).strip()
+    if not cache_key:
+        return None
+    if cache_key in _SYMBOL_ICON_CACHE:
+        return _SYMBOL_ICON_CACHE[cache_key]
+    icon_path = Path(__file__).resolve().parent / "icons" / cache_key
+    if not icon_path.exists():
+        _SYMBOL_ICON_CACHE[cache_key] = None
+        return None
+    try:
+        svg_bytes = icon_path.read_bytes()
+        encoded = base64.b64encode(svg_bytes).decode("ascii")
+        data_uri = f"data:image/svg+xml;base64,{encoded}"
+        _SYMBOL_ICON_CACHE[cache_key] = data_uri
+        return data_uri
+    except Exception:
+        _SYMBOL_ICON_CACHE[cache_key] = None
+        return None
+
+
+def _resolve_symbol_icon(symbol_dict):
+    if not isinstance(symbol_dict, dict):
+        return None
+    explicit = str(symbol_dict.get("symbol_icon") or "").strip()
+    if explicit:
+        return _load_symbol_icon_data_uri(explicit)
+    symbol_text = str(symbol_dict.get("symbol") or "").strip().lower()
+    icon_name = {
+        "↑": "active.svg",
+        "â†‘": "active.svg",
+        "x": "inhibit.svg",
+        "+": "regsite.svg",
+    }.get(symbol_text)
+    return _load_symbol_icon_data_uri(icon_name) if icon_name else None
+
 
 def calculate_angle(x1, y1, x2, y2):
     return np.arctan2(y2 - y1, x2 - x1)
@@ -242,27 +296,27 @@ def classify_phosphosite_function(phospho_data, ptm_symbol_list, reg_site_col='C
                                   reg_function_col='C: Regulatory site function',
                                   output_col='Phosphosite_Classification'):
     phospho_data[output_col] = 'none'
-    print(f"Classifying {len(phospho_data)} PTM sites with symbol list: {ptm_symbol_list}")
-    print(f"PTM data columns: {phospho_data.columns.tolist()}")
+    _safe_debug_print(f"Classifying {len(phospho_data)} PTM sites with symbol list: {ptm_symbol_list}")
+    _safe_debug_print(f"PTM data columns: {phospho_data.columns.tolist()}")
 
     valid_symbol_list = []
     for symbol_dict in ptm_symbol_list:
         if not symbol_dict or len(symbol_dict) != 1:
-            print(f"Warning: Skipping invalid rule with incorrect structure: {symbol_dict}")
+            _safe_debug_print(f"Warning: Skipping invalid rule with incorrect structure: {symbol_dict}")
             continue
         inner_dict_key = list(symbol_dict.keys())[0]
         inner_dict = symbol_dict[inner_dict_key]
         header = inner_dict.get('header_to_search', '')
         if not header:
-            print(f"Warning: Skipping rule with empty header_to_search: {symbol_dict}")
+            _safe_debug_print(f"Warning: Skipping rule with empty header_to_search: {symbol_dict}")
             continue
         if header not in phospho_data.columns:
-            print(f"Warning: Header {header} not in PTM data columns: {phospho_data.columns}")
+            _safe_debug_print(f"Warning: Header {header} not in PTM data columns: {phospho_data.columns}")
             continue
         valid_symbol_list.append(symbol_dict)
 
     if not valid_symbol_list:
-        print("Error: No valid rules in ptm_symbol_list. All PTMs will be classified as 'none'.")
+        _safe_debug_print("Error: No valid rules in ptm_symbol_list. All PTMs will be classified as 'none'.")
         return phospho_data
 
     for idx in phospho_data.index:
@@ -323,7 +377,7 @@ def classify_phosphosite_function(phospho_data, ptm_symbol_list, reg_site_col='C
                 if ptm_label_type == 'none' and search_text_1.lower() in function_text:
                     ptm_label_type = symbol_label
         phospho_data.loc[idx, output_col] = ptm_label_type
-    print(f"Classification complete. Value counts:\n{phospho_data[output_col].value_counts()}")
+    _safe_debug_print(f"Classification complete. Value counts:\n{phospho_data[output_col].value_counts()}")
     return phospho_data
 
 class PathwayProcessor:
@@ -337,7 +391,7 @@ class PathwayProcessor:
                 dataset['data'] = dataset['dataframe'].copy()
             else:
                 dataset['data'] = pd.read_csv(dataset['file_path'], sep="\t")
-            print(f"PTM dataset {dataset_id}: {len(dataset['data'])} rows, columns: {dataset['data'].columns.tolist()}")
+            _safe_debug_print(f"PTM dataset {dataset_id}: {len(dataset['data'])} rows, columns: {dataset['data'].columns.tolist()}")
             main_cols = []
             for col in dataset.get('main_columns', []):
                 if isinstance(col, (list, tuple)) and len(col) > 1:
@@ -348,16 +402,16 @@ class PathwayProcessor:
             symbol_list = dataset.get('ptm_symbol_list', [])
             reg_site_col = dataset.get('modulation_column', 'C: Regulatory site')
             reg_function_col = dataset.get('tooltip_columns', ['C: Regulatory site function'])[0]
-            print(f"Calling classify_phosphosite_function with:")
-            print(f"  ptm_symbol_list: {symbol_list}")
-            print(f"  reg_site_col: {reg_site_col}")
-            print(f"  reg_function_col: {reg_function_col}")
+            _safe_debug_print("Calling classify_phosphosite_function with:")
+            _safe_debug_print(f"  ptm_symbol_list: {symbol_list}")
+            _safe_debug_print(f"  reg_site_col: {reg_site_col}")
+            _safe_debug_print(f"  reg_function_col: {reg_function_col}")
             if not symbol_list:
-                print(f"Warning: ptm_symbol_list is empty for dataset {dataset_id}. PTMs will be classified as 'none'.")
+                _safe_debug_print(f"Warning: ptm_symbol_list is empty for dataset {dataset_id}. PTMs will be classified as 'none'.")
             if reg_site_col not in dataset['data'].columns:
-                print(f"Warning: reg_site_col {reg_site_col} not in PTM data columns.")
+                _safe_debug_print(f"Warning: reg_site_col {reg_site_col} not in PTM data columns.")
             if reg_function_col not in dataset['data'].columns:
-                print(f"Warning: reg_function_col {reg_function_col} not in PTM data columns.")
+                _safe_debug_print(f"Warning: reg_function_col {reg_function_col} not in PTM data columns.")
             dataset['data'] = classify_phosphosite_function(
                 dataset['data'],
                 ptm_symbol_list=symbol_list,
@@ -1463,6 +1517,7 @@ class PathwayProcessor:
                             symbol_color = [0, 0, 0]
                             symbol_font = 'Arial'
                             symbol_size = 6
+                            symbol_icon = None
                             if symbol_type:
                                 try:
                                     ptm_type_idx = int(dataset_id.split('_')[1])
@@ -1475,24 +1530,27 @@ class PathwayProcessor:
                                         if symbol_dict:
                                             symbol = symbol_dict.get('symbol', '')
                                             symbol_color = symbol_dict.get('symbol_color', [0, 0, 0])
-                                            symbol_x = shape_x + symbol_dict.get('symbol_x_offset', 0)
-                                            symbol_y = shape_y + symbol_dict.get('symbol_y_offset', 0)
+                                            # Anchor the symbol to the PTM shape center rather than per-side offsets.
+                                            symbol_x = shape_x
+                                            symbol_y = shape_y
                                             symbol_font = symbol_dict.get('symbol_font', 'Arial')
                                             symbol_size = symbol_dict.get('symbol_size', 6)
-                                            print(f"PTM {ptm_key}: symbol={symbol}, symbol_x={symbol_x}, symbol_y={symbol_y}, pos_key={pos_key}")
+                                            symbol_icon = _resolve_symbol_icon(symbol_dict)
+                                            _safe_debug_print(f"PTM {ptm_key}: symbol={symbol}, symbol_x={symbol_x}, symbol_y={symbol_y}, pos_key={pos_key}")
                                         else:
-                                            print(f"Warning: No symbol dict for {symbol_type} in dataset {dataset_id}")
+                                            _safe_debug_print(f"Warning: No symbol dict for {symbol_type} in dataset {dataset_id}")
                                     else:
-                                        print(f"Warning: ptm_type_idx {ptm_type_idx} out of range for ptm_datasets")
+                                        _safe_debug_print(f"Warning: ptm_type_idx {ptm_type_idx} out of range for ptm_datasets")
                                 except (IndexError, ValueError) as e:
-                                    print(f"Error processing symbol for PTM {ptm_key}: {e}")
+                                    _safe_debug_print(f"Error processing symbol for PTM {ptm_key}: {e}")
                             ptm_entry['symbol'] = symbol
+                            ptm_entry['symbol_icon'] = symbol_icon
                             ptm_entry['symbol_x'] = float(symbol_x)
                             ptm_entry['symbol_y'] = float(symbol_y)
                             ptm_entry['symbol_color'] = symbol_color
                             ptm_entry['symbol_font'] = symbol_font
                             ptm_entry['symbol_size'] = symbol_size
-                            print(f"PTM {ptm_key}: shape=({shape_x}, {shape_y}), label=({label_x}, {label_y}), centering={label_centering}")
+                            _safe_debug_print(f"PTM {ptm_key}: shape=({shape_x}, {shape_y}), label=({label_x}, {label_y}), centering={label_centering}")
                         else:
                             ptm_entry['ptm_position'] = ""
 
@@ -1603,6 +1661,7 @@ class PathwayProcessor:
                 'symbol_type': row.get('Phosphosite_Classification', 'none'),
                 'annotated': '+' if str(row.get('Phosphosite_Classification', 'none')).lower() != 'none' else '',
                 'symbol': '',
+                'symbol_icon': None,
                 'symbol_color': [0, 0, 0],
                 'symbol_font': 'Arial',
                 'symbol_size': 6,
@@ -1648,6 +1707,7 @@ class PathwayProcessor:
                 )
                 if symbol_dict:
                     ptm_entry['symbol'] = symbol_dict.get('symbol', '')
+                    ptm_entry['symbol_icon'] = _resolve_symbol_icon(symbol_dict)
                     ptm_entry['symbol_color'] = symbol_dict.get('symbol_color', [0, 0, 0])
                     ptm_entry['symbol_font'] = symbol_dict.get('symbol_font', 'Arial')
                     ptm_entry['symbol_size'] = symbol_dict.get('symbol_size', 6)
@@ -1867,6 +1927,7 @@ DEFAULT_DATA = {
                     "symbol_label_1_dict": {
                         "symbol": "↑",
                         "symbol_font": "Segoe UI Symbol",
+                        "symbol_icon": "active.svg",
                         "symbol_size": 8,
                         "symbol_color": (0, 0, 0),
                         "symbol_x_offset": -0.1,
@@ -1883,6 +1944,7 @@ DEFAULT_DATA = {
                     "symbol_label_2_dict": {
                         "symbol": "x",
                         "symbol_font": "Arial",
+                        "symbol_icon": "inhibit.svg",
                         "symbol_size": 8,
                         "symbol_color": (0, 0, 0),
                         "symbol_x_offset": -0.3,    #-1.2
@@ -1899,6 +1961,7 @@ DEFAULT_DATA = {
                     "symbol_label_3_dict": {
                         "symbol": "+",
                         "symbol_font": "Arial",
+                        "symbol_icon": "regsite.svg",
                         "symbol_size": 9,
                         "symbol_color": (0, 0, 0),
                         "symbol_x_offset": -0.1,
@@ -1915,6 +1978,7 @@ DEFAULT_DATA = {
                     "symbol_label_4_dict": {
                         "symbol": "+",
                         "symbol_font": "Arial",
+                        "symbol_icon": "regsite.svg",
                         "symbol_size": 9,
                         "symbol_color": (0, 0, 0),
                         "symbol_x_offset": -0.1,
