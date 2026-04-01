@@ -1,0 +1,1451 @@
+{
+  "version": 3,
+  "saved_at_utc": "2026-03-29T20:56:31.741081+00:00",
+  "pathway_id": "cst_vesicle_trafficking",
+  "pathway_name": "Vesicle Trafficking",
+  "pathway_file": "Vesicle Trafficking.ai",
+  "nodes": [
+    {
+      "id": "cst_overlay_mn7m5oso_68",
+      "originalLabel": "SNAP25",
+      "displayLabel": "Complexin",
+      "label": "Complexin",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": false,
+      "cx": 142.2418966942148,
+      "cy": 497.8198916969923,
+      "rx": 32.941333928238535,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": -47.70862308712401,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m2mz6_59",
+      "originalLabel": "SNAP25",
+      "displayLabel": "Munc18-1",
+      "label": "Munc18-1",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "STXBP1"
+      ],
+      "suggested_uniprot_ids": [
+        "P61764"
+      ],
+      "isCustom": false,
+      "cx": 522.868541322314,
+      "cy": 330.13391215863385,
+      "rx": 32.03170881110441,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lba87_2",
+      "originalLabel": "Rab",
+      "displayLabel": "Rab",
+      "label": "Rab",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "AGFG1"
+      ],
+      "suggested_uniprot_ids": [
+        "P52594"
+      ],
+      "isCustom": false,
+      "cx": 434.3329375,
+      "cy": 324.65426249999996,
+      "rx": 14.8385,
+      "ry": 8.186757370247392,
+      "shapeType": "ellipse",
+      "angle": -36.43856335731395,
+      "opacity": 0.98,
+      "strokeWidth": 5.8840900000000005
+    },
+    {
+      "id": "cst_overlay_mn7lba87_3",
+      "originalLabel": "Rab",
+      "displayLabel": "Rab",
+      "label": "Rab",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "AGFG1"
+      ],
+      "suggested_uniprot_ids": [
+        "P52594"
+      ],
+      "isCustom": false,
+      "cx": 149.6322076086956,
+      "cy": 320.8860876083997,
+      "rx": 8.359154307205879,
+      "ry": 19.291936659161045,
+      "shapeType": "ellipse",
+      "angle": 222.20664192535727,
+      "opacity": 0.98,
+      "strokeWidth": 7.44004
+    },
+    {
+      "id": "cst_overlay_mn7lba87_7",
+      "originalLabel": "SERT",
+      "displayLabel": "SERT",
+      "label": "SERT",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SLC6A4"
+      ],
+      "suggested_uniprot_ids": [
+        "P31645"
+      ],
+      "isCustom": false,
+      "cx": 564.1350578512397,
+      "cy": 478.97089161676644,
+      "rx": 15.980932920254695,
+      "ry": 6.977828715771725,
+      "shapeType": "rect",
+      "angle": 19.149877382894175,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lba87_10",
+      "originalLabel": "Dynamin",
+      "displayLabel": "Dynamin",
+      "label": "Dynamin",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "DNM1",
+        "DNM2",
+        "DNM3"
+      ],
+      "suggested_uniprot_ids": [
+        "Q05193",
+        "P50570",
+        "Q9UQ16"
+      ],
+      "isCustom": false,
+      "cx": 236.68772400000003,
+      "cy": 228.07286940253465,
+      "rx": 29.05722184671086,
+      "ry": 7.850636451418211,
+      "shapeType": "rect",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lba87_11",
+      "originalLabel": "Clathrin",
+      "displayLabel": "Clathrin",
+      "label": "Clathrin",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "CLTA",
+        "CLTB",
+        "CLTC",
+        "CLTCL1"
+      ],
+      "suggested_uniprot_ids": [
+        "P09496",
+        "P09497",
+        "Q00610",
+        "P53675"
+      ],
+      "isCustom": false,
+      "cx": 175.95565599999995,
+      "cy": 180.207764152082,
+      "rx": 24.82874423657205,
+      "ry": 8.261280999999968,
+      "shapeType": "rect",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lba87_13",
+      "originalLabel": "SYT1",
+      "displayLabel": "SYT1",
+      "label": "SYT1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SYT1"
+      ],
+      "suggested_uniprot_ids": [
+        "C9JX50"
+      ],
+      "isCustom": false,
+      "cx": 151.40639999999996,
+      "cy": 137.11020525045268,
+      "rx": 15.872725820518944,
+      "ry": 6.712448796360952,
+      "shapeType": "rect",
+      "angle": -49.923805294893384,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lba87_17",
+      "originalLabel": "Rab",
+      "displayLabel": "Rab",
+      "label": "Rab",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "AGFG1"
+      ],
+      "suggested_uniprot_ids": [
+        "P52594"
+      ],
+      "isCustom": false,
+      "cx": 347.57940625000003,
+      "cy": 495.431225,
+      "rx": 13.7295,
+      "ry": 7.422212192118252,
+      "shapeType": "ellipse",
+      "angle": -14.780627170535169,
+      "opacity": 0.98,
+      "strokeWidth": 4.32791
+    },
+    {
+      "id": "cst_overlay_mn7lba87_18",
+      "originalLabel": "SNAP25",
+      "displayLabel": "SNAP25",
+      "label": "SNAP25",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SNAP25"
+      ],
+      "suggested_uniprot_ids": [
+        "P60880"
+      ],
+      "isCustom": false,
+      "cx": 223.32949999999997,
+      "cy": 330.5608587628605,
+      "rx": 25.202451719975898,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lba87_23",
+      "originalLabel": "Rab",
+      "displayLabel": "Rab",
+      "label": "Rab",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "AGFG1"
+      ],
+      "suggested_uniprot_ids": [
+        "P52594"
+      ],
+      "isCustom": false,
+      "cx": 131.1997375,
+      "cy": 468.86767499999996,
+      "rx": 22.476776656801096,
+      "ry": 8.820979433497484,
+      "shapeType": "ellipse",
+      "angle": -36.88601573213289,
+      "opacity": 0.98,
+      "strokeWidth": 8.521040000000001
+    },
+    {
+      "id": "cst_overlay_mn7lba87_37",
+      "originalLabel": "AP180",
+      "displayLabel": "AP180",
+      "label": "AP180",
+      "annotation": "",
+      "mappingType": "ambiguous",
+      "suggested_gene_symbols": [
+        "SNAP91"
+      ],
+      "suggested_uniprot_ids": [
+        "O60641"
+      ],
+      "isCustom": false,
+      "cx": 190.5095695652174,
+      "cy": 214.41013543676476,
+      "rx": 19.709761327907053,
+      "ry": 7.238108882751476,
+      "shapeType": "rect",
+      "angle": 41.93537035640641,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn7lfl7t_38",
+      "originalLabel": "SYT1",
+      "displayLabel": "SYT1",
+      "label": "SYT1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SYT1"
+      ],
+      "suggested_uniprot_ids": [
+        "C9JX50"
+      ],
+      "isCustom": false,
+      "cx": 116.44639999999995,
+      "cy": 137.2443609535305,
+      "rx": 15.872725820518944,
+      "ry": 6.712448796360952,
+      "shapeType": "rect",
+      "angle": 46.924238514154055,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lfyxl_39",
+      "originalLabel": "SYT1",
+      "displayLabel": "SYT1",
+      "label": "SYT1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SYT1"
+      ],
+      "suggested_uniprot_ids": [
+        "C9JX50"
+      ],
+      "isCustom": false,
+      "cx": 475.0784,
+      "cy": 264.0760543753772,
+      "rx": 15.872725820518944,
+      "ry": 6.712448796360952,
+      "shapeType": "rect",
+      "angle": -38.32230951797666,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lg8xt_40",
+      "originalLabel": "SYT1",
+      "displayLabel": "SYT1",
+      "label": "SYT1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SYT1"
+      ],
+      "suggested_uniprot_ids": [
+        "C9JX50"
+      ],
+      "isCustom": false,
+      "cx": 184.9904,
+      "cy": 251.02584797827404,
+      "rx": 15.872725820518944,
+      "ry": 6.712448796360952,
+      "shapeType": "rect",
+      "angle": -49.923805294893384,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lgcjl_41",
+      "originalLabel": "SYT1",
+      "displayLabel": "SYT1",
+      "label": "SYT1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SYT1"
+      ],
+      "suggested_uniprot_ids": [
+        "C9JX50"
+      ],
+      "isCustom": false,
+      "cx": 140.64639999999997,
+      "cy": 250.3443657815329,
+      "rx": 15.872725820518944,
+      "ry": 6.712448796360952,
+      "shapeType": "rect",
+      "angle": 46.924238514154055,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lgfed_42",
+      "originalLabel": "SYT1",
+      "displayLabel": "VAMP",
+      "label": "VAMP",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "VAMP1"
+      ],
+      "suggested_uniprot_ids": [
+        "F5GZV7"
+      ],
+      "isCustom": false,
+      "cx": 148.93439999999995,
+      "cy": 179.92584315027162,
+      "rx": 18.742720222737095,
+      "ry": 7.5618446867517655,
+      "shapeType": "rect",
+      "angle": 46.924238514154055,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lgl5b_43",
+      "originalLabel": "SYT1",
+      "displayLabel": "VAMP",
+      "label": "VAMP",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "VAMP1"
+      ],
+      "suggested_uniprot_ids": [
+        "F5GZV7"
+      ],
+      "isCustom": false,
+      "cx": 114.79039999999998,
+      "cy": 180.46781780325895,
+      "rx": 18.742720222737095,
+      "ry": 7.5618446867517655,
+      "shapeType": "rect",
+      "angle": -43.108931778850746,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lh3xb_44",
+      "originalLabel": "SYT1",
+      "displayLabel": "VAMP",
+      "label": "VAMP",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "VAMP1"
+      ],
+      "suggested_uniprot_ids": [
+        "F5GZV7"
+      ],
+      "isCustom": false,
+      "cx": 192.31039999999993,
+      "cy": 301.18222697646354,
+      "rx": 18.742720222737095,
+      "ry": 7.5618446867517655,
+      "shapeType": "rect",
+      "angle": 46.924238514154055,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lh750_45",
+      "originalLabel": "SYT1",
+      "displayLabel": "VAMP",
+      "label": "VAMP",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "VAMP1"
+      ],
+      "suggested_uniprot_ids": [
+        "F5GZV7"
+      ],
+      "isCustom": false,
+      "cx": 475.9983999999999,
+      "cy": 311.10403747736876,
+      "rx": 18.742720222737095,
+      "ry": 7.5618446867517655,
+      "shapeType": "rect",
+      "angle": 37.71980799203216,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7li75k_46",
+      "originalLabel": "AP180",
+      "displayLabel": "AP-2",
+      "label": "AP-2",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "TFAP2"
+      ],
+      "suggested_uniprot_ids": [
+        "P05549"
+      ],
+      "isCustom": false,
+      "cx": 193.08556956521738,
+      "cy": 149.70107810423607,
+      "rx": 15.134212114943878,
+      "ry": 7.238108882751476,
+      "shapeType": "rect",
+      "angle": -47.707091068910216,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn7lighy_47",
+      "originalLabel": "AP180",
+      "displayLabel": "SYT1",
+      "label": "SYT1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SYT1"
+      ],
+      "suggested_uniprot_ids": [
+        "C9JX50"
+      ],
+      "isCustom": false,
+      "cx": 198.51756956521734,
+      "cy": 177.9747413510677,
+      "rx": 13.648805434782645,
+      "ry": 7.238108882751476,
+      "shapeType": "rect",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn7lj6wf_48",
+      "originalLabel": "Dynamin",
+      "displayLabel": "Amphiphysin",
+      "label": "Amphiphysin",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "AMPH"
+      ],
+      "suggested_uniprot_ids": [
+        "H0Y5S4"
+      ],
+      "isCustom": false,
+      "cx": 219.679724,
+      "cy": 241.25723150271568,
+      "rx": 38.57121339770666,
+      "ry": 7.850636451418211,
+      "shapeType": "rect",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7lz8b4_49",
+      "originalLabel": "Munc13",
+      "displayLabel": "Munc13",
+      "label": "Munc13",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "UNC13"
+      ],
+      "suggested_uniprot_ids": [
+        "O14795"
+      ],
+      "isCustom": true,
+      "cx": 113.430375,
+      "cy": 318.09878092939044,
+      "rx": 24.480000000000018,
+      "ry": 7.748560048280012,
+      "shapeType": "rect",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn7lzo5m_50",
+      "originalLabel": "RIM",
+      "displayLabel": "RIM",
+      "label": "RIM",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 118.73437500000003,
+      "cy": 332.78026312613156,
+      "rx": 17.543999999999983,
+      "ry": 7.340741098370529,
+      "shapeType": "rect",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn7m06sb_51",
+      "originalLabel": "RIM-BP",
+      "displayLabel": "RIM-BP",
+      "label": "RIM-BP",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 119.95837500000005,
+      "cy": 347.4617453228727,
+      "rx": 20.39999999999995,
+      "ry": 7.340741098370586,
+      "shapeType": "rect",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn7m10v6_52",
+      "originalLabel": "SNAP25",
+      "displayLabel": "Syntaxin 1",
+      "label": "Syntaxin 1",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "STX1A"
+      ],
+      "suggested_uniprot_ids": [
+        "A8MZ54"
+      ],
+      "isCustom": false,
+      "cx": 192.44949999999994,
+      "cy": 361.37942214846106,
+      "rx": 30.534588714544384,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": 90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m1axl_53",
+      "originalLabel": "SNAP25",
+      "displayLabel": "Munc18-1",
+      "label": "Munc18-1",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "STXBP1"
+      ],
+      "suggested_uniprot_ids": [
+        "P61764"
+      ],
+      "isCustom": false,
+      "cx": 177.07349999999988,
+      "cy": 342.7539061557031,
+      "rx": 32.03170881110441,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": 90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m1v2g_54",
+      "originalLabel": "Munc13",
+      "displayLabel": "Munc13",
+      "label": "Munc13",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "UNC13"
+      ],
+      "suggested_uniprot_ids": [
+        "O14795"
+      ],
+      "isCustom": true,
+      "cx": 399.54277169421493,
+      "cy": 314.90139769585755,
+      "rx": 24.480000000000018,
+      "ry": 7.748560048280012,
+      "shapeType": "rect",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn7m1z2r_55",
+      "originalLabel": "RIM",
+      "displayLabel": "RIM",
+      "label": "RIM",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 404.8467716942148,
+      "cy": 331.1002960602633,
+      "rx": 17.543999999999983,
+      "ry": 7.340741098370529,
+      "shapeType": "rect",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn7m227l_56",
+      "originalLabel": "RIM-BP",
+      "displayLabel": "RIM-BP",
+      "label": "RIM-BP",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 409.10548243801657,
+      "cy": 344.77016747856123,
+      "rx": 23.348701446280984,
+      "ry": 7.340741098370586,
+      "shapeType": "rect",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn7m2abm_57",
+      "originalLabel": "SNAP25",
+      "displayLabel": "SNAP25",
+      "label": "SNAP25",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SNAP25"
+      ],
+      "suggested_uniprot_ids": [
+        "P60880"
+      ],
+      "isCustom": false,
+      "cx": 458.3575991735537,
+      "cy": 331.9157240323216,
+      "rx": 25.202451719975898,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m2dv5_58",
+      "originalLabel": "SNAP25",
+      "displayLabel": "Syntaxin 1",
+      "label": "Syntaxin 1",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "STX1A"
+      ],
+      "suggested_uniprot_ids": [
+        "A8MZ54"
+      ],
+      "isCustom": false,
+      "cx": 487.6660289256197,
+      "cy": 355.65301196882046,
+      "rx": 33.45497903468873,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m3ate_60",
+      "originalLabel": "SYT1",
+      "displayLabel": "SYT1",
+      "label": "SYT1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SYT1"
+      ],
+      "suggested_uniprot_ids": [
+        "C9JX50"
+      ],
+      "isCustom": false,
+      "cx": 188.8746975206612,
+      "cy": 459.25511743935186,
+      "rx": 15.872725820518944,
+      "ry": 6.712448796360952,
+      "shapeType": "rect",
+      "angle": 68.0503204467951,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m3j15_61",
+      "originalLabel": "SYT1",
+      "displayLabel": "VAMP",
+      "label": "VAMP",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "VAMP1"
+      ],
+      "suggested_uniprot_ids": [
+        "F5GZV7"
+      ],
+      "isCustom": false,
+      "cx": 166.85916033057845,
+      "cy": 464.3948167968229,
+      "rx": 18.742720222737095,
+      "ry": 7.5618446867517655,
+      "shapeType": "rect",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m3p82_62",
+      "originalLabel": "SNAP25",
+      "displayLabel": "Syntaxin 1",
+      "label": "Syntaxin 1",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "STX1A"
+      ],
+      "suggested_uniprot_ids": [
+        "A8MZ54"
+      ],
+      "isCustom": false,
+      "cx": 192.79330165289252,
+      "cy": 495.76110478319157,
+      "rx": 30.534588714544384,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": 56.05520343228939,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m3x29_63",
+      "originalLabel": "SNAP25",
+      "displayLabel": "Munc18-1",
+      "label": "Munc18-1",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "STXBP1"
+      ],
+      "suggested_uniprot_ids": [
+        "P61764"
+      ],
+      "isCustom": false,
+      "cx": 215.35118595041308,
+      "cy": 488.26330735330777,
+      "rx": 32.03170881110441,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": 81.00582962807978,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m43z3_64",
+      "originalLabel": "SNAP25",
+      "displayLabel": "SNAP25",
+      "label": "SNAP25",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SNAP25"
+      ],
+      "suggested_uniprot_ids": [
+        "P60880"
+      ],
+      "isCustom": false,
+      "cx": 156.90966528925617,
+      "cy": 502.3721401999862,
+      "rx": 25.202451719975898,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": -57.457759924440296,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m4mky_66",
+      "originalLabel": "RIM",
+      "displayLabel": "RIM",
+      "label": "RIM",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 98.40181301652888,
+      "cy": 487.8999667189458,
+      "rx": 17.543999999999983,
+      "ry": 7.340741098370529,
+      "shapeType": "rect",
+      "angle": -19.076622965176156,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn7m50k7_67",
+      "originalLabel": "RIM-BP",
+      "displayLabel": "RIM-BP",
+      "label": "RIM-BP",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 103.28095351239662,
+      "cy": 501.06403274802227,
+      "rx": 22.69479084530209,
+      "ry": 7.340741098370586,
+      "shapeType": "rect",
+      "angle": -19.24471979709743,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn7m4ew7_65",
+      "originalLabel": "Munc13",
+      "displayLabel": "Munc13",
+      "label": "Munc13",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "UNC13"
+      ],
+      "suggested_uniprot_ids": [
+        "O14795"
+      ],
+      "isCustom": true,
+      "cx": 91.01384607438015,
+      "cy": 474.73590068986954,
+      "rx": 24.480000000000018,
+      "ry": 7.748560048280012,
+      "shapeType": "rect",
+      "angle": -19.588192481903462,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn7m6a34_69",
+      "originalLabel": "Munc13",
+      "displayLabel": "Munc13",
+      "label": "Munc13",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "UNC13"
+      ],
+      "suggested_uniprot_ids": [
+        "O14795"
+      ],
+      "isCustom": true,
+      "cx": 312.89153202479343,
+      "cy": 482.6662360192108,
+      "rx": 24.480000000000018,
+      "ry": 7.748560048280012,
+      "shapeType": "rect",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn7m6dd8_70",
+      "originalLabel": "RIM",
+      "displayLabel": "RIM",
+      "label": "RIM",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 319.82753202479347,
+      "cy": 497.75553716586137,
+      "rx": 17.543999999999983,
+      "ry": 7.340741098370529,
+      "shapeType": "rect",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn7m6gxs_71",
+      "originalLabel": "RIM-BP",
+      "displayLabel": "RIM-BP",
+      "label": "RIM-BP",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 325.63223347107447,
+      "cy": 512.4370193626025,
+      "rx": 23.348701446280984,
+      "ry": 7.340741098370586,
+      "shapeType": "rect",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn7m6nym_72",
+      "originalLabel": "SYT1",
+      "displayLabel": "SYT1",
+      "label": "SYT1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SYT1"
+      ],
+      "suggested_uniprot_ids": [
+        "C9JX50"
+      ],
+      "isCustom": false,
+      "cx": 449.12137520661156,
+      "cy": 469.2704915011257,
+      "rx": 15.872725820518944,
+      "ry": 6.712448796360952,
+      "shapeType": "rect",
+      "angle": 22.200766934745573,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m6wxq_73",
+      "originalLabel": "SYT1",
+      "displayLabel": "VAMP",
+      "label": "VAMP",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "VAMP1"
+      ],
+      "suggested_uniprot_ids": [
+        "F5GZV7"
+      ],
+      "isCustom": false,
+      "cx": 440.43145785123954,
+      "cy": 489.9965943635963,
+      "rx": 18.742720222737095,
+      "ry": 7.5618446867517655,
+      "shapeType": "rect",
+      "angle": 21.970289158883773,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m76zq_74",
+      "originalLabel": "SNAP25",
+      "displayLabel": "Complexin",
+      "label": "Complexin",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": false,
+      "cx": 515.3493347107437,
+      "cy": 445.0535803197468,
+      "rx": 31.810577325734812,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m7jdy_75",
+      "originalLabel": "SNAP25",
+      "displayLabel": "Munc18-1",
+      "label": "Munc18-1",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "STXBP1"
+      ],
+      "suggested_uniprot_ids": [
+        "P61764"
+      ],
+      "isCustom": false,
+      "cx": 502.4751528925618,
+      "cy": 485.7538279170386,
+      "rx": 32.03170881110441,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": 19.22326075783741,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m7qnq_76",
+      "originalLabel": "SNAP25",
+      "displayLabel": "Syntaxin 1",
+      "label": "Syntaxin 1",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "STX1A"
+      ],
+      "suggested_uniprot_ids": [
+        "A8MZ54"
+      ],
+      "isCustom": false,
+      "cx": 487.5040454545453,
+      "cy": 499.13919160953907,
+      "rx": 33.45497903468873,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": 19.27047802426648,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7m838t_77",
+      "originalLabel": "SNAP25",
+      "displayLabel": "SNAP25",
+      "label": "SNAP25",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SNAP25"
+      ],
+      "suggested_uniprot_ids": [
+        "P60880"
+      ],
+      "isCustom": false,
+      "cx": 450.10305371900824,
+      "cy": 513.4034032642319,
+      "rx": 25.202451719975898,
+      "ry": 8.307124999999985,
+      "shapeType": "rect",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7ml4ax_78",
+      "originalLabel": "SERT",
+      "displayLabel": "DAT",
+      "label": "DAT",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "SLC6A3"
+      ],
+      "suggested_uniprot_ids": [
+        "Q01959"
+      ],
+      "isCustom": false,
+      "cx": 569.5367107438017,
+      "cy": 458.070319760479,
+      "rx": 12.600620863090581,
+      "ry": 6.977828715771725,
+      "shapeType": "rect",
+      "angle": 8.162561020953987,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_mn7mld88_79",
+      "originalLabel": "SERT",
+      "displayLabel": "EAAT",
+      "label": "EAAT",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "SLC1A1"
+      ],
+      "suggested_uniprot_ids": [
+        "H0Y7R2"
+      ],
+      "isCustom": false,
+      "cx": 552.1780330578513,
+      "cy": 499.38381077844303,
+      "rx": 16.09541647162395,
+      "ry": 6.977828715771725,
+      "shapeType": "rect",
+      "angle": 27.304412059816762,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    }
+  ],
+  "edges": [
+    {
+      "id": "cst_ai_edge_1",
+      "startX": 264.3296,
+      "startY": 293.1866,
+      "endX": 342.0126,
+      "endY": 293.1866,
+      "controlX": 303.1711,
+      "controlY": 293.1866,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 303.1711,
+          "y": 293.1866
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_2",
+      "startX": 256.7603,
+      "startY": 183.0,
+      "endX": 228.88729999999998,
+      "endY": 183.0,
+      "controlX": 242.82379999999998,
+      "controlY": 183.0,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 242.82379999999998,
+          "y": 183.0
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_3",
+      "startX": 583.0029,
+      "startY": 519.0015,
+      "endX": 577.6699,
+      "endY": 495.16749999999996,
+      "controlX": 580.3363999999999,
+      "controlY": 507.08449999999993,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 580.3363999999999,
+          "y": 507.08449999999993
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_4",
+      "startX": 592.21,
+      "startY": 519.0044,
+      "endX": 583.5490000000001,
+      "endY": 470.3404,
+      "controlX": 587.8795,
+      "controlY": 494.67240000000004,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 587.8795,
+          "y": 494.67240000000004
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_5",
+      "startX": 65.3657,
+      "startY": 543.1031,
+      "endX": 65.7257,
+      "endY": 488.6991,
+      "controlX": 65.54570000000001,
+      "controlY": 515.9011,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 65.54570000000001,
+          "y": 515.9011
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_6",
+      "startX": 318.0957,
+      "startY": 343.125,
+      "endX": 247.71470000000002,
+      "endY": 395.758,
+      "controlX": 282.90520000000004,
+      "controlY": 369.4415,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 282.90520000000004,
+          "y": 369.4415
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_7",
+      "startX": 259.9971,
+      "startY": 415.92139999999995,
+      "endX": 347.3461,
+      "endY": 415.92139999999995,
+      "controlX": 303.6716,
+      "controlY": 415.92139999999995,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 303.6716,
+          "y": 415.92139999999995
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_8",
+      "startX": 132.1812,
+      "startY": 188.03569999999996,
+      "endX": 162.8532,
+      "endY": 244.71169999999995,
+      "controlX": 147.5172,
+      "controlY": 216.37369999999996,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 147.5172,
+          "y": 216.37369999999996
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_9",
+      "startX": 368.3945,
+      "startY": 377.09529999999995,
+      "endX": 368.7545,
+      "endY": 322.69129999999996,
+      "controlX": 368.5745,
+      "controlY": 349.89329999999995,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 368.5745,
+          "y": 349.89329999999995
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_10",
+      "startX": 82.395,
+      "startY": 377.09529999999995,
+      "endX": 82.756,
+      "endY": 322.69129999999996,
+      "controlX": 82.5755,
+      "controlY": 349.89329999999995,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 82.5755,
+          "y": 349.89329999999995
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774817764809_571217",
+      "startX": 176.71361699380165,
+      "startY": 152.66143498596819,
+      "endX": 162.17229467975204,
+      "endY": 149.50074275023385,
+      "controlX": 172.92022856404958,
+      "controlY": 148.2364658559401,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 172.92022856404958,
+          "y": 148.2364658559401
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774817774945_213022",
+      "startX": 285.1413029442149,
+      "startY": 542.0587184284378,
+      "endX": 293.0441955061984,
+      "endY": 450.3986435921422,
+      "controlX": 286.0896500516529,
+      "controlY": 479.79308138447146,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 286.0896500516529,
+          "y": 479.79308138447146
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774817786327_338693",
+      "startX": 575.5913739669421,
+      "startY": 525.0259940119761,
+      "endX": 566.4872417355372,
+      "endY": 512.8866646706587,
+      "controlX": 571.0393078512396,
+      "controlY": 518.9563293413173,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 571.0393078512396,
+          "y": 518.9563293413173
+        }
+      ]
+    }
+  ],
+  "disable_pdf_reader": false
+}

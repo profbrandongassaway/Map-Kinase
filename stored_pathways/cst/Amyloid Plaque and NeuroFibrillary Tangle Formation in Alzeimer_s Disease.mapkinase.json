@@ -1,0 +1,273 @@
+{
+  "version": 1,
+  "saved_at_utc": "2026-03-25T16:21:10.462883+00:00",
+  "pathway_id": "cst_amyloid_plaque_and_neurofibrillary_tangle_formation_in_alzeimer_s_disease",
+  "pathway_name": "Amyloid Plaque and NeuroFibrillary Tangle Formation in Alzeimer_s Disease",
+  "pathway_file": "Amyloid Plaque and NeuroFibrillary Tangle Formation in Alzeimer_s Disease.ai",
+  "nodes": [
+    {
+      "id": "cst_overlay_1",
+      "originalLabel": "Akt",
+      "displayLabel": "Akt",
+      "label": "Akt",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "AKT1",
+        "AKT2",
+        "AKT3"
+      ],
+      "suggested_uniprot_ids": [
+        "P31749",
+        "P31751",
+        "Q9Y243"
+      ],
+      "isCustom": false,
+      "cx": 231.1221,
+      "cy": 196.80886249999992,
+      "rx": 13.3305,
+      "ry": 8.042,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_2",
+      "originalLabel": "CDK5",
+      "displayLabel": "CDK5",
+      "label": "CDK5",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "CDK5"
+      ],
+      "suggested_uniprot_ids": [
+        "Q00535"
+      ],
+      "isCustom": false,
+      "cx": 298.21517500000004,
+      "cy": 203.59308749999997,
+      "rx": 16.944,
+      "ry": 7.8165,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_3",
+      "originalLabel": "GSK-3-/-",
+      "displayLabel": "GSK-3α/β",
+      "label": "GSK-3α/β",
+      "annotation": "",
+      "mappingType": "family",
+      "suggested_gene_symbols": [
+        "GSK3A",
+        "GSK3B"
+      ],
+      "suggested_uniprot_ids": [
+        "A8MT37",
+        "P49841"
+      ],
+      "isCustom": false,
+      "cx": 269.859225,
+      "cy": 224.28136874999996,
+      "rx": 28.9305,
+      "ry": 9.6705,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.44843
+    },
+    {
+      "id": "cst_overlay_4",
+      "originalLabel": "Tau",
+      "displayLabel": "Tau",
+      "label": "Tau",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "MAPT"
+      ],
+      "suggested_uniprot_ids": [
+        "P10636"
+      ],
+      "isCustom": false,
+      "cx": 218.2557,
+      "cy": 223.3947,
+      "rx": 12.492,
+      "ry": 7.792,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_7",
+      "originalLabel": "DR6",
+      "displayLabel": "DR6",
+      "label": "DR6",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "TNFRSF21"
+      ],
+      "suggested_uniprot_ids": [
+        "O75509"
+      ],
+      "isCustom": false,
+      "cx": 199.85529008264473,
+      "cy": 377.3753361477572,
+      "rx": 12.0,
+      "ry": 9.36,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_14",
+      "originalLabel": "Bax production",
+      "displayLabel": "CASP3/9",
+      "label": "CASP3/9",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "CASP3"
+      ],
+      "suggested_uniprot_ids": [
+        "A8MVM1"
+      ],
+      "isCustom": false,
+      "cx": 234.91036084710743,
+      "cy": 526.2642240105541,
+      "rx": 27.9965,
+      "ry": 9.7595,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.48937
+    },
+    {
+      "id": "cst_overlay_17",
+      "originalLabel": "p35",
+      "displayLabel": "p35",
+      "label": "p35",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 253.19303125,
+      "cy": 159.96699999999998,
+      "rx": 13.242,
+      "ry": 8.015,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_18",
+      "originalLabel": "p25",
+      "displayLabel": "p25",
+      "label": "p25",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 311.62883124999996,
+      "cy": 216.7697,
+      "rx": 11.622,
+      "ry": 8.577,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_19",
+      "originalLabel": "γ-Secretase",
+      "displayLabel": "γ-Secretase",
+      "label": "γ-Secretase",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 321.20173124999997,
+      "cy": 336.32408749999996,
+      "rx": 24.1635,
+      "ry": 13.949,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_20",
+      "originalLabel": "β-Secretase",
+      "displayLabel": "β-Secretase",
+      "label": "β-Secretase",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 252.11165624999998,
+      "cy": 338.5841,
+      "rx": 23.073,
+      "ry": 13.949,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_21",
+      "originalLabel": "α-Secretase",
+      "displayLabel": "α-Secretase",
+      "label": "α-Secretase",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 146.7462125,
+      "cy": 339.79671874999997,
+      "rx": 23.0735,
+      "ry": 13.9485,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_22",
+      "originalLabel": "γ-Secretase",
+      "displayLabel": "γ-Secretase",
+      "label": "γ-Secretase",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 99.88330624999999,
+      "cy": 333.8335125,
+      "rx": 23.084,
+      "ry": 13.847,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_23",
+      "originalLabel": "Calpain",
+      "displayLabel": "Calpain",
+      "label": "Calpain",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 287.17083125,
+      "cy": 169.77852499999995,
+      "rx": 21.139999999999997,
+      "ry": 9.6885,
+      "angle": 0.0,
+      "opacity": 1.0,
+      "strokeWidth": 4.5
+    }
+  ]
+}

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import logging
 import re
 from dataclasses import asdict, dataclass, field
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
@@ -20,6 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent
 ANNOTATION_DIR = BASE_DIR / "annotation_files"
 CACHE_DIR = BASE_DIR / "cache" / "pathway_label_mapper"
 LOCAL_UNIPROT_ANNOTATIONS = ANNOTATION_DIR / "uniprot_human_function_annotations.tsv"
+FORCED_REVIEW_TSV = BASE_DIR / "cache" / "unmapped_gene_name_review_code_friendly_pathway_forced.tsv"
+COMPLEX_REVIEW_TSV = BASE_DIR / "cache" / "complex_or_process_only_annotated_nested_components.tsv"
 DEFAULT_ORGANISM_ID = 9606
 UNIPROT_SEARCH_URL = "https://rest.uniprot.org/uniprotkb/search"
 
@@ -444,6 +448,34 @@ def _split_gene_names(raw: str) -> List[str]:
 
 
 def _normalize_whitespace(text: str) -> str:
+    replacements = {
+        "Î±": "alpha",
+        "α": "alpha",
+        "Î‘": "ALPHA",
+        "Α": "ALPHA",
+        "Î²": "beta",
+        "β": "beta",
+        "Î’": "BETA",
+        "Β": "BETA",
+        "Î³": "gamma",
+        "γ": "gamma",
+        "Î“": "GAMMA",
+        "Γ": "GAMMA",
+        "Î¶": "zeta",
+        "ζ": "zeta",
+        "Î–": "ZETA",
+        "Ζ": "ZETA",
+        "Ïƒ": "sigma",
+        "σ": "sigma",
+        "Î£": "SIGMA",
+        "Σ": "SIGMA",
+        "Ï‰": "omega",
+        "ω": "omega",
+        "Î©": "OMEGA",
+        "Ω": "OMEGA",
+    }
+    for src, dst in replacements.items():
+        text = text.replace(src, dst)
     text = re.sub(r"[\u2010\u2011\u2012\u2013\u2014\u2212]", "-", text)
     text = text.replace("\u03ba", "k").replace("\u039a", "K")
     text = re.sub(r"\s+", " ", text.strip())
@@ -460,6 +492,277 @@ def _canonicalize_label(text: str) -> str:
     value = value.replace("{", "").replace("}", "")
     value = value.replace("_", "")
     return value
+
+
+def _normalize_forced_pathway_name(text: str) -> str:
+    return _canonicalize_label(re.sub(r"\s+\(\d+\)$", "", str(text or "").strip()))
+
+
+def _parse_forced_gene_symbols(row: Dict[str, Any]) -> List[str]:
+    parsed: List[str] = []
+    raw_json = str(row.get("mapped_gene_symbols_json") or "").strip()
+    if raw_json:
+        try:
+            value = json.loads(raw_json)
+            if isinstance(value, list):
+                for item in value:
+                    symbol = str(item or "").strip().upper()
+                    if symbol and symbol not in parsed:
+                        parsed.append(symbol)
+        except Exception:
+            pass
+    if parsed:
+        return parsed
+    raw_pipe = str(row.get("mapped_gene_symbols_pipe") or "").strip()
+    if raw_pipe:
+        for item in raw_pipe.split("|"):
+            symbol = str(item or "").strip().upper()
+            if symbol and symbol not in parsed:
+                parsed.append(symbol)
+    return parsed
+
+
+def _parse_nested_member_groups(row: Dict[str, Any]) -> List[List[str]]:
+    for key in ("complex_components_nested_json", "complex_components_nested_python"):
+        raw_value = str(row.get(key) or "").strip()
+        if not raw_value:
+            continue
+        try:
+            parsed = json.loads(raw_value)
+        except Exception:
+            continue
+        if isinstance(parsed, list):
+            groups: List[List[str]] = []
+            for group in parsed:
+                if isinstance(group, list):
+                    clean_group = [str(item or "").strip().upper() for item in group if str(item or "").strip()]
+                    if clean_group:
+                        groups.append(clean_group)
+            if groups:
+                return groups
+    return []
+
+
+def _parse_complex_structure(row: Dict[str, Any]) -> List[Dict[str, Any]]:
+    raw_value = str(row.get("complex_structure_json") or "").strip()
+    if raw_value:
+        try:
+            parsed = json.loads(raw_value)
+            if isinstance(parsed, list):
+                components: List[Dict[str, Any]] = []
+                for item in parsed:
+                    if not isinstance(item, dict):
+                        continue
+                    label = str(item.get("component_label") or "").strip()
+                    groups: List[List[str]] = []
+                    for group in list(item.get("member_groups") or []):
+                        if isinstance(group, list):
+                            clean_group = [str(member or "").strip().upper() for member in group if str(member or "").strip()]
+                            if clean_group:
+                                groups.append(clean_group)
+                    if groups:
+                        components.append({
+                            "component_label": label,
+                            "member_groups": groups,
+                        })
+                if components:
+                    return components
+        except Exception:
+            pass
+    nested = _parse_nested_member_groups(row)
+    if not nested:
+        return []
+    return [{
+        "component_label": str(row.get("input_label") or "").strip(),
+        "member_groups": nested,
+    }]
+
+
+def _lookup_first_forced_uniprots(
+    mapper: "PathwayLabelMapper",
+    gene_symbols: Sequence[str],
+) -> tuple[str, List[str]]:
+    for symbol in gene_symbols:
+        normalized = str(symbol or "").strip().upper()
+        if not normalized:
+            continue
+        candidates = mapper.lookup_uniprot(normalized)
+        uniprot_ids = list(dict.fromkeys(str(item.uniprot_id or "").strip().upper() for item in candidates if str(item.uniprot_id or "").strip()))
+        if uniprot_ids:
+            return normalized, uniprot_ids
+    return "", []
+
+
+def _resolve_complex_component_groups(
+    mapper: "PathwayLabelMapper",
+    components: Sequence[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    resolved_components: List[Dict[str, Any]] = []
+    for component in components:
+        resolved_groups: List[Dict[str, Any]] = []
+        for group in list(component.get("member_groups") or []):
+            candidate_genes = [str(item or "").strip().upper() for item in list(group or []) if str(item or "").strip()]
+            candidate_uniprots: List[str] = []
+            for symbol in candidate_genes:
+                candidates = mapper.lookup_uniprot(symbol)
+                ids = [str(item.uniprot_id or "").strip().upper() for item in candidates if str(item.uniprot_id or "").strip()]
+                if ids:
+                    candidate_uniprots = list(dict.fromkeys(ids))
+                    break
+            resolved_groups.append({
+                "candidate_gene_symbols": candidate_genes,
+                "candidate_uniprot_ids": candidate_uniprots,
+            })
+        resolved_components.append({
+            "component_label": str(component.get("component_label") or "").strip(),
+            "member_groups": resolved_groups,
+        })
+    return resolved_components
+
+
+def populate_forced_review_uniprot_ids(
+    input_path: str | Path = FORCED_REVIEW_TSV,
+    output_path: str | Path | None = None,
+) -> Path:
+    source = Path(input_path)
+    destination = Path(output_path) if output_path is not None else source
+    mapper = PathwayLabelMapper(use_uniprot_rest=False)
+
+    with source.open("r", encoding="utf-8", errors="replace", newline="") as fh:
+        reader = csv.DictReader(fh, delimiter="\t")
+        fieldnames = list(reader.fieldnames or [])
+        rows = list(reader)
+
+    for column in ("forced_selected_gene_symbol", "forced_uniprot_ids", "forced_uniprot_count", "forced_uniprot_urls"):
+        if column not in fieldnames:
+            fieldnames.append(column)
+
+    for row in rows:
+        gene_symbols = _parse_forced_gene_symbols(row)
+        selected_symbol, uniprot_ids = _lookup_first_forced_uniprots(mapper, gene_symbols)
+        row["forced_selected_gene_symbol"] = selected_symbol
+        row["forced_uniprot_ids"] = "|".join(uniprot_ids)
+        row["forced_uniprot_count"] = str(len(uniprot_ids))
+        row["forced_uniprot_urls"] = "|".join(f"https://www.uniprot.org/uniprotkb/{item}/entry" for item in uniprot_ids)
+
+    with destination.open("w", encoding="utf-8", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames, delimiter="\t")
+        writer.writeheader()
+        writer.writerows(rows)
+    return destination
+
+
+def populate_complex_review_uniprot_ids(
+    input_path: str | Path = COMPLEX_REVIEW_TSV,
+    output_path: str | Path | None = None,
+) -> Path:
+    source = Path(input_path)
+    destination = Path(output_path) if output_path is not None else source
+    mapper = PathwayLabelMapper(use_uniprot_rest=False)
+
+    with source.open("r", encoding="utf-8", errors="replace", newline="") as fh:
+        reader = csv.DictReader(fh, delimiter="\t")
+        fieldnames = list(reader.fieldnames or [])
+        rows = list(reader)
+
+    for column in ("resolved_complex_structure_json", "resolved_component_group_count", "resolved_uniprot_total_count"):
+        if column not in fieldnames:
+            fieldnames.append(column)
+
+    for row in rows:
+        components = _parse_complex_structure(row)
+        resolved = _resolve_complex_component_groups(mapper, components)
+        row["resolved_complex_structure_json"] = json.dumps(resolved, ensure_ascii=False)
+        group_count = sum(len(list(component.get("member_groups") or [])) for component in resolved)
+        total_ids = sum(len(list(group.get("candidate_uniprot_ids") or [])) for component in resolved for group in list(component.get("member_groups") or []))
+        row["resolved_component_group_count"] = str(group_count)
+        row["resolved_uniprot_total_count"] = str(total_ids)
+
+    with destination.open("w", encoding="utf-8", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames, delimiter="\t")
+        writer.writeheader()
+        writer.writerows(rows)
+    return destination
+
+
+@lru_cache(maxsize=1)
+def load_forced_review_mapping_index(
+    input_path: str | Path = FORCED_REVIEW_TSV,
+) -> Dict[tuple[str, str], Dict[str, Any]]:
+    source = Path(input_path)
+    if not source.exists():
+        return {}
+    index: Dict[tuple[str, str], Dict[str, Any]] = {}
+    with source.open("r", encoding="utf-8", errors="replace", newline="") as fh:
+        reader = csv.DictReader(fh, delimiter="\t")
+        for row in reader:
+            pathway_key = _normalize_forced_pathway_name(str(row.get("Pathway") or ""))
+            label_key = _canonicalize_label(str(row.get("input_label") or ""))
+            if not pathway_key or not label_key:
+                continue
+            forced_ids = [str(item).strip().upper() for item in str(row.get("forced_uniprot_ids") or "").split("|") if str(item).strip()]
+            selected_symbol = str(row.get("forced_selected_gene_symbol") or "").strip().upper()
+            if not forced_ids and not selected_symbol:
+                continue
+            index[(pathway_key, label_key)] = {
+                "mapping_type": "forced_review",
+                "suggested_uniprot_ids": forced_ids,
+                "suggested_gene_symbols": [selected_symbol] if selected_symbol else _parse_forced_gene_symbols(row),
+                "notes": "Mapped from curated forced-review pathway label table.",
+                "confidence": "medium-high",
+            }
+    return index
+
+
+@lru_cache(maxsize=1)
+def load_complex_review_mapping_index(
+    input_path: str | Path = COMPLEX_REVIEW_TSV,
+) -> Dict[tuple[str, str], Dict[str, Any]]:
+    source = Path(input_path)
+    if not source.exists():
+        return {}
+    index: Dict[tuple[str, str], Dict[str, Any]] = {}
+    with source.open("r", encoding="utf-8", errors="replace", newline="") as fh:
+        reader = csv.DictReader(fh, delimiter="\t")
+        for row in reader:
+            pathway_key = _normalize_forced_pathway_name(str(row.get("Pathway") or ""))
+            label_key = _canonicalize_label(str(row.get("input_label") or ""))
+            if not pathway_key or not label_key:
+                continue
+            raw_resolved = str(row.get("resolved_complex_structure_json") or "").strip()
+            components: List[Dict[str, Any]] = []
+            if raw_resolved:
+                try:
+                    parsed = json.loads(raw_resolved)
+                    if isinstance(parsed, list):
+                        components = [item for item in parsed if isinstance(item, dict)]
+                except Exception:
+                    components = []
+            if not components:
+                components = _resolve_complex_component_groups(PathwayLabelMapper(use_uniprot_rest=False), _parse_complex_structure(row))
+            if not components:
+                continue
+            aggregate_genes: List[str] = []
+            aggregate_ids: List[str] = []
+            for component in components:
+                for group in list(component.get("member_groups") or []):
+                    for gene_symbol in list(group.get("candidate_gene_symbols") or []):
+                        gene = str(gene_symbol or "").strip().upper()
+                        if gene and gene not in aggregate_genes:
+                            aggregate_genes.append(gene)
+                    for uniprot_id in list(group.get("candidate_uniprot_ids") or []):
+                        accession = str(uniprot_id or "").strip().upper()
+                        if accession and accession not in aggregate_ids:
+                            aggregate_ids.append(accession)
+            index[(pathway_key, label_key)] = {
+                "mapping_type": "complex_forced",
+                "suggested_uniprot_ids": aggregate_ids,
+                "suggested_gene_symbols": aggregate_genes,
+                "complex_components": components,
+                "notes": "Mapped from curated complex/process component table.",
+                "confidence": "medium-high",
+            }
+    return index
 
 
 @dataclass
@@ -978,22 +1281,44 @@ def export_results_to_json(results: Sequence[Dict[str, Any]], output_path: str |
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-    example_labels = [
-        "MAPK14",
-        "p38",
-        "ERK",
-        "ERK1/2",
-        "MEK1",
-        "JNK",
-        "AKT",
-        "RAS",
-        "PI3K",
-        "c-Jun",
-        "Elk-1",
-        "PRAK",
-        "MAPKAPK-3",
-        "MKK3/6",
-    ]
-    mapper = PathwayLabelMapper()
-    results = mapper.map_pathway_labels(example_labels)
-    print(json.dumps({"summary": mapper.build_summary(results), "results": results}, indent=2))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--populate-forced-review", action="store_true")
+    parser.add_argument("--populate-complex-review", action="store_true")
+    parser.add_argument("--forced-review-input", default=str(FORCED_REVIEW_TSV))
+    parser.add_argument("--forced-review-output", default="")
+    parser.add_argument("--complex-review-input", default=str(COMPLEX_REVIEW_TSV))
+    parser.add_argument("--complex-review-output", default="")
+    args = parser.parse_args()
+
+    if args.populate_forced_review:
+        output = populate_forced_review_uniprot_ids(
+            input_path=args.forced_review_input,
+            output_path=(args.forced_review_output or None),
+        )
+        print(str(output))
+    elif args.populate_complex_review:
+        output = populate_complex_review_uniprot_ids(
+            input_path=args.complex_review_input,
+            output_path=(args.complex_review_output or None),
+        )
+        print(str(output))
+    else:
+        example_labels = [
+            "MAPK14",
+            "p38",
+            "ERK",
+            "ERK1/2",
+            "MEK1",
+            "JNK",
+            "AKT",
+            "RAS",
+            "PI3K",
+            "c-Jun",
+            "Elk-1",
+            "PRAK",
+            "MAPKAPK-3",
+            "MKK3/6",
+        ]
+        mapper = PathwayLabelMapper()
+        results = mapper.map_pathway_labels(example_labels)
+        print(json.dumps({"summary": mapper.build_summary(results), "results": results}, indent=2))

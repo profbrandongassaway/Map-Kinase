@@ -122,6 +122,7 @@ def _build_blank_canvas(catalog_info=None):
             base['_global_protein_catalog'] = dict(catalog_info)
         except Exception:
             base['_global_protein_catalog'] = catalog_info
+    base['_global_metabolite_catalog'] = {}
     return base
 
 def create_pathway_svg(json_data, show_kegg_bg=False):
@@ -137,7 +138,9 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
     show_arrows = bool(settings.get('show_arrows', True))
     show_text_boxes = bool(settings.get('show_text_boxes', True))
     catalog_data = {}
+    metabolite_catalog_data = {}
     catalog_info = json_data.get('_global_protein_catalog') or {}
+    metabolite_catalog_info = json_data.get('_global_metabolite_catalog') or {}
     catalog_path = catalog_info.get('path') or os.environ.get('GLOBAL_PROTEIN_CATALOG_PATH')
     if isinstance(catalog_info, dict) and catalog_info.get('protein_catalog'):
         catalog_data = catalog_info.get('protein_catalog') or {}
@@ -149,6 +152,8 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 catalog_data = catalog_payload.get('protein_catalog', {}) or {}
         except Exception as catalog_err:
             print(f"Warning: failed to load global protein catalog from {catalog_path}: {catalog_err}")
+    if isinstance(metabolite_catalog_info, dict):
+        metabolite_catalog_data = metabolite_catalog_info
     if not protbox_data:
         max_x, max_y = 800, 600
     else:
@@ -175,6 +180,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
     # Embed the full JSON (including any 'kegg_bg_image' and preview settings) for the client
     data_script = f"""<script type="application/json" id="pathway-data">{_safe_json_dumps(json_data)}</script>"""
     catalog_script = f"""<script type="application/json" id="global-protein-catalog">{_safe_json_dumps(catalog_data)}</script>"""
+    metabolite_catalog_script = f"""<script type="application/json" id="global-metabolite-catalog">{_safe_json_dumps(metabolite_catalog_data)}</script>"""
     svg_js = f"""
         <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.2.0/svg.min.js"></script>
     <script>
@@ -244,6 +250,20 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             }}
         }} catch (err) {{
             console.warn('m3: failed to parse global protein catalog', err);
+        }}
+        return {{}};
+    }})();
+    var metaboliteCatalog = (function() {{
+        try {{
+            var catalogNode = getScopedNodeById('global-metabolite-catalog');
+            if (catalogNode) {{
+                var parsedPayload = JSON.parse(catalogNode.textContent || '{{}}') || {{}};
+                if (typeof parsedPayload === 'object' && !Array.isArray(parsedPayload)) {{
+                    return parsedPayload;
+                }}
+            }}
+        }} catch (err) {{
+            console.warn('m3: failed to parse global metabolite catalog', err);
         }}
         return {{}};
     }})();
@@ -568,6 +588,27 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     searchText: `${{uniprot}}|${{geneSymbol}}`
                 }};
             }});
+            const metaboliteSearchIndex = Object.entries(metaboliteCatalog).map(([hmdbId, metabolite]) => {{
+                const resolvedHmdbId = String(metabolite?.hmdb_id || hmdbId || '').trim();
+                const wikiId = String(metabolite?.wikipedia_id || metabolite?.display_label || '').trim();
+                const keggId = String(metabolite?.kegg_id || '').trim();
+                const displayLabel = String(metabolite?.display_label || wikiId || metabolite?.name || resolvedHmdbId || 'Unknown').trim();
+                const searchBits = [
+                    resolvedHmdbId,
+                    wikiId,
+                    keggId,
+                    displayLabel,
+                    String(metabolite?.name || '').trim(),
+                    String(metabolite?.synonyms || '').trim()
+                ].filter(Boolean);
+                return {{
+                    hmdbId: resolvedHmdbId,
+                    wikipediaId: wikiId,
+                    keggId,
+                    displayLabel,
+                    searchText: searchBits.join('|')
+                }};
+            }});
             const getViewportCenter = () => {{
                 const width = Number(viewBox?.width) || {max_x};
                 const height = Number(viewBox?.height) || {max_y};
@@ -601,6 +642,55 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                         }});
                     }}
                     if (matches.length >= maxResults) break;
+                }}
+                return {{ results: matches, error: null }};
+            }};
+            const searchObjectCatalog = (query, limit = 40) => {{
+                const trimmed = String(query || '').trim();
+                if (!trimmed) {{
+                    return {{ results: [], error: null }};
+                }}
+                let regex = null;
+                try {{
+                    regex = new RegExp(trimmed, 'i');
+                }} catch (err) {{
+                    return {{ results: [], error: 'Invalid regex pattern.' }};
+                }}
+                const matches = [];
+                const maxResults = Math.max(1, Number(limit) || 40);
+                for (const entry of proteinSearchIndex) {{
+                    if (!regex.test(entry.searchText)) continue;
+                    const protein = searchSource[entry.uniprot] || {{}};
+                    matches.push({{
+                        kind: 'protein',
+                        key: entry.uniprot,
+                        uniprot: entry.uniprot,
+                        geneSymbol: entry.geneSymbol,
+                        label: `${{entry.uniprot}} - ${{entry.geneSymbol}}`,
+                        color: entityColor(protein)
+                    }});
+                    if (matches.length >= maxResults) {{
+                        return {{ results: matches, error: null }};
+                    }}
+                }}
+                for (const entry of metaboliteSearchIndex) {{
+                    if (!regex.test(entry.searchText)) continue;
+                    const metabolite = metaboliteCatalog[entry.hmdbId] || {{}};
+                    const wikiId = entry.wikipediaId || entry.displayLabel || '';
+                    const idBits = [entry.hmdbId, wikiId].filter(Boolean);
+                    matches.push({{
+                        kind: 'metabolite',
+                        key: entry.hmdbId,
+                        hmdbId: entry.hmdbId,
+                        wikipediaId: wikiId,
+                        keggId: entry.keggId,
+                        displayLabel: entry.displayLabel,
+                        label: idBits.length ? `${{idBits.join(' - ')}}` : entry.displayLabel,
+                        color: entityColor(metabolite)
+                    }});
+                    if (matches.length >= maxResults) {{
+                        break;
+                    }}
                 }}
                 return {{ results: matches, error: null }};
             }};
@@ -713,6 +803,163 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 translateArrowByDelta(arrowId, 0, 0);
                 updateAttachedArrows(arrowId, 'start');
                 updateAttachedArrows(arrowId, 'end');
+            }};
+            const getArrowBaseType = (arrow) => {{
+                const rawType = String(arrow?.line || 'arrow');
+                return rawType.startsWith('dashed_') ? rawType.replace(/^dashed_/, '') : rawType;
+            }};
+            const isArrowBent = (arrow) => {{
+                const ctrlPoints = Array.isArray(arrow?.control_points) ? arrow.control_points : [];
+                return ctrlPoints.length > 0;
+            }};
+            const getArrowMidpoint = (arrow) => {{
+                const x1 = Number(arrow?.x1 || 0);
+                const y1 = Number(arrow?.y1 || 0);
+                const x2 = Number(arrow?.x2 || 0);
+                const y2 = Number(arrow?.y2 || 0);
+                if (!isArrowBent(arrow)) {{
+                    return {{ x: (x1 + x2) * 0.5, y: (y1 + y2) * 0.5 }};
+                }}
+                const cp = Array.isArray(arrow?.control_points) ? arrow.control_points[0] : null;
+                const cx = Number(cp?.x || ((x1 + x2) * 0.5));
+                const cy = Number(cp?.y || ((y1 + y2) * 0.5));
+                return {{
+                    x: (0.25 * x1) + (0.5 * cx) + (0.25 * x2),
+                    y: (0.25 * y1) + (0.5 * cy) + (0.25 * y2),
+                }};
+            }};
+            const solveArrowControlFromMidpoint = (arrow, midpoint) => {{
+                const x1 = Number(arrow?.x1 || 0);
+                const y1 = Number(arrow?.y1 || 0);
+                const x2 = Number(arrow?.x2 || 0);
+                const y2 = Number(arrow?.y2 || 0);
+                const midX = Number(midpoint?.x || ((x1 + x2) * 0.5));
+                const midY = Number(midpoint?.y || ((y1 + y2) * 0.5));
+                return {{
+                    x: (2 * midX) - (0.5 * (x1 + x2)),
+                    y: (2 * midY) - (0.5 * (y1 + y2)),
+                }};
+            }};
+            const ensureArrowControlState = (arrow) => {{
+                if (!arrow) return null;
+                if (!Array.isArray(arrow.control_points)) {{
+                    arrow.control_points = [];
+                }}
+                if (arrow.control_points.length) {{
+                    const cp = arrow.control_points[0];
+                    return {{
+                        x: Number(cp?.x || 0),
+                        y: Number(cp?.y || 0),
+                    }};
+                }}
+                return null;
+            }};
+            const setArrowBentState = (arrow, bent, midpoint = null) => {{
+                if (!arrow) return;
+                if (!bent) {{
+                    arrow.control_points = [];
+                    return;
+                }}
+                const targetMidpoint = midpoint || getArrowMidpoint(arrow);
+                arrow.control_points = [solveArrowControlFromMidpoint(arrow, targetMidpoint)];
+            }};
+            const buildArrowPathString = (arrow) => {{
+                const x1 = Number(arrow?.x1 || 0);
+                const y1 = Number(arrow?.y1 || 0);
+                const x2 = Number(arrow?.x2 || 0);
+                const y2 = Number(arrow?.y2 || 0);
+                if (!isArrowBent(arrow)) {{
+                    return `M ${{x1}} ${{y1}} L ${{x2}} ${{y2}}`;
+                }}
+                const cp = ensureArrowControlState(arrow);
+                return `M ${{x1}} ${{y1}} Q ${{Number(cp?.x || 0)}} ${{Number(cp?.y || 0)}} ${{x2}} ${{y2}}`;
+            }};
+            const getArrowTangentAngle = (arrow, atStart = false) => {{
+                const x1 = Number(arrow?.x1 || 0);
+                const y1 = Number(arrow?.y1 || 0);
+                const x2 = Number(arrow?.x2 || 0);
+                const y2 = Number(arrow?.y2 || 0);
+                if (!isArrowBent(arrow)) {{
+                    return Math.atan2(y2 - y1, x2 - x1);
+                }}
+                const cp = ensureArrowControlState(arrow);
+                if (atStart) {{
+                    return Math.atan2(Number(cp?.y || 0) - y1, Number(cp?.x || 0) - x1);
+                }}
+                return Math.atan2(y2 - Number(cp?.y || 0), x2 - Number(cp?.x || 0));
+            }};
+            const getArrowDecorPoints = (tipX, tipY, angle, size) => {{
+                return {{
+                    left: {{
+                        x: tipX - size * Math.cos(angle + Math.PI / 6),
+                        y: tipY - size * Math.sin(angle + Math.PI / 6),
+                    }},
+                    right: {{
+                        x: tipX - size * Math.cos(angle - Math.PI / 6),
+                        y: tipY - size * Math.sin(angle - Math.PI / 6),
+                    }},
+                    tip: {{ x: tipX, y: tipY }},
+                }};
+            }};
+            const getArrowInhibitorBar = (tipX, tipY, angle, size) => {{
+                const perp = angle + (Math.PI / 2);
+                return {{
+                    left: {{
+                        x: tipX + Math.cos(perp) * size,
+                        y: tipY + Math.sin(perp) * size,
+                    }},
+                    right: {{
+                        x: tipX - Math.cos(perp) * size,
+                        y: tipY - Math.sin(perp) * size,
+                    }},
+                }};
+            }};
+            const refreshArrowGeometry = (arrowId) => {{
+                const arrow = getArrowById(arrowId);
+                if (!arrow) return;
+                const line = draw.findOne(`[data-id="${{arrowId}}"]`);
+                const hit = draw.findOne(`[data-id="${{arrowId}}_hit"]`);
+                const head = draw.findOne(`[data-id="${{arrowId}}_head"]`);
+                const group = arrowHandleGroups[arrowId] || {{}};
+                if (!line || !hit) return;
+                const pathStr = buildArrowPathString(arrow);
+                const x1 = Number(arrow.x1 || 0);
+                const y1 = Number(arrow.y1 || 0);
+                const x2 = Number(arrow.x2 || 0);
+                const y2 = Number(arrow.y2 || 0);
+                line.plot(pathStr);
+                hit.plot(pathStr);
+                line.attr({{ x1, y1, x2, y2 }});
+                hit.attr({{ x1, y1, x2, y2 }});
+                if (isArrowBent(arrow)) {{
+                    const cp = ensureArrowControlState(arrow);
+                    line.attr({{ cx: Number(cp?.x || 0), cy: Number(cp?.y || 0) }});
+                    hit.attr({{ cx: Number(cp?.x || 0), cy: Number(cp?.y || 0) }});
+                }} else {{
+                    line.attr({{ cx: null, cy: null }});
+                    hit.attr({{ cx: null, cy: null }});
+                }}
+                if (group.startHandle) group.startHandle.cx(x1).cy(y1);
+                if (group.endHandle) group.endHandle.cx(x2).cy(y2);
+                if (group.headHitbox) group.headHitbox.cx(x2).cy(y2);
+                if (group.midHandle) {{
+                    const midpoint = getArrowMidpoint(arrow);
+                    group.midHandle.cx(Number(midpoint.x || 0)).cy(Number(midpoint.y || 0));
+                    group.midHandle.fill(isArrowBent(arrow) ? '#2563eb' : '#94a3b8');
+                }}
+                const arrowSize = 5;
+                const baseType = getArrowBaseType(arrow);
+                if (head) {{
+                    if (baseType === 'arrow') {{
+                        const angle = getArrowTangentAngle(arrow, false);
+                        const decor = getArrowDecorPoints(x2, y2, angle, arrowSize);
+                        head.plot([[decor.tip.x, decor.tip.y], [decor.left.x, decor.left.y], [decor.right.x, decor.right.y]]);
+                    }} else if (baseType === 'inhibition') {{
+                        const angle = getArrowTangentAngle(arrow, false);
+                        const bar = getArrowInhibitorBar(x2, y2, angle, arrowSize);
+                        head.plot(bar.left.x, bar.left.y, bar.right.x, bar.right.y);
+                    }}
+                }}
             }};
             const findArrowBetweenProtboxes = (idA, idB) => {{
                 const a = normalizeProtboxId(idA);
@@ -854,7 +1101,13 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 }}
                 return toRgbString(entity && entity[`outline_color_${{idx}}`], 'black');
             }};
-            const trackableMoveTypes = new Set(['prot-box','group','ptm-shape','ptm-label','ptm-symbol','compound','text-box','figure-key','arrow','arrow-start','arrow-end']);
+            const proteinOutlineColor = (entity, idx = activeFcIndex) => {{
+                if (pickSettingValue('use_black_protein_outlines', false)) {{
+                    return 'black';
+                }}
+                return entityOutlineColor(entity, idx);
+            }};
+            const trackableMoveTypes = new Set(['prot-box','group','ptm-shape','ptm-label','ptm-symbol','compound','text-box','figure-key','arrow','arrow-start','arrow-end','arrow-mid']);
             const toCoordinateNumber = (value, fallback = 0) => {{
                 const num = Number(value);
                 return Number.isFinite(num) ? num : fallback;
@@ -911,6 +1164,39 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                         return;
                     }}
                 }}
+                if (entry.type === 'arrow') {{
+                    const arrowData = getArrowById(entry.id);
+                    if (arrowData) {{
+                        arrowData.x1 = toCoordinateNumber(pos.x, arrowData.x1);
+                        arrowData.y1 = toCoordinateNumber(pos.y, arrowData.y1);
+                        arrowData.x2 = toCoordinateNumber(pos.x2, arrowData.x2);
+                        arrowData.y2 = toCoordinateNumber(pos.y2, arrowData.y2);
+                        refreshArrowGeometry(entry.id);
+                        return;
+                    }}
+                }}
+                if (entry.type === 'arrow-start' || entry.type === 'arrow-end' || entry.type === 'arrow-mid') {{
+                    const arrowId = String(entry.id || '').replace(/_(start|end|mid)$/, '');
+                    const arrowData = getArrowById(arrowId);
+                    if (arrowData) {{
+                        if (entry.type === 'arrow-start') {{
+                            arrowData.x1 = toCoordinateNumber(pos.x, arrowData.x1);
+                            arrowData.y1 = toCoordinateNumber(pos.y, arrowData.y1);
+                            if (!isArrowBent(arrowData)) arrowData.control_points = [];
+                        }} else if (entry.type === 'arrow-end') {{
+                            arrowData.x2 = toCoordinateNumber(pos.x, arrowData.x2);
+                            arrowData.y2 = toCoordinateNumber(pos.y, arrowData.y2);
+                            if (!isArrowBent(arrowData)) arrowData.control_points = [];
+                        }} else {{
+                            setArrowBentState(arrowData, true, {{
+                                x: toCoordinateNumber(pos.x, getArrowMidpoint(arrowData).x),
+                                y: toCoordinateNumber(pos.y, getArrowMidpoint(arrowData).y),
+                            }});
+                        }}
+                        refreshArrowGeometry(arrowId);
+                        return;
+                    }}
+                }}
                 if (entry.type === 'ptm-shape' || entry.type === 'ptm-label' || entry.type === 'ptm-symbol') {{
                     if (entry.type === 'ptm-shape') {{
                         if (pos.posKey) {{
@@ -946,7 +1232,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                         y2: readAttr('y2')
                     }};
                 }}
-                if (type === 'arrow-start' || type === 'arrow-end') {{
+                if (type === 'arrow-start' || type === 'arrow-end' || type === 'arrow-mid') {{
                     if (typeof element.cx === 'function' && typeof element.cy === 'function') {{
                         return {{
                             x: toCoordinateNumber(element.cx()),
@@ -1078,12 +1364,12 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 if (!Array.isArray(snapshots) || !snapshots.length) return;
                 snapshots.forEach(snap => {{
                     if (!snap?.arrowId) return;
-                    const arrowElement = draw.find(`[data-id="${{snap.arrowId}}"]`)[0];
-                    if (!arrowElement) return;
-                    let x1 = toCoordinateNumber(arrowElement.attr('x1'), 0);
-                    let y1 = toCoordinateNumber(arrowElement.attr('y1'), 0);
-                    let x2 = toCoordinateNumber(arrowElement.attr('x2'), 0);
-                    let y2 = toCoordinateNumber(arrowElement.attr('y2'), 0);
+                    const arrowData = getArrowById(snap.arrowId);
+                    if (!arrowData) return;
+                    let x1 = toCoordinateNumber(arrowData.x1, 0);
+                    let y1 = toCoordinateNumber(arrowData.y1, 0);
+                    let x2 = toCoordinateNumber(arrowData.x2, 0);
+                    let y2 = toCoordinateNumber(arrowData.y2, 0);
                     let appliedPartial = false;
                     if (typeof snap.endType === 'string') {{
                         if (snap.endType === 'start') {{
@@ -1102,55 +1388,28 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                         x2 = toCoordinateNumber(snap.x2, x2);
                         y2 = toCoordinateNumber(snap.y2, y2);
                     }}
-                    arrowElement.plot(x1, y1, x2, y2);
-                    const arrowHitbox = draw.find(`[data-id="${{snap.arrowId}}_hit"]`)[0];
-                    if (arrowHitbox) {{
-                        arrowHitbox.plot(x1, y1, x2, y2);
-                    }}
-                    const startHandle = arrowHandleGroups[snap.arrowId]?.startHandle;
-                    if (startHandle) {{
-                        startHandle.cx(x1).cy(y1);
-                    }}
-                    const endHandle = arrowHandleGroups[snap.arrowId]?.endHandle;
-                    if (endHandle) {{
-                        endHandle.cx(x2).cy(y2);
-                    }}
-                    updateArrowHeadHitbox(snap.arrowId, x2, y2);
-                    const arrowHead = draw.find(`[data-id="${{snap.arrowId}}_head"]`)[0];
-                    if (!arrowHead) return;
-                    const dx = x2 - x1;
-                    const dy = y2 - y1;
-                    const angle = Math.atan2(dy, dx);
-                    const arrowSize = 5;
-                    const lineType = snap.lineType || arrowElement.attr('data-line-type') || 'arrow';
-                    if (lineType === 'inhibition') {{
-                        const arrowData = getArrowById(snap.arrowId);
-                        const endSide = arrowData?.protbox_id_2_side;
-                        let barX1, barY1, barX2, barY2;
-                        if (endSide === 'North' || endSide === 'South') {{
-                            barX1 = x2 - arrowSize;
-                            barX2 = x2 + arrowSize;
-                            barY1 = barY2 = y2;
-                        }} else if (endSide === 'West' || endSide === 'East') {{
-                            barY1 = y2 - arrowSize;
-                            barY2 = y2 + arrowSize;
-                            barX1 = barX2 = x2;
-                        }} else {{
-                            const perp = angle + Math.PI / 2;
-                            barX1 = x2 + Math.cos(perp) * arrowSize;
-                            barY1 = y2 + Math.sin(perp) * arrowSize;
-                            barX2 = x2 - Math.cos(perp) * arrowSize;
-                            barY2 = y2 - Math.sin(perp) * arrowSize;
-                        }}
-                        arrowHead.plot(barX1, barY1, barX2, barY2);
-                    }} else {{
-                        arrowHead.plot([
-                            [x2, y2],
-                            [x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)],
-                            [x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)],
-                        ]);
-                    }}
+                    arrowData.x1 = x1;
+                    arrowData.y1 = y1;
+                    arrowData.x2 = x2;
+                    arrowData.y2 = y2;
+                    refreshArrowGeometry(snap.arrowId);
                 }});
+            }};
+            const restoreArrowSnapshot = (snapshot, insertIndex = arrows.length) => {{
+                if (!snapshot) return null;
+                const clone = cloneData(snapshot);
+                if (!clone) return null;
+                const safeIndex = Math.max(0, insertIndex);
+                while (arrows.length <= safeIndex) arrows.push(null);
+                arrows[safeIndex] = clone;
+                drawArrows([clone], {{ force: true }});
+                rebuildAttachmentsIndex();
+                if (clone.protbox_id_1 && clone.protbox_id_1_side) updateArrowPositions(clone.protbox_id_1, clone.protbox_id_1_side);
+                if (clone.protbox_id_2 && clone.protbox_id_2_side) updateArrowPositions(clone.protbox_id_2, clone.protbox_id_2_side);
+                const aid = arrowIdFromIndex(safeIndex);
+                updateAttachedArrows(aid, 'start');
+                updateAttachedArrows(aid, 'end');
+                return clone;
             }};
             const warmMovableElements = () => {{
                 let warmed = false;
@@ -1270,6 +1529,10 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     suppress = true;
                     try {{
                         applyEntry(entry, 'undo');
+                    }} catch (err) {{
+                        console.error('mkHistory undo failed', err, entry);
+                        undoStack.push(entry);
+                        return;
                     }} finally {{
                         suppress = false;
                     }}
@@ -1282,6 +1545,10 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     suppress = true;
                     try {{
                         applyEntry(entry, 'redo');
+                    }} catch (err) {{
+                        console.error('mkHistory redo failed', err, entry);
+                        redoStack.push(entry);
+                        return;
                     }} finally {{
                         suppress = false;
                     }}
@@ -1809,16 +2076,17 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             }};
             let mouseMode = 'drag';
             const canDeleteSelection = () => {{
+                if (resolveSelectedArrowActionId()) return true;
                 if (!selectedElement || !selectedType || !selectedId) return false;
-                return new Set(['prot-box', 'group', 'arrow', 'arrow-start', 'arrow-end', 'compound', 'figure-key', 'text-box', 'ptm-shape', 'ptm-label', 'ptm-symbol']).has(selectedType);
+                return new Set(['prot-box', 'group', 'arrow', 'arrow-hitbox', 'arrow-head', 'arrow-start', 'arrow-end', 'arrow-mid', 'compound', 'figure-key', 'text-box', 'ptm-shape', 'ptm-label', 'ptm-symbol']).has(selectedType);
             }};
             function resolveSelectedArrowActionId() {{
                 const selectedProtIds = typeof getSelectedProtboxes === 'function' ? getSelectedProtboxes() : [];
                 if (selectedType === 'arrow' || selectedType === 'arrow-hitbox') {{
                     return selectedId || null;
                 }}
-                if (selectedType === 'arrow-start' || selectedType === 'arrow-end') {{
-                    return (selectedId || '').replace(/_(start|end)$/, '') || null;
+                if (selectedType === 'arrow-start' || selectedType === 'arrow-end' || selectedType === 'arrow-mid') {{
+                    return (selectedId || '').replace(/_(start|end|mid)$/, '') || null;
                 }}
                 if (Array.isArray(selectedProtIds) && selectedProtIds.length === 2 && typeof findArrowBetweenProtboxes === 'function') {{
                     return findArrowBetweenProtboxes(selectedProtIds[0], selectedProtIds[1]) || null;
@@ -2769,20 +3037,23 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             const showRelatedHandles = (arrowId, visited = new Set()) => {{
                 if (visited.has(arrowId)) return;
                 visited.add(arrowId);
-                const group = arrowHandleGroups[arrowId];
+                const group = ensureArrowHandleGroup(arrowId);
                 if (group) {{
                     group.headHitbox?.attr({{ 'pointer-events': 'none' }});
                     group.startHandle?.show();
                     group.endHandle?.show();
+                    group.midHandle?.show();
                 }}
                 const arrow = getArrowById(arrowId);
                 if (arrow) {{
                     if (arrow.attached_arrow_1) {{
+                        ensureArrowHandleGroup(arrow.attached_arrow_1);
                         const mh = arrowHandleGroups[arrow.attached_arrow_1]?.[`${{arrow.attached_end_1}}Handle`];
                         mh?.show();
                         showRelatedHandles(arrow.attached_arrow_1, visited);
                     }}
                     if (arrow.attached_arrow_2) {{
+                        ensureArrowHandleGroup(arrow.attached_arrow_2);
                         const mh = arrowHandleGroups[arrow.attached_arrow_2]?.[`${{arrow.attached_end_2}}Handle`];
                         mh?.show();
                         showRelatedHandles(arrow.attached_arrow_2, visited);
@@ -2793,6 +3064,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                         if (attachedBy[arrowId][endType]) {{
                             attachedBy[arrowId][endType].forEach(slaveInfo => {{
                                 const sId = slaveInfo.slave;
+                                ensureArrowHandleGroup(sId);
                                 const freeEnd = slaveInfo.slaveEnd === 'start' ? 'endHandle' : 'startHandle';
                                 arrowHandleGroups[sId]?.[freeEnd]?.show();
                                 showRelatedHandles(sId, visited);
@@ -2809,6 +3081,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     group.headHitbox?.attr({{ 'pointer-events': 'all' }});
                     group.startHandle?.hide();
                     group.endHandle?.hide();
+                    group.midHandle?.hide();
                 }}
                 const arrow = getArrowById(arrowId);
                 if (arrow) {{
@@ -2855,8 +3128,8 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     }});
                 }} else if (selectedType === 'arrow' && selectedId) {{
                     showRelatedHandles(selectedId);
-                }} else if ((selectedType === 'arrow-start' || selectedType === 'arrow-end') && selectedId) {{
-                    showRelatedHandles(selectedId.replace(/_(start|end)$/, ''));
+                }} else if ((selectedType === 'arrow-start' || selectedType === 'arrow-end' || selectedType === 'arrow-mid') && selectedId) {{
+                    showRelatedHandles(selectedId.replace(/_(start|end|mid)$/, ''));
                 }}
             }};
             const setGroupStrokeColor = (group, role, color = null) => {{
@@ -2940,6 +3213,8 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     selectionVisual?.stroke({{ color: arrow?.color || 'black', width: 2 }});
                 }} else if (type === 'arrow-start' || type === 'arrow-end') {{
                     element.fill('red').stroke({{ color: 'red', width: 2 }});
+                }} else if (type === 'arrow-mid') {{
+                    element.fill('#2563eb').stroke({{ color: '#2563eb', width: 2 }});
                 }} else if (type === 'ptm-label') {{
                     element.stroke({{ color: 'none' }});
                 }} else {{
@@ -2957,8 +3232,8 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     const arrowId = id;
                     Object.values(elementGroups).forEach(group => group.forEach(el => el.element.attr('data-type').startsWith('handle-') && el.element.hide()));
                     showRelatedHandles(arrowId);
-                }} else if (asPrimary && (type === 'arrow-start' || type === 'arrow-end')) {{
-                    const arrowId = id.replace(/_(start|end)$/, '');
+                }} else if (asPrimary && (type === 'arrow-start' || type === 'arrow-end' || type === 'arrow-mid')) {{
+                    const arrowId = id.replace(/_(start|end|mid)$/, '');
                     const arrowEl = draw.findOne(`[data-id="${{arrowId}}"]`) || element;
                     const arrowBounds = getScreenBounds(arrowEl);
                     const arrowEnds = [];
@@ -3010,13 +3285,19 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     entry.visual?.stroke({{ color: arrow?.color || 'black', width: 1 }});
                 }} else if (type === 'arrow-start' || type === 'arrow-end') {{
                     element.stroke({{ color: 'black', width: 1 }});
+                    element.fill('red');
+                }} else if (type === 'arrow-mid') {{
+                    const arrowId = id.replace(/_mid$/, '');
+                    const arrow = getArrowById(arrowId);
+                    element.stroke({{ color: 'white', width: 1.1 }});
+                    element.fill(isArrowBent(arrow) ? '#2563eb' : '#94a3b8');
                 }} else if (type === 'ptm-label') {{
                     element.stroke({{ color: 'none' }});
                 }} else if (type === 'prot-box') {{
                     const pb = protBoxes.find(p => p.protbox_id === id);
                     const selected = currentSelected[id] || pb?.selected_uniprot || pb?.proteins?.[0] || '';
                     const prot = (selected && proteinData[selected]) ? proteinData[selected] : {{}};
-                    element.stroke({{ color: entityOutlineColor(prot), width: protOutlineWidth }});
+                    element.stroke({{ color: proteinOutlineColor(prot), width: protOutlineWidth }});
                 }} else if (type === 'ptm-shape') {{
                     const parsed = parsePtmElementId(id);
                     let ptm = null;
@@ -3028,8 +3309,8 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 }} else {{
                     element.stroke({{ color: 'black', width: 1 }});
                 }}
-                if ((type === 'arrow' || type === 'arrow-start' || type === 'arrow-end') && id) {{
-                    const arrowId = type === 'arrow' ? id : id.replace(/_(start|end)$/, '');
+                if ((type === 'arrow' || type === 'arrow-start' || type === 'arrow-end' || type === 'arrow-mid') && id) {{
+                    const arrowId = type === 'arrow' ? id : id.replace(/_(start|end|mid)$/, '');
                     hideRelatedHandles(arrowId);
                     const arrow = getArrowById(arrowId);
                     if (arrow) {{
@@ -3263,41 +3544,22 @@ function rebuildGroupIndexes() {{
                 return acc;
             }}
             function translateArrowByDelta(arrowId, deltaX, deltaY) {{
-                const line = draw.find(`[data-id="${{arrowId}}"]`)[0];
-                const hit = draw.find(`[data-id="${{arrowId}}_hit"]`)[0];
-                const head = draw.find(`[data-id="${{arrowId}}_head"]`)[0];
-                const startHandle = arrowHandleGroups[arrowId]?.startHandle;
-                const endHandle = arrowHandleGroups[arrowId]?.endHandle;
                 const arrowData = getArrowById(arrowId);
-                if (!line) return;
-                let x1 = parseFloat(line.attr('x1') || 0) + deltaX;
-                let y1 = parseFloat(line.attr('y1') || 0) + deltaY;
-                let x2 = parseFloat(line.attr('x2') || 0) + deltaX;
-                let y2 = parseFloat(line.attr('y2') || 0) + deltaY;
-                line.plot(x1, y1, x2, y2);
-                if (hit) hit.plot(x1, y1, x2, y2);
-                if (startHandle) startHandle.cx(x1).cy(y1);
-                if (endHandle) endHandle.cx(x2).cy(y2);
-                const lineType = line.attr('data-line-type') || 'arrow';
-                if (arrowData) {{
-                    arrowData.x1 = x1;
-                    arrowData.y1 = y1;
-                    arrowData.x2 = x2;
-                    arrowData.y2 = y2;
+                if (!arrowData) return;
+                arrowData.x1 = Number(arrowData.x1 || 0) + deltaX;
+                arrowData.y1 = Number(arrowData.y1 || 0) + deltaY;
+                arrowData.x2 = Number(arrowData.x2 || 0) + deltaX;
+                arrowData.y2 = Number(arrowData.y2 || 0) + deltaY;
+                if (isArrowBent(arrowData)) {{
+                    const cp = ensureArrowControlState(arrowData);
+                    arrowData.control_points = [{{
+                        x: Number(cp?.x || 0) + deltaX,
+                        y: Number(cp?.y || 0) + deltaY,
+                    }}];
                 }}
-                if (head) {{
-                    const dx = x2 - x1, dy = y2 - y1, angle = Math.atan2(dy, dx), arrowSize = 5;
-                    if (lineType === 'arrow') {{
-                        head.plot([[x2, y2],[x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)],[x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)]]);
-                    }} else if (lineType === 'inhibition') {{
-                        const endSide = arrowData?.protbox_id_2_side;
-                        let barX1, barY1, barX2, barY2;
-                        if (endSide === 'North' || endSide === 'South') {{barX1 = x2 - arrowSize; barY1 = y2; barX2 = x2 + arrowSize; barY2 = y2;}}
-                        else if (endSide === 'West' || endSide === 'East') {{barX1 = x2; barY1 = y2 - arrowSize; barX2 = x2; barY2 = y2 + arrowSize;}}
-                        else {{const perp = angle + Math.PI / 2; barX1 = x2 + Math.cos(perp) * arrowSize; barY1 = y2 + Math.sin(perp) * arrowSize; barX2 = x2 - Math.cos(perp) * arrowSize; barY2 = y2 - Math.sin(perp) * arrowSize;}}
-                        head.plot(barX1, barY1, barX2, barY2);
-                    }}
-                }}
+                refreshArrowGeometry(arrowId);
+                updateAttachedArrows(arrowId, 'start');
+                updateAttachedArrows(arrowId, 'end');
             }}
             function isProtboxInGroup(protboxId, groupId, visited = new Set()) {{
                 const gid = `${{groupId}}`;
@@ -3814,8 +4076,8 @@ function rebuildGroupIndexes() {{
                                 return {{ type: 'arrow', id: aid }};
                             }}
                         }}
-                        if (dtype === 'arrow-start' || dtype === 'arrow-end') {{
-                            const aid = (arrowOwner || did || '').replace(/_(start|end)$/, '');
+                        if (dtype === 'arrow-start' || dtype === 'arrow-end' || dtype === 'arrow-mid') {{
+                            const aid = (arrowOwner || did || '').replace(/_(start|end|mid)$/, '');
                             if (aid) {{
                                 return {{ type: 'arrow', id: aid }};
                             }}
@@ -3961,13 +4223,6 @@ function rebuildGroupIndexes() {{
                     menu.appendChild(item);
                 }};
                 const flipArrow = () => {{
-                    const line = draw.findOne(`[data-id="${{arrowId}}"]`);
-                    const hit = draw.findOne(`[data-id="${{arrowId}}_hit"]`);
-                    if (line) {{
-                        const x1 = line.attr('x1'), y1 = line.attr('y1'), x2 = line.attr('x2'), y2 = line.attr('y2');
-                        line.attr({{ x1: x2, y1: y2, x2: x1, y2: y1 }});
-                        if (hit) hit.attr({{ x1: x2, y1: y2, x2: x1, y2: y1 }});
-                    }}
                     const swapFields = (obj, a, b) => {{ const tmp = obj[a]; obj[a] = obj[b]; obj[b] = tmp; }};
                     swapFields(arrow, 'x1', 'x2');
                     swapFields(arrow, 'y1', 'y2');
@@ -3975,6 +4230,10 @@ function rebuildGroupIndexes() {{
                     swapFields(arrow, 'protbox_id_1_side', 'protbox_id_2_side');
                     swapFields(arrow, 'attached_arrow_1', 'attached_arrow_2');
                     swapFields(arrow, 'attached_end_1', 'attached_end_2');
+                    if (isArrowBent(arrow)) {{
+                        const midpoint = getArrowMidpoint(arrow);
+                        setArrowBentState(arrow, true, midpoint);
+                    }}
                     updateArrowVisual(arrowId);
                     rebuildAttachmentsIndex();
                     updateAttachedArrows(arrowId, 'start');
@@ -3994,7 +4253,6 @@ function rebuildGroupIndexes() {{
                 }};
                 const disconnectArrow = () => {{
                     const line = draw.findOne(`[data-id="${{arrowId}}"]`);
-                    const hit = draw.findOne(`[data-id="${{arrowId}}_hit"]`);
                     const x1 = line ? parseFloat(line.attr('x1') || 0) : toFiniteNumber(arrow.x1) || 0;
                     const y1 = line ? parseFloat(line.attr('y1') || 0) : toFiniteNumber(arrow.y1) || 0;
                     const x2 = line ? parseFloat(line.attr('x2') || 0) : toFiniteNumber(arrow.x2) || 0;
@@ -4003,10 +4261,9 @@ function rebuildGroupIndexes() {{
                     delete arrow.protbox_id_1; delete arrow.protbox_id_1_side;
                     delete arrow.protbox_id_2; delete arrow.protbox_id_2_side;
                     cleanupProtboxAttachmentsForArrow(arrowId);
-                    if (line) line.plot(x1, y1, x2, y2);
-                    if (hit) hit.plot(x1, y1, x2, y2);
                     ensureArrowHandle(arrowId, 'start');
                     ensureArrowHandle(arrowId, 'end');
+                    refreshArrowGeometry(arrowId);
                     rebuildAttachmentsIndex();
                     updateAttachedArrows(arrowId, 'start');
                     updateAttachedArrows(arrowId, 'end');
@@ -4267,6 +4524,18 @@ function rebuildGroupIndexes() {{
                             const box = getScreenBounds(el);
                             if (hitScreen(box)) selectedEntries.push({{ type: 'compound', id: cid }});
                         }});
+                        // Arrows
+                        const seenArrowIds = new Set();
+                        const arrowEls = draw.find('[data-type=\"arrow-hitbox\"], [data-type=\"arrow\"]') || [];
+                        arrowEls.forEach(el => {{
+                            const rawArrowId = el.attr('data-arrow-id') || el.attr('data-id') || '';
+                            const aid = String(rawArrowId || '').replace(/_(hit|head|start|end|mid)$/, '');
+                            if (!aid || seenArrowIds.has(aid)) return;
+                            const box = getScreenBounds(el);
+                            if (!hitScreen(box)) return;
+                            seenArrowIds.add(aid);
+                            selectedEntries.push({{ type: 'arrow', id: aid }});
+                        }});
                         deselectElement();
                         selectedEntries.forEach((entry, idx) => {{
                             const target = draw.findOne(`[data-id=\"${{entry.id}}\"]`);
@@ -4380,45 +4649,23 @@ function rebuildGroupIndexes() {{
             }};
             const updateAttachedArrows = (arrowId, endType) => {{
                 if (!attachedBy[arrowId] || !attachedBy[arrowId][endType]) return;
-                const masterLine = draw.find(`[data-id="${{arrowId}}"]`)[0];
-                const masterX = endType === 'start' ? parseFloat(masterLine.attr('x1')) : parseFloat(masterLine.attr('x2'));
-                const masterY = endType === 'start' ? parseFloat(masterLine.attr('y1')) : parseFloat(masterLine.attr('y2'));
+                const masterArrow = getArrowById(arrowId);
+                if (!masterArrow) return;
+                const masterX = endType === 'start' ? Number(masterArrow.x1 || 0) : Number(masterArrow.x2 || 0);
+                const masterY = endType === 'start' ? Number(masterArrow.y1 || 0) : Number(masterArrow.y2 || 0);
                 attachedBy[arrowId][endType].forEach(slaveInfo => {{
                     const slaveArrowId = slaveInfo.slave;
                     const slaveEnd = slaveInfo.slaveEnd;
-                    const slaveLine = draw.find(`[data-id="${{slaveArrowId}}"]`)[0];
-                    const slaveHitbox = draw.find(`[data-id="${{slaveArrowId}}_hit"]`)[0];
+                    const slaveArrow = getArrowById(slaveArrowId);
+                    if (!slaveArrow) return;
                     if (slaveEnd === 'start') {{
-                        slaveLine.attr({{ x1: masterX, y1: masterY }});
+                        slaveArrow.x1 = masterX;
+                        slaveArrow.y1 = masterY;
                     }} else {{
-                        slaveLine.attr({{ x2: masterX, y2: masterY }});
+                        slaveArrow.x2 = masterX;
+                        slaveArrow.y2 = masterY;
                     }}
-                    if (slaveHitbox) slaveHitbox.plot(slaveLine.attr('x1'), slaveLine.attr('y1'), slaveLine.attr('x2'), slaveLine.attr('y2'));
-                    const slaveHead = draw.find(`[data-id="${{slaveArrowId}}_head"]`)[0];
-                    if (slaveHead) {{
-                        const sX1 = parseFloat(slaveLine.attr('x1')), sY1 = parseFloat(slaveLine.attr('y1'));
-                        const sX2 = parseFloat(slaveLine.attr('x2')), sY2 = parseFloat(slaveLine.attr('y2'));
-                        const dx = sX2 - sX1, dy = sY2 - sY1, angle = Math.atan2(dy, dx), arrowSize = 5;
-                        const lineType = slaveLine.attr('data-line-type');
-                        if (lineType === 'arrow') {{
-                            slaveHead.plot([[sX2, sY2],[sX2 - arrowSize * Math.cos(angle + Math.PI / 6), sY2 - arrowSize * Math.sin(angle + Math.PI / 6)],[sX2 - arrowSize * Math.cos(angle - Math.PI / 6), sY2 - arrowSize * Math.sin(angle - Math.PI / 6)]]);
-                        }} else if (lineType === 'inhibition') {{
-                            const perp = angle + Math.PI / 2;
-                            const barX1 = sX2 + Math.cos(perp) * arrowSize;
-                            const barY1 = sY2 + Math.sin(perp) * arrowSize;
-                            const barX2 = sX2 - Math.cos(perp) * arrowSize;
-                            const barY2 = sY2 - Math.sin(perp) * arrowSize;
-                            slaveHead.plot(barX1, barY1, barX2, barY2);
-                        }}
-                    }}
-                    const slaveHandle = arrowHandleGroups[slaveArrowId]?.[`${{slaveEnd}}Handle`];
-                    if (slaveHandle) {{
-                        slaveHandle.cx(masterX).cy(masterY);
-                    }}
-                    const slaveHeadHitbox = arrowHandleGroups[slaveArrowId]?.headHitbox;
-                    if (slaveHeadHitbox) {{
-                        slaveHeadHitbox.cx(sX2).cy(sY2);
-                    }}
+                    refreshArrowGeometry(slaveArrowId);
                 }});
             }};
             const updateArrowAttachments = (arrowId, endType, x, y) => {{
@@ -4467,16 +4714,13 @@ function rebuildGroupIndexes() {{
                         }}
                     }}
                 }}
-                const arrowElement = draw.find(`[data-id="${{arrowId}}"]`)[0];
-                const arrowHitbox = draw.find(`[data-id="${{arrowId}}_hit"]`)[0];
-                const arrowHead = draw.find(`[data-id="${{arrowId}}_head"]`)[0];
                 const startHandle = arrowHandleGroups[arrowId]?.startHandle;
                 const endHandle = arrowHandleGroups[arrowId]?.endHandle;
                 const headHitbox = arrowHandleGroups[arrowId]?.headHitbox;
-                let x1 = parseFloat(arrowElement.attr('x1') || 0);
-                let y1 = parseFloat(arrowElement.attr('y1') || 0);
-                let x2 = parseFloat(arrowElement.attr('x2') || 0);
-                let y2 = parseFloat(arrowElement.attr('y2') || 0);
+                let x1 = Number(arrow.x1 || 0);
+                let y1 = Number(arrow.y1 || 0);
+                let x2 = Number(arrow.x2 || 0);
+                let y2 = Number(arrow.y2 || 0);
                 if (endType === 'start') {{
                     x1 = snapped.x;
                     y1 = snapped.y;
@@ -4487,12 +4731,14 @@ function rebuildGroupIndexes() {{
                     if (endHandle) endHandle.cx(x2).cy(y2);
                 }}
                 if (headHitbox) headHitbox.cx(x2).cy(y2);
-                arrowElement.plot(x1, y1, x2, y2);
-                if (arrowHitbox) arrowHitbox.plot(x1, y1, x2, y2);
                 arrow.x1 = x1;
                 arrow.y1 = y1;
                 arrow.x2 = x2;
                 arrow.y2 = y2;
+                if (!isArrowBent(arrow)) {{
+                    arrow.control_points = [];
+                }}
+                refreshArrowGeometry(arrowId);
                 if (snapped.isSnapped) {{
                     if (snapped.protbox_id) {{
                         const {{ protbox_id, side }} = snapped;
@@ -4527,20 +4773,6 @@ function rebuildGroupIndexes() {{
                         }});
                         if (Object.keys(attachments[protboxId]).length === 0) delete attachments[protboxId];
                     }});
-                }}
-                if (arrowHead) {{
-                    const lineType = arrowElement.attr('data-line-type') || 'arrow';
-                    const dx = x2 - x1, dy = y2 - y1, angle = Math.atan2(dy, dx), arrowSize = 5;
-                    if (lineType === 'arrow') {{
-                        arrowHead.plot([[x2, y2],[x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)],[x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)]]);
-                    }} else if (lineType === 'inhibition') {{
-                        const endSide = snapped.isSnapped ? snapped.side : arrow.protbox_id_2_side;
-                        let barX1, barY1, barX2, barY2;
-                        if (endSide && (endSide === 'North' || endSide === 'South')) {{barX1 = x2 - 5;barY1 = y2;barX2 = x2 + 5;barY2 = y2;}} 
-                        else if (endSide && (endSide === 'West' || endSide === 'East')) {{barX1 = x2;barY1 = y2 - 5;barX2 = x2;barY2 = y2 + 5;}} 
-                        else {{const perp = angle + Math.PI / 2;barX1 = x2 + Math.cos(perp) * arrowSize;barY1 = y2 + Math.sin(perp) * arrowSize;barX2 = x2 - Math.cos(perp) * arrowSize;barY2 = y2 - Math.sin(perp) * arrowSize;}}
-                        arrowHead.plot(barX1, barY1, barX2, barY2);
-                    }}
                 }}
                 const startProtboxId = arrow.protbox_id_1;
                 const startSide = arrow.protbox_id_1_side;
@@ -4611,32 +4843,11 @@ function rebuildGroupIndexes() {{
                         x2 = parseFloat(arrowElement.attr('x2') || arrow.x2 || 0);
                         y2 = parseFloat(arrowElement.attr('y2') || arrow.y2 || 0);
                     }}
-                    arrowElement.plot(x1, y1, x2, y2);
-                    if (arrowHitbox && arrowHitbox.plot) arrowHitbox.plot(x1, y1, x2, y2);
                     arrow.x1 = x1;
                     arrow.y1 = y1;
                     arrow.x2 = x2;
                     arrow.y2 = y2;
-                    const startHandle = arrowHandleGroups[arrowId]?.startHandle;
-                    const endHandle = arrowHandleGroups[arrowId]?.endHandle;
-                    const headHitbox = arrowHandleGroups[arrowId]?.headHitbox;
-                    if (startHandle) startHandle.cx(x1).cy(y1);
-                    if (endHandle) endHandle.cx(x2).cy(y2);
-                    if (headHitbox) headHitbox.cx(x2).cy(y2);
-                    if (arrowHead && arrowHead.plot) {{
-                        const dx = x2 - x1, dy = y2 - y1, angle = Math.atan2(dy, dx), arrowSize = 5;
-                        const lineType = arrowElement.attr('data-line-type') || 'arrow';
-                        if (lineType === 'arrow') {{
-                            arrowHead.plot([[x2, y2],[x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)],[x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)]]);
-                        }} else if (lineType === 'inhibition') {{
-                            const endSide = arrow.protbox_id_2_side;
-                            let barX1, barY1, barX2, barY2;
-                            if (endSide === 'North' || endSide === 'South') {{barX1 = x2 - arrowSize;barY1 = y2;barX2 = x2 + arrowSize;barY2 = y2;}} 
-                            else if (endSide === 'West' || endSide === 'East') {{barX1 = x2;barY1 = y2 - arrowSize;barX2 = x2;barY2 = y2 + arrowSize;}} 
-                            else {{const perp = angle + Math.PI / 2;barX1 = x2 + Math.cos(perp) * arrowSize;barY1 = y2 + Math.sin(perp) * arrowSize;barX2 = x2 - Math.cos(perp) * arrowSize;barY2 = y2 - Math.sin(perp) * arrowSize;}}
-                            arrowHead.plot(barX1, barY1, barX2, barY2);
-                        }}
-                    }}
+                    refreshArrowGeometry(arrowId);
                 }});
             }};
             const PROTBOX_SNAP_DISTANCE = 2;
@@ -5404,7 +5615,7 @@ function rebuildGroupIndexes() {{
                     }});
                     return;
                 }}
-                const isCircle = selectedType === 'ptm-shape' || selectedType === 'arrow-start' || selectedType === 'arrow-end' || (selectedElement && selectedElement.type === 'circle');
+                const isCircle = selectedType === 'ptm-shape' || selectedType === 'arrow-start' || selectedType === 'arrow-end' || selectedType === 'arrow-mid' || (selectedElement && selectedElement.type === 'circle');
                 let currentX = parseFloat(isCircle ? selectedElement.cx() : selectedElement.x() || 0);
                 let currentY = parseFloat(isCircle ? selectedElement.cy() : selectedElement.y() || 0);
                 let newX = currentX + deltaX, newY = currentY + deltaY;
@@ -5412,14 +5623,10 @@ function rebuildGroupIndexes() {{
                 if (selectedType === 'arrow-start' || selectedType === 'arrow-end') {{
                     const arrowId = selectedId.replace(/_(start|end)$/, '');
                     const arrowElement = draw.find(`[data-id="${{arrowId}}"]`)[0];
-                    const arrowHitbox = draw.find(`[data-id="${{arrowId}}_hit"]`)[0];
-                    const arrowHead = draw.find(`[data-id="${{arrowId}}_head"]`)[0];
                     const arrowData = getArrowById(arrowId);
                     arrowHandleContext = {{
                         arrowId,
                         arrowElement,
-                        arrowHitbox,
-                        arrowHead,
                         arrowData
                     }};
                     if (arrowElement) {{
@@ -5427,11 +5634,9 @@ function rebuildGroupIndexes() {{
                             newX = pointerX;
                             newY = pointerY;
                         }}
-                        const anchorAttrX = selectedType === 'arrow-start' ? 'x2' : 'x1';
-                        const anchorAttrY = selectedType === 'arrow-start' ? 'y2' : 'y1';
                         arrowHandleContext.anchor = {{
-                            x: parseFloat(arrowElement.attr(anchorAttrX) || 0),
-                            y: parseFloat(arrowElement.attr(anchorAttrY) || 0)
+                            x: Number(selectedType === 'arrow-start' ? arrowData?.x2 : arrowData?.x1) || 0,
+                            y: Number(selectedType === 'arrow-start' ? arrowData?.y2 : arrowData?.y1) || 0,
                         }};
                     if (arrowData && arrowHandleContext.anchor) {{
                         const nearProtbox = isPointNearProtboxSnapZone(newX, newY, arrowData);
@@ -5506,76 +5711,56 @@ function rebuildGroupIndexes() {{
                 }}
                 if (selectedType === 'arrow') {{
                     const arrowId = selectedId;
-                    const hitbox = selectedElement;
-                    const visual = selectedVisual;
-                    const arrowHead = draw.find(`[data-id="${{arrowId}}_head"]`)[0];
-                    const headHitbox = arrowHandleGroups[arrowId]?.headHitbox;
-                    const startHandle = arrowHandleGroups[arrowId]?.startHandle;
-                    const endHandle = arrowHandleGroups[arrowId]?.endHandle;
-                    let x1 = parseFloat(hitbox.attr('x1') || 0) + deltaX;
-                    let y1 = parseFloat(hitbox.attr('y1') || 0) + deltaY;
-                    let x2 = parseFloat(hitbox.attr('x2') || 0) + deltaX;
-                    let y2 = parseFloat(hitbox.attr('y2') || 0) + deltaY;
-                    hitbox.plot(x1, y1, x2, y2);
-                    visual.plot(x1, y1, x2, y2);
-                    if (startHandle) startHandle.cx(x1).cy(y1);
-                    if (endHandle) endHandle.cx(x2).cy(y2);
-                    if (headHitbox) headHitbox.cx(x2).cy(y2);
-                    if (arrowHead) {{
-                        const lineType = visual.attr('data-line-type') || 'arrow';
-                        const baseLineType = lineType.startsWith('dashed_') ? lineType.replace(/^dashed_/, '') : lineType;
-                        const dx = x2 - x1, dy = y2 - y1, angle = Math.atan2(dy, dx), arrowSize = 5;
-                        if (baseLineType === 'arrow') {{
-                            arrowHead.plot([[x2, y2],[x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)],[x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)]]);
-                        }} else if (baseLineType === 'inhibition') {{
-                            const arrow = getArrowById(arrowId);
-                            const endSide = arrow?.protbox_id_2_side;
-                            let barX1, barY1, barX2, barY2;
-                            if (endSide === 'North' || endSide === 'South') {{barX1 = x2 - arrowSize;barY1 = y2;barX2 = x2 + arrowSize;barY2 = y2;}} 
-                            else if (endSide === 'West' || endSide === 'East') {{barX1 = x2;barY1 = y2 - arrowSize;barX2 = x2;barY2 = y2 + arrowSize;}} 
-                            else {{const perp = angle + Math.PI / 2;barX1 = x2 + Math.cos(perp) * arrowSize;barY1 = y2 + Math.sin(perp) * arrowSize;barX2 = x2 - Math.cos(perp) * arrowSize;barY2 = y2 - Math.sin(perp) * arrowSize;}}
-                            arrowHead.plot(barX1, barY1, barX2, barY2);
-                        }}
-                    }}
                     const arrow = getArrowById(arrowId);
+                    arrow.x1 = Number(arrow.x1 || 0) + deltaX;
+                    arrow.y1 = Number(arrow.y1 || 0) + deltaY;
+                    arrow.x2 = Number(arrow.x2 || 0) + deltaX;
+                    arrow.y2 = Number(arrow.y2 || 0) + deltaY;
+                    if (isArrowBent(arrow)) {{
+                        const cp = ensureArrowControlState(arrow);
+                        arrow.control_points = [{{
+                            x: Number(cp?.x || 0) + deltaX,
+                            y: Number(cp?.y || 0) + deltaY,
+                        }}];
+                    }}
+                    refreshArrowGeometry(arrowId);
                     ['1', '2'].forEach(num => {{
                         const attachedKey = `attached_arrow_${{num}}`;
                         const endKey = `attached_end_${{num}}`;
                         if (arrow[attachedKey]) {{
                             const masterId = arrow[attachedKey];
                             const masterEnd = arrow[endKey];
-                            const masterElement = draw.find(`[data-id="${{masterId}}"]`)[0];
-                            const masterHitbox = draw.find(`[data-id="${{masterId}}_hit"]`)[0];
-                            const masterHead = draw.find(`[data-id="${{masterId}}_head"]`)[0];
-                            const masterHandle = arrowHandleGroups[masterId]?.[`${{masterEnd}}Handle`];
-                            let mx1 = parseFloat(masterElement.attr('x1')) + (masterEnd === 'start' ? deltaX : 0);
-                            let my1 = parseFloat(masterElement.attr('y1')) + (masterEnd === 'start' ? deltaY : 0);
-                            let mx2 = parseFloat(masterElement.attr('x2')) + (masterEnd === 'end' ? deltaX : 0);
-                            let my2 = parseFloat(masterElement.attr('y2')) + (masterEnd === 'end' ? deltaY : 0);
-                            masterElement.plot(mx1, my1, mx2, my2);
-                            if (masterHitbox) masterHitbox.plot(mx1, my1, mx2, my2);
-                            if (masterHandle) masterHandle.cx(masterEnd === 'start' ? mx1 : mx2).cy(masterEnd === 'start' ? my1 : my2);
-                            if (masterHead) {{
-                                const dx = mx2 - mx1, dy = my2 - my1, angle = Math.atan2(dy, dx), arrowSize = 5;
-                                const lineType = masterElement.attr('data-line-type') || 'arrow';
-                                const baseLineType = lineType.startsWith('dashed_') ? lineType.replace(/^dashed_/, '') : lineType;
-                                if (baseLineType === 'arrow') {{
-                                    masterHead.plot([[mx2, my2],[mx2 - arrowSize * Math.cos(angle + Math.PI / 6), my2 - arrowSize * Math.sin(angle + Math.PI / 6)],[mx2 - arrowSize * Math.cos(angle - Math.PI / 6), my2 - arrowSize * Math.sin(angle - Math.PI / 6)]]);
-                                }} else if (baseLineType === 'inhibition') {{
-                                    const masterArrow = getArrowById(masterId);
-                                    const endSide = masterArrow?.protbox_id_2_side;
-                                    let barX1, barY1, barX2, barY2;
-                                    if (endSide === 'North' || endSide === 'South') {{barX1 = mx2 - arrowSize;barY1 = my2;barX2 = mx2 + arrowSize;barY2 = my2;}} 
-                                    else if (endSide === 'West' || endSide === 'East') {{barX1 = mx2;barY1 = my2 - arrowSize;barX2 = mx2;barY2 = my2 + arrowSize;}} 
-                                    else {{const perp = angle + Math.PI / 2;barX1 = mx2 + Math.cos(perp) * arrowSize;barY1 = my2 + Math.sin(perp) * arrowSize;barX2 = mx2 - Math.cos(perp) * arrowSize;barY2 = my2 - Math.sin(perp) * arrowSize;}}
-                                    masterHead.plot(barX1, barY1, barX2, barY2);
-                                }}
+                            const masterArrow = getArrowById(masterId);
+                            if (!masterArrow) return;
+                            if (masterEnd === 'start') {{
+                                masterArrow.x1 = Number(masterArrow.x1 || 0) + deltaX;
+                                masterArrow.y1 = Number(masterArrow.y1 || 0) + deltaY;
+                            }} else {{
+                                masterArrow.x2 = Number(masterArrow.x2 || 0) + deltaX;
+                                masterArrow.y2 = Number(masterArrow.y2 || 0) + deltaY;
                             }}
+                            if (isArrowBent(masterArrow)) {{
+                                const cp = ensureArrowControlState(masterArrow);
+                                masterArrow.control_points = [{{
+                                    x: Number(cp?.x || 0) + deltaX,
+                                    y: Number(cp?.y || 0) + deltaY,
+                                }}];
+                            }}
+                            refreshArrowGeometry(masterId);
                             updateAttachedArrows(masterId, masterEnd);
                         }}
                     }});
                     updateAttachedArrows(arrowId, 'start');
                     updateAttachedArrows(arrowId, 'end');
+                }} else if (selectedType === 'arrow-mid') {{
+                    const arrowId = selectedId.replace(/_mid$/, '');
+                    const arrow = getArrowById(arrowId);
+                    if (arrow && pointerX != null && pointerY != null) {{
+                        setArrowBentState(arrow, true, {{ x: pointerX, y: pointerY }});
+                        refreshArrowGeometry(arrowId);
+                        updateAttachedArrows(arrowId, 'start');
+                        updateAttachedArrows(arrowId, 'end');
+                    }}
                 }} else if (isCircle) {{
                     // compute the normal target from the delta
                     let targetX = newX;
@@ -5654,37 +5839,28 @@ function rebuildGroupIndexes() {{
                 if (selectedType === 'arrow-start' || selectedType === 'arrow-end') {{
                     const context = arrowHandleContext;
                     const arrowId = context?.arrowId || selectedId.replace(/_(start|end)$/, '');
-                    const arrowElement = context?.arrowElement || draw.find(`[data-id="${{arrowId}}"]`)[0];
-                    const arrowHitbox = context?.arrowHitbox || draw.find(`[data-id="${{arrowId}}_hit"]`)[0];
-                    const arrowHead = context?.arrowHead || draw.find(`[data-id="${{arrowId}}_head"]`)[0];
-                    const headHitbox = arrowHandleGroups[arrowId]?.headHitbox;
                     const arrowData = context?.arrowData || getArrowById(arrowId);
-                    if (arrowElement) {{
+                    if (arrowData) {{
                         selectedElement?.cx(newX).cy(newY); // keep handle with cursor/snap
-                        let x1 = parseFloat(arrowElement.attr('x1') || 0);
-                        let y1 = parseFloat(arrowElement.attr('y1') || 0);
-                        let x2 = parseFloat(arrowElement.attr('x2') || 0);
-                        let y2 = parseFloat(arrowElement.attr('y2') || 0);
-                        if (selectedType === 'arrow-start') {{ x1 = newX; y1 = newY; }} else {{ x2 = newX; y2 = newY; }}
-                        arrowElement.plot(x1, y1, x2, y2);
-                        if (arrowHitbox) arrowHitbox.plot(x1, y1, x2, y2);
-                        if (headHitbox) headHitbox.cx(x2).cy(y2);
-                        if (arrowHead) {{
-                            const dx = x2 - x1, dy = y2 - y1, angle = Math.atan2(dy, dx), arrowSize = 5;
-                            const lineType = arrowElement.attr('data-line-type') || 'arrow';
-                            const baseLineType = lineType.startsWith('dashed_') ? lineType.replace(/^dashed_/, '') : lineType;
-                            if (baseLineType === 'arrow') {{
-                                arrowHead.plot([[x2, y2],[x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)],[x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)]]);
-                            }} else if (baseLineType === 'inhibition') {{
-                                const arrow = context?.arrowData || getArrowById(arrowId);
-                                const endSide = arrow?.protbox_id_2_side;
-                                let barX1, barY1, barX2, barY2;
-                                if (endSide === 'North' || endSide === 'South') {{barX1 = x2 - arrowSize;barY1 = y2;barX2 = x2 + arrowSize;barY2 = y2;}}
-                                else if (endSide === 'West' || endSide === 'East') {{barX1 = x2;barY1 = y2 - arrowSize;barX2 = x2;barY2 = y2 + arrowSize;}}
-                                else {{const perp = angle + Math.PI / 2;barX1 = x2 + Math.cos(perp) * arrowSize;barY1 = y2 + Math.sin(perp) * arrowSize;barX2 = x2 - Math.cos(perp) * arrowSize;barY2 = y2 - Math.sin(perp) * arrowSize;}}
-                                arrowHead.plot(barX1, barY1, barX2, barY2);
-                            }}
+                        if (selectedType === 'arrow-start') {{
+                            arrowData.x1 = Number(newX || 0);
+                            arrowData.y1 = Number(newY || 0);
+                        }} else {{
+                            arrowData.x2 = Number(newX || 0);
+                            arrowData.y2 = Number(newY || 0);
                         }}
+                        if (!isArrowBent(arrowData)) {{
+                            arrowData.control_points = [];
+                        }}
+                        refreshArrowGeometry(arrowId);
+                    }}
+                }} else if (selectedType === 'arrow-mid') {{
+                    const arrowId = selectedId.replace(/_mid$/, '');
+                    const arrowData = getArrowById(arrowId);
+                    if (arrowData) {{
+                        selectedElement?.cx(newX).cy(newY);
+                        setArrowBentState(arrowData, true, {{ x: Number(newX || 0), y: Number(newY || 0) }});
+                        refreshArrowGeometry(arrowId);
                     }}
                 }}
             }};
@@ -5812,7 +5988,7 @@ function rebuildGroupIndexes() {{
                         window.cancelAnimationFrame(dragFrameId);
                         dragFrameId = null;
                     }}
-                    if (mkHistory && trackableMoveTypes.has(type)) {{
+                    if (mkHistory && trackableMoveTypes.has(type) && !multiMoveBefore && !(selectionMap.size > 1 || type === 'group')) {{
                         mkHistory.beginMoveSession({{
                             element,
                             type,
@@ -5890,7 +6066,7 @@ function rebuildGroupIndexes() {{
                         cleanupBrokenLinks();
                         flushDirtyProtboxes();
                     }}
-                    if (mkHistory && trackableMoveTypes.has(type)) {{
+                    if (mkHistory && trackableMoveTypes.has(type) && !multiMoveBefore && !(selectionMap.size > 1 || type === 'group')) {{
                         mkHistory.finalizeMoveSession();
                     }}
                     let currentX, currentY;
@@ -5916,17 +6092,27 @@ function rebuildGroupIndexes() {{
                         }}
                         const lineEl = draw.findOne(`[data-id="${{arrowId}}"]`);
                         if (arrow && lineEl) {{
-                            arrow.x1 = parseFloat(lineEl.attr('x1') || handle.cx());
-                            arrow.y1 = parseFloat(lineEl.attr('y1') || handle.cy());
-                            arrow.x2 = parseFloat(lineEl.attr('x2') || handle.cx());
-                            arrow.y2 = parseFloat(lineEl.attr('y2') || handle.cy());
+                            arrow.x1 = Number(arrow.x1 || handle.cx());
+                            arrow.y1 = Number(arrow.y1 || handle.cy());
+                            arrow.x2 = Number(arrow.x2 || handle.cx());
+                            arrow.y2 = Number(arrow.y2 || handle.cy());
+                            if (!isArrowBent(arrow)) {{
+                                arrow.control_points = [];
+                            }}
+                            refreshArrowGeometry(arrowId);
                         }}
-                        if (arrow && arrow.line === 'inhibition') {{
+                        if (arrow && getArrowBaseType(arrow) === 'inhibition') {{
                             const endSide = end === 'end' ? arrow.protbox_id_2_side : arrow.protbox_id_1_side;
                             const protboxId = end === 'end' ? arrow.protbox_id_2 : arrow.protbox_id_1;
                             if (endSide && protboxId) {{
                                 updateArrowPositions(protboxId, endSide);
                             }}
+                        }}
+                    }} else if (selectedType === 'arrow-mid') {{
+                        const arrowId = selectedId.replace(/_mid$/, '');
+                        const arrow = getArrowById(arrowId);
+                        if (arrow) {{
+                            refreshArrowGeometry(arrowId);
                         }}
                     }} else if (selectedType === 'arrow') {{
                         const arrowId = selectedId;
@@ -6033,15 +6219,62 @@ function rebuildGroupIndexes() {{
                 const handleKey = whichEnd === 'start' ? 'startHandle' : 'endHandle';
                 arrowHandleGroups[arrowId] = arrowHandleGroups[arrowId] || {{}};
                 if (arrowHandleGroups[arrowId][handleKey]) return;
-                const line = draw.find(`[data-id="${{arrowId}}"]`)[0];
-                if (!line) return;
-                const cx = parseFloat(line.attr(whichEnd === 'start' ? 'x1' : 'x2') || 0);
-                const cy = parseFloat(line.attr(whichEnd === 'start' ? 'y1' : 'y2') || 0);
+                const arrow = getArrowById(arrowId);
+                if (!arrow) return;
+                const cx = Number(whichEnd === 'start' ? arrow.x1 : arrow.x2) || 0;
+                const cy = Number(whichEnd === 'start' ? arrow.y1 : arrow.y2) || 0;
                 const handleId = `${{arrowId}}_${{whichEnd}}`;
                 const handle = arrowGroup.circle(6).cx(cx).cy(cy).fill('red').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': handleId, 'data-type': whichEnd === 'start' ? 'arrow-start' : 'arrow-end' }}).hide();
                 arrowHandleGroups[arrowId][handleKey] = handle;
                 makeDraggable(handle, whichEnd === 'start' ? 'arrow-start' : 'arrow-end', handleId);
             }};
+            function ensureArrowHandleGroup(arrowId) {{
+                if (!arrowId) return arrowHandleGroups[arrowId] || null;
+                arrowHandleGroups[arrowId] = arrowHandleGroups[arrowId] || {{}};
+                const group = arrowHandleGroups[arrowId];
+                const arrow = getArrowById(arrowId);
+                if (!arrow) return group;
+                const openArrowMenuLazy = (evt) => {{
+                    const additive = evt && (evt.ctrlKey || evt.metaKey);
+                    const hitbox = draw.findOne(`[data-id="${{arrowId}}_hit"]`) || draw.findOne(`[data-id="${{arrowId}}"]`);
+                    selectElement(hitbox, 'arrow', arrowId, null, {{ additive, toggle: additive }});
+                    if (shouldShowGroupMenu('arrow', arrowId)) {{
+                        showGroupingMenu(evt, {{ mode: 'create' }});
+                        return;
+                    }}
+                    showArrowMenu(evt, arrowId);
+                }};
+                const x1 = Number(arrow.x1 || 0);
+                const y1 = Number(arrow.y1 || 0);
+                const x2 = Number(arrow.x2 || 0);
+                const y2 = Number(arrow.y2 || 0);
+                if (!arrow.attached_arrow_1 && !group.startHandle) {{
+                    const startId = arrowId + '_start';
+                    group.startHandle = arrowGroup.circle(6).cx(x1).cy(y1).fill('red').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': startId, 'data-type': 'arrow-start' }}).hide();
+                    makeDraggable(group.startHandle, 'arrow-start', startId);
+                }}
+                if (!arrow.attached_arrow_2 && !group.endHandle) {{
+                    const endId = arrowId + '_end';
+                    group.endHandle = arrowGroup.circle(6).cx(x2).cy(y2).fill('red').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': endId, 'data-type': 'arrow-end' }}).hide();
+                    makeDraggable(group.endHandle, 'arrow-end', endId);
+                }}
+                if (!group.midHandle) {{
+                    const midPoint = getArrowMidpoint(arrow);
+                    group.midHandle = arrowGroup.circle(5.5).cx(Number(midPoint.x || 0)).cy(Number(midPoint.y || 0)).fill(isArrowBent(arrow) ? '#2563eb' : '#94a3b8').stroke({{ color: 'white', width: 1.1 }}).attr({{ 'data-id': arrowId + '_mid', 'data-type': 'arrow-mid', 'data-arrow-id': arrowId }}).hide();
+                    makeDraggable(group.midHandle, 'arrow-mid', arrowId + '_mid');
+                    if (group.midHandle.node) group.midHandle.node.addEventListener('contextmenu', openArrowMenuLazy);
+                }}
+                if (!group.headHitbox) {{
+                    group.headHitbox = arrowGroup.circle(18).cx(x2).cy(y2).fill({{ color: 'transparent', opacity: 0 }}).stroke({{ color: 'transparent', width: 0 }}).attr({{ 'data-id': arrowId + '_head_hit', 'data-type': 'arrow-hitbox', 'data-arrow-id': arrowId }});
+                    group.headHitbox.node.addEventListener('mousedown', () => {{
+                        suppressNextBackgroundClick = true;
+                    }});
+                    group.headHitbox.node.addEventListener('contextmenu', openArrowMenuLazy);
+                    makeDraggable(group.headHitbox, 'arrow', arrowId);
+                }}
+                refreshArrowGeometry(arrowId);
+                return group;
+            }}
             const detachDependentArrows = (arrowId) => {{
                 const dependents = attachedBy[arrowId];
                 if (!dependents) return;
@@ -6158,7 +6391,7 @@ function rebuildGroupIndexes() {{
                 let head = draw.findOne(`[data-id="${{arrowId}}_head"]`);
                 if (!arrow || !line) return;
                 const type = arrow.line || 'arrow';
-                const baseType = type.startsWith('dashed_') ? type.replace(/^dashed_/, '') : type;
+                const baseType = getArrowBaseType(arrow);
                 const arrowColor = arrow.color || 'black';
                 const strokeOpts = {{ color: arrowColor, width: 1 }};
                 if (type.startsWith('dashed') || arrow.dashed) strokeOpts.dasharray = '5,5'; else strokeOpts.dasharray = null;
@@ -6171,17 +6404,20 @@ function rebuildGroupIndexes() {{
                 }}
                 if (hit) hit.stroke({{ color: 'transparent', width: parseFloat(hit.attr('stroke-width') || 22) }});
                 if (head) {{ try {{ head.remove(); }} catch (err) {{}} head = null; }}
-                const x1 = parseFloat(line.attr('x1') || 0);
-                const y1 = parseFloat(line.attr('y1') || 0);
-                const x2 = parseFloat(line.attr('x2') || 0);
-                const y2 = parseFloat(line.attr('y2') || 0);
-                const dx = x2 - x1, dy = y2 - y1, angle = Math.atan2(dy, dx), arrowSize = 5;
+                const x2 = Number(arrow.x2 || 0);
+                const y2 = Number(arrow.y2 || 0);
+                const arrowSize = 5;
                 if (baseType === 'arrow') {{
-                    head = arrowGroup.polygon([[x2, y2],[x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)],[x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)]]).fill(arrowColor).stroke({{ color: arrowColor, width: 1 }}).attr({{ 'data-id': `${{arrowId}}_head`, 'data-type': 'arrow-head' }});
+                    const angle = getArrowTangentAngle(arrow, false);
+                    const decor = getArrowDecorPoints(x2, y2, angle, arrowSize);
+                    head = arrowGroup.polygon([[decor.tip.x, decor.tip.y],[decor.left.x, decor.left.y],[decor.right.x, decor.right.y]]).fill(arrowColor).stroke({{ color: arrowColor, width: 0 }}).attr({{ 'data-id': `${{arrowId}}_head`, 'data-type': 'arrow-head' }});
                 }} else if (baseType === 'inhibition') {{
-                    head = arrowGroup.line(x2 - arrowSize, y2, x2 + arrowSize, y2).stroke({{ color: arrowColor, width: 2 }}).attr({{ 'data-id': `${{arrowId}}_head`, 'data-type': 'arrow-head' }});
+                    const angle = getArrowTangentAngle(arrow, false);
+                    const bar = getArrowInhibitorBar(x2, y2, angle, arrowSize);
+                    head = arrowGroup.line(bar.left.x, bar.left.y, bar.right.x, bar.right.y).stroke({{ color: arrowColor, width: 1 }}).attr({{ 'data-id': `${{arrowId}}_head`, 'data-type': 'arrow-head' }});
                 }}
                 updateArrowHeadHitbox(arrowId, x2, y2);
+                refreshArrowGeometry(arrowId);
                 return head;
             }};
             const updateArrowHeadHitbox = (arrowId, x, y) => {{
@@ -6230,13 +6466,11 @@ function rebuildGroupIndexes() {{
                             arrowElement.attr({{ x2: payload.x, y2: payload.y }});
                         }}
                     }}
-                    if (arrowHitbox && arrowElement) {{
-                        arrowHitbox.plot(arrowElement.attr('x1'), arrowElement.attr('y1'), arrowElement.attr('x2'), arrowElement.attr('y2'));
-                    }}
                     ensureArrowHandle(payload.arrow_id, payload.end);
                     const handleKey = payload.end === 'start' ? 'startHandle' : 'endHandle';
                     const handle = arrowHandleGroups[payload.arrow_id]?.[handleKey];
                     if (handle) handle.cx(payload.x).cy(payload.y);
+                    refreshArrowGeometry(payload.arrow_id);
                     attachments[payload.protbox_id] = attachments[payload.protbox_id] || {{}};
                     if (payload.side) {{
                         attachments[payload.protbox_id][payload.side] = attachments[payload.protbox_id][payload.side] || [];
@@ -6256,6 +6490,7 @@ function rebuildGroupIndexes() {{
                 if (idx === null || idx < 0 || idx >= arrows.length) return false;
                 const arrow = arrows[idx];
                 if (!arrow) return false;
+                const snapshot = cloneData(arrow);
                 detachDependentArrows(arrowId);
                 cleanupProtboxAttachmentsForArrow(arrowId);
                 pruneAttachedByReferences(arrowId);
@@ -6274,6 +6509,24 @@ function rebuildGroupIndexes() {{
                 arrows[idx] = null;
                 if (!options.silent) {{
                     Shiny?.setInputValue('delete_element', {{ type: 'arrow', id: arrowId, arrow_index: idx, timestamp: Date.now() }}, {{ priority: 'event' }});
+                }}
+                if (mkHistory && options.suppressHistory !== true && snapshot) {{
+                    const entry = {{
+                        kind: 'arrow-delete',
+                        arrowId,
+                        index: idx,
+                        snapshot
+                    }};
+                    entry.handlers = {{
+                        undo: () => mkHistory.runWithoutRecording(() => {{
+                            restoreArrowSnapshot(entry.snapshot, entry.index);
+                        }}),
+                        redo: () => mkHistory.runWithoutRecording(() => {{
+                            deleteArrowById(entry.arrowId, {{ silent: true, suppressHistory: true }});
+                            rebuildAttachmentsIndex();
+                        }})
+                    }};
+                    mkHistory.recordAction(entry);
                 }}
                 return true;
             }};
@@ -6489,7 +6742,131 @@ function rebuildGroupIndexes() {{
                 return Boolean(target.isContentEditable);
             }};
             const deleteSelectedElement = () => {{
-                if (!selectedElement || !selectedType || !selectedId) return;
+                const resolvedArrowId = resolveSelectedArrowActionId();
+                if (!selectedElement && !resolvedArrowId) return;
+                if (!selectedType && !resolvedArrowId) return;
+                if (!selectedId && !resolvedArrowId) return;
+                const selectedEntries = Array.from(selectionMap.values()).filter(Boolean);
+                if (selectedEntries.length > 1) {{
+                    const deletions = [];
+                    const seenKeys = new Set();
+                    selectedEntries.forEach(entry => {{
+                        if (!entry) return;
+                        const entryKeyValue = selectionKey(entry.type, entry.id);
+                        if (!entryKeyValue || seenKeys.has(entryKeyValue)) return;
+                        seenKeys.add(entryKeyValue);
+                        if (entry.type === 'arrow') {{
+                            const idx = parseArrowIndex(entry.id);
+                            if (idx === null || idx < 0 || idx >= arrows.length || !arrows[idx]) return;
+                            deletions.push({{
+                                kind: 'arrow',
+                                id: entry.id,
+                                index: idx,
+                                snapshot: cloneData(arrows[idx])
+                            }});
+                            return;
+                        }}
+                        if (entry.type === 'compound') {{
+                            const idx = compounds.findIndex(c => c && (c._client_id === entry.id || `compound_${{c.compound_id}}` === entry.id));
+                            if (idx < 0 || !compounds[idx]) return;
+                            deletions.push({{
+                                kind: 'compound',
+                                id: entry.id,
+                                index: idx,
+                                snapshot: cloneData(compounds[idx])
+                            }});
+                            return;
+                        }}
+                        if (entry.type === 'text-box') {{
+                            const idx = textBlocks.findIndex(tb => tb && (tb._client_id === entry.id || `text_${{tb.text_id}}` === entry.id));
+                            if (idx < 0 || !textBlocks[idx]) return;
+                            deletions.push({{
+                                kind: 'text-box',
+                                id: entry.id,
+                                index: idx,
+                                snapshot: cloneData(textBlocks[idx])
+                            }});
+                            return;
+                        }}
+                        if (entry.type === 'prot-box') {{
+                            const pid = normalizeProtboxId(entry.id);
+                            const idx = protBoxes.findIndex(pb => normalizeProtboxId(pb?.protbox_id) === pid);
+                            if (!pid || idx < 0 || !protBoxes[idx]) return;
+                            deletions.push({{
+                                kind: 'prot-box',
+                                id: pid,
+                                index: idx,
+                                snapshot: cloneData(protBoxes[idx]),
+                                detached_arrows: cloneData(captureAttachedArrowSnapshots(pid))
+                            }});
+                            return;
+                        }}
+                        if (entry.type === 'ptm-shape' || entry.type === 'ptm-label' || entry.type === 'ptm-symbol') {{
+                            const meta = parsePtmElementId(entry.id);
+                            const protboxId = entry.protboxId || null;
+                            const snapshot = meta && protboxId ? capturePtmSnapshot(protboxId, meta) : null;
+                            if (!meta || !protboxId || !snapshot) return;
+                            deletions.push({{
+                                kind: 'ptm',
+                                id: entry.id,
+                                protboxId,
+                                meta,
+                                snapshot
+                            }});
+                        }}
+                    }});
+                    if (deletions.length) {{
+                        deselectElement();
+                        deletions.slice().reverse().forEach(item => {{
+                            if (item.kind === 'arrow') deleteArrowById(item.id, {{ suppressHistory: true }});
+                            else if (item.kind === 'compound') deleteCompoundById(item.id, {{ suppressHistory: true }});
+                            else if (item.kind === 'text-box') deleteTextBoxById(item.id, {{ suppressHistory: true }});
+                            else if (item.kind === 'prot-box') deleteProtboxById(item.id, {{ suppressHistory: true }});
+                            else if (item.kind === 'ptm') deletePtmFromProtbox(item.protboxId, item.meta, {{ suppressHistory: true }});
+                        }});
+                        if (mkHistory) {{
+                            const entry = {{
+                                kind: 'multi-delete',
+                                deletions: cloneData(deletions)
+                            }};
+                            entry.handlers = {{
+                                undo: () => mkHistory.runWithoutRecording(() => {{
+                                    (entry.deletions || []).forEach(item => {{
+                                        if (item.kind === 'prot-box') {{
+                                            if (restoreProtboxSnapshot(item.snapshot, item.index)) {{
+                                                reattachArrowPayloads(item.detached_arrows);
+                                            }}
+                                        }}
+                                    }});
+                                    (entry.deletions || []).forEach(item => {{
+                                        if (item.kind === 'compound') restoreCompoundSnapshot(item.snapshot, item.index);
+                                        else if (item.kind === 'text-box') restoreTextSnapshot(item.snapshot, item.index);
+                                    }});
+                                    (entry.deletions || []).forEach(item => {{
+                                        if (item.kind === 'arrow') restoreArrowSnapshot(item.snapshot, item.index);
+                                        else if (item.kind === 'ptm') {{
+                                            spawnPtmForProtbox(item.protboxId, item.meta.uniprot, item.meta.ptmKey, {{
+                                                recordHistory: false,
+                                                snapshot: item.snapshot
+                                            }});
+                                        }}
+                                    }});
+                                }}),
+                                redo: () => mkHistory.runWithoutRecording(() => {{
+                                    (entry.deletions || []).slice().reverse().forEach(item => {{
+                                        if (item.kind === 'arrow') deleteArrowById(item.id, {{ silent: true, suppressHistory: true }});
+                                        else if (item.kind === 'compound') deleteCompoundById(item.id, {{ suppressHistory: true }});
+                                        else if (item.kind === 'text-box') deleteTextBoxById(item.id, {{ suppressHistory: true }});
+                                        else if (item.kind === 'prot-box') deleteProtboxById(item.id, {{ suppressHistory: true }});
+                                        else if (item.kind === 'ptm') deletePtmFromProtbox(item.protboxId, item.meta, {{ suppressHistory: true }});
+                                    }});
+                                }})
+                            }};
+                            mkHistory.recordAction(entry);
+                        }}
+                        return;
+                    }}
+                }}
                 const targetId = selectedId;
                 const targetType = selectedType;
                 const targetProtboxId = selectedProtboxId;
@@ -6505,8 +6882,8 @@ function rebuildGroupIndexes() {{
                 }}
                 deselectElement();
                 let deleted = false;
-                if (targetType === 'arrow' || targetType === 'arrow-start' || targetType === 'arrow-end') {{
-                    const arrowId = targetType === 'arrow' ? targetId : targetId.replace(/_(start|end)$/, '');
+                if (targetType === 'arrow' || targetType === 'arrow-hitbox' || targetType === 'arrow-head' || targetType === 'arrow-start' || targetType === 'arrow-end' || targetType === 'arrow-mid' || resolvedArrowId) {{
+                    const arrowId = resolvedArrowId || (targetType === 'arrow' ? targetId : targetId.replace(/_(start|end|mid)$/, ''));
                     deleted = deleteArrowById(arrowId);
                 }} else if (targetType === 'compound') {{
                     deleted = deleteCompoundById(targetId);
@@ -6531,19 +6908,16 @@ function rebuildGroupIndexes() {{
             }};
             const toggleDashForArrowId = (arrowId) => applyToArrowId(arrowId, () => setArrowDashState(arrowId, !getArrowById(arrowId)?.dashed));
             const flipArrowId = (arrowId) => applyToArrowId(arrowId, (aid, ar) => {{
-                const line = draw.findOne(`[data-id="${{aid}}"]`);
-                const hit = draw.findOne(`[data-id="${{aid}}_hit"]`);
-                if (line) {{
-                    const x1 = line.attr('x1'), y1 = line.attr('y1'), x2 = line.attr('x2'), y2 = line.attr('y2');
-                    line.attr({{ x1: x2, y1: y2, x2: x1, y2: y1 }});
-                    if (hit) hit.attr({{ x1: x2, y1: y2, x2: x1, y2: y1 }});
-                }}
                 const swapFields = (obj, a, b) => {{ const tmp = obj[a]; obj[a] = obj[b]; obj[b] = tmp; }};
                 swapFields(ar, 'x1', 'x2'); swapFields(ar, 'y1', 'y2');
                 swapFields(ar, 'protbox_id_1', 'protbox_id_2');
                 swapFields(ar, 'protbox_id_1_side', 'protbox_id_2_side');
                 swapFields(ar, 'attached_arrow_1', 'attached_arrow_2');
                 swapFields(ar, 'attached_end_1', 'attached_end_2');
+                if (isArrowBent(ar)) {{
+                    const midpoint = getArrowMidpoint(ar);
+                    setArrowBentState(ar, true, midpoint);
+                }}
                 updateArrowVisual(aid);
                 rebuildAttachmentsIndex();
                 updateAttachedArrows(aid, 'start');
@@ -6859,11 +7233,59 @@ function rebuildGroupIndexes() {{
                 }} catch (err) {{}}
                 return created;
             }};
+            const tryHandleDeleteShortcut = (e) => {{
+                if (!e) return false;
+                if (e.__mkHistoryHandled) return true;
+                if (!(e.key === 'Backspace' || e.key === 'Delete')) return false;
+                const isShapeSelection = selectedType === 'text-box' && findTextBlockByDomId(selectedId)?.shape_type;
+                if (!isShapeSelection && isEditableTarget(e.target)) return false;
+                if (!canDeleteSelection()) return false;
+                e.__mkHistoryHandled = true;
+                e.preventDefault();
+                if (typeof e.stopPropagation === 'function') e.stopPropagation();
+                if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                deleteSelectedElement();
+                return true;
+            }};
+            const tryHandleHistoryShortcut = (e) => {{
+                if (!e) return false;
+                if (e.__mkHistoryHandled) return true;
+                const keyLower = typeof e.key === 'string' ? e.key.toLowerCase() : '';
+                if (!(e.ctrlKey || e.metaKey)) return false;
+                if (isEditableTarget(e.target)) return false;
+                if (keyLower === 'z') {{
+                    e.__mkHistoryHandled = true;
+                    e.preventDefault();
+                    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+                    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                    if (e.shiftKey) {{
+                        mkHistory?.redo();
+                    }} else {{
+                        mkHistory?.undo();
+                    }}
+                    return true;
+                }}
+                if (keyLower === 'y') {{
+                    e.__mkHistoryHandled = true;
+                    e.preventDefault();
+                    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+                    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                    mkHistory?.redo();
+                    return true;
+                }}
+                return false;
+            }};
             document.addEventListener('keydown', e => {{
                 if (e.key === 'Shift') {{
                     shiftKeyDown = true;
                 }}
                 const targetEditable = isEditableTarget(e.target);
+                if (tryHandleDeleteShortcut(e)) {{
+                    return;
+                }}
+                if (tryHandleHistoryShortcut(e)) {{
+                    return;
+                }}
                 if (isTextEditing && activeTextEditorId) {{
                     if (e.key === 'Escape') {{
                         e.preventDefault();
@@ -6873,22 +7295,6 @@ function rebuildGroupIndexes() {{
                     return;
                 }}
                 const keyLower = typeof e.key === 'string' ? e.key.toLowerCase() : '';
-                if ((e.ctrlKey || e.metaKey) && keyLower === 'z') {{
-                    if (targetEditable) return;
-                    e.preventDefault();
-                    if (e.shiftKey) {{
-                        mkHistory?.redo();
-                    }} else {{
-                        mkHistory?.undo();
-                    }}
-                    return;
-                }}
-                if ((e.ctrlKey || e.metaKey) && (keyLower === 'y')) {{
-                    if (targetEditable) return;
-                    e.preventDefault();
-                    mkHistory?.redo();
-                    return;
-                }}
                 const selectedProtIds = getSelectedProtboxes();
                 const selectedArrowId = resolveSelectedArrowActionId();
                 const autoConnectSelectedProtboxesWith = (createArrowFn, resultKey = 'auto_connect_result') => {{
@@ -7087,13 +7493,6 @@ function rebuildGroupIndexes() {{
                     return;
                 }}
                 if (!selectedElement) return;
-                if (e.key === 'Backspace' || e.key === 'Delete') {{
-                    const isShapeSelection = selectedType === 'text-box' && findTextBlockByDomId(selectedId)?.shape_type;
-                    if (!isShapeSelection && isEditableTarget(e.target)) return;
-                    e.preventDefault();
-                    deleteSelectedElement();
-                    return;
-                }}
                 if (selectedType === 'text-box' && e.key === 'Enter') {{
                     if (isEditableTarget(e.target)) return;
                     e.preventDefault();
@@ -7162,6 +7561,10 @@ function rebuildGroupIndexes() {{
                 if (!canvas.hasAttribute('data-mk-focus-listener')) {{
                     canvas.setAttribute('data-mk-focus-listener', '1');
                     canvas.addEventListener('mousedown', focusCanvas);
+                    canvas.addEventListener('keydown', tryHandleDeleteShortcut, true);
+                    canvas.addEventListener('keydown', tryHandleHistoryShortcut, true);
+                    window.addEventListener('keydown', tryHandleDeleteShortcut, true);
+                    window.addEventListener('keydown', tryHandleHistoryShortcut, true);
                 }}
                 focusCanvas();
             }}
@@ -7495,7 +7898,7 @@ function rebuildGroupIndexes() {{
                     let labelColor = protein.label_color || [0, 0, 0];
                     elementGroups[id] = [];
                     const fillRgb = entityColor(protein);
-                    const outlineRgb = entityOutlineColor(protein);
+                    const outlineRgb = proteinOutlineColor(protein);
                     const labelRgb = Array.isArray(labelColor) && labelColor.length === 3 && labelColor.every(c => typeof c === 'number' && c >= 0 && c <= 255) ? `rgb(${{labelColor.join(',')}})` : 'black';
                     const rect = protboxGroup.rect(width, height).move(x, yPos).fill(fillRgb).stroke({{ color: outlineRgb, width: protOutlineWidth }}).attr({{ 'data-id': id, 'data-type': 'prot-box', 'data-tooltip': (pb && pb.tooltip) || (protein && protein.tooltip) || '' }});
                     // Tooltip handlers for prot-box
@@ -7961,15 +8364,41 @@ function rebuildGroupIndexes() {{
                 const r = Math.max(w, h) / 2;
                 const label = compound.label || (compound.kegg_compound || '').replace(/^cpd:/, '') || 'C?';
                 const stroke = compound.border_color || 'black';
-                const fill = compound.bgcolor || '#FFFFFF';
+                const metaboliteDatasetLoaded = !!pickSettingValue('metabolite_file_path', '');
+                const hasCompoundFc = parseFoldChange(compound) !== null
+                    || compound[`fc_color_${{activeFcIndex}}`] !== undefined
+                    || compound[`fold_change_${{activeFcIndex}}`] !== undefined;
+                const fill = hasCompoundFc
+                    ? entityColor(compound)
+                    : (metaboliteDatasetLoaded ? '#808080' : (compound.bgcolor || '#FFFFFF'));
                 const textColor = compound.fgcolor || '#000000';
-                const g = compoundGroup.group().attr({{ 'data-id': id, 'data-type': 'compound' }});
+                const tooltipText = compound.tooltip || '';
+                const tooltipHtml = compound.tooltip_html || '';
+                const g = compoundGroup.group().attr({{
+                    'data-id': id,
+                    'data-type': 'compound',
+                    'data-tooltip': tooltipText,
+                    'data-tooltip-html': tooltipHtml
+                }});
                 const circle = g.circle(r * 2).cx(x).cy(y).fill(fill).stroke({{ color: stroke, width: 1 }});
                 circle.attr({{
                     'data-role': 'compound-shape',
                     'data-original-stroke': stroke,
-                    'data-original-stroke-width': 1
+                    'data-original-stroke-width': 1,
+                    'data-tooltip': tooltipText,
+                    'data-tooltip-html': tooltipHtml
                 }});
+                g.node.addEventListener('mouseenter', e => {{
+                    const htmlTip = g.attr('data-tooltip-html') || '';
+                    const tip = htmlTip || g.attr('data-tooltip') || '';
+                    if (hoverTooltipsAllowed() && tip) {{
+                        scheduleTooltipShow(tip, Boolean(htmlTip), e);
+                    }}
+                }});
+                g.node.addEventListener('mousemove', e => {{
+                    if (hoverTooltipsAllowed()) moveTooltipFromEvent(e);
+                }});
+                g.node.addEventListener('mouseleave', () => {{ hideTooltipNow(); }});
                 const labelOffset = settings.compound_label_offset || 6;
                 const t = g.text(label)
                     .font({{
@@ -8047,9 +8476,24 @@ function rebuildGroupIndexes() {{
                 const style = resolveTextStyle(textBlock);
                 textBlock.text_style = style;
                 const isShape = !!textBlock.shape_type;
+                const isBracket = String(textBlock.shape_type || '').toLowerCase() === 'bracket';
                 const htmlContent = (textBlock.html !== undefined) ? textBlock.html : (textBlock.label || '');
                 const parentGroup = isShape ? shapeGroup : textGroup;
                 const g = parentGroup.group().attr({{ 'data-id': id, 'data-type': 'text-box' }});
+                const buildBracketShapePath = (tb) => {{
+                    const x = Number(tb.x || 0);
+                    const y = Number(tb.y || 0);
+                    const width = Number(tb.width || 0);
+                    const height = Number(tb.height || 0);
+                    return 'M ' + x.toFixed(3)
+                        + ' ' + y.toFixed(3)
+                        + ' L ' + (x + width).toFixed(3)
+                        + ' ' + y.toFixed(3)
+                        + ' L ' + (x + width).toFixed(3)
+                        + ' ' + (y + height).toFixed(3)
+                        + ' L ' + x.toFixed(3)
+                        + ' ' + (y + height).toFixed(3);
+                }};
                 const hitRect = g.rect(textBlock.width + TEXT_HIT_PADDING * 2, textBlock.height + TEXT_HIT_PADDING * 2)
                     .move(textBlock.x - TEXT_HIT_PADDING, textBlock.y - TEXT_HIT_PADDING)
                     .fill({{ color: '#000', opacity: 0.001 }})
@@ -8063,14 +8507,21 @@ function rebuildGroupIndexes() {{
                     if (textBlock.shape_type === 'circle') return Math.max(textBlock.width, textBlock.height) / 2;
                     return 4;
                 }})();
-                const outlineRect = g.rect(textBlock.width, textBlock.height)
-                    .move(textBlock.x, textBlock.y)
-                    .fill('transparent')
-                    .stroke({{ color: textBlock.border_color, width: textBlock.border_width || 1 }})
-                    .radius(outlineRadius)
-                    .attr({{ 'data-role': 'text-outline', 'data-original-stroke': textBlock.border_color || 'black', 'data-original-stroke-width': textBlock.border_width || 1 }});
+                const outlineRect = isBracket
+                    ? g.path(buildBracketShapePath(textBlock))
+                        .fill('none')
+                        .stroke({{ color: textBlock.border_color, width: textBlock.border_width || 1, linecap: 'round', linejoin: 'round' }})
+                        .attr({{ 'data-role': 'text-outline', 'data-original-stroke': textBlock.border_color || 'black', 'data-original-stroke-width': textBlock.border_width || 1 }})
+                    : g.rect(textBlock.width, textBlock.height)
+                        .move(textBlock.x, textBlock.y)
+                        .fill('transparent')
+                        .stroke({{ color: textBlock.border_color, width: textBlock.border_width || 1 }})
+                        .radius(outlineRadius)
+                        .attr({{ 'data-role': 'text-outline', 'data-original-stroke': textBlock.border_color || 'black', 'data-original-stroke-width': textBlock.border_width || 1 }});
                 const rectRadius = outlineRadius;
-                const rect = g.rect(textBlock.width, textBlock.height).move(textBlock.x, textBlock.y).fill(textBlock.bgcolor).stroke({{ color: 'transparent', width: 0 }}).radius(rectRadius);
+                const rect = isBracket
+                    ? g.path(buildBracketShapePath(textBlock)).fill('none').stroke({{ color: 'transparent', width: 0 }})
+                    : g.rect(textBlock.width, textBlock.height).move(textBlock.x, textBlock.y).fill(textBlock.bgcolor).stroke({{ color: 'transparent', width: 0 }}).radius(rectRadius);
                 rect.attr({{
                     'data-role': 'text-rect',
                     'data-original-stroke': textBlock.border_color || 'black',
@@ -8390,6 +8841,37 @@ function rebuildGroupIndexes() {{
                     }}
                 }}
             }};
+            const createCompoundAtPosition = (hmdbId, svgX, svgY, options = {{}}) => {{
+                const key = String(hmdbId || '').trim();
+                if (!key) return;
+                const metabolite = metaboliteCatalog[key];
+                if (!metabolite) {{
+                    console.warn('No metabolite data for', hmdbId);
+                    return;
+                }}
+                const newCompound = {{
+                    hmdb_id: key,
+                    pathway_match_id: metabolite.wikipedia_id || metabolite.kegg_id || '',
+                    kegg_compound: metabolite.kegg_id ? `cpd:${{metabolite.kegg_id}}` : '',
+                    label: metabolite.display_label || metabolite.wikipedia_id || metabolite.name || key,
+                    x: Math.round(svgX),
+                    y: Math.round(svgY),
+                    width: 8,
+                    height: 8,
+                    fgcolor: '#000000',
+                    bgcolor: '#FFFFFF',
+                    graphics_type: 'circle',
+                    tooltip: metabolite.tooltip || '',
+                    tooltip_html: metabolite.tooltip_html || ''
+                }};
+                Object.keys(metabolite || {{}}).forEach((field) => {{
+                    if (/^(fold_change|fc_color)_\\d+$/.test(field)) {{
+                        newCompound[field] = metabolite[field];
+                    }}
+                }});
+                compounds.push(newCompound);
+                renderCompound(newCompound, compounds.length - 1, {{ recordHistory: options.recordHistory !== false }});
+            }};
             const switchProtein = (protboxId, newUniprot) => {{
                 const pb = protBoxes.find(p => p.protbox_id === protboxId);
                 if (!pb) return;
@@ -8400,7 +8882,7 @@ function rebuildGroupIndexes() {{
                 const newLabel = debugMode ? String(protboxId) : (newProtein.label || pb.backup_label || 'Unknown');
                 const newLabelColor = newProtein.label_color || [0, 0, 0];
                 const fillRgb = entityColor(newProtein);
-                const outlineRgb = entityOutlineColor(newProtein);
+                const outlineRgb = proteinOutlineColor(newProtein);
                 const labelRgb = Array.isArray(newLabelColor) && newLabelColor.length === 3 ? `rgb(${{newLabelColor.join(',')}})` : 'black';
                 rect.fill(fillRgb);
                 rect.stroke({{ color: outlineRgb, width: protOutlineWidth }});
@@ -8671,52 +9153,34 @@ function rebuildGroupIndexes() {{
                             x2 = arrow.x2 || 0;
                             y2 = arrow.y2 || 0;
                         }}
+                        arrow.x1 = Number(x1 || 0);
+                        arrow.y1 = Number(y1 || 0);
+                        arrow.x2 = Number(x2 || 0);
+                        arrow.y2 = Number(y2 || 0);
                         const lineType = arrow.line || 'arrow';
-                        const baseLineType = lineType.startsWith('dashed_') ? lineType.replace(/^dashed_/, '') : lineType;
+                        const baseLineType = getArrowBaseType(arrow);
                         const arrowColor = arrow.color || 'black';
                         let strokeOpts = {{ color: arrowColor, width: 1 }};
                         if (lineType.startsWith('dashed') || arrow.dashed) {{ strokeOpts.dasharray = '5,5'; }}
                         const hitboxWidth = 22; // make hit area larger (approx +6px padding each side)
-                        const ctrlPoints = Array.isArray(arrow.control_points) ? arrow.control_points : [];
                         let hitbox = null;
                         let line = null;
-                        if (ctrlPoints.length > 0) {{
-                            const cp = ctrlPoints[0];
-                            const pathStr = `M ${{x1}} ${{y1}} Q ${{cp.x}} ${{cp.y}} ${{x2}} ${{y2}}`;
-                            hitbox = arrowGroup.path(pathStr).fill('none').stroke({{ color: 'transparent', width: hitboxWidth }}).attr({{ 'data-id': arrowId + '_hit', 'data-type': 'arrow-hitbox', 'data-arrow-id': arrowId }});
-                            line = arrowGroup.path(pathStr).fill('none').stroke(strokeOpts).attr({{ 'data-id': arrowId, 'data-type': 'arrow', 'data-line-type': lineType, 'pointer-events': 'none' }});
-                        }} else {{
-                            hitbox = arrowGroup.line(x1, y1, x2, y2).stroke({{ color: 'transparent', width: hitboxWidth }}).attr({{ 'data-id': arrowId + '_hit', 'data-type': 'arrow-hitbox', 'data-arrow-id': arrowId }});
-                            line = arrowGroup.line(x1, y1, x2, y2).stroke(strokeOpts).attr({{ 'data-id': arrowId, 'data-type': 'arrow', 'data-line-type': lineType, 'pointer-events': 'none' }});
-                        }}
-                        const dx = x2 - x1, dy = y2 - y1, angle = Math.atan2(dy, dx), arrowSize = 5;
+                        const pathStr = buildArrowPathString(arrow);
+                        hitbox = arrowGroup.path(pathStr).fill('none').stroke({{ color: 'transparent', width: hitboxWidth }}).attr({{ 'data-id': arrowId + '_hit', 'data-type': 'arrow-hitbox', 'data-arrow-id': arrowId, 'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2 }});
+                        line = arrowGroup.path(pathStr).fill('none').stroke(strokeOpts).attr({{ 'data-id': arrowId, 'data-type': 'arrow', 'data-line-type': lineType, 'pointer-events': 'none', 'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2 }});
+                        const arrowSize = 5;
                         let arrowHead = null;
                         if (baseLineType === 'arrow') {{
-                            arrowHead = arrowGroup.polygon([[x2, y2],[x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)],[x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)]]).fill(arrowColor).stroke({{ color: arrowColor, width: 1 }}).attr({{ 'data-id': arrowId + '_head', 'data-type': 'arrow-head' }});
+                            const angle = getArrowTangentAngle(arrow, false);
+                            const decor = getArrowDecorPoints(x2, y2, angle, arrowSize);
+                            arrowHead = arrowGroup.polygon([[decor.tip.x, decor.tip.y],[decor.left.x, decor.left.y],[decor.right.x, decor.right.y]]).fill(arrowColor).stroke({{ color: arrowColor, width: 0 }}).attr({{ 'data-id': arrowId + '_head', 'data-type': 'arrow-head' }});
                         }} else if (baseLineType === 'inhibition') {{
-                            let barX1, barY1, barX2, barY2;
-                            if (side2 === 'North' || side2 === 'South') {{barX1 = x2 - arrowSize;barY1 = y2;barX2 = x2 + arrowSize;barY2 = y2;}} 
-                            else if (side2 === 'West' || side2 === 'East') {{barX1 = x2;barY1 = y2 - arrowSize;barX2 = x2;barY2 = y2 + arrowSize;}}
-                            else {{const perp = angle + Math.PI / 2;barX1 = x2 + Math.cos(perp) * arrowSize;barY1 = y2 + Math.sin(perp) * arrowSize;barX2 = x2 - Math.cos(perp) * arrowSize;barY2 = y2 - Math.sin(perp) * arrowSize;}}
-                            arrowHead = arrowGroup.line(barX1, barY1, barX2, barY2).stroke({{ color: arrowColor, width: 2 }}).attr({{ 'data-id': arrowId + '_head', 'data-type': 'arrow-head' }});
+                            const angle = getArrowTangentAngle(arrow, false);
+                            const bar = getArrowInhibitorBar(x2, y2, angle, arrowSize);
+                            arrowHead = arrowGroup.line(bar.left.x, bar.left.y, bar.right.x, bar.right.y).stroke({{ color: arrowColor, width: 1 }}).attr({{ 'data-id': arrowId + '_head', 'data-type': 'arrow-head' }});
                         }}
-                        let startHandle = null;
-                        if (!arrow.attached_arrow_1) {{
-                            startHandle = arrowGroup.circle(6).cx(x1).cy(y1).fill('red').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': arrowId + '_start', 'data-type': 'arrow-start' }}).hide();
-                        }}
-                        let endHandle = null;
-                        if (!arrow.attached_arrow_2) {{
-                            endHandle = arrowGroup.circle(6).cx(x2).cy(y2).fill('red').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': arrowId + '_end', 'data-type': 'arrow-end' }}).hide();
-                        }}
-                        const headHitbox = arrowGroup.circle(18).cx(x2).cy(y2).fill({{ color: 'transparent', opacity: 0 }}).stroke({{ color: 'transparent', width: 0 }}).attr({{ 'data-id': arrowId + '_head_hit', 'data-type': 'arrow-hitbox', 'data-arrow-id': arrowId }});
-                        headHitbox.node.addEventListener('mousedown', () => {{
-                            suppressNextBackgroundClick = true;
-                        }});
-                        arrowHandleGroups[arrowId] = {{ startHandle, endHandle, headHitbox }};
+                        arrowHandleGroups[arrowId] = arrowHandleGroups[arrowId] || {{ startHandle: null, endHandle: null, midHandle: null, headHitbox: null }};
                         makeDraggable(hitbox, 'arrow', arrowId);
-                        makeDraggable(headHitbox, 'arrow', arrowId);
-                        if (startHandle) makeDraggable(startHandle, 'arrow-start', arrowId + '_start');
-                        if (endHandle) makeDraggable(endHandle, 'arrow-end', arrowId + '_end');
                         const openArrowMenu = (evt) => {{
                             const additive = evt && (evt.ctrlKey || evt.metaKey);
                             selectElement(hitbox, 'arrow', arrowId, null, {{ additive, toggle: additive }});
@@ -8727,9 +9191,9 @@ function rebuildGroupIndexes() {{
                             showArrowMenu(evt, arrowId);
                         }};
                         hitbox.node.addEventListener('contextmenu', openArrowMenu);
-                        headHitbox.node.addEventListener('contextmenu', openArrowMenu);
                         if (line && line.node) line.node.addEventListener('contextmenu', openArrowMenu);
                         if (arrowHead && arrowHead.node) arrowHead.node.addEventListener('contextmenu', openArrowMenu);
+                        refreshArrowGeometry(arrowId);
                     }} catch (e) {{ }}
                 }});
             }};
@@ -8894,11 +9358,43 @@ function rebuildGroupIndexes() {{
                     li.style.padding = '4px 6px';
                     li.style.cursor = 'pointer';
                     const icon = document.createElement('div');
-                    icon.style.width = type === 'circle' ? '22px' : '24px';
-                    icon.style.height = type === 'circle' ? '22px' : '18px';
-                    icon.style.border = '2px solid #444';
-                    icon.style.background = '#f5f5f5';
-                    icon.style.borderRadius = radius;
+                    if (type === 'bracket') {{
+                        icon.style.width = '24px';
+                        icon.style.height = '18px';
+                        icon.style.border = 'none';
+                        icon.style.background = 'transparent';
+                        icon.style.position = 'relative';
+                        const topLine = document.createElement('div');
+                        topLine.style.position = 'absolute';
+                        topLine.style.left = '2px';
+                        topLine.style.top = '1px';
+                        topLine.style.width = '18px';
+                        topLine.style.height = '2px';
+                        topLine.style.background = '#444';
+                        const rightLine = document.createElement('div');
+                        rightLine.style.position = 'absolute';
+                        rightLine.style.left = '18px';
+                        rightLine.style.top = '1px';
+                        rightLine.style.width = '2px';
+                        rightLine.style.height = '16px';
+                        rightLine.style.background = '#444';
+                        const bottomLine = document.createElement('div');
+                        bottomLine.style.position = 'absolute';
+                        bottomLine.style.left = '2px';
+                        bottomLine.style.top = '15px';
+                        bottomLine.style.width = '18px';
+                        bottomLine.style.height = '2px';
+                        bottomLine.style.background = '#444';
+                        icon.appendChild(topLine);
+                        icon.appendChild(rightLine);
+                        icon.appendChild(bottomLine);
+                    }} else {{
+                        icon.style.width = type === 'circle' ? '22px' : '24px';
+                        icon.style.height = type === 'circle' ? '22px' : '18px';
+                        icon.style.border = '2px solid #444';
+                        icon.style.background = '#f5f5f5';
+                        icon.style.borderRadius = radius;
+                    }}
                     li.appendChild(icon);
                     li.addEventListener('click', () => {{
                         addNewShape(type, svgX, svgY);
@@ -8909,6 +9405,7 @@ function rebuildGroupIndexes() {{
                 makeShapeItem('square', '2px');
                 makeShapeItem('rounded', '10px');
                 makeShapeItem('circle', '50%');
+                makeShapeItem('bracket', '0');
                 liAddShape.appendChild(shapeSub);
                 liAddShape.addEventListener('mouseenter', () => {{ shapeSub.style.display = 'block'; }});
                 liAddShape.addEventListener('mouseleave', () => {{ shapeSub.style.display = 'none'; }});
@@ -9163,11 +9660,18 @@ function rebuildGroupIndexes() {{
                 Shiny?.setInputValue('add_arrow', {{ line: type, x1, y1, x2, y2 }}, {{ priority: 'event' }});
             }};
             Object.assign(viewerControlApi, {{
+                searchObjects: (query, limit = 40) => searchObjectCatalog(query, limit),
                 searchProteins: (query, limit = 40) => searchProteinCatalog(query, limit),
                 addProtbox: (uniprot) => {{
                     if (!uniprot) return false;
                     const center = getViewportCenter();
                     createProtboxAtPosition(uniprot, center.x, center.y);
+                    return true;
+                }},
+                addCompound: (hmdbId) => {{
+                    if (!hmdbId) return false;
+                    const center = getViewportCenter();
+                    createCompoundAtPosition(hmdbId, center.x, center.y);
                     return true;
                 }},
                 addArrow: (type = 'arrow') => {{
@@ -9308,7 +9812,7 @@ function rebuildGroupIndexes() {{
                 </div>
             </div>
         '''),
-        ui.HTML(data_script + catalog_script + svg_js),
+        ui.HTML(data_script + catalog_script + metabolite_catalog_script + svg_js),
         class_="svg-container",
         **{"style": f"position: relative; width: {container_width_style}; height: {container_height_style}; overflow: auto; background-color: #f9f9f9; border: 1px solid #ccc; max-width: 100%;"}
     )
@@ -9321,8 +9825,8 @@ app_ui = ui.page_fluid(
             <style>
                 body {{ font-family: Arial, sans-serif; margin: 20px; }}
                 .svg-container {{ border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9; position: relative; overflow: auto; }}
-                #svgCanvas {{ background-color: white; display: block; position: relative; outline: none; }}
-                #svgCanvas:focus {{ outline: 2px solid #007bff; outline-offset: -2px; }}
+                #svgCanvas {{ background-color: white; display: block; position: relative; outline: none !important; }}
+                #svgCanvas:focus, #svgCanvas:focus-visible {{ outline: none !important; box-shadow: none !important; }}
                 #svgCanvas svg {{ width: 100%; height: 100%; display: block; position: absolute; top: 0; left: 0; }}
                 .canvas-controls {{
                     position: absolute;

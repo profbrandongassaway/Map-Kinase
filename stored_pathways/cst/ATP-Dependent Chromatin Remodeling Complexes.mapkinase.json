@@ -1,0 +1,1447 @@
+{
+  "version": 1,
+  "saved_at_utc": "2026-03-25T18:35:30.633730+00:00",
+  "pathway_id": "cst_atp_dependent_chromatin_remodeling_complexes",
+  "pathway_name": "ATP-Dependent Chromatin Remodeling Complexes",
+  "pathway_file": "ATP-Dependent Chromatin Remodeling Complexes.ai",
+  "nodes": [
+    {
+      "id": "cst_overlay_1",
+      "originalLabel": "BCL7A/B/C",
+      "displayLabel": "BCL7A/B/C",
+      "label": "BCL7A/B/C",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "BCL7A"
+      ],
+      "suggested_uniprot_ids": [
+        "Q4VC05"
+      ],
+      "isCustom": false,
+      "cx": 164.40338221487605,
+      "cy": 218.4096298850575,
+      "rx": 31.34336365289252,
+      "ry": 15.099285057471263,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    },
+    {
+      "id": "cst_overlay_8",
+      "originalLabel": "BAF53A/B",
+      "displayLabel": "BAF53A/B",
+      "label": "BAF53A/B",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "ACTL6A"
+      ],
+      "suggested_uniprot_ids": [
+        "O96019"
+      ],
+      "isCustom": false,
+      "cx": 56.091743623140495,
+      "cy": 217.60962559080446,
+      "rx": 26.691200000000002,
+      "ry": 16.82801639540216,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_9",
+      "originalLabel": "SS18/L1",
+      "displayLabel": "SS18/L1",
+      "label": "SS18/L1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SS18"
+      ],
+      "suggested_uniprot_ids": [
+        "B4DLD3"
+      ],
+      "isCustom": false,
+      "cx": 230.3610661157025,
+      "cy": 290.7300298850575,
+      "rx": 23.924800000000005,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_10",
+      "originalLabel": "BAF47",
+      "displayLabel": "BAF47",
+      "label": "BAF47",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCB1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q12824"
+      ],
+      "isCustom": false,
+      "cx": 142.66683884297524,
+      "cy": 269.05885402298844,
+      "rx": 18.392000000000003,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_11",
+      "originalLabel": "ARID1A/B",
+      "displayLabel": "ARID1A/B",
+      "label": "ARID1A/B",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "ARID1A"
+      ],
+      "suggested_uniprot_ids": [
+        "E9PQW6"
+      ],
+      "isCustom": false,
+      "cx": 41.72462975206611,
+      "cy": 256.79104367816086,
+      "rx": 45.294236112497735,
+      "ry": 16.889955062380658,
+      "angle": 55.110366618461235,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_12",
+      "originalLabel": "RBAP46",
+      "displayLabel": "RBAP46",
+      "label": "RBAP46",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "RBBP7"
+      ],
+      "suggested_uniprot_ids": [
+        "Q16576"
+      ],
+      "isCustom": false,
+      "cx": 76.15432396694216,
+      "cy": 514.672512643678,
+      "rx": 25.010603719008245,
+      "ry": 17.01734022988495,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_13",
+      "originalLabel": "RBAP48",
+      "displayLabel": "RBAP48",
+      "label": "RBAP48",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "RBBP4"
+      ],
+      "suggested_uniprot_ids": [
+        "Q09028"
+      ],
+      "isCustom": false,
+      "cx": 111.60073819504132,
+      "cy": 497.6451058206895,
+      "rx": 25.98071841652893,
+      "ry": 16.173841452873432,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_14",
+      "originalLabel": "BPTF",
+      "displayLabel": "BPTF",
+      "label": "BPTF",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "BPTF"
+      ],
+      "suggested_uniprot_ids": [
+        "Q12830"
+      ],
+      "isCustom": false,
+      "cx": 143.81562758347104,
+      "cy": 515.4272244965517,
+      "rx": 24.11293646611574,
+      "ry": 15.243316450574696,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_15",
+      "originalLabel": "CHRAC15",
+      "displayLabel": "CHRAC15",
+      "label": "CHRAC15",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "CHRAC1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9NRG0"
+      ],
+      "isCustom": false,
+      "cx": 157.79887501487602,
+      "cy": 692.4434164229885,
+      "rx": 23.924800000000005,
+      "ry": 15.248014124137967,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_16",
+      "originalLabel": "ACF1",
+      "displayLabel": "ACF1",
+      "label": "ACF1",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "BAZ1A"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9NRL2"
+      ],
+      "isCustom": false,
+      "cx": 118.45807207933882,
+      "cy": 680.5705943908047,
+      "rx": 23.6754506479339,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_17",
+      "originalLabel": "CHRAC17",
+      "displayLabel": "CHRAC17",
+      "label": "CHRAC17",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "POLE3"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9NRF9"
+      ],
+      "isCustom": false,
+      "cx": 80.28356297520658,
+      "cy": 690.9569142436782,
+      "rx": 23.924800000000005,
+      "ry": 15.784500450574797,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_18",
+      "originalLabel": "SNF2L",
+      "displayLabel": "SNF2L",
+      "label": "SNF2L",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCA1"
+      ],
+      "suggested_uniprot_ids": [
+        "P28370"
+      ],
+      "isCustom": false,
+      "cx": 110.19668967933882,
+      "cy": 528.480339770115,
+      "rx": 24.855841312396734,
+      "ry": 14.641259310344935,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_19",
+      "originalLabel": "ACF1",
+      "displayLabel": "ACF1",
+      "label": "ACF1",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "BAZ1A"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9NRL2"
+      ],
+      "isCustom": false,
+      "cx": 245.71352310743802,
+      "cy": 683.0401268229886,
+      "rx": 26.406776479338845,
+      "ry": 15.45391992643681,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_20",
+      "originalLabel": "RBAP46",
+      "displayLabel": "RBAP46",
+      "label": "RBAP46",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "RBBP7"
+      ],
+      "suggested_uniprot_ids": [
+        "Q16576"
+      ],
+      "isCustom": false,
+      "cx": 293.02337179504127,
+      "cy": 483.0895335172414,
+      "rx": 22.594448452892664,
+      "ry": 14.261947310344851,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_21",
+      "originalLabel": "MBD2,3",
+      "displayLabel": "MBD2,3",
+      "label": "MBD2,3",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "MBD2"
+      ],
+      "suggested_uniprot_ids": [
+        "J3KSA7"
+      ],
+      "isCustom": false,
+      "cx": 329.55891147107434,
+      "cy": 493.23249817011504,
+      "rx": 24.49857819834716,
+      "ry": 14.795716560919686,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_22",
+      "originalLabel": "HDAC1,2",
+      "displayLabel": "HDAC1,2",
+      "label": "HDAC1,2",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "HDAC1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q13547"
+      ],
+      "isCustom": false,
+      "cx": 254.9058685950413,
+      "cy": 492.4468126436782,
+      "rx": 23.924800000000005,
+      "ry": 15.52727241379307,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_23",
+      "originalLabel": "INO80B",
+      "displayLabel": "INO80B",
+      "label": "INO80B",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "INO80B"
+      ],
+      "suggested_uniprot_ids": [
+        "B8ZZ93"
+      ],
+      "isCustom": false,
+      "cx": 401.9307668033058,
+      "cy": 504.2702813701149,
+      "rx": 21.158400000000004,
+      "ry": 14.707062979310251,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_24",
+      "originalLabel": "INO80C",
+      "displayLabel": "INO80C",
+      "label": "INO80C",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "INO80C"
+      ],
+      "suggested_uniprot_ids": [
+        "K7EIY8"
+      ],
+      "isCustom": false,
+      "cx": 538.3166322314048,
+      "cy": 511.31483563218376,
+      "rx": 23.836943614835786,
+      "ry": 14.590057534058044,
+      "angle": -29.471512987690843,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_25",
+      "originalLabel": "MCRS1",
+      "displayLabel": "MCRS1",
+      "label": "MCRS1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "MCRS1"
+      ],
+      "suggested_uniprot_ids": [
+        "F8VP44"
+      ],
+      "isCustom": false,
+      "cx": 434.30283223140486,
+      "cy": 497.5746597701149,
+      "rx": 18.392000000000003,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_26",
+      "originalLabel": "RUVBL1,2",
+      "displayLabel": "RUVBL1,2",
+      "label": "RUVBL1,2",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "RUVBL1"
+      ],
+      "suggested_uniprot_ids": [
+        "E7ETR0"
+      ],
+      "isCustom": false,
+      "cx": 510.3598394512397,
+      "cy": 498.342934675862,
+      "rx": 26.691200000000002,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_27",
+      "originalLabel": "NFRKB",
+      "displayLabel": "NFRKB",
+      "label": "NFRKB",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "NFRKB"
+      ],
+      "suggested_uniprot_ids": [
+        "E9PJE1"
+      ],
+      "isCustom": false,
+      "cx": 434.47849813553717,
+      "cy": 519.318837075862,
+      "rx": 21.241801451239724,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_28",
+      "originalLabel": "ARP4,5,8",
+      "displayLabel": "ARP4,5,8",
+      "label": "ARP4,5,8",
+      "annotation": "",
+      "mappingType": "ambiguous",
+      "suggested_gene_symbols": [
+        "ANGPTL4",
+        "ACTR3B"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9BY76",
+        "Q9P1U1"
+      ],
+      "isCustom": false,
+      "cx": 469.1621844033058,
+      "cy": 485.59186129655166,
+      "rx": 26.009354852892614,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_29",
+      "originalLabel": "UCHL5",
+      "displayLabel": "UCHL5",
+      "label": "UCHL5",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "UCHL5"
+      ],
+      "suggested_uniprot_ids": [
+        "H0Y4E0"
+      ],
+      "isCustom": false,
+      "cx": 469.30686903140486,
+      "cy": 506.10097024367815,
+      "rx": 20.80681898512404,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_30",
+      "originalLabel": "YY1",
+      "displayLabel": "YY1",
+      "label": "YY1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "YY1"
+      ],
+      "suggested_uniprot_ids": [
+        "G3V3M8"
+      ],
+      "isCustom": false,
+      "cx": 505.4301907636363,
+      "cy": 519.8977426022988,
+      "rx": 20.088455930578505,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_31",
+      "originalLabel": "INO80D",
+      "displayLabel": "INO80D",
+      "label": "INO80D",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "INO80D"
+      ],
+      "suggested_uniprot_ids": [
+        "C9JLV2"
+      ],
+      "isCustom": false,
+      "cx": 472.6338127272727,
+      "cy": 462.8633255172412,
+      "rx": 24.560867024793424,
+      "ry": 14.26562436781586,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_32",
+      "originalLabel": "INO80E",
+      "displayLabel": "INO80E",
+      "label": "INO80E",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "INO80E"
+      ],
+      "suggested_uniprot_ids": [
+        "H3BNM4"
+      ],
+      "isCustom": false,
+      "cx": 512.8691732429752,
+      "cy": 474.53953991724137,
+      "rx": 23.77674617851244,
+      "ry": 15.826896239080497,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_33",
+      "originalLabel": "TFPT",
+      "displayLabel": "TFPT",
+      "label": "TFPT",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "TFPT"
+      ],
+      "suggested_uniprot_ids": [
+        "A8MTQ3"
+      ],
+      "isCustom": false,
+      "cx": 433.5942705917356,
+      "cy": 473.40557526436766,
+      "rx": 19.59710337520653,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_34",
+      "originalLabel": "MTA1,2,3",
+      "displayLabel": "MTA1,2,3",
+      "label": "MTA1,2,3",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "MTA1"
+      ],
+      "suggested_uniprot_ids": [
+        "E7ESY4"
+      ],
+      "isCustom": false,
+      "cx": 255.2799412429752,
+      "cy": 517.935851475862,
+      "rx": 26.691200000000002,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_35",
+      "originalLabel": "RBAP48",
+      "displayLabel": "RBAP48",
+      "label": "RBAP48",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "RBBP4"
+      ],
+      "suggested_uniprot_ids": [
+        "Q09028"
+      ],
+      "isCustom": false,
+      "cx": 291.9205916231405,
+      "cy": 505.74812079080453,
+      "rx": 22.68565837685952,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_36",
+      "originalLabel": "CHD3,4",
+      "displayLabel": "CHD3,4",
+      "label": "CHD3,4",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "CHD3"
+      ],
+      "suggested_uniprot_ids": [
+        "H7C0J3"
+      ],
+      "isCustom": false,
+      "cx": 292.8112946710744,
+      "cy": 529.0481142436781,
+      "rx": 24.829666072727207,
+      "ry": 15.209033783908012,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_37",
+      "originalLabel": "INO80",
+      "displayLabel": "INO80",
+      "label": "INO80",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "INO80"
+      ],
+      "suggested_uniprot_ids": [
+        "H0YKH3"
+      ],
+      "isCustom": false,
+      "cx": 472.2501652033058,
+      "cy": 529.3267204965515,
+      "rx": 25.9560847966942,
+      "ry": 14.476145783907782,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_38",
+      "originalLabel": "BAF45B/C/D",
+      "displayLabel": "BAF45B/C/D",
+      "label": "BAF45B/C/D",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "DPF1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q92782"
+      ],
+      "isCustom": false,
+      "cx": 74.89287520661158,
+      "cy": 241.74190114942533,
+      "rx": 32.224000000000004,
+      "ry": 15.167188505747134,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_39",
+      "originalLabel": "BRG1 or",
+      "displayLabel": "BRG1/BRM",
+      "label": "BRG1/BRM",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCA4"
+      ],
+      "suggested_uniprot_ids": [
+        "P51532"
+      ],
+      "isCustom": false,
+      "cx": 333.40437047933875,
+      "cy": 242.1374011494253,
+      "rx": 23.924800000000005,
+      "ry": 15.562688505747104,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_41",
+      "originalLabel": "BAF53A/B",
+      "displayLabel": "BAF53A/B",
+      "label": "BAF53A/B",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "ACTL6A"
+      ],
+      "suggested_uniprot_ids": [
+        "O96019"
+      ],
+      "isCustom": false,
+      "cx": 262.45041322314046,
+      "cy": 213.799624137931,
+      "rx": 26.691200000000002,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_42",
+      "originalLabel": "BCL7A/B/C",
+      "displayLabel": "BCL7A/B/C",
+      "label": "BCL7A/B/C",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "BCL7A"
+      ],
+      "suggested_uniprot_ids": [
+        "Q4VC05"
+      ],
+      "isCustom": false,
+      "cx": 356.5013244429752,
+      "cy": 214.9783197701149,
+      "rx": 29.457600000000003,
+      "ry": 14.70245770114937,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_43",
+      "originalLabel": "BAF155/170",
+      "displayLabel": "BAF155/170",
+      "label": "BAF155/170",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCC1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q92922"
+      ],
+      "isCustom": false,
+      "cx": 335.6527752066115,
+      "cy": 295.75467701149427,
+      "rx": 32.224000000000004,
+      "ry": 12.844,
+      "angle": -18.78310453447368,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_44",
+      "originalLabel": "BAF155/170",
+      "displayLabel": "BAF155/170",
+      "label": "BAF155/170",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCC1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q92922"
+      ],
+      "isCustom": false,
+      "cx": 277.26484958677685,
+      "cy": 297.9492252873563,
+      "rx": 32.224000000000004,
+      "ry": 12.844,
+      "angle": 15.48797567030634,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_45",
+      "originalLabel": "BAF47",
+      "displayLabel": "BAF47",
+      "label": "BAF47",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCB1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q12824"
+      ],
+      "isCustom": false,
+      "cx": 335.5028537190083,
+      "cy": 272.7877896551724,
+      "rx": 22.095131818181812,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_46",
+      "originalLabel": "BRD7",
+      "displayLabel": "BRD7",
+      "label": "BRD7",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "BRD7"
+      ],
+      "suggested_uniprot_ids": [
+        "I3L0Y7"
+      ],
+      "isCustom": false,
+      "cx": 364.6703189752066,
+      "cy": 261.2614043494253,
+      "rx": 20.745848380165228,
+      "ry": 15.468300901149405,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_47",
+      "originalLabel": "PBRM1",
+      "displayLabel": "PBRM1",
+      "label": "PBRM1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "PBRM1"
+      ],
+      "suggested_uniprot_ids": [
+        "C9J053"
+      ],
+      "isCustom": false,
+      "cx": 383.349732231405,
+      "cy": 247.55216206896552,
+      "rx": 27.785172255905533,
+      "ry": 12.844,
+      "angle": 68.90697806527888,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_48",
+      "originalLabel": "PBRM1",
+      "displayLabel": "PBRM1",
+      "label": "PBRM1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "PBRM1"
+      ],
+      "suggested_uniprot_ids": [
+        "C9J053"
+      ],
+      "isCustom": false,
+      "cx": 403.5640713074379,
+      "cy": 241.96692665747122,
+      "rx": 26.313050163476586,
+      "ry": 12.844,
+      "angle": 67.4667116900308,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_49",
+      "originalLabel": "BAF57",
+      "displayLabel": "BAF57",
+      "label": "BAF57",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCE1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q969G3"
+      ],
+      "isCustom": false,
+      "cx": 297.0962876033058,
+      "cy": 283.49194252873554,
+      "rx": 23.5793838842975,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_50",
+      "originalLabel": "ARID2",
+      "displayLabel": "ARID2",
+      "label": "ARID2",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "ARID2"
+      ],
+      "suggested_uniprot_ids": [
+        "F8VWP4"
+      ],
+      "isCustom": false,
+      "cx": 246.56435537190083,
+      "cy": 256.60137356321843,
+      "rx": 35.28631929692783,
+      "ry": 22.83215666128051,
+      "angle": 59.924638377242076,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_51",
+      "originalLabel": "PHF10",
+      "displayLabel": "PHF10",
+      "label": "PHF10",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "PHF10"
+      ],
+      "suggested_uniprot_ids": [
+        "Q8WUB8"
+      ],
+      "isCustom": false,
+      "cx": 275.3601578512396,
+      "cy": 237.87040689655157,
+      "rx": 25.084108677686004,
+      "ry": 15.341671264367648,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_52",
+      "originalLabel": "BAF60A/B/C",
+      "displayLabel": "BAF60A/B/C",
+      "label": "BAF60A/B/C",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCD1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q96GM5"
+      ],
+      "isCustom": false,
+      "cx": 295.51364299504144,
+      "cy": 259.03932682298847,
+      "rx": 32.224000000000004,
+      "ry": 13.751970501149401,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_55",
+      "originalLabel": "BRM",
+      "displayLabel": "BRG1/BRM",
+      "label": "BRG1/BRM",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCA4"
+      ],
+      "suggested_uniprot_ids": [
+        "P51532"
+      ],
+      "isCustom": false,
+      "cx": 523.6546381041321,
+      "cy": 259.73361294367805,
+      "rx": 32.19772584439054,
+      "ry": 12.844,
+      "angle": -0.41381791199684415,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_56",
+      "originalLabel": "BAF53A",
+      "displayLabel": "BAF53A",
+      "label": "BAF53A",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "ACTL6A"
+      ],
+      "suggested_uniprot_ids": [
+        "O96019"
+      ],
+      "isCustom": false,
+      "cx": 474.77271322314044,
+      "cy": 254.4790356321839,
+      "rx": 25.69610152910228,
+      "ry": 14.003290016610936,
+      "angle": -20.382841972510846,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_57",
+      "originalLabel": "BCL7A/B/C",
+      "displayLabel": "BCL7A/B/C",
+      "label": "BCL7A/B/C",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "BCL7A"
+      ],
+      "suggested_uniprot_ids": [
+        "Q4VC05"
+      ],
+      "isCustom": false,
+      "cx": 552.8796429752066,
+      "cy": 234.2082528735632,
+      "rx": 29.457600000000003,
+      "ry": 14.545043275403126,
+      "angle": -24.233210788027833,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_58",
+      "originalLabel": "GLTSCR1/1L",
+      "displayLabel": "GLTSCR1/1L",
+      "label": "GLTSCR1/1L",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "BICRA"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9NZM4"
+      ],
+      "isCustom": false,
+      "cx": 526.8626644628099,
+      "cy": 301.136448275862,
+      "rx": 32.224000000000004,
+      "ry": 13.872080459770018,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_59",
+      "originalLabel": "BRD9",
+      "displayLabel": "BRD9",
+      "label": "BRD9",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "BRD9"
+      ],
+      "suggested_uniprot_ids": [
+        "C9JBY0"
+      ],
+      "isCustom": false,
+      "cx": 554.754332231405,
+      "cy": 283.10881264367805,
+      "rx": 26.24149225877323,
+      "ry": 14.866671608843715,
+      "angle": 13.787899604440142,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_60",
+      "originalLabel": "BAF155/170",
+      "displayLabel": "BAF155/170",
+      "label": "BAF155/170",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCC1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q92922"
+      ],
+      "isCustom": false,
+      "cx": 499.9153198347108,
+      "cy": 278.9447540229885,
+      "rx": 32.224000000000004,
+      "ry": 13.427512643678142,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_61",
+      "originalLabel": "BAF60A",
+      "displayLabel": "BAF60A",
+      "label": "BAF60A",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCD1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q96GM5"
+      ],
+      "isCustom": false,
+      "cx": 453.5180471074379,
+      "cy": 276.4021413793103,
+      "rx": 21.158400000000004,
+      "ry": 15.685262427305485,
+      "angle": -8.130509816559822,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_62",
+      "originalLabel": "BAF155/170",
+      "displayLabel": "BAF155/170",
+      "label": "BAF155/170",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCC1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q92922"
+      ],
+      "isCustom": false,
+      "cx": 480.01949008264467,
+      "cy": 302.3932609195401,
+      "rx": 32.224000000000004,
+      "ry": 12.844,
+      "angle": 23.082038053634363,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_63",
+      "originalLabel": "SS18/L1*",
+      "displayLabel": "SS18/L1*",
+      "label": "SS18/L1*",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SS18"
+      ],
+      "suggested_uniprot_ids": [
+        "B4DLD3"
+      ],
+      "isCustom": false,
+      "cx": 577.4075578512395,
+      "cy": 257.3093827586207,
+      "rx": 26.691200000000002,
+      "ry": 14.870011383597038,
+      "angle": -15.271094258778163,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_64",
+      "originalLabel": "BAF60A/B/C",
+      "displayLabel": "BAF60A/B/C",
+      "label": "BAF60A/B/C",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCD1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q96GM5"
+      ],
+      "isCustom": false,
+      "cx": 97.25039834710745,
+      "cy": 261.21600114942527,
+      "rx": 32.224000000000004,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_70",
+      "originalLabel": "BAF155/170",
+      "displayLabel": "BAF155/170",
+      "label": "BAF155/170",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCC1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q92922"
+      ],
+      "isCustom": false,
+      "cx": 144.10664545454543,
+      "cy": 292.26673563218384,
+      "rx": 32.224000000000004,
+      "ry": 12.844,
+      "angle": -18.372809745675653,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_71",
+      "originalLabel": "BAF155/170",
+      "displayLabel": "BAF155/170",
+      "label": "BAF155/170",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCC1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q92922"
+      ],
+      "isCustom": false,
+      "cx": 87.3540752066116,
+      "cy": 298.6181896551725,
+      "rx": 32.224000000000004,
+      "ry": 13.848868340062142,
+      "angle": 10.061637634805862,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_72",
+      "originalLabel": "BAF57",
+      "displayLabel": "BAF57",
+      "label": "BAF57",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCE1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q969G3"
+      ],
+      "isCustom": false,
+      "cx": 102.55920247933884,
+      "cy": 280.0057712643678,
+      "rx": 27.43547727272727,
+      "ry": 13.47703563218397,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_74",
+      "originalLabel": "BRM",
+      "displayLabel": "BRG1/BRM",
+      "label": "BRG1/BRM",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCA4"
+      ],
+      "suggested_uniprot_ids": [
+        "P51532"
+      ],
+      "isCustom": false,
+      "cx": 136.54379076363637,
+      "cy": 242.75081795862073,
+      "rx": 29.867417914049568,
+      "ry": 15.164611062069014,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_75",
+      "originalLabel": "SNF2H",
+      "displayLabel": "SNF2H",
+      "label": "SNF2H",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCA5"
+      ],
+      "suggested_uniprot_ids": [
+        "O60264"
+      ],
+      "isCustom": false,
+      "cx": 246.72417289917354,
+      "cy": 706.599442675862,
+      "rx": 26.913482059504133,
+      "ry": 12.844,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_76",
+      "originalLabel": "SNF2H",
+      "displayLabel": "SNF2H",
+      "label": "SNF2H",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "SMARCA5"
+      ],
+      "suggested_uniprot_ids": [
+        "O60264"
+      ],
+      "isCustom": false,
+      "cx": 117.09114760330576,
+      "cy": 704.968470170115,
+      "rx": 26.053945371900852,
+      "ry": 15.129389710344867,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.90824
+    },
+    {
+      "id": "cst_overlay_77",
+      "originalLabel": "β-actin",
+      "displayLabel": "β-actin",
+      "label": "β-actin",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 108.75170454545456,
+      "cy": 217.4712643678161,
+      "rx": 25.79504132231405,
+      "ry": 14.666666666666686,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_78",
+      "originalLabel": "SS18/L1*",
+      "displayLabel": "SS18/L1*",
+      "label": "SS18/L1*",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SS18"
+      ],
+      "suggested_uniprot_ids": [
+        "B4DLD3"
+      ],
+      "isCustom": true,
+      "cx": 180.06740702479337,
+      "cy": 252.367816091954,
+      "rx": 22.25454545454545,
+      "ry": 16.183908045977063,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_79",
+      "originalLabel": "β-actin",
+      "displayLabel": "β-actin",
+      "label": "β-actin",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 308.53682851239665,
+      "cy": 215.44827586206895,
+      "rx": 21.242975206611504,
+      "ry": 15.678160919540204,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_80",
+      "originalLabel": "β-actin",
+      "displayLabel": "β-actin",
+      "label": "β-actin",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 507.8161673553718,
+      "cy": 239.21839080459768,
+      "rx": 19.725619834710756,
+      "ry": 14.160919540229884,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_81",
+      "originalLabel": "p66α/β",
+      "displayLabel": "p66α/β",
+      "label": "p66α/β",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 330.7913739669422,
+      "cy": 518.3908045977012,
+      "rx": 21.748760330578477,
+      "ry": 13.655172413793139,
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    }
+  ]
+}

@@ -1,0 +1,312 @@
+{
+  "version": 3,
+  "saved_at_utc": "2026-03-27T19:35:54.404561+00:00",
+  "pathway_id": "cst_astrocytes_in_neurodegeneration",
+  "pathway_name": "Astrocytes in Neurodegeneration",
+  "pathway_file": "Astrocytes in Neurodegeneration.ai",
+  "nodes": [
+    {
+      "id": "cst_overlay_1",
+      "originalLabel": "ApoE",
+      "displayLabel": "ApoE",
+      "label": "ApoE",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "APOE"
+      ],
+      "suggested_uniprot_ids": [
+        "E7ERP7"
+      ],
+      "isCustom": false,
+      "cx": 266.3452148760331,
+      "cy": 155.40424067796613,
+      "rx": 14.774400000000002,
+      "ry": 11.855999999999998,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_2",
+      "originalLabel": "ABCA1",
+      "displayLabel": "ABCA1",
+      "label": "ABCA1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "ABCA1"
+      ],
+      "suggested_uniprot_ids": [
+        "B1AMI1"
+      ],
+      "isCustom": false,
+      "cx": 295.7370057851239,
+      "cy": 270.6290389830508,
+      "rx": 17.328,
+      "ry": 11.855999999999998,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_3",
+      "originalLabel": "ApoE",
+      "displayLabel": "ApoE",
+      "label": "ApoE",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "APOE"
+      ],
+      "suggested_uniprot_ids": [
+        "E7ERP7"
+      ],
+      "isCustom": false,
+      "cx": 395.46707190082645,
+      "cy": 276.3590898305085,
+      "rx": 14.774400000000002,
+      "ry": 11.855999999999998,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    }
+  ],
+  "edges": [
+    {
+      "id": "cst_ai_edge_1",
+      "startX": 219.2336,
+      "startY": 190.926,
+      "endX": 249.33159999999998,
+      "endY": 196.95499999999998,
+      "controlX": 234.2826,
+      "controlY": 193.9405,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 234.2826,
+          "y": 193.9405
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_2",
+      "startX": 542.3117,
+      "startY": 331.5604305084746,
+      "endX": 233.08669999999995,
+      "endY": 200.55943050847458,
+      "controlX": 313.2303964359504,
+      "controlY": 348.85334745762714,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 313.2303964359504,
+          "y": 348.85334745762714
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_3",
+      "startX": 537.9406,
+      "startY": 302.7278,
+      "endX": 436.5996,
+      "endY": 242.30180000000001,
+      "controlX": 480.1446412518097,
+      "controlY": 283.50226083597937,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": true,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 480.1446412518097,
+          "y": 283.50226083597937
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_4",
+      "startX": 609.548,
+      "startY": 167.9866,
+      "endX": 609.548,
+      "endY": 147.76760000000002,
+      "controlX": 609.548,
+      "controlY": 157.87710000000004,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 609.548,
+          "y": 157.87710000000004
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_5",
+      "startX": 455.552,
+      "startY": 222.1458,
+      "endX": 475.77000000000004,
+      "endY": 222.1458,
+      "controlX": 465.66100000000006,
+      "controlY": 222.1458,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 465.66100000000006,
+          "y": 222.1458
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_6",
+      "startX": 289.9514,
+      "startY": 168.8254,
+      "endX": 422.2514,
+      "endY": 166.6464,
+      "controlX": 355.40837231060493,
+      "controlY": 139.9498751839327,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": true,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 355.40837231060493,
+          "y": 139.9498751839327
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_7",
+      "startX": 411.5691,
+      "startY": 244.0286,
+      "endX": 361.4631,
+      "endY": 238.3846,
+      "controlX": 385.29138250862064,
+      "controlY": 252.8105346537044,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 385.29138250862064,
+          "y": 252.8105346537044
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_8",
+      "startX": 606.2468,
+      "startY": 190.9358,
+      "endX": 559.4838,
+      "endY": 219.6058,
+      "controlX": 588.1647141437506,
+      "controlY": 213.91298605509087,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 588.1647141437506,
+          "y": 213.91298605509087
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774640126110_211631",
+      "startX": 280.41676007231405,
+      "startY": 218.8532966101695,
+      "endX": 347.2372559400826,
+      "endY": 236.14688135593218,
+      "controlX": 311.4405617252066,
+      "controlY": 245.09183898305085,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 311.4405617252066,
+          "y": 245.09183898305085
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774640132003_522648",
+      "startX": 540.5394047004132,
+      "startY": 317.2478305084746,
+      "endX": 356.7830410640496,
+      "endY": 276.1010254237288,
+      "controlX": 442.69510717975203,
+      "controlY": 320.82581355932206,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 442.69510717975203,
+          "y": 320.82581355932206
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774640138971_662386",
+      "startX": 509.51560304752064,
+      "startY": 161.60556779661016,
+      "endX": 397.949239411157,
+      "endY": 104.95416949152543,
+      "controlX": 461.190065857438,
+      "controlY": 121.65142372881357,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 461.190065857438,
+          "y": 121.65142372881357
+        }
+      ]
+    }
+  ],
+  "disable_pdf_reader": false
+}

@@ -49,7 +49,9 @@ from MapKinase_WebApp.m7_cst_viewer import (
     create_cst_pathway_viewer,
     get_cst_pathway_catalog,
     load_cst_pathway_payload,
+    save_cst_overlay_state,
 )
+from MapKinase_WebApp.m11_cst_pathway_index import iter_effective_cst_modules
 
 try:
     import uvicorn  # type: ignore
@@ -176,9 +178,23 @@ JSON_PREVIEW_DIR = os.path.join(BASE_DIR, "JSONfiles")
 JSON_PREVIEW_FILE = os.path.join(JSON_PREVIEW_DIR, "latest_preview.json")
 CUSTOM_LAYOUT_EXPORT_FILE = os.path.join(JSON_PREVIEW_DIR, "custom_pathway_export.json")
 RESOURCE_ROOT = getattr(sys, "_MEIPASS", PARENT_DIR)
-SAMPLE_DATA_DIR = os.path.join(RESOURCE_ROOT, "sample_input_files")
-SAMPLE_PROTEIN_FILE = os.path.join(SAMPLE_DATA_DIR, "mapk_prot_examplefile.csv")
-SAMPLE_PTM_FILE = os.path.join(SAMPLE_DATA_DIR, "mapk_phos_examplefile.csv")
+
+
+def _resolve_sample_data_dir() -> str:
+    candidates = [
+        os.path.join(RESOURCE_ROOT, "Sample_input_files"),
+        os.path.join(RESOURCE_ROOT, "sample_input_files"),
+    ]
+    for path in candidates:
+        if os.path.isdir(path):
+            return path
+    return candidates[0]
+
+
+SAMPLE_DATA_DIR = _resolve_sample_data_dir()
+SAMPLE_PROTEIN_FILE = os.path.join(SAMPLE_DATA_DIR, "TCA_protein_for_mapk.txt")
+SAMPLE_PTM_FILE = os.path.join(SAMPLE_DATA_DIR, "TCA_phospho_for_mapk_singlesite.csv")
+SAMPLE_METABOLITE_FILE = os.path.join(SAMPLE_DATA_DIR, "example_metabolite_file.txt")
 SPECIES_REF_PATH = _resolve_species_ref_file()
 UPLOAD_ACCEPT_TYPES = [
     ".txt",
@@ -221,6 +237,16 @@ def _load_species_choices() -> Dict[str, Dict[str, str]]:
 SPECIES_CHOICES: Dict[str, Dict[str, str]] = _load_species_choices()
 DEFAULT_SPECIES = "human" if "human" in SPECIES_CHOICES else next(iter(SPECIES_CHOICES.keys()))
 SPECIES_OPTIONS = {key: cfg["label"] for key, cfg in SPECIES_CHOICES.items() if cfg.get("label")}
+
+
+def _resolve_demo_species_key() -> str:
+    for key, cfg in SPECIES_CHOICES.items():
+        if str(cfg.get("label") or "").strip().lower() == "mouse":
+            return key
+    return "mouse" if "mouse" in SPECIES_CHOICES else DEFAULT_SPECIES
+
+
+DEMO_SPECIES = _resolve_demo_species_key()
 
 MODE_PRESET_DEFAULTS: Dict[str, Dict[str, bool]] = {
     "analysis": {
@@ -1098,6 +1124,15 @@ def collect_settings(input, cfg: Dict[str, Any]) -> Dict[str, Any]:  # type: ign
     overrides["ptm_outline_width"] = _to_float(
         _get_input_value(input, "settings_ptm_outline_width"), DEFAULT_SETTINGS.get("ptm_outline_width", 1)
     )
+    current_mode = str(_get_input_value(input, "input_mode") or "user").strip().lower()
+    overrides["use_black_protein_outlines"] = (
+        True
+        if current_mode == "demo"
+        else _to_bool(
+            _get_input_value(input, "settings_use_black_protein_outlines"),
+            DEFAULT_SETTINGS.get("use_black_protein_outlines", False),
+        )
+    )
     overrides["protein_tooltip_columns"] = list(DEFAULT_SETTINGS["protein_tooltip_columns"])
     overrides["include_psp_tooltips"] = bool(_get_input_value(input, "settings_include_psp_tooltips"))
     overrides["species"] = species_label
@@ -1204,6 +1239,10 @@ def _resolve_outline_columns(main_columns: Sequence[str], headers: Sequence[str]
     return [outline_map.get(_normalize_fc_suffix(col)) for col in main_columns or []]
 
 
+def _has_outline_columns(headers: Sequence[str]) -> bool:
+    return any(str(header or "").strip().lower().startswith("o:") for header in list(headers or []))
+
+
 CUSTOM_STYLES = ui.tags.style(
     """
     .pathway-search-wrapper { position: relative; margin-bottom: 0.25rem; }
@@ -1272,9 +1311,70 @@ CUSTOM_STYLES = ui.tags.style(
     .ks-filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
     .ks-filter-row > * { flex: 1; min-width: 140px; }
     .ks-filter-disabled { opacity: 0.45; pointer-events: none; }
-    .pathway-table { width: 100%; }
+    .pathway-table { width: 100%; table-layout: fixed; }
+    .pathway-table th:nth-child(1),
+    .pathway-table td:nth-child(1) { width: 110px; }
+    .pathway-table th:nth-child(2),
+    .pathway-table td:nth-child(2) { width: 280px; }
+    .pathway-table th:nth-child(3),
+    .pathway-table td:nth-child(3),
+    .pathway-table th:nth-child(4),
+    .pathway-table td:nth-child(4) { width: 120px; }
+    .pathway-table td:nth-child(2) > div {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .pathway-table td:nth-child(2) > small {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .pathway-table-hover-tooltip { display: none; position: fixed; left: 0; top: 0;
+        max-width: 420px; padding: 8px 10px; border-radius: 10px; background: rgba(15, 23, 42, 0.96);
+        color: #ffffff; font-size: 12px; line-height: 1.35; box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28); z-index: 1200;
+        pointer-events: none; white-space: normal; word-break: break-word; }
     .input-page-stack { display: flex; flex-direction: column; row-gap: 16px; width: 100%; }
     .input-page-row { width: 100%; }
+    .mk-input-busy-overlay { position: fixed; inset: 0; z-index: 2200; display: none; align-items: center; justify-content: center;
+        background: rgba(11, 31, 51, 0.28); backdrop-filter: blur(2px); }
+    .mk-input-busy-overlay.is-visible { display: flex; }
+    .mk-input-busy-card { min-width: 280px; max-width: 360px; padding: 22px 24px; border-radius: 18px; background: rgba(255,255,255,0.98);
+        border: 1px solid #dbe2ea; box-shadow: 0 28px 60px rgba(15, 23, 42, 0.20); display: flex; align-items: center; gap: 14px; }
+    .mk-input-busy-spinner { width: 28px; height: 28px; border: 3px solid #dbe5f0; border-top-color: #2563eb; border-radius: 50%;
+        animation: mk-spin 0.8s linear infinite; flex: 0 0 auto; }
+    .mk-input-busy-copy { min-width: 0; }
+    .mk-input-busy-title { font-size: 15px; font-weight: 800; color: #0f172a; line-height: 1.2; }
+    .mk-input-busy-text { margin-top: 4px; font-size: 12px; color: #475569; line-height: 1.45; }
+    .input-sample-download-row { display: inline-flex; align-items: center; gap: 8px; margin-top: 2px; }
+    .input-sample-download-btn {
+        width: 34px; height: 34px; min-width: 34px; padding: 0; border-radius: 10px;
+        display: inline-flex; align-items: center; justify-content: center;
+    }
+    .input-sample-download-label { font-size: 12px; font-weight: 600; color: #334155; line-height: 1.2; }
+    .input-preview-labeled-row { display: flex; align-items: stretch; gap: 14px; width: 100%; }
+    .input-preview-side-label {
+        flex: 0 0 160px;
+        min-width: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        border: 1px solid #d7e3f4;
+        background: linear-gradient(180deg, #f8fbff 0%, #e8f0ff 100%);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+    .input-preview-side-label.is-protein { color: #1d4ed8; }
+    .input-preview-side-label.is-ptm { color: #0f766e; }
+    .input-preview-side-label.is-metabolite { color: #7c3aed; }
+    .input-preview-table-wrap { flex: 1 1 auto; min-width: 0; }
     .input-preview-section { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; width: 100%; }
     .input-preview-panel { flex: 0 0 auto; min-width: 0; max-width: 100%; }
     .input-preview-wrap { display: inline-block; border: 1px solid #dbe2ea; border-radius: 14px; background: #ffffff; overflow-x: auto;
@@ -1285,21 +1385,35 @@ CUSTOM_STYLES = ui.tags.style(
     .input-preview-table tbody td { color: #334155; white-space: nowrap; }
     .input-preview-table th, .input-preview-table td { padding: 10px 12px; border-color: #e5e7eb;
         overflow: hidden; text-overflow: ellipsis; }
-    .input-preview-guide-card { width: 1240px; min-width: 940px; height: 200px; border: 1px solid #dbe2ea;
+    .input-preview-guide-card { width: 1380px; min-width: 1080px; height: 224px; border: 1px solid #dbe2ea;
         border-radius: 16px; background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
         box-shadow: 0 18px 36px rgba(15, 23, 42, 0.10); overflow: hidden; }
     .input-preview-guide-layout { display: block; height: 100%; }
-    .input-preview-guide-body { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; padding: 16px 18px 16px 18px; height: 100%; }
+    .input-preview-guide-body { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 12px; padding: 16px 18px 16px 18px; height: 100%; }
     .input-preview-guide-pill { background: rgba(255,255,255,0.94); border: 1px solid #d7e3f4; border-radius: 12px; padding: 12px 14px; }
     .input-preview-guide-pill-title { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .input-preview-guide-required { color: #dc2626; margin-left: 3px; font-weight: 800; }
     .input-preview-guide-pill-text { font-size: 12px; line-height: 1.45; color: #334155; }
+    .mk-mode-help-row { position: relative; overflow: visible; }
+    .mk-mode-help-row .shiny-input-container { margin-bottom: 0; overflow: visible; }
+    .mk-mode-help-row .form-check { overflow: visible; }
+    .mk-mode-help-row label { overflow: visible; }
+    .mk-inline-help-wrap { position: relative; display: inline-flex; align-items: center; vertical-align: middle; margin-left: 6px; overflow: visible; }
+    .mk-inline-help { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px;
+        border-radius: 999px; background: #2563eb; color: #ffffff; font-size: 12px; font-weight: 800; line-height: 1;
+        cursor: help; user-select: none; box-shadow: 0 2px 6px rgba(37, 99, 235, 0.28); }
+    .mk-floating-help-tooltip { display: none; position: fixed; left: 0; top: 0;
+        min-width: 310px; max-width: 360px; padding: 10px 12px; border-radius: 12px; background: rgba(15, 23, 42, 0.96);
+        color: #ffffff; font-size: 12px; line-height: 1.45; box-shadow: 0 18px 38px rgba(15, 23, 42, 0.28); z-index: 1200; }
+    .mk-floating-help-tooltip::before { content: ""; position: absolute; left: -6px; top: 50%; width: 12px; height: 12px;
+        background: rgba(15, 23, 42, 0.96); transform: translateY(-50%) rotate(45deg); }
     .web-load-ready { background-color: #16a34a !important; border-color: #16a34a !important; color: #ffffff !important; }
     .web-load-ready:hover, .web-load-ready:focus { background-color: #15803d !important; border-color: #15803d !important; color: #ffffff !important; }
     .pathway-viewer-card { position: relative; }
     .viewer-fullscreen-btn, .viewer-overlay-btn { border: 1px solid rgba(107, 114, 128, 0.45);
         background: rgba(107, 114, 128, 0.22); color: #111827; border-radius: 10px; padding: 6px 10px; font-size: 12px;
         font-weight: 600; backdrop-filter: blur(4px); transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease; }
-    .viewer-fullscreen-btn { position: absolute; top: 10px; right: 10px; z-index: 15; }
+    .viewer-fullscreen-btn { position: absolute; top: 10px; right: 10px; z-index: 45; }
     .viewer-fullscreen-btn:hover, .viewer-fullscreen-btn:focus, .viewer-overlay-btn:hover, .viewer-overlay-btn:focus {
         background: rgba(75, 85, 99, 0.82); border-color: rgba(75, 85, 99, 0.95); color: #ffffff; }
     .viewer-overlay-panel { position: absolute; top: 52px; right: 10px; z-index: 15; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
@@ -1367,19 +1481,25 @@ CUSTOM_STYLES = ui.tags.style(
     .viewer-create-protein-popover-overlay { display: none; position: absolute; z-index: 40; min-width: 240px; max-width: 300px; max-height: 220px; overflow-y: auto; }
     .viewer-create-legend-popover-overlay { display: none; position: absolute; z-index: 50; min-width: 150px; }
     .pathway-viewer-body { min-width: 0; position: relative; }
+    .viewer-create-panel.is-hidden-for-cst,
+    .pathway-viewer-card:fullscreen .viewer-create-panel.is-hidden-for-cst { display: none !important; }
     .viewer-create-option.viewer-create-protein-option { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .viewer-create-protein-label { min-width: 0; flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .viewer-create-protein-swatch { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(15, 23, 42, 0.16); flex: 0 0 auto; }
+    .viewer-create-metabolite-swatch { width: 12px; height: 12px; border-radius: 999px; border: 1px solid rgba(15, 23, 42, 0.16); flex: 0 0 auto; }
     .pathway-viewer-card:fullscreen { background: #ffffff; padding: 16px; overflow: auto; box-sizing: border-box;
         width: 100vw; height: 100vh; max-width: none; display: flex; flex-direction: column; align-items: stretch; }
     .pathway-viewer-card:fullscreen > *:not(.viewer-fullscreen-btn):not(.viewer-overlay-panel) { width: 100%; max-width: none; }
     .pathway-viewer-card:fullscreen .viewer-create-panel { display: block !important; visibility: visible !important; flex: 0 0 auto;
         align-self: stretch; width: 100%; max-width: 100%; min-width: 0; }
-    .pathway-viewer-card:fullscreen .pathway-viewer-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
-    .pathway-viewer-card:fullscreen .svg-container { width: 100% !important; min-width: 100% !important; max-width: none !important; flex: 1 1 auto; }
+    .pathway-viewer-card:fullscreen .pathway-viewer-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: auto; }
+    .pathway-viewer-card:fullscreen .svg-container { width: 100% !important; min-width: 100% !important; max-width: none !important; flex: 1 1 auto; min-height: 0; overflow: auto; }
     .pathway-viewer-card:fullscreen #svgCanvas { width: 100% !important; max-width: none !important; }
-    .pathway-viewer-card:fullscreen .viewer-fullscreen-btn { top: 16px; right: 16px; }
+    .pathway-viewer-card:fullscreen .viewer-fullscreen-btn { top: 16px; right: 16px; z-index: 60; }
     .pathway-viewer-card:fullscreen .viewer-overlay-panel { top: 58px; right: 16px; }
+    .pathway-viewer-card:fullscreen .cst-viewer-shell { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+    .pathway-viewer-card:fullscreen .cst-viewer-stage { flex: 1 1 auto; min-height: 0; height: 100% !important; }
+    .pathway-viewer-card:fullscreen .cst-viewer-viewport { height: 100%; max-height: 100%; overflow: auto; }
     .svg-download-row { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
     .svg-download-row .svg-download-label { font-weight: 700; color: #1f2937; margin-right: 4px; }
     .svg-download-row .btn { font-weight: 600; padding: 6px 12px; }
@@ -1447,6 +1567,125 @@ EXPORT_DOWNLOAD_SCRIPT = ui.tags.script(
             if (btn) btn.disabled = false;
             var spinner = msg && msg.spinner_id ? document.getElementById(msg.spinner_id) : null;
             if (spinner) spinner.style.display = "none";
+        });
+    })();
+    """
+)
+
+INPUT_BUSY_SCRIPT = ui.tags.script(
+    """
+    (function(){
+        let datasetLoadPending = false;
+        function overlay(){
+            return document.getElementById("mk-input-busy-overlay");
+        }
+        function inputTabActive(){
+            return !!document.querySelector('#bookmark_selector a.nav-link.active[data-value="input"]');
+        }
+        function showOverlay(){
+            const el = overlay();
+            if (!el) return;
+            el.classList.add("is-visible");
+        }
+        function hideOverlay(){
+            const el = overlay();
+            if (!el) return;
+            el.classList.remove("is-visible");
+        }
+        document.addEventListener("change", function(ev){
+            const target = ev && ev.target;
+            if (!target) return;
+            if (target.id !== "input_protein_upload" && target.id !== "input_ptm_upload" && target.id !== "input_metabolite_upload") return;
+            datasetLoadPending = !!(target.files && target.files.length);
+            if (datasetLoadPending && inputTabActive()){
+                showOverlay();
+            } else if (!datasetLoadPending) {
+                hideOverlay();
+            }
+        }, true);
+        document.addEventListener("shiny:busy", function(){
+            if (datasetLoadPending && inputTabActive()){
+                showOverlay();
+            }
+        });
+        document.addEventListener("shiny:idle", function(){
+            datasetLoadPending = false;
+            hideOverlay();
+        });
+        document.addEventListener("shown.bs.tab", function(){
+            if (!(datasetLoadPending && inputTabActive())){
+                hideOverlay();
+            }
+        });
+    })();
+    """
+)
+
+INLINE_HELP_TOOLTIP_SCRIPT = ui.tags.script(
+    """
+    (function(){
+        let tooltipEl = null;
+        let activeTarget = null;
+        function ensureTooltip(){
+            if (tooltipEl) return tooltipEl;
+            tooltipEl = document.createElement('div');
+            tooltipEl.className = 'mk-floating-help-tooltip';
+            tooltipEl.setAttribute('role', 'tooltip');
+            document.body.appendChild(tooltipEl);
+            return tooltipEl;
+        }
+        function hideTooltip(){
+            const el = ensureTooltip();
+            el.style.display = 'none';
+            el.innerHTML = '';
+            activeTarget = null;
+        }
+        function positionTooltip(target){
+            const el = ensureTooltip();
+            const rect = target.getBoundingClientRect();
+            const margin = 12;
+            const desiredLeft = rect.right + margin;
+            const maxLeft = window.innerWidth - el.offsetWidth - 12;
+            const left = Math.max(12, Math.min(desiredLeft, maxLeft));
+            const centerTop = rect.top + (rect.height * 0.5) - (el.offsetHeight * 0.5);
+            const top = Math.max(12, Math.min(centerTop, window.innerHeight - el.offsetHeight - 12));
+            el.style.left = left + 'px';
+            el.style.top = top + 'px';
+        }
+        function showTooltip(target){
+            const html = target.getAttribute('data-help-tooltip-html');
+            if (!html) return;
+            const el = ensureTooltip();
+            activeTarget = target;
+            el.innerHTML = html;
+            el.style.display = 'block';
+            positionTooltip(target);
+        }
+        document.addEventListener('mouseenter', function(ev){
+            const target = ev.target && ev.target.closest ? ev.target.closest('.mk-inline-help[data-help-tooltip-html]') : null;
+            if (!target) return;
+            showTooltip(target);
+        }, true);
+        document.addEventListener('mouseleave', function(ev){
+            const target = ev.target && ev.target.closest ? ev.target.closest('.mk-inline-help[data-help-tooltip-html]') : null;
+            if (!target) return;
+            hideTooltip();
+        }, true);
+        document.addEventListener('focusin', function(ev){
+            const target = ev.target && ev.target.closest ? ev.target.closest('.mk-inline-help[data-help-tooltip-html]') : null;
+            if (!target) return;
+            showTooltip(target);
+        });
+        document.addEventListener('focusout', function(ev){
+            const target = ev.target && ev.target.closest ? ev.target.closest('.mk-inline-help[data-help-tooltip-html]') : null;
+            if (!target) return;
+            hideTooltip();
+        });
+        window.addEventListener('scroll', function(){
+            if (activeTarget) positionTooltip(activeTarget);
+        }, true);
+        window.addEventListener('resize', function(){
+            if (activeTarget) positionTooltip(activeTarget);
         });
     })();
     """
@@ -1681,6 +1920,14 @@ SVG_DOWNLOAD_SCRIPT = ui.tags.script(
             link.click();
             link.remove();
         }
+        function blobToDataUrl(blob){
+            return new Promise(function(resolve, reject){
+                var reader = new FileReader();
+                reader.onload = function(){ resolve(reader.result); };
+                reader.onerror = function(err){ reject(err || new Error("Failed to read blob")); };
+                reader.readAsDataURL(blob);
+            });
+        }
         function serializeSvg(svg){
             if (!svg) return null;
             var clone = svg.cloneNode(true);
@@ -1696,6 +1943,58 @@ SVG_DOWNLOAD_SCRIPT = ui.tags.script(
             var serializer = new XMLSerializer();
             var text = serializer.serializeToString(clone);
             return { text: text, width: width, height: height };
+        }
+        function inlineSvgImageResources(text){
+            return new Promise(function(resolve){
+                try {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(text, "image/svg+xml");
+                    var svgEl = doc.documentElement;
+                    if (!svgEl || svgEl.nodeName.toLowerCase() !== "svg"){
+                        resolve(text);
+                        return;
+                    }
+                    var images = Array.prototype.slice.call(svgEl.querySelectorAll("image"));
+                    if (!images.length){
+                        resolve(text);
+                        return;
+                    }
+                    var tasks = images.map(function(node){
+                        var rawHref = node.getAttribute("href") || node.getAttribute("xlink:href") || "";
+                        rawHref = String(rawHref || "").trim();
+                        if (!rawHref || rawHref.indexOf("data:") === 0 || rawHref.indexOf("blob:") === 0){
+                            return Promise.resolve();
+                        }
+                        var resolvedHref = rawHref;
+                        try {
+                            resolvedHref = String(new URL(rawHref, window.location.href));
+                        } catch (_urlErr) {}
+                        return fetch(resolvedHref)
+                            .then(function(resp){
+                                if (!resp.ok) throw new Error("Failed to fetch SVG image resource: " + resolvedHref);
+                                return resp.blob();
+                            })
+                            .then(function(blob){ return blobToDataUrl(blob); })
+                            .then(function(dataUrl){
+                                node.setAttribute("href", dataUrl);
+                                node.setAttribute("xlink:href", dataUrl);
+                            })
+                            .catch(function(err){
+                                console.warn("Failed to inline SVG image resource", resolvedHref, err);
+                            });
+                    });
+                    Promise.all(tasks).then(function(){
+                        try {
+                            var serializer = new XMLSerializer();
+                            resolve(serializer.serializeToString(svgEl));
+                        } catch (_serializeErr){
+                            resolve(text);
+                        }
+                    });
+                } catch (_err){
+                    resolve(text);
+                }
+            });
         }
         function ensureJsPdf(){
             return new Promise(function(resolve, reject){
@@ -1719,6 +2018,28 @@ SVG_DOWNLOAD_SCRIPT = ui.tags.script(
                 document.head.appendChild(script);
             });
         }
+        function ensureCanvg(){
+            return new Promise(function(resolve, reject){
+                if (window.canvg && window.canvg.Canvg){
+                    resolve(window.canvg);
+                    return;
+                }
+                var existing = document.querySelector("script[data-mk-canvg]");
+                if (existing && existing.dataset.loading === "1"){
+                    existing.addEventListener("load", function(){ resolve(window.canvg); });
+                    existing.addEventListener("error", function(){ reject(new Error("Failed to load canvg")); });
+                    return;
+                }
+                var script = document.createElement("script");
+                script.src = "https://cdnjs.cloudflare.com/ajax/libs/canvg/3.0.11/umd.min.js";
+                script.async = true;
+                script.dataset.mkCanvg = "1";
+                script.dataset.loading = "1";
+                script.onload = function(){ resolve(window.canvg); };
+                script.onerror = function(){ reject(new Error("Failed to load canvg")); };
+                document.head.appendChild(script);
+            });
+        }
         function findSvg(btn){
             if (!btn) return null;
             var scoped = btn.closest(".pathway-viewer-card");
@@ -1728,12 +2049,13 @@ SVG_DOWNLOAD_SCRIPT = ui.tags.script(
             }
             return document.querySelector(".svg-container svg");
         }
-        function exportSvg(svgEl, format, name){
-            var payload = serializeSvg(svgEl);
+        function exportSerializedSvg(payload, format, name){
             if (!payload) return;
             var text = payload.text;
             var width = payload.width;
             var height = payload.height;
+            var rasterScale = 4;
+            var maxRasterPixels = format === "pdf" ? 24000000 : 48000000;
             if (format === "svg"){
                 var blob = new Blob([text], { type: "image/svg+xml" });
                 var href = URL.createObjectURL(blob);
@@ -1741,54 +2063,99 @@ SVG_DOWNLOAD_SCRIPT = ui.tags.script(
                 setTimeout(function(){ URL.revokeObjectURL(href); }, 1500);
                 return;
             }
-            var canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
-            var ctx = canvas.getContext("2d");
-            var img = new Image();
-            var svgBlob = new Blob([text], { type: "image/svg+xml" });
-            var url = URL.createObjectURL(svgBlob);
-            img.onload = function(){
-                try {
-                    ctx.fillStyle = "white";
-                    ctx.fillRect(0, 0, width, height);
-                    ctx.drawImage(img, 0, 0, width, height);
-                    if (format === "pdf"){
-                        ensureJsPdf().then(function(jsPDF){
-                            if (!jsPDF){ console.error("jsPDF unavailable"); return; }
-                            var orientation = width >= height ? "l" : "p";
-                            var pdf = new jsPDF({ orientation: orientation, unit: "pt", format: [width, height] });
-                            pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, width, height);
-                            pdf.save(name + ".pdf");
-                        }).catch(function(err){ console.error("PDF export failed", err); });
-                    } else {
-                        var mime = format === "jpeg" ? "image/jpeg" : "image/png";
-                        var ext = format === "jpeg" ? ".jpeg" : ".png";
-                        var data = canvas.toDataURL(mime, 1.0);
-                        downloadHref(data, name + ext);
-                    }
-                } finally {
-                    URL.revokeObjectURL(url);
+            inlineSvgImageResources(text).then(function(inlinedText){
+                var exportScale = rasterScale;
+                var scaledWidth = Math.max(1, Math.round(width * exportScale));
+                var scaledHeight = Math.max(1, Math.round(height * exportScale));
+                var pixelCount = scaledWidth * scaledHeight;
+                if (pixelCount > maxRasterPixels){
+                    exportScale = Math.sqrt(maxRasterPixels / Math.max(width * height, 1));
+                    scaledWidth = Math.max(1, Math.round(width * exportScale));
+                    scaledHeight = Math.max(1, Math.round(height * exportScale));
                 }
-            };
-            img.onerror = function(err){
-                console.error("SVG export failed", err);
-                URL.revokeObjectURL(url);
-            };
-            img.src = url;
+                var canvas = document.createElement("canvas");
+                canvas.width = scaledWidth;
+                canvas.height = scaledHeight;
+                var ctx = canvas.getContext("2d");
+                ensureCanvg().then(function(canvgLib){
+                    if (!ctx || !canvgLib || !canvgLib.Canvg){
+                        throw new Error("canvg unavailable");
+                    }
+                    ctx.save();
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.scale(exportScale, exportScale);
+                    return canvgLib.Canvg.fromString(ctx, inlinedText, {
+                        ignoreDimensions: true,
+                        ignoreClear: true,
+                    }).render().then(function(){
+                        ctx.restore();
+                        if (format === "pdf"){
+                            ensureJsPdf().then(function(jsPDF){
+                                if (!jsPDF){ console.error("jsPDF unavailable"); return; }
+                                var orientation = width >= height ? "l" : "p";
+                                var pdf = new jsPDF({ orientation: orientation, unit: "pt", format: [width, height] });
+                                pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, width, height);
+                                pdf.save(name + ".pdf");
+                            }).catch(function(err){ console.error("PDF export failed", err); });
+                        } else {
+                            var mime = format === "jpeg" ? "image/jpeg" : "image/png";
+                            var ext = format === "jpeg" ? ".jpeg" : ".png";
+                            var data = canvas.toDataURL(mime, 1.0);
+                            downloadHref(data, name + ext);
+                        }
+                    });
+                }).catch(function(err){
+                    console.error("SVG raster export failed", err);
+                });
+            });
+        }
+        function exportSvg(svgEl, format, name){
+            var payload = serializeSvg(svgEl);
+            exportSerializedSvg(payload, format, name);
+        }
+        function findExportPayload(btn){
+            if (!btn) return null;
+            var scoped = btn.closest(".pathway-viewer-card");
+            if (!scoped) return null;
+            var svg = scoped.querySelector(".svg-container svg");
+            if (svg){
+                return { kind: "svg", value: svg };
+            }
+            var key = String(btn.getAttribute("data-mk-prefix") || ((scoped.dataset && scoped.dataset.prefix) || "")).toLowerCase();
+            if (key && window.__mkExportSvgMap && typeof window.__mkExportSvgMap[key] === "function"){
+                try {
+                    var payload = window.__mkExportSvgMap[key]();
+                    if (payload && payload.text){
+                        return { kind: "payload", value: payload };
+                    }
+                } catch (err){
+                    console.error("Custom export payload failed", err);
+                }
+            }
+            svg = document.querySelector(".svg-container svg");
+            if (svg){
+                return { kind: "svg", value: svg };
+            }
+            return null;
         }
         document.addEventListener("click", function(ev){
             var btn = ev.target.closest("[data-mk-download]");
             if (!btn) return;
             ev.preventDefault();
             var format = btn.getAttribute("data-mk-download");
-            var svg = findSvg(btn);
-            if (!svg){
-                console.warn("No SVG element found for download");
+            var target = findExportPayload(btn);
+            if (!target){
+                console.warn("No export target found for download");
                 return;
             }
             var name = btn.getAttribute("data-mk-name") || "pathway";
-            exportSvg(svg, format, name);
+            if (target.kind === "payload"){
+                exportSerializedSvg(target.value, format, name);
+            } else {
+                exportSvg(target.value, format, name);
+            }
         });
         window.mkExportPathwaySvg = exportSvg;
     })();
@@ -2401,10 +2768,33 @@ def _settings_panel(cfg: Dict[str, Any]) -> ui.card:
         toggle_controls = []
         if cfg.get("key") == "web":
             toggle_controls.append(
-                ui.input_checkbox(
-                    _prefixed_id(prefix, "simple_kegg_mode"),
-                    "Simple: KEGG",
-                    value=True,
+                ui.div(
+                    {"class": "mk-mode-help-row"},
+                    ui.input_checkbox(
+                        _prefixed_id(prefix, "simple_kegg_mode"),
+                        ui.TagList(
+                            "Data Analysis Mode",
+                            ui.tags.span(
+                                {"class": "mk-inline-help-wrap"},
+                                ui.tags.span(
+                                    {
+                                        "class": "mk-inline-help",
+                                        "aria-label": "Data Analysis Mode help",
+                                        "tabindex": "0",
+                                        "data-help-tooltip-html": (
+                                            "<strong>When on:</strong> uses the simpler data-analysis view with the PDF background visible "
+                                            "and imported CST arrows/text hidden.<br/><br/>"
+                                            "<strong>When off:</strong> uses the full CST layout with imported arrows and text boxes, "
+                                            "while the PDF background starts hidden but can be shown again with the Background Image button."
+                                            "<br/><br/>Currently affects KEGG and CST pathways only."
+                                        ),
+                                    },
+                                    "i",
+                                ),
+                            ),
+                        ),
+                        value=True,
+                    ),
                 )
             )
         if cfg.get("key") not in {"web", "figure"}:
@@ -2557,7 +2947,7 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                         ui.div({"class": "viewer-create-group-label viewer-create-main-label"}, "Add Objects"),
                         ui.div(
                             {"class": "viewer-create-inline"},
-                            ui.tags.input({"id": protein_search_id, "class": "viewer-create-field viewer-create-search", "type": "text", "placeholder": "Regex UniProt or gene symbol"}),
+                            ui.tags.input({"id": protein_search_id, "class": "viewer-create-field viewer-create-search", "type": "text", "placeholder": "Regex UniProt, gene symbol, HMDB ID, or Wiki ID"}),
                         ),
                     ),
                     ui.div(
@@ -2595,6 +2985,7 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                                     ui.tags.option("□ Square", value="square"),
                                     ui.tags.option("▢ Rounded", value="rounded"),
                                     ui.tags.option("○ Circle", value="circle"),
+                                    ui.tags.option("] Bracket", value="bracket"),
                                 ),
                             ),
                         ),
@@ -2699,8 +3090,17 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                     tooltips: document.getElementById('{_prefixed_id(prefix, "viewer_toggle_tooltips")}'),
                 }};
                 if (!btn || !card || !panel || !settingsBtn || btn.dataset.bound === '1') return;
-                const viewerKey = '{prefix}';
-                const getApi = () => window.__mkViewerControls && window.__mkViewerControls[viewerKey];
+                const getViewerKey = () => {{
+                    const cstShell = card.querySelector('.cst-viewer-shell[data-cst-viewer-key]');
+                    if (cstShell) {{
+                        return String(cstShell.dataset.cstViewerKey || '');
+                    }}
+                    return '{prefix}';
+                }};
+                const getApi = () => {{
+                    const viewerKey = getViewerKey();
+                    return viewerKey && window.__mkViewerControls ? window.__mkViewerControls[viewerKey] : null;
+                }};
                 const updateSettingsLabel = () => {{
                     settingsBtn.textContent = panel.classList.contains('is-open') ? 'Hide Objects ⌄' : 'Hide Objects ^';
                 }};
@@ -2746,7 +3146,7 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                     }});
                 }});
                 document.addEventListener('mk-viewer-controls-ready', (evt) => {{
-                    if (evt?.detail?.key === viewerKey) {{
+                    if (evt?.detail?.key === getViewerKey()) {{
                         syncToggleButtons(evt.detail.state || {{}});
                     }}
                 }});
@@ -2906,14 +3306,16 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                     proteinPopover.innerHTML = '';
                     proteinItem?.classList.remove('is-open');
                     const api = getApi();
-                    if (!api || typeof api.searchProteins !== 'function') {{
+                    if (!api || (typeof api.searchObjects !== 'function' && typeof api.searchProteins !== 'function')) {{
                         return;
                     }}
                     const query = proteinSearch.value.trim();
                     if (!query) {{
                         return;
                     }}
-                    const payload = api.searchProteins(query, 40) || {{}};
+                    const payload = (typeof api.searchObjects === 'function'
+                        ? api.searchObjects(query, 40)
+                        : api.searchProteins(query, 40)) || {{}};
                     if (payload.error) {{
                         return;
                     }}
@@ -2924,8 +3326,14 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                     const stack = document.createElement('div');
                     stack.className = 'viewer-create-option-stack';
                     results.forEach((entry) => {{
-                        const label = `${{entry.uniprot}} - ${{entry.geneSymbol}}`;
-                        proteinMatches.set(label, entry.uniprot);
+                        const isMetabolite = entry.kind === 'metabolite';
+                        const label = isMetabolite
+                            ? (entry.label || `${{entry.hmdbId || ''}} - ${{entry.wikipediaId || entry.displayLabel || ''}}`.replace(/^\\s*-\\s*|\\s*-\\s*$/g, ''))
+                            : `${{entry.uniprot}} - ${{entry.geneSymbol}}`;
+                        proteinMatches.set(label, {{
+                            kind: isMetabolite ? 'metabolite' : 'protein',
+                            value: isMetabolite ? entry.hmdbId : entry.uniprot
+                        }});
                         const option = document.createElement('button');
                         option.className = 'viewer-create-option viewer-create-protein-option';
                         option.type = 'button';
@@ -2933,13 +3341,19 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                         text.className = 'viewer-create-protein-label';
                         text.textContent = label;
                         const swatch = document.createElement('span');
-                        swatch.className = 'viewer-create-protein-swatch';
+                        swatch.className = isMetabolite
+                            ? 'viewer-create-metabolite-swatch'
+                            : 'viewer-create-protein-swatch';
                         swatch.style.background = proteinColorToCss(entry.color);
                         option.appendChild(text);
                         option.appendChild(swatch);
                         option.addEventListener('click', () => {{
                             const api = getApi();
-                            if (api && typeof api.addProtbox === 'function') {{
+                            if (isMetabolite) {{
+                                if (api && typeof api.addCompound === 'function') {{
+                                    api.addCompound(entry.hmdbId);
+                                }}
+                            }} else if (api && typeof api.addProtbox === 'function') {{
                                 api.addProtbox(entry.uniprot);
                             }}
                             if (proteinSearch) {{
@@ -2977,10 +3391,17 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                     if (evt.key === 'Enter') {{
                         evt.preventDefault();
                         const raw = proteinSearch?.value?.trim() || '';
-                        const value = proteinMatches.get(raw) || '';
+                        const match = proteinMatches.get(raw) || null;
                         const api = getApi();
-                        if (api && typeof api.addProtbox === 'function' && value) {{
-                            api.addProtbox(value);
+                        if (api && match && match.value) {{
+                            if (match.kind === 'metabolite' && typeof api.addCompound === 'function') {{
+                                api.addCompound(match.value);
+                            }} else if (match.kind === 'protein' && typeof api.addProtbox === 'function') {{
+                                api.addProtbox(match.value);
+                            }} else {{
+                                renderProteinResults();
+                                return;
+                            }}
                             proteinSearch.value = '';
                             closeProteinResults();
                         }} else if (raw) {{
@@ -3200,6 +3621,7 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
             {
                 "class": "btn btn-primary btn-sm",
                 "data-mk-download": "svg",
+                "data-mk-prefix": prefix,
                 "data-mk-name": download_name,
                 "type": "button",
             },
@@ -3209,6 +3631,7 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
             {
                 "class": "btn btn-outline-primary btn-sm",
                 "data-mk-download": "pdf",
+                "data-mk-prefix": prefix,
                 "data-mk-name": download_name,
                 "type": "button",
             },
@@ -3218,6 +3641,7 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
             {
                 "class": "btn btn-outline-primary btn-sm",
                 "data-mk-download": "png",
+                "data-mk-prefix": prefix,
                 "data-mk-name": download_name,
                 "type": "button",
             },
@@ -3227,6 +3651,7 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
             {
                 "class": "btn btn-outline-primary btn-sm",
                 "data-mk-download": "jpeg",
+                "data-mk-prefix": prefix,
                 "data-mk-name": download_name,
                 "type": "button",
             },
@@ -3256,6 +3681,445 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
         ui.hr(),
         ui.output_text(_prefixed_id(prefix, "status_message")),
         ui.output_text(_prefixed_id(prefix, "json_summary")),
+    )
+
+
+def _cst_create_panel(prefix: str) -> ui.TagList:
+    card_id = _prefixed_id(prefix, "viewer_card")
+    panel_id = _prefixed_id(prefix, "cst_create_panel")
+    protein_item_id = _prefixed_id(prefix, "cst_create_protein_item")
+    protein_search_id = _prefixed_id(prefix, "cst_create_protein_search")
+    protein_popover_id = _prefixed_id(prefix, "cst_create_protein_popover")
+    legend_item_id = _prefixed_id(prefix, "cst_create_legend_item")
+    legend_add_id = _prefixed_id(prefix, "cst_create_legend_add")
+    legend_popover_id = _prefixed_id(prefix, "cst_create_legend_popover")
+    arrow_select_id = _prefixed_id(prefix, "cst_create_arrow_select")
+    shape_select_id = _prefixed_id(prefix, "cst_create_shape_select")
+    text_add_id = _prefixed_id(prefix, "cst_create_text_add")
+    undo_btn_id = _prefixed_id(prefix, "cst_create_undo")
+    redo_btn_id = _prefixed_id(prefix, "cst_create_redo")
+    delete_btn_id = _prefixed_id(prefix, "cst_create_delete")
+    edge_shortest_btn_id = _prefixed_id(prefix, "cst_create_edge_shortest")
+    edge_type_btn_id = _prefixed_id(prefix, "cst_create_edge_type")
+    edge_dash_btn_id = _prefixed_id(prefix, "cst_create_edge_dash")
+    edge_flip_btn_id = _prefixed_id(prefix, "cst_create_edge_flip")
+    select_mode_btn_id = _prefixed_id(prefix, "cst_create_select_mode")
+    front_btn_id = _prefixed_id(prefix, "cst_create_front")
+    back_btn_id = _prefixed_id(prefix, "cst_create_back")
+    return ui.TagList(
+        ui.div(
+            {"class": "viewer-create-panel", "id": panel_id},
+            ui.div(
+                {"class": "viewer-create-scroll"},
+                ui.div(
+                    {"class": "viewer-create-card"},
+                    ui.div(
+                        {"class": "viewer-create-group viewer-create-item", "id": protein_item_id},
+                        ui.div({"class": "viewer-create-group-label viewer-create-main-label"}, "Add Objects"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.tags.input({"id": protein_search_id, "class": "viewer-create-field viewer-create-search", "type": "text", "placeholder": "Regex UniProt, gene symbol, HMDB ID, or Wiki ID"}),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-group"},
+                        ui.div({"class": "viewer-create-group-label"}, "Interaction"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.div(
+                                {"class": "viewer-create-select-wrap"},
+                                _icon_markup("arrow-right", "viewer-create-select-icon"),
+                                ui.tags.select(
+                                    {"id": arrow_select_id, "class": "viewer-create-field viewer-create-select viewer-create-select-interaction", "aria-label": "Add Edge"},
+                                    ui.tags.option(" ", value="", selected=True, disabled=True),
+                                    ui.tags.option("→ Arrow", value="arrow"),
+                                    ui.tags.option("⊣ Inhibitor", value="inhibition"),
+                                    ui.tags.option("─ Line", value="line"),
+                                    ui.tags.option("⇢ Dashed Arrow", value="dashed_arrow"),
+                                    ui.tags.option("╌⊣ Dashed Inhibitor", value="dashed_inhibition"),
+                                    ui.tags.option("╌ Line", value="dashed_line"),
+                                ),
+                            ),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-group"},
+                        ui.div({"class": "viewer-create-group-label"}, "Shape"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.div(
+                                {"class": "viewer-create-select-wrap"},
+                                _icon_markup("shapes", "viewer-create-select-icon viewer-create-shape-icon"),
+                                ui.tags.select(
+                                    {"id": shape_select_id, "class": "viewer-create-field viewer-create-select viewer-create-select-shape", "aria-label": "Add Shape"},
+                                    ui.tags.option(" ", value="", selected=True, disabled=True),
+                                    ui.tags.option("□ Square", value="square"),
+                                    ui.tags.option("▢ Rounded", value="rounded"),
+                                    ui.tags.option("○ Circle", value="circle"),
+                                    ui.tags.option("] Bracket", value="bracket"),
+                                ),
+                            ),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-group"},
+                        ui.div({"class": "viewer-create-group-label"}, "Text"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.tags.button({"id": text_add_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Add Textbox", "aria-label": "Add Textbox"}, _icon_markup("text-box", "viewer-create-icon")),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-group viewer-create-item", "id": legend_item_id},
+                        ui.div({"class": "viewer-create-group-label"}, "Legend"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.tags.button({"id": legend_add_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Add Legend", "aria-label": "Add Legend"}, _icon_markup("key-plus", "viewer-create-icon")),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-section"},
+                        ui.div({"class": "viewer-create-section-label"}, "Interactions"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.tags.button({"id": edge_shortest_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Auto-add arrows using the shortest side-to-side path.", "aria-label": "Shortest Auto Add Arrows", "disabled": "disabled"}, _icon_markup("divide-three-solid", "viewer-create-icon")),
+                            ui.tags.button({"id": edge_type_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Cycle the selected interactor type. Shortcut: Ctrl+S", "aria-label": "Cycle Interactor Type", "disabled": "disabled"}, _icon_markup("arrow_head_switch", "viewer-create-icon")),
+                            ui.tags.button({"id": edge_dash_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Toggle dashed or solid style for the selected interactor. Shortcut: Ctrl+D", "aria-label": "Toggle Interactor Dash", "disabled": "disabled"}, _icon_markup("data-transfer-up", "viewer-create-icon")),
+                            ui.tags.button({"id": edge_flip_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Flip the selected interactor direction.", "aria-label": "Flip Interactor Direction", "disabled": "disabled"}, _icon_markup("ruler-arrows", "viewer-create-icon")),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "viewer-create-section"},
+                        ui.div({"class": "viewer-create-section-label"}, "Edit Controls"),
+                        ui.div(
+                            {"class": "viewer-create-inline"},
+                            ui.tags.button(
+                                {"id": undo_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Undo", "aria-label": "Undo"},
+                                ui.span({"class": "viewer-create-icon-pair"}, _icon_markup("undo", "viewer-create-icon viewer-create-icon-primary"), _icon_markup("undo (1)", "viewer-create-icon viewer-create-icon-secondary")),
+                            ),
+                            ui.tags.button(
+                                {"id": redo_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Redo", "aria-label": "Redo"},
+                                ui.span({"class": "viewer-create-icon-pair"}, _icon_markup("redo", "viewer-create-icon viewer-create-icon-primary"), _icon_markup("redo (1)", "viewer-create-icon viewer-create-icon-secondary")),
+                            ),
+                            ui.tags.button(
+                                {"id": delete_btn_id, "class": "viewer-create-action viewer-create-icon-action", "type": "button", "title": "Delete selected object", "aria-label": "Delete Selected Object", "disabled": "disabled"},
+                                ui.span({"class": "viewer-create-icon-pair"}, _icon_markup("xmark (1)", "viewer-create-icon viewer-create-icon-primary"), _icon_markup("xmark (2)", "viewer-create-icon viewer-create-icon-secondary")),
+                            ),
+                            ui.tags.button({"id": select_mode_btn_id, "class": "viewer-create-action viewer-create-icon-action viewer-create-mode-btn", "type": "button", "title": "Selection Mode", "aria-label": "Selection Mode"}, _icon_markup("frame-select", "viewer-create-icon")),
+                            ui.tags.button({"id": back_btn_id, "class": "viewer-create-action", "type": "button", "title": "Send selected module behind the others", "disabled": "disabled"}, "Back"),
+                            ui.tags.button({"id": front_btn_id, "class": "viewer-create-action", "type": "button", "title": "Bring selected module in front of the others", "disabled": "disabled"}, "Front"),
+                        ),
+                    ),
+                ),
+            ),
+            ui.div(
+                {"id": protein_popover_id, "class": "viewer-create-popover viewer-create-protein-popover-overlay"},
+            ),
+            ui.div(
+                {"id": legend_popover_id, "class": "viewer-create-popover viewer-create-legend-popover-overlay"},
+                ui.div(
+                    {"class": "viewer-create-option-stack"},
+                    ui.tags.button({"class": "viewer-create-option", "type": "button", "data-legend-type": "horizontal"}, "Horizontal"),
+                    ui.tags.button({"class": "viewer-create-option", "type": "button", "data-legend-type": "vertical"}, "Vertical"),
+                ),
+            ),
+        ),
+        ui.tags.script(
+            f"""
+            (function(){{
+                const panel = document.getElementById('{panel_id}');
+                const card = document.getElementById('{card_id}');
+                const createScroll = panel?.querySelector('.viewer-create-scroll');
+                const proteinSearch = document.getElementById('{protein_search_id}');
+                const proteinItem = document.getElementById('{protein_item_id}') || panel?.querySelector('.viewer-create-item');
+                const proteinPopover = document.getElementById('{protein_popover_id}');
+                const legendAdd = document.getElementById('{legend_add_id}');
+                const legendItem = document.getElementById('{legend_item_id}');
+                const legendPopover = document.getElementById('{legend_popover_id}');
+                const arrowSelect = document.getElementById('{arrow_select_id}');
+                const shapeSelect = document.getElementById('{shape_select_id}');
+                const textAdd = document.getElementById('{text_add_id}');
+                const undoBtn = document.getElementById('{undo_btn_id}');
+                const redoBtn = document.getElementById('{redo_btn_id}');
+                const deleteBtn = document.getElementById('{delete_btn_id}');
+                const edgeShortestBtn = document.getElementById('{edge_shortest_btn_id}');
+                const edgeTypeBtn = document.getElementById('{edge_type_btn_id}');
+                const edgeDashBtn = document.getElementById('{edge_dash_btn_id}');
+                const edgeFlipBtn = document.getElementById('{edge_flip_btn_id}');
+                const selectModeBtn = document.getElementById('{select_mode_btn_id}');
+                const frontBtn = document.getElementById('{front_btn_id}');
+                const backBtn = document.getElementById('{back_btn_id}');
+                if (!panel || !card || panel.dataset.bound === '1') return;
+                const proteinMatches = new Map();
+                const proteinSearchDelayMs = 1500;
+                let proteinSearchTimer = null;
+                const getViewerKey = () => {{
+                    const shell = card.querySelector('.cst-viewer-shell[data-cst-viewer-key]');
+                    return shell ? String(shell.dataset.cstViewerKey || '') : '';
+                }};
+                const getApi = () => {{
+                    const viewerKey = getViewerKey();
+                    return viewerKey && window.__mkCstViewerControls ? window.__mkCstViewerControls[viewerKey] : null;
+                }};
+                const setEnabled = (el, enabled) => {{
+                    if (!el) return;
+                    el.disabled = !enabled;
+                    el.classList.toggle('is-disabled', !enabled);
+                }};
+                const clearProteinSearchTimer = () => {{
+                    if (proteinSearchTimer) {{
+                        window.clearTimeout(proteinSearchTimer);
+                        proteinSearchTimer = null;
+                    }}
+                }};
+                const closeProteinResults = () => {{
+                    clearProteinSearchTimer();
+                    proteinMatches.clear();
+                    if (proteinPopover) {{
+                        proteinPopover.innerHTML = '';
+                        proteinPopover.style.display = 'none';
+                    }}
+                    proteinItem?.classList.remove('is-open');
+                }};
+                const positionProteinResults = () => {{
+                    if (!panel || !proteinSearch || !proteinPopover) return;
+                    const panelRect = panel.getBoundingClientRect();
+                    const searchRect = proteinSearch.getBoundingClientRect();
+                    const left = Math.max(0, searchRect.left - panelRect.left);
+                    const top = Math.max(0, searchRect.bottom - panelRect.top + 8);
+                    proteinPopover.style.left = `${{left}}px`;
+                    proteinPopover.style.top = `${{top}}px`;
+                    proteinPopover.style.minWidth = `${{Math.max(240, Math.round(searchRect.width))}}px`;
+                }};
+                const positionLegendPopover = () => {{
+                    if (!panel || !legendAdd || !legendItem || !legendPopover) return;
+                    const panelRect = panel.getBoundingClientRect();
+                    const btnRect = legendAdd.getBoundingClientRect();
+                    const left = Math.max(0, btnRect.left - panelRect.left);
+                    const top = Math.max(0, btnRect.bottom - panelRect.top + 8);
+                    legendPopover.style.left = `${{left}}px`;
+                    legendPopover.style.top = `${{top}}px`;
+                }};
+                const closeLegendPopover = () => {{
+                    if (legendPopover) {{
+                        legendPopover.style.display = 'none';
+                    }}
+                    legendItem?.classList.remove('is-open');
+                }};
+                const proteinColorToCss = (value) => {{
+                    if (Array.isArray(value) && value.length >= 3) {{
+                        const parts = value.slice(0, 3).map((part) => {{
+                            const num = Number(part);
+                            if (!Number.isFinite(num)) return 0;
+                            return Math.max(0, Math.min(255, Math.round(num)));
+                        }});
+                        return `rgb(${{parts[0]}}, ${{parts[1]}}, ${{parts[2]}})`;
+                    }}
+                    if (typeof value === 'string' && value.trim()) {{
+                        return value.trim();
+                    }}
+                    return '#d1d5db';
+                }};
+                const renderProteinResults = () => {{
+                    if (!proteinSearch || !proteinPopover) return;
+                    proteinMatches.clear();
+                    proteinPopover.innerHTML = '';
+                    proteinItem?.classList.remove('is-open');
+                    const api = getApi();
+                    if (!api || (typeof api.searchObjects !== 'function' && typeof api.searchProteins !== 'function')) return;
+                    const query = proteinSearch.value.trim();
+                    if (!query) return;
+                    const payload = (typeof api.searchObjects === 'function'
+                        ? api.searchObjects(query, 40)
+                        : api.searchProteins(query, 40)) || {{}};
+                    if (payload.error) return;
+                    const results = Array.isArray(payload.results) ? payload.results : [];
+                    if (!results.length) return;
+                    const stack = document.createElement('div');
+                    stack.className = 'viewer-create-option-stack';
+                    results.forEach((entry) => {{
+                        const isMetabolite = entry.kind === 'metabolite';
+                        const label = isMetabolite
+                            ? (entry.label || `${{entry.hmdbId || ''}} - ${{entry.wikipediaId || entry.displayLabel || ''}}`.replace(/^\\s*-\\s*|\\s*-\\s*$/g, ''))
+                            : `${{entry.uniprot}} - ${{entry.geneSymbol}}`;
+                        proteinMatches.set(label, {{
+                            kind: isMetabolite ? 'metabolite' : 'protein',
+                            value: isMetabolite ? entry.hmdbId : entry.uniprot
+                        }});
+                        const option = document.createElement('button');
+                        option.className = 'viewer-create-option viewer-create-protein-option';
+                        option.type = 'button';
+                        const text = document.createElement('span');
+                        text.className = 'viewer-create-protein-label';
+                        text.textContent = label;
+                        const swatch = document.createElement('span');
+                        swatch.className = isMetabolite
+                            ? 'viewer-create-metabolite-swatch'
+                            : 'viewer-create-protein-swatch';
+                        swatch.style.background = proteinColorToCss(entry.color || entry.fc_color_1 || entry['fc_color_1']);
+                        option.appendChild(text);
+                        option.appendChild(swatch);
+                        option.addEventListener('click', () => {{
+                            const api = getApi();
+                            if (isMetabolite) {{
+                                if (api && typeof api.addCompound === 'function') {{
+                                    api.addCompound(entry.hmdbId);
+                                }}
+                            }} else if (api && typeof api.addProtbox === 'function') {{
+                                api.addProtbox(entry.uniprot);
+                            }}
+                            if (proteinSearch) proteinSearch.value = '';
+                            closeProteinResults();
+                            syncState();
+                        }});
+                        stack.appendChild(option);
+                    }});
+                    proteinPopover.appendChild(stack);
+                    positionProteinResults();
+                    proteinPopover.style.display = 'block';
+                    proteinItem?.classList.add('is-open');
+                }};
+                const scheduleProteinResults = () => {{
+                    if (!proteinSearch) return;
+                    const query = proteinSearch.value.trim();
+                    if (!query) {{
+                        closeProteinResults();
+                        return;
+                    }}
+                    clearProteinSearchTimer();
+                    proteinSearchTimer = window.setTimeout(() => {{
+                        proteinSearchTimer = null;
+                        renderProteinResults();
+                    }}, proteinSearchDelayMs);
+                }};
+                const syncState = () => {{
+                    const api = getApi();
+                    const state = api && typeof api.getState === 'function' ? (api.getState() || {{}}) : {{}};
+                    setEnabled(undoBtn, !!state.canUndo);
+                    setEnabled(redoBtn, !!state.canRedo);
+                    setEnabled(deleteBtn, !!state.canDelete);
+                    setEnabled(edgeShortestBtn, !!state.canAutoConnect);
+                    setEnabled(edgeTypeBtn, !!state.canEdgeEdit);
+                    setEnabled(edgeDashBtn, !!state.canEdgeEdit);
+                    setEnabled(edgeFlipBtn, !!state.canEdgeEdit);
+                    setEnabled(frontBtn, !!state.canArrange);
+                    setEnabled(backBtn, !!state.canArrange);
+                    if (selectModeBtn) selectModeBtn.classList.toggle('is-active', String(state.mouseMode || 'drag') === 'selection');
+                }};
+                proteinSearch?.addEventListener('input', scheduleProteinResults);
+                proteinSearch?.addEventListener('keydown', (evt) => {{
+                    if (evt.key === 'Escape') {{
+                        evt.preventDefault();
+                        closeProteinResults();
+                        return;
+                    }}
+                    if (evt.key === 'Enter') {{
+                        evt.preventDefault();
+                        const raw = proteinSearch?.value?.trim() || '';
+                        const match = proteinMatches.get(raw) || null;
+                        const api = getApi();
+                        if (api && match && match.value) {{
+                            if (match.kind === 'metabolite' && typeof api.addCompound === 'function') {{
+                                api.addCompound(match.value);
+                            }} else if (match.kind === 'protein' && typeof api.addProtbox === 'function') {{
+                                api.addProtbox(match.value);
+                            }} else {{
+                                renderProteinResults();
+                                return;
+                            }}
+                            proteinSearch.value = '';
+                            closeProteinResults();
+                            syncState();
+                        }} else if (raw) {{
+                            renderProteinResults();
+                        }}
+                    }}
+                }});
+                proteinSearch?.addEventListener('focus', () => {{
+                    if ((proteinSearch?.value || '').trim()) {{
+                        scheduleProteinResults();
+                    }}
+                }});
+                createScroll?.addEventListener('scroll', () => {{
+                    if (proteinItem?.classList.contains('is-open')) positionProteinResults();
+                    if (legendItem?.classList.contains('is-open')) positionLegendPopover();
+                }});
+                window.addEventListener('resize', () => {{
+                    if (proteinItem?.classList.contains('is-open')) positionProteinResults();
+                    if (legendItem?.classList.contains('is-open')) positionLegendPopover();
+                }});
+                if (arrowSelect) {{
+                    arrowSelect.addEventListener('change', () => {{
+                        const api = getApi();
+                        if (api && typeof api.addArrow === 'function' && arrowSelect.value) api.addArrow(arrowSelect.value);
+                        arrowSelect.value = '';
+                        syncState();
+                    }});
+                }}
+                if (shapeSelect) {{
+                    shapeSelect.addEventListener('change', () => {{
+                        const api = getApi();
+                        if (api && typeof api.addShape === 'function' && shapeSelect.value) api.addShape(shapeSelect.value);
+                        shapeSelect.value = '';
+                        syncState();
+                    }});
+                }}
+                if (textAdd) textAdd.addEventListener('click', () => {{ const api = getApi(); if (api && typeof api.addText === 'function') api.addText(); syncState(); }});
+                if (legendAdd) {{
+                    legendAdd.addEventListener('click', () => {{
+                        const opening = !legendItem?.classList.contains('is-open');
+                        if (!opening) {{
+                            closeLegendPopover();
+                            return;
+                        }}
+                        positionLegendPopover();
+                        if (legendPopover) legendPopover.style.display = 'block';
+                        legendItem?.classList.add('is-open');
+                    }});
+                }}
+                if (undoBtn) undoBtn.addEventListener('click', () => {{ const api = getApi(); if (api && typeof api.undo === 'function') api.undo(); syncState(); }});
+                if (redoBtn) redoBtn.addEventListener('click', () => {{ const api = getApi(); if (api && typeof api.redo === 'function') api.redo(); syncState(); }});
+                if (deleteBtn) deleteBtn.addEventListener('click', () => {{ const api = getApi(); if (api && typeof api.deleteSelected === 'function') api.deleteSelected(); syncState(); }});
+                if (edgeShortestBtn) edgeShortestBtn.addEventListener('click', () => {{ const api = getApi(); if (api && typeof api.autoConnectShortestEdges === 'function') api.autoConnectShortestEdges(); syncState(); }});
+                if (edgeTypeBtn) edgeTypeBtn.addEventListener('click', () => {{ const api = getApi(); if (api && typeof api.cycleSelectedEdgeType === 'function') api.cycleSelectedEdgeType(); syncState(); }});
+                if (edgeDashBtn) edgeDashBtn.addEventListener('click', () => {{ const api = getApi(); if (api && typeof api.toggleSelectedEdgeDash === 'function') api.toggleSelectedEdgeDash(); syncState(); }});
+                if (edgeFlipBtn) edgeFlipBtn.addEventListener('click', () => {{ const api = getApi(); if (api && typeof api.flipSelectedEdgeDirection === 'function') api.flipSelectedEdgeDirection(); syncState(); }});
+                if (selectModeBtn) selectModeBtn.addEventListener('click', () => {{
+                    const api = getApi();
+                    if (api && typeof api.setMouseMode === 'function' && typeof api.getMouseMode === 'function') {{
+                        const nextMode = api.getMouseMode() === 'selection' ? 'drag' : 'selection';
+                        api.setMouseMode(nextMode);
+                    }}
+                    syncState();
+                }});
+                if (frontBtn) frontBtn.addEventListener('click', () => {{ const api = getApi(); if (api && typeof api.bringSelectedToFront === 'function') api.bringSelectedToFront(); syncState(); }});
+                if (backBtn) backBtn.addEventListener('click', () => {{ const api = getApi(); if (api && typeof api.sendSelectedToBack === 'function') api.sendSelectedToBack(); syncState(); }});
+                proteinItem?.addEventListener('click', (evt) => evt.stopPropagation());
+                legendItem?.addEventListener('click', (evt) => evt.stopPropagation());
+                panel.querySelectorAll('[data-legend-type]').forEach((el) => {{
+                    el.addEventListener('click', () => {{
+                        const api = getApi();
+                        if (api && typeof api.addLegend === 'function') {{
+                            api.addLegend(el.getAttribute('data-legend-type') || 'vertical');
+                        }}
+                        closeLegendPopover();
+                        syncState();
+                    }});
+                }});
+                document.addEventListener('click', () => {{
+                    closeProteinResults();
+                    closeLegendPopover();
+                }});
+                window.addEventListener('mk-cst-controls-ready', () => syncState());
+                window.addEventListener('mk-cst-viewer-state', (evt) => {{
+                    const viewerKey = getViewerKey();
+                    if (viewerKey && evt && evt.detail && String(evt.detail.viewerKey || '') === viewerKey) syncState();
+                }});
+                panel.dataset.bound = '1';
+                window.setTimeout(syncState, 50);
+            }})();
+            """
+        ),
     )
 
 
@@ -3538,95 +4402,16 @@ def _home_tab() -> ui.nav_panel:
 
 
 def _ptm_shape_picker() -> Any:
-    trigger_id = "input_ptm_shape_trigger"
-    menu_id = "input_ptm_shape_menu"
-    hidden_id = "input_ptm_shape"
-    option_specs = [
-        ("circle", "ptm_circle", "Circle"),
-        ("square", "ptm_square", "Square"),
-        ("diamond", "ptm_diamond", "Diamond"),
-    ]
-    return ui.div(
-        {"class": "ptm-shape-picker", "id": "input_ptm_shape_picker"},
-        ui.div(
-            {"style": "display:none;"},
-            ui.input_text(hidden_id, None, value="circle", width="1px"),
-        ),
-        ui.tags.button(
-            {
-                "id": trigger_id,
-                "type": "button",
-                "class": "ptm-shape-picker-trigger",
-                "title": "PTM shape",
-                "aria-label": "PTM shape",
-            },
-            *[
-                ui.tags.span(
-                    {
-                        "class": f"ptm-shape-trigger-icon{' is-active' if value == 'circle' else ''}",
-                        "data-value": value,
-                        "aria-hidden": "true",
-                    },
-                    _icon_markup(icon_name, "ptm-shape-picker-icon"),
-                )
-                for value, icon_name, _label in option_specs
-            ],
-        ),
-        ui.div(
-            {"id": menu_id, "class": "ptm-shape-picker-menu"},
-            *[
-                ui.tags.button(
-                    {
-                        "type": "button",
-                        "class": "ptm-shape-picker-option",
-                        "data-value": value,
-                        "title": label,
-                        "aria-label": label,
-                    },
-                    _icon_markup(icon_name, "ptm-shape-picker-icon"),
-                )
-                for value, icon_name, label in option_specs
-            ],
-        ),
-        ui.tags.script(
-            f"""
-            (function(){{
-                const picker = document.getElementById('input_ptm_shape_picker');
-                const trigger = document.getElementById('{trigger_id}');
-                const menu = document.getElementById('{menu_id}');
-                const hidden = document.getElementById('{hidden_id}');
-                if (!picker || !trigger || !menu || !hidden) return;
-                const setValue = (value) => {{
-                    hidden.value = value;
-                    picker.querySelectorAll('.ptm-shape-trigger-icon').forEach((el) => {{
-                        el.classList.toggle('is-active', el.dataset.value === value);
-                    }});
-                    if (window.Shiny && typeof window.Shiny.setInputValue === 'function') {{
-                        window.Shiny.setInputValue('{hidden_id}', value, {{ priority: 'event' }});
-                    }}
-                }};
-                trigger.addEventListener('click', (evt) => {{
-                    evt.preventDefault();
-                    evt.stopPropagation();
-                    picker.classList.toggle('is-open');
-                }});
-                menu.querySelectorAll('.ptm-shape-picker-option').forEach((btn) => {{
-                    btn.addEventListener('click', (evt) => {{
-                        evt.preventDefault();
-                        evt.stopPropagation();
-                        setValue(btn.dataset.value || 'circle');
-                        picker.classList.remove('is-open');
-                    }});
-                }});
-                document.addEventListener('click', (evt) => {{
-                    if (!picker.contains(evt.target)) {{
-                        picker.classList.remove('is-open');
-                    }}
-                }}, true);
-                setValue(hidden.value || 'circle');
-            }})();
-            """
-        ),
+    return ui.input_select(
+        "input_ptm_shape",
+        None,
+        choices={
+            "circle": "Circle",
+            "square": "Square",
+            "diamond": "Diamond",
+        },
+        selected="circle",
+        width="120px",
     )
 
 
@@ -3766,6 +4551,8 @@ app_ui = ui.page_fluid(
     ),
     NAV_LOCK_SCRIPT,
     EXPORT_DOWNLOAD_SCRIPT,
+    INPUT_BUSY_SCRIPT,
+    INLINE_HELP_TOOLTIP_SCRIPT,
     SVG_DOWNLOAD_SCRIPT,
     ui.navset_tab(
         _home_tab(),
@@ -3867,7 +4654,7 @@ app_ui = ui.page_fluid(
                                 "Max negative",
                                 value=DEFAULT_SETTINGS["max_negative"],
                                 step=0.1,
-                                width="140px",
+                                width="280px",
                             ),
                         ),
                         ui.column(
@@ -3885,7 +4672,7 @@ app_ui = ui.page_fluid(
                                 "Max positive",
                                 value=DEFAULT_SETTINGS["max_positive"],
                                 step=0.1,
-                                width="140px",
+                                width="280px",
                             ),
                         ),
                         ui.column(
@@ -3927,15 +4714,21 @@ def server(input, output, session):  # type: ignore[override]
     ptm_validation = reactive.Value(
         {"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False}  # type: ignore[var-annotated]
     )
+    metabolite_validation = reactive.Value(
+        {"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []}  # type: ignore[var-annotated]
+    )
     nav_lock_status = reactive.Value("User mode: upload valid Protein file to unlock other tabs. PTM optional.")
     extra_datasets = reactive.Value([])  # type: ignore[var-annotated]
     protein_dataset = reactive.Value(None)
     ptm_dataset = reactive.Value(None)
+    metabolite_dataset = reactive.Value(None)
     protein_preview_dataset = reactive.Value(None)
     ptm_preview_dataset = reactive.Value(None)
+    metabolite_preview_dataset = reactive.Value(None)
     global_catalog_info = reactive.Value(dict(GLOBAL_CATALOG_INFO))
     protein_dataset_path = reactive.Value(None)
     ptm_dataset_path = reactive.Value(None)
+    metabolite_dataset_path = reactive.Value(None)
     psp_cache: Dict[str, Any] = {}
     kegg_cache: Dict[str, Dict[str, str]] = {}
     protein_kegg_warning = reactive.Value("")
@@ -4058,6 +4851,23 @@ def server(input, output, session):  # type: ignore[override]
 
     def _pathway_uniprots(pathway: Dict[str, Any], index_nodes: Dict[str, Dict[str, Any]], gene_to_uniprot: Dict[str, List[str]]) -> set[str]:
         pathway_uniprots: set[str] = set()
+        modules = list(pathway.get("modules", []))
+        if modules:
+            for module in modules:
+                if not isinstance(module, dict):
+                    continue
+                raw_ids = list(module.get("uniprot_ids") or [])
+                if raw_ids:
+                    for uni in raw_ids:
+                        normalized = normalize_uniprot(uni)
+                        if normalized:
+                            pathway_uniprots.add(normalized)
+                for gene_symbol in list(module.get("gene_symbols") or []):
+                    for uni in gene_to_uniprot.get(str(gene_symbol or "").strip().upper(), []):
+                        normalized = normalize_uniprot(uni)
+                        if normalized:
+                            pathway_uniprots.add(normalized)
+            return pathway_uniprots
         for node_id in list(pathway.get("nodes", [])):
             node_obj = index_nodes.get(str(node_id), {})
             for uni in candidate_uniprots_for_node(node_obj, gene_to_uniprot):
@@ -4065,6 +4875,52 @@ def server(input, output, session):  # type: ignore[override]
                 if normalized:
                     pathway_uniprots.add(normalized)
         return pathway_uniprots
+
+    def _cst_pathway_id_from_name(name: str) -> str:
+        return "cst_" + re.sub(r"[^a-z0-9]+", "_", str(name or "").strip().lower()).strip("_")
+
+    def _build_cst_fisher_index(base_dir: Path) -> Dict[str, Any]:
+        grouped: Dict[str, Dict[str, Any]] = {}
+        for row in iter_effective_cst_modules(base_dir):
+            if not isinstance(row, dict):
+                continue
+            pathway_name = str(row.get("pathway") or "").strip()
+            protein_name = str(row.get("protein_module_name") or "").strip()
+            if not pathway_name or not protein_name:
+                continue
+            pathway_id = _cst_pathway_id_from_name(pathway_name)
+            pathway_entry = grouped.setdefault(
+                pathway_id,
+                {
+                    "pathway_id": pathway_id,
+                    "name": pathway_name,
+                    "modules": [],
+                },
+            )
+            uniprot_ids: List[str] = []
+            for field_name in ("psp_uniprot_ids", "backup_uniprot_ids"):
+                raw_val = str(row.get(field_name) or "")
+                for item in raw_val.split(";"):
+                    normalized = normalize_uniprot(item)
+                    if normalized and normalized not in uniprot_ids:
+                        uniprot_ids.append(normalized)
+            gene_symbols: List[str] = []
+            raw_genes = str(row.get("gene_symbols") or "")
+            for item in raw_genes.split(";"):
+                symbol = str(item or "").strip().upper()
+                if symbol and symbol not in gene_symbols:
+                    gene_symbols.append(symbol)
+            pathway_entry["modules"].append(
+                {
+                    "label": protein_name,
+                    "uniprot_ids": uniprot_ids,
+                    "gene_symbols": gene_symbols,
+                }
+            )
+        return {
+            "pathways": list(grouped.values()),
+            "nodes": {},
+        }
 
     def _compute_fisher_pathway_rows(
         prot_df: pd.DataFrame,
@@ -4081,6 +4937,16 @@ def server(input, output, session):  # type: ignore[override]
         protein_id_col = protein_rows.columns[0]
         protein_rows["_uniprot"] = protein_rows[protein_id_col].map(normalize_uniprot)
         protein_rows = protein_rows[protein_rows["_uniprot"] != ""].copy()
+        protein_gene_col = protein_rows.columns[1] if len(protein_rows.columns) > 1 else None
+        if protein_gene_col:
+            protein_rows["_gene_symbol"] = (
+                protein_rows[protein_gene_col]
+                .astype(str)
+                .str.strip()
+                .str.upper()
+            )
+        else:
+            protein_rows["_gene_symbol"] = ""
         protein_rows["_fc"] = _coerce_numeric_series(protein_rows[fc_col])
         protein_rows["_significant"] = _fisher_significance_mask(
             protein_rows["_fc"],
@@ -4094,6 +4960,22 @@ def server(input, output, session):  # type: ignore[override]
         significant_proteins = int(protein_rows["_significant"].sum()) if total_proteins else 0
         protein_uniprots = set(protein_rows["_uniprot"].tolist())
         significant_protein_uniprots = set(protein_rows.loc[protein_rows["_significant"], "_uniprot"].tolist())
+
+        effective_gene_map: Dict[str, List[str]] = {
+            str(key or "").strip().upper(): list(dict.fromkeys(str(item or "").strip().upper() for item in values if str(item or "").strip()))
+            for key, values in (gene_map or {}).items()
+            if str(key or "").strip()
+        }
+        if protein_gene_col:
+            for row in protein_rows.itertuples(index=False):
+                row_map = dict(zip(protein_rows.columns, row))
+                symbol = str(row_map.get("_gene_symbol") or "").strip().upper()
+                uni = normalize_uniprot(row_map.get("_uniprot"))
+                if not symbol or not uni:
+                    continue
+                bucket = effective_gene_map.setdefault(symbol, [])
+                if uni not in bucket:
+                    bucket.append(uni)
 
         site_rows = pd.DataFrame()
         total_sites = 0
@@ -4126,7 +5008,7 @@ def server(input, output, session):  # type: ignore[override]
                 if not pathway_id:
                     continue
                 pathway_name = str(pathway.get("name") or pathway_id).strip()
-                pathway_uniprots = _pathway_uniprots(pathway, source_index.get("nodes", {}), gene_map)
+                pathway_uniprots = _pathway_uniprots(pathway, source_index.get("nodes", {}), effective_gene_map)
                 proteins_in_dataset = protein_uniprots & pathway_uniprots
                 sig_proteins_in_path = significant_protein_uniprots & pathway_uniprots
                 pathway_protein_total = len(proteins_in_dataset)
@@ -4252,7 +5134,9 @@ def server(input, output, session):  # type: ignore[override]
         species_code = (species_info.get("code") or "").strip().lower()
         kegg_index_file = _resolve_kegg_index_file_for_species(species_code)
         wikipathways_index_file = _resolve_wikipathways_index_file_for_species(species_code)
-        if not kegg_index_file and not wikipathways_index_file:
+        cst_ai_dir = Path(BASE_DIR).resolve().parent / "stored_pathways" / "cst"
+        cst_available = cst_ai_dir.exists()
+        if not kegg_index_file and not wikipathways_index_file and not cst_available:
             _clear_pathway_scores(f"No pathway index files found for species '{species_code}' in index_files.")
             return
 
@@ -4280,6 +5164,8 @@ def server(input, output, session):  # type: ignore[override]
                 index_sources.append(("kegg", load_kegg_index(Path(kegg_index_file)), kegg_index_file))
             if wikipathways_index_file:
                 index_sources.append(("wikipathways", load_kegg_index(Path(wikipathways_index_file)), wikipathways_index_file))
+            if cst_available:
+                index_sources.append(("cst", _build_cst_fisher_index(cst_ai_dir), str(cst_ai_dir)))
 
             results_by_fc: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = {}
             download_rows_by_fc: Dict[str, List[Dict[str, Any]]] = {}
@@ -4306,6 +5192,8 @@ def server(input, output, session):  # type: ignore[override]
                 index_files_obj["kegg"] = kegg_index_file
             if wikipathways_index_file:
                 index_files_obj["wikipathways"] = wikipathways_index_file
+            if cst_available:
+                index_files_obj["cst"] = str(cst_ai_dir)
             source_label = ", ".join(sorted(index_files_obj.keys())) if index_files_obj else "none"
 
             pathway_score_cache.set(
@@ -4397,6 +5285,39 @@ def server(input, output, session):  # type: ignore[override]
         except Exception as exc:
             return {"error": f"Debug load failed: {exc}"}
 
+    def _validate_metabolite_file(path: str, protein_comparisons: Sequence[str]) -> Namespace:
+        errors: List[str] = []
+        dataset = _load_dataset(path)
+        if dataset.get("error"):
+            errors.append(str(dataset.get("error")))
+            return Namespace(valid=False, errors=errors, summary={"rows": 0, "comparisons": 0, "tooltips": 0}, comparisons=[])
+        headers = [str(h or "").strip() for h in list(dataset.get("headers") or [])]
+        rows = list(dataset.get("rows") or [])
+        if not headers:
+            errors.append("No headers found in metabolite file.")
+            return Namespace(valid=False, errors=errors, summary={"rows": 0, "comparisons": 0, "tooltips": 0}, comparisons=[])
+        first_header = headers[0].strip().lower().replace(" ", "_")
+        if first_header != "hmdb_id":
+            errors.append("HMDB ID must be the first column in the metabolite file.")
+        fc_columns = [h for h in headers if str(h).startswith("C:")]
+        tooltip_columns = [h for h in headers if str(h).startswith("T:")]
+        if not fc_columns:
+            errors.append("Metabolite file requires at least one comparison column beginning with 'C:'.")
+        expected = [str(c or "").strip() for c in list(protein_comparisons or []) if str(c or "").strip()]
+        if expected:
+            missing = [col for col in expected if col not in fc_columns]
+            extra = [col for col in fc_columns if col not in expected]
+            if missing:
+                errors.append("Missing Comparison columns present in protein file: " + ", ".join(missing) + ".")
+            if extra:
+                errors.append("Metabolite comparison columns must match the Protein dataset exactly. Unexpected columns: " + ", ".join(extra) + ".")
+        summary = {
+            "rows": len(rows),
+            "comparisons": len(fc_columns),
+            "tooltips": len(tooltip_columns),
+        }
+        return Namespace(valid=not errors, errors=errors, summary=summary, comparisons=fc_columns)
+
     def _get_input_preview_content(
         dataset: Optional[Dict[str, Any]],
         fallback_headers: List[str],
@@ -4487,7 +5408,7 @@ def server(input, output, session):  # type: ignore[override]
         wrap_style = ""
         table_style = ""
         if fixed_width:
-            wrap_style = f"width:{fixed_width};"
+            wrap_style = f"display:block; width:{fixed_width}; max-width:none;"
             table_style = "width:100%;"
         colgroup = ui.tags.colgroup(
             *[
@@ -4521,7 +5442,11 @@ def server(input, output, session):  # type: ignore[override]
                     {"class": "input-preview-guide-body"},
                     ui.div(
                         {"class": "input-preview-guide-pill"},
-                        ui.div({"class": "input-preview-guide-pill-title"}, "Uniprot"),
+                        ui.div(
+                            {"class": "input-preview-guide-pill-title"},
+                            "Uniprot",
+                            ui.tags.span({"class": "input-preview-guide-required"}, "*"),
+                        ),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
                             "Use the UniProt ID for each protein or PTM row.",
@@ -4529,7 +5454,11 @@ def server(input, output, session):  # type: ignore[override]
                     ),
                     ui.div(
                         {"class": "input-preview-guide-pill"},
-                        ui.div({"class": "input-preview-guide-pill-title"}, "Gene Symbol"),
+                        ui.div(
+                            {"class": "input-preview-guide-pill-title"},
+                            "Gene Symbol",
+                            ui.tags.span({"class": "input-preview-guide-required"}, "*"),
+                        ),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
                             "Use the matching gene symbol for each protein entry.",
@@ -4537,7 +5466,11 @@ def server(input, output, session):  # type: ignore[override]
                     ),
                     ui.div(
                         {"class": "input-preview-guide-pill"},
-                        ui.div({"class": "input-preview-guide-pill-title"}, "PTM Site"),
+                        ui.div(
+                            {"class": "input-preview-guide-pill-title"},
+                            "PTM Site",
+                            ui.tags.span({"class": "input-preview-guide-required"}, "*"),
+                        ),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
                             "Use the modified residue position for each PTM entry.",
@@ -4545,10 +5478,26 @@ def server(input, output, session):  # type: ignore[override]
                     ),
                     ui.div(
                         {"class": "input-preview-guide-pill"},
-                        ui.div({"class": "input-preview-guide-pill-title"}, "Comparisons"),
+                        ui.div(
+                            {"class": "input-preview-guide-pill-title"},
+                            "Comparisons",
+                            ui.tags.span({"class": "input-preview-guide-required"}, "*"),
+                        ),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
                             "Use log2 fold-change values comparing two conditions. Each comparison header must start with 'C:'.",
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "input-preview-guide-pill"},
+                        ui.div(
+                            {"class": "input-preview-guide-pill-title"},
+                            "HMDB ID",
+                            ui.tags.span({"class": "input-preview-guide-required"}, "*"),
+                        ),
+                        ui.div(
+                            {"class": "input-preview-guide-pill-text"},
+                            "Unique identifier from the HMDB used to specify each metabolite (e.g., HMDB0000001). This must be the first column in the metabolite file.",
                         ),
                     ),
                     ui.div(
@@ -4845,6 +5794,21 @@ def server(input, output, session):  # type: ignore[override]
         except Exception as exc:
             print(f"Warning: send_custom_message failed: {exc}")
 
+    def _apply_outline_width_defaults(protein_headers: Optional[Sequence[str]] = None, ptm_headers: Optional[Sequence[str]] = None) -> None:
+        try:
+            if protein_headers is not None:
+                session.send_input_message(
+                    "settings_prot_outline_width",
+                    {"value": 3 if _has_outline_columns(protein_headers) else 1},
+                )
+            if ptm_headers is not None:
+                session.send_input_message(
+                    "settings_ptm_outline_width",
+                    {"value": 3 if _has_outline_columns(ptm_headers) else 1},
+                )
+        except Exception as exc:
+            print(f"Warning: failed to apply outline width defaults: {exc}")
+
     def _load_demo_datasets():
         """Load bundled demo protein/PTM files so Demo mode behaves like preloaded uploads."""
         missing = []
@@ -4852,13 +5816,18 @@ def server(input, output, session):  # type: ignore[override]
             missing.append(f"Protein file not found: {SAMPLE_PROTEIN_FILE}")
         if not os.path.exists(SAMPLE_PTM_FILE):
             missing.append(f"PTM file not found: {SAMPLE_PTM_FILE}")
+        if not os.path.exists(SAMPLE_METABOLITE_FILE):
+            missing.append(f"Metabolite file not found: {SAMPLE_METABOLITE_FILE}")
         if missing:
             protein_validation.set({"status": "Demo mode files missing.", "errors": missing, "valid": False, "comparisons": []})
             ptm_validation.set({"status": "Demo mode files missing.", "errors": missing, "valid": False})
+            metabolite_validation.set({"status": "Demo mode files missing.", "errors": missing, "valid": False, "comparisons": []})
             protein_dataset.set(None)
             ptm_dataset.set(None)
+            metabolite_dataset.set(None)
             protein_preview_dataset.set(None)
             ptm_preview_dataset.set(None)
+            metabolite_preview_dataset.set(None)
             _refresh_global_catalog_from_current(reset=True)
             nav_lock_status.set("Demo mode: sample files missing. Navigation locked.")
             _clear_pathway_scores("Demo datasets missing; pathway scoring unavailable.")
@@ -4869,24 +5838,29 @@ def server(input, output, session):  # type: ignore[override]
             if not prot_result.valid:
                 protein_validation.set({"status": "Demo protein file failed validation.", "errors": prot_result.errors, "valid": False, "comparisons": []})
                 ptm_validation.set({"status": "PTM upload disabled until demo protein is valid.", "errors": [], "valid": False})
+                metabolite_validation.set({"status": "Metabolite upload disabled until demo protein is valid.", "errors": [], "valid": False, "comparisons": []})
                 protein_dataset.set(None)
                 ptm_dataset.set(None)
+                metabolite_dataset.set(None)
                 protein_preview_dataset.set(None)
                 ptm_preview_dataset.set(None)
+                metabolite_preview_dataset.set(None)
                 _refresh_global_catalog_from_current(reset=True)
                 nav_lock_status.set("Demo mode: sample protein validation failed.")
                 _clear_pathway_scores("Demo protein validation failed; pathway scoring unavailable.")
                 return
 
-            species_choice, species_info = _resolve_species(_get_input_value(input, "input_species"))
-            if not species_info:
-                species_choice = DEFAULT_SPECIES
-                species_info = SPECIES_CHOICES.get(DEFAULT_SPECIES, {})
+            species_choice = DEMO_SPECIES
+            species_info = SPECIES_CHOICES.get(DEMO_SPECIES, SPECIES_CHOICES.get(DEFAULT_SPECIES, {}))
+            current_species = str(_get_input_value(input, "input_species") or "").strip().lower()
+            if species_choice and current_species != species_choice:
+                session.send_input_message("input_species", {"value": species_choice})
             species_code = species_info.get("code", "") or SPECIES_CHOICES.get(DEFAULT_SPECIES, {}).get("code", "hsa")
             print(f"Demo mode: loading sample datasets for species '{species_choice}' code '{species_code}'")
 
             demo_prot_payload = _load_dataset(SAMPLE_PROTEIN_FILE)
             protein_preview_dataset.set(demo_prot_payload)
+            _apply_outline_width_defaults(protein_headers=demo_prot_payload.get("headers") or [])
             try:
                 demo_prot_payload = annotate_protein_with_kegg(demo_prot_payload, species_code, _get_kegg_map(species_code))
             except Exception as exc:
@@ -4910,12 +5884,14 @@ def server(input, output, session):  # type: ignore[override]
                 ptm_validation.set({"status": "Demo PTM file failed validation.", "errors": ptm_result.errors, "valid": False})
                 ptm_dataset.set(None)
                 ptm_preview_dataset.set(None)
+                metabolite_validation.set({"status": "Metabolite upload optional. Demo metabolite file still available.", "errors": [], "valid": False, "comparisons": []})
                 nav_lock_status.set("Demo mode: sample PTM validation failed.")
-                _mark_pathway_scores_pending("Demo datasets changed. Run Fisher's Exact Test to score pathways.")
+                _refresh_pathway_scores()
                 return
 
             demo_ptm_payload = _load_dataset(SAMPLE_PTM_FILE)
             ptm_preview_dataset.set(demo_ptm_payload)
+            _apply_outline_width_defaults(ptm_headers=demo_ptm_payload.get("headers") or [])
             try:
                 demo_ptm_payload = annotate_ptm_dataset(demo_ptm_payload, species_choice, _get_psp_map())
                 demo_ptm_payload = annotate_ptm_dataset_with_kinases(demo_ptm_payload, species_choice, _get_psp_ks_map())
@@ -4933,21 +5909,48 @@ def server(input, output, session):  # type: ignore[override]
                 "valid": True,
             })
             _write_debug_dump("user_ptm_dataset_debug.txt", demo_ptm_payload)
+            metabolite_result = _validate_metabolite_file(SAMPLE_METABOLITE_FILE, prot_result.comparisons)
+            if metabolite_result.valid:
+                demo_metabolite_payload = _load_dataset(SAMPLE_METABOLITE_FILE)
+                metabolite_preview_dataset.set(demo_metabolite_payload)
+                metabolite_dataset.set(demo_metabolite_payload)
+                metabolite_dataset_path.set(SAMPLE_METABOLITE_FILE)
+                metabolite_validation.set({
+                    "status": (
+                        f"Demo metabolite loaded. Rows: {metabolite_result.summary.get('rows', 0)}, "
+                        f"Comparison columns: {metabolite_result.summary.get('comparisons', 0)}, "
+                        f"Tooltip columns: {metabolite_result.summary.get('tooltips', 0)}."
+                    ),
+                    "errors": [],
+                    "valid": True,
+                    "comparisons": metabolite_result.comparisons,
+                })
+            else:
+                metabolite_dataset.set(None)
+                metabolite_preview_dataset.set(_load_dataset(SAMPLE_METABOLITE_FILE))
+                metabolite_dataset_path.set(None)
+                metabolite_validation.set({
+                    "status": "Demo metabolite file failed validation.",
+                    "errors": metabolite_result.errors,
+                    "valid": False,
+                    "comparisons": [],
+                })
             _refresh_global_catalog_from_current()
             _update_ks_index()
-            _mark_pathway_scores_pending("Demo datasets loaded. Run Fisher's Exact Test to score pathways.")
+            _refresh_pathway_scores()
             nav_lock_status.set("Demo mode: sample datasets loaded. Navigation unlocked.")
-            print("Demo mode: sample protein/PTM loaded successfully.")
-        except Exception as exc:
-            print(f"Warning: demo mode encountered an unexpected error: {exc}")
+            print("Demo mode: sample protein/PTM/metabolite loaded successfully.")
         except Exception as exc:
             print(f"Warning: demo mode encountered an unexpected error: {exc}")
             protein_validation.set({"status": "Demo mode failed to load sample protein.", "errors": [str(exc)], "valid": False, "comparisons": []})
             ptm_validation.set({"status": "Demo mode failed to load sample PTM.", "errors": [str(exc)], "valid": False})
+            metabolite_validation.set({"status": "Demo mode failed to load sample metabolite.", "errors": [str(exc)], "valid": False, "comparisons": []})
             protein_dataset.set(None)
             ptm_dataset.set(None)
+            metabolite_dataset.set(None)
             protein_preview_dataset.set(None)
             ptm_preview_dataset.set(None)
+            metabolite_preview_dataset.set(None)
             _refresh_global_catalog_from_current(reset=True)
             nav_lock_status.set("Demo mode: sample datasets failed to load.")
             _clear_pathway_scores("Demo datasets failed to load; pathway scoring unavailable.")
@@ -4959,8 +5962,10 @@ def server(input, output, session):  # type: ignore[override]
         with reactive.isolate():
             protein_valid = protein_validation.get().get("valid")
             ptm_valid = ptm_validation.get().get("valid")
+            metabolite_valid = metabolite_validation.get().get("valid")
             protein_data = protein_dataset.get()
             ptm_data = ptm_dataset.get()
+            metabolite_data = metabolite_dataset.get()
         if not protein_valid:
             return {}
         if not protein_data:
@@ -5073,6 +6078,18 @@ def server(input, output, session):  # type: ignore[override]
             },
             "ptm": ptm_entries,
         }
+        if metabolite_valid and metabolite_data:
+            metabolite_headers = list(metabolite_data.get("headers") or [])
+            if metabolite_headers:
+                metabolite_hmdb = metabolite_headers[0]
+                data_override["metabolite"] = {
+                    "data_headers": metabolite_headers,
+                    "data_rows": metabolite_data.get("rows") or [],
+                    "file_path": metabolite_dataset_path.get() or "",
+                    "hmdb_column": metabolite_hmdb,
+                    "main_columns": [h for h in metabolite_headers if h.startswith("C:")],
+                    "tooltip_columns": [h for h in metabolite_headers if h.startswith("T:")],
+                }
         # Attach file_path to each PTM entry so downstream processors/catalog use the correct dataset
         for entry in data_override["ptm"]:
             entry["file_path"] = ptm_dataset_path.get() or ""
@@ -5136,6 +6153,7 @@ def server(input, output, session):  # type: ignore[override]
         protein_validation.set({"status": status, "errors": [], "valid": True, "comparisons": result.comparisons})
         dataset_payload = _load_dataset(datapath)
         protein_preview_dataset.set(dataset_payload)
+        _apply_outline_width_defaults(protein_headers=dataset_payload.get("headers") or [])
         species_key, species_info = _resolve_species(_get_input_value(input, "input_species"))
         species_code = species_info.get("code", "")
         try:
@@ -5160,7 +6178,7 @@ def server(input, output, session):  # type: ignore[override]
         _write_debug_dump("user_protein_dataset_debug.txt", dataset_payload)
         ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
         _refresh_global_catalog_from_current()
-        _mark_pathway_scores_pending("Protein dataset loaded. Run Fisher's Exact Test to score pathways.")
+        _refresh_pathway_scores()
 
     @output
     @render.text
@@ -5185,12 +6203,23 @@ def server(input, output, session):  # type: ignore[override]
             ptm_preview_dataset.get(),
             ["Uniprot", "PTM Site", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
         )
-        return _build_input_preview_table(
-            protein_headers,
-            protein_row,
-            _get_input_preview_widths((protein_headers, protein_row), (ptm_headers, ptm_row)),
-            _extract_problem_column_indexes(protein_headers, protein_validation.get().get("errors") or []),
-            None if protein_preview_data else "815px",
+        metabolite_headers, metabolite_row = _get_input_preview_content(
+            metabolite_preview_dataset.get(),
+            ["HMDB ID", "C: Comparison (1)", "...", "T: Text(1)", "..."],
+        )
+        return ui.div(
+            {"class": "input-preview-labeled-row"},
+            ui.div({"class": "input-preview-side-label is-protein"}, "Protein"),
+            ui.div(
+                {"class": "input-preview-table-wrap"},
+                _build_input_preview_table(
+                    protein_headers,
+                    protein_row,
+                    _get_input_preview_widths((protein_headers, protein_row), (ptm_headers, ptm_row), (metabolite_headers, metabolite_row)),
+                    _extract_problem_column_indexes(protein_headers, protein_validation.get().get("errors") or []),
+                    None if protein_preview_data else "1104px",
+                ),
+            ),
         )
 
     @output
@@ -5228,12 +6257,74 @@ def server(input, output, session):  # type: ignore[override]
             ptm_preview_data,
             ["Uniprot", "PTM Site", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
         )
-        return _build_input_preview_table(
-            ptm_headers,
-            ptm_row,
-            _get_input_preview_widths((protein_headers, protein_row), (ptm_headers, ptm_row)),
-            _extract_problem_column_indexes(ptm_headers, ptm_validation.get().get("errors") or []),
-            None if ptm_preview_data else "815px",
+        metabolite_headers, metabolite_row = _get_input_preview_content(
+            metabolite_preview_dataset.get(),
+            ["HMDB ID", "C: Comparison (1)", "...", "T: Text(1)", "..."],
+        )
+        return ui.div(
+            {"class": "input-preview-labeled-row"},
+            ui.div({"class": "input-preview-side-label is-ptm"}, "PTM"),
+            ui.div(
+                {"class": "input-preview-table-wrap"},
+                _build_input_preview_table(
+                    ptm_headers,
+                    ptm_row,
+                    _get_input_preview_widths((protein_headers, protein_row), (ptm_headers, ptm_row), (metabolite_headers, metabolite_row)),
+                    _extract_problem_column_indexes(ptm_headers, ptm_validation.get().get("errors") or []),
+                    None if ptm_preview_data else "1104px",
+                ),
+            ),
+        )
+
+    @output
+    @render.ui
+    def input_metabolite_preview():
+        protein_headers, protein_row = _get_input_preview_content(
+            protein_preview_dataset.get(),
+            ["Uniprot", "GeneSymbol", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
+        )
+        ptm_headers, ptm_row = _get_input_preview_content(
+            ptm_preview_dataset.get(),
+            ["Uniprot", "PTM Site", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
+        )
+        metabolite_preview_data = metabolite_preview_dataset.get()
+        metabolite_headers, metabolite_row = _get_input_preview_content(
+            metabolite_preview_data,
+            ["HMDB ID", "C: Comparison (1)", "...", "T: Text(1)", "..."],
+        )
+        metabolite_headers = [
+            metabolite_headers[0] if len(metabolite_headers) > 0 else "HMDB ID",
+            "",
+            metabolite_headers[1] if len(metabolite_headers) > 1 else "C: Comparison (1)",
+            metabolite_headers[2] if len(metabolite_headers) > 2 else "...",
+            metabolite_headers[3] if len(metabolite_headers) > 3 else "T: Text(1)",
+            metabolite_headers[4] if len(metabolite_headers) > 4 else "...",
+            "",
+            "",
+        ]
+        metabolite_row = [
+            metabolite_row[0] if len(metabolite_row) > 0 else "",
+            "",
+            metabolite_row[1] if len(metabolite_row) > 1 else "",
+            metabolite_row[2] if len(metabolite_row) > 2 else "",
+            metabolite_row[3] if len(metabolite_row) > 3 else "",
+            metabolite_row[4] if len(metabolite_row) > 4 else "",
+            "",
+            "",
+        ]
+        return ui.div(
+            {"class": "input-preview-labeled-row"},
+            ui.div({"class": "input-preview-side-label is-metabolite"}, "Metabolite"),
+            ui.div(
+                {"class": "input-preview-table-wrap"},
+                _build_input_preview_table(
+                    metabolite_headers,
+                    metabolite_row,
+                    _get_input_preview_widths((protein_headers, protein_row), (ptm_headers, ptm_row), (metabolite_headers, metabolite_row)),
+                    None,
+                    None if metabolite_preview_data else "1104px",
+                ),
+            ),
         )
 
     @output
@@ -5247,6 +6338,74 @@ def server(input, output, session):  # type: ignore[override]
         if len(errs) > 50:
             items.append(ui.tags.li(f"...and {len(errs) - 50} more errors."))
         return ui.tags.ul(*items, style="color:#b00020;")
+
+    @output
+    @render.ui
+    def input_metabolite_errors():
+        data = metabolite_validation.get()
+        errs = data.get("errors") or []
+        if not errs:
+            return ui.div()
+        items = [ui.tags.li(err) for err in errs[:50]]
+        if len(errs) > 50:
+            items.append(ui.tags.li(f"...and {len(errs) - 50} more errors."))
+        return ui.tags.ul(*items, style="color:#b00020;")
+
+    @reactive.Effect
+    @reactive.event(input.input_metabolite_upload)
+    def _process_metabolite_upload():
+        if not protein_validation.get().get("valid"):
+            metabolite_validation.set({"status": "Upload a valid protein file first.", "errors": ["Protein file not validated yet."], "valid": False, "comparisons": []})
+            metabolite_dataset.set(None)
+            metabolite_preview_dataset.set(None)
+            metabolite_dataset_path.set(None)
+            return
+        if str((_get_input_value(input, "input_mode") or "user")).lower() == "demo":
+            metabolite_validation.set({"status": "Demo mode uses bundled sample files; switch to User mode to upload.", "errors": [], "valid": False, "comparisons": []})
+            return
+        upload = input.input_metabolite_upload()
+        if not upload:
+            metabolite_validation.set({"status": "No metabolite file uploaded (optional).", "errors": [], "valid": False, "comparisons": []})
+            metabolite_dataset.set(None)
+            metabolite_preview_dataset.set(None)
+            metabolite_dataset_path.set(None)
+            return
+        file_info = upload[0]
+        datapath = getattr(file_info, "datapath", None)
+        if datapath is None and isinstance(file_info, dict):
+            datapath = file_info.get("datapath")
+        if not datapath:
+            metabolite_validation.set({"status": "Could not locate the uploaded metabolite file.", "errors": [], "valid": False, "comparisons": []})
+            metabolite_dataset.set(None)
+            metabolite_preview_dataset.set(None)
+            metabolite_dataset_path.set(None)
+            return
+        protein_comparisons = protein_validation.get().get("comparisons") or []
+        result = _validate_metabolite_file(datapath, protein_comparisons)
+        preview_payload = _load_dataset(datapath)
+        metabolite_preview_dataset.set(preview_payload)
+        if result.valid:
+            metabolite_dataset.set(preview_payload)
+            metabolite_dataset_path.set(datapath)
+            metabolite_validation.set({
+                "status": (
+                    f"Metabolite file valid. Rows: {result.summary.get('rows', 0)}, "
+                    f"Comparison columns: {result.summary.get('comparisons', 0)}, "
+                    f"Tooltip columns: {result.summary.get('tooltips', 0)}."
+                ),
+                "errors": [],
+                "valid": True,
+                "comparisons": result.comparisons,
+            })
+        else:
+            metabolite_dataset.set(None)
+            metabolite_dataset_path.set(None)
+            metabolite_validation.set({
+                "status": "Metabolite file failed validation. See errors below.",
+                "errors": result.errors,
+                "valid": False,
+                "comparisons": [],
+            })
 
     @output
     @render.text
@@ -5270,7 +6429,7 @@ def server(input, output, session):  # type: ignore[override]
             _refresh_global_catalog_from_current()
             _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "No dataset loaded"})
             _update_ks_index(reset=True)
-            _mark_pathway_scores_pending("PTM dataset changed. Run Fisher's Exact Test to refresh pathway scores.")
+            _refresh_pathway_scores()
             return
         file_info = upload[0]
         datapath = getattr(file_info, "datapath", None)
@@ -5284,7 +6443,7 @@ def server(input, output, session):  # type: ignore[override]
             _refresh_global_catalog_from_current()
             _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "No dataset loaded"})
             _update_ks_index(reset=True)
-            _mark_pathway_scores_pending("PTM dataset changed. Run Fisher's Exact Test to refresh pathway scores.")
+            _refresh_pathway_scores()
             return
         protein_comparisons = protein_validation.get().get("comparisons") or []
         result = validate_ptm_file(datapath, protein_comparisons)
@@ -5297,6 +6456,7 @@ def server(input, output, session):  # type: ignore[override]
             ptm_validation.set({"status": status, "errors": [], "valid": True})
             dataset_payload = _load_dataset(datapath)
             ptm_preview_dataset.set(dataset_payload)
+            _apply_outline_width_defaults(ptm_headers=dataset_payload.get("headers") or [])
             try:
                 species_choice, _ = _resolve_species(_get_input_value(input, "input_species"))
                 dataset_payload = annotate_ptm_dataset(dataset_payload, species_choice, _get_psp_map())
@@ -5308,7 +6468,7 @@ def server(input, output, session):  # type: ignore[override]
             _refresh_global_catalog_from_current()
             _write_debug_dump("user_ptm_dataset_debug.txt", dataset_payload)
             _update_ks_index()
-            _mark_pathway_scores_pending("PTM dataset loaded. Run Fisher's Exact Test to refresh pathway scores.")
+            _refresh_pathway_scores()
         else:
             ptm_preview_dataset.set(_load_dataset(datapath))
             ptm_validation.set({"status": "PTM file failed validation. See errors below.", "errors": result.errors, "valid": False})
@@ -5317,7 +6477,7 @@ def server(input, output, session):  # type: ignore[override]
             _refresh_global_catalog_from_current()
             _write_debug_dump("user_ptm_dataset_debug.txt", {"errors": result.errors})
             _update_ks_index(reset=True)
-            _mark_pathway_scores_pending("PTM dataset changed. Run Fisher's Exact Test to refresh pathway scores.")
+            _refresh_pathway_scores()
 
     @reactive.Effect
     def _enforce_nav_lock():
@@ -5346,6 +6506,10 @@ def server(input, output, session):  # type: ignore[override]
         mode = str((_get_input_value(input, "input_mode") or "user")).lower()
         if mode == "demo":
             try:
+                session.send_input_message("settings_use_black_protein_outlines", {"value": True})
+            except Exception:
+                pass
+            try:
                 _load_demo_datasets()
             except Exception as exc:
                 print(f"Warning: demo mode failed to load sample datasets: {exc}")
@@ -5359,14 +6523,21 @@ def server(input, output, session):  # type: ignore[override]
                 nav_lock_status.set("Demo mode: sample datasets failed to load.")
                 _clear_pathway_scores("Demo datasets failed to load; pathway scoring unavailable.")
         else:
+            try:
+                session.send_input_message("settings_use_black_protein_outlines", {"value": False})
+            except Exception:
+                pass
             protein_dataset.set(None)
             ptm_dataset.set(None)
+            metabolite_dataset.set(None)
             protein_preview_dataset.set(None)
             ptm_preview_dataset.set(None)
+            metabolite_preview_dataset.set(None)
             _refresh_global_catalog_from_current(reset=True)
             protein_kegg_warning.set("")
             protein_validation.set({"status": "Upload a protein file to begin.", "errors": [], "valid": False, "comparisons": []})
             ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
+            metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
             nav_lock_status.set("User mode: upload valid Protein file to unlock other tabs. PTM optional.")
             _update_ks_index(reset=True)
             _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
@@ -5377,7 +6548,10 @@ def server(input, output, session):  # type: ignore[override]
         with reactive.isolate():
             protein_ok = bool(protein_validation.get().get("valid"))
         if protein_ok:
-            _mark_pathway_scores_pending("Species changed. Run Fisher's Exact Test to refresh pathway scores.")
+            if _current_mode() == "demo":
+                _refresh_pathway_scores()
+            else:
+                _mark_pathway_scores_pending("Species changed. Run Fisher's Exact Test to refresh pathway scores.")
 
     @reactive.Effect
     @reactive.event(input.settings_gradient_preset)
@@ -5454,9 +6628,11 @@ def server(input, output, session):  # type: ignore[override]
         protein_ok = bool(protein_validation.get().get("valid"))
         disabled = mode == "demo"
         ptm_disabled = disabled or not protein_ok
+        metabolite_disabled = disabled or not protein_ok
         species_wrap_style = "opacity:0.55; pointer-events:none;" if disabled else ""
         protein_wrap_style = "opacity:0.55; pointer-events:none;" if disabled else ""
         ptm_wrap_style = "opacity:0.55; pointer-events:none;" if ptm_disabled else ""
+        metabolite_wrap_style = "opacity:0.55; pointer-events:none;" if metabolite_disabled else ""
         add_wrap_style = "opacity:0.55; pointer-events:none;" if disabled else ""
         current_species = _get_input_value(input, "input_species") or DEFAULT_SPECIES
         if current_species not in SPECIES_OPTIONS:
@@ -5466,6 +6642,7 @@ def server(input, output, session):  # type: ignore[override]
         ptv = ptm_validation.get()
         protein_valid = bool(pv.get("valid"))
         ptm_valid = bool(ptv.get("valid"))
+        metabolite_valid = bool(metabolite_validation.get().get("valid"))
         error_flag = False
         for entry in (pv.get("errors") or []):
             if entry:
@@ -5476,13 +6653,18 @@ def server(input, output, session):  # type: ignore[override]
                 if entry:
                     error_flag = True
                     break
+        if not error_flag:
+            for entry in (metabolite_validation.get().get("errors") or []):
+                if entry:
+                    error_flag = True
+                    break
         # Also treat statuses containing "failed" or "missing" as errors
         statuses_to_check = [str(pv.get("status", "")), str(ptv.get("status", ""))]
         if not error_flag and any("failed" in s.lower() or "missing" in s.lower() for s in statuses_to_check):
             error_flag = True
 
         data_card = ui.card(
-            {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px; height: 174px;"},
+            {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px; height: 224px;"},
             ui.card_header(
                 ui.div(
                     {"style": "display:flex; align-items:center; justify-content:space-between; gap:12px;"},
@@ -5516,7 +6698,7 @@ def server(input, output, session):  # type: ignore[override]
         add_card = ui.div(style="display:none;")
 
         ptm_card = ui.card(
-            {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px; height: 174px;"},
+            {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px; height: 224px;"},
             ui.card_header(
                 ui.div(
                     {"style": "display:flex; align-items:center; gap:8px;"},
@@ -5537,18 +6719,27 @@ def server(input, output, session):  # type: ignore[override]
                         {"style": "display:flex; align-items:flex-end; gap:8px;"},
                         ui.input_file(
                             "input_ptm_upload",
-                            ui.TagList("PTM Dataset Upload ", ui.tags.em("(.txt, .tsv, .csv)")),
+                            ui.TagList("PTM Upload ", ui.tags.em("(.txt, .tsv, .csv)")),
                             multiple=False,
                             accept=UPLOAD_ACCEPT_TYPES,
                         ),
                         _ptm_shape_picker(),
+                    ),
+                    ui.div(
+                        {"class": "input-sample-download-row"},
+                        ui.download_button(
+                            "download_sample_ptm_dataset",
+                            _icon_markup("download", "viewer-create-icon"),
+                            class_="btn btn-outline-secondary btn-sm input-sample-download-btn",
+                        ),
+                        ui.tags.span({"class": "input-sample-download-label"}, "Sample PTM Dataset"),
                     ),
                 )
             ),
         )
 
         protein_card = ui.card(
-            {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px; height: 174px;"},
+            {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px; height: 224px;"},
             ui.card_header(
                 ui.div(
                     {"style": "display:flex; align-items:center; gap:8px;"},
@@ -5576,8 +6767,55 @@ def server(input, output, session):  # type: ignore[override]
                         ),
                     ),
                     ui.div(
+                        {"class": "input-sample-download-row"},
+                        ui.download_button(
+                            "download_sample_protein_dataset",
+                            _icon_markup("download", "viewer-create-icon"),
+                            class_="btn btn-outline-secondary btn-sm input-sample-download-btn",
+                        ),
+                        ui.tags.span({"class": "input-sample-download-label"}, "Sample Protein Dataset"),
+                    ),
+                    ui.div(
                         "Demo mode uses bundled sample files. Switch to User mode to upload your own.",
                         style="color: #b00020; font-size: 12px;" if disabled else "display:none;",
+                    ),
+                )
+            ),
+        )
+
+        metabolite_card = ui.card(
+            {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px; height: 224px;"},
+            ui.card_header(
+                ui.div(
+                    {"style": "display:flex; align-items:center; gap:8px;"},
+                    ui.tags.span("Metabolite Dataset", style="font-weight:700; color:#0b1f33;"),
+                    ui.tags.span(
+                        "OK",
+                        style="color:#16a34a; font-weight:700;" if metabolite_valid else "color:transparent; font-weight:700;",
+                    ),
+                )
+            ),
+            ui.card_body(
+                ui.div(
+                    {"style": metabolite_wrap_style},
+                    ui.input_file(
+                        "input_metabolite_upload",
+                        ui.TagList("Metabolite Upload ", ui.tags.em("(.txt, .tsv, .csv)")),
+                        multiple=False,
+                        accept=UPLOAD_ACCEPT_TYPES,
+                    ),
+                    ui.div(
+                        {"class": "input-sample-download-row"},
+                        ui.download_button(
+                            "download_sample_metabolite_dataset",
+                            _icon_markup("download", "viewer-create-icon"),
+                            class_="btn btn-outline-secondary btn-sm input-sample-download-btn",
+                        ),
+                        ui.tags.span({"class": "input-sample-download-label"}, "Sample Metabolite Dataset"),
+                    ),
+                    ui.div(
+                        "Demo mode uses bundled sample files. Switch to User mode to upload your own.",
+                        style="margin-top:6px; color:#b00020; font-size:12px;" if disabled else "display:none;",
                     ),
                 )
             ),
@@ -5595,6 +6833,7 @@ def server(input, output, session):  # type: ignore[override]
                 ui.div(
                     ui.output_ui("input_protein_errors"),
                     ui.output_ui("input_ptm_errors"),
+                    ui.output_ui("input_metabolite_errors"),
                     style="color:#b00020; font-size:13px;",
                 )
             ),
@@ -5604,10 +6843,26 @@ def server(input, output, session):  # type: ignore[override]
             ui.div(
                 {"class": "input-page-stack"},
                 ui.div(
+                    {"id": "mk-input-busy-overlay", "class": "mk-input-busy-overlay", "aria-live": "polite", "aria-hidden": "true"},
+                    ui.div(
+                        {"class": "mk-input-busy-card", "role": "status"},
+                        ui.div({"class": "mk-input-busy-spinner"}),
+                        ui.div(
+                            {"class": "mk-input-busy-copy"},
+                            ui.div({"class": "mk-input-busy-title"}, "Loading dataset"),
+                            ui.div(
+                                {"class": "mk-input-busy-text"},
+                                "Validating, annotating, and preparing your uploaded file. This may take up to one minute.",
+                            ),
+                        ),
+                    ),
+                ),
+                ui.div(
                     {"class": "input-page-row", "style": "display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;"},
                     data_card,
                     protein_card,
                     ptm_card,
+                    metabolite_card,
                 ),
                 ui.div({"class": "input-page-row"}, ui.output_ui("input_protein_preview_guide")),
                 ui.div({"class": "input-page-row input-preview-section"}, ui.output_ui("input_protein_preview")),
@@ -5617,6 +6872,7 @@ def server(input, output, session):  # type: ignore[override]
                     style="display:block;" if error_flag else "display:none;",
                 ),
                 ui.div({"class": "input-page-row input-preview-section"}, ui.output_ui("input_ptm_preview")),
+                ui.div({"class": "input-page-row input-preview-section"}, ui.output_ui("input_metabolite_preview")),
                 ui.div(
                     {"class": "input-page-row", "style": "display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;"},
                     ui.output_ui("input_extra_datasets_panel"),
@@ -5860,6 +7116,7 @@ def server(input, output, session):  # type: ignore[override]
             general_settings["ptm_circle_spacing"] = settings_override.get("ptm_circle_spacing", DEFAULT_SETTINGS["ptm_circle_spacing"])
             general_settings["prot_outline_width"] = settings_override.get("prot_outline_width", DEFAULT_SETTINGS.get("prot_outline_width", 1))
             general_settings["ptm_outline_width"] = settings_override.get("ptm_outline_width", DEFAULT_SETTINGS.get("ptm_outline_width", 1))
+            general_settings["use_black_protein_outlines"] = bool(settings_override.get("use_black_protein_outlines", DEFAULT_SETTINGS.get("use_black_protein_outlines", False)))
             general_settings["negative_color"] = color_override["negative_color"]
             general_settings["positive_color"] = color_override["positive_color"]
             general_settings["max_negative"] = color_override["max_negative"]
@@ -5927,6 +7184,7 @@ def server(input, output, session):  # type: ignore[override]
             max_neg = settings_override.get("max_negative", DEFAULT_SETTINGS["max_negative"])
             max_pos = settings_override.get("max_positive", DEFAULT_SETTINGS["max_positive"])
             outline_cols = ctx.get("protein_outline_columns", [])
+            use_black_protein_outlines = bool(settings_override.get("use_black_protein_outlines", DEFAULT_SETTINGS.get("use_black_protein_outlines", False)))
             for idx, col in enumerate(ctx.get("protein_main_columns", []), 1):
                 raw = protein_row.get(col, "")
                 try:
@@ -5942,7 +7200,7 @@ def server(input, output, session):  # type: ignore[override]
                 except (TypeError, ValueError):
                     outline_val = None
                 entry[f"outline_fold_change_{idx}"] = outline_val
-                entry[f"outline_color_{idx}"] = _gradient_color_from_fold(outline_val, neg, pos, max_neg, max_pos) if outline_val is not None else [0, 0, 0]
+                entry[f"outline_color_{idx}"] = [0, 0, 0] if use_black_protein_outlines else (_gradient_color_from_fold(outline_val, neg, pos, max_neg, max_pos) if outline_val is not None else [0, 0, 0])
             if not ctx.get("protein_main_columns"):
                 entry["fold_change_1"] = None
                 entry["fc_color_1"] = [128, 128, 128]
@@ -6344,14 +7602,31 @@ def server(input, output, session):  # type: ignore[override]
                 if str(settings_override.get("pathway_source") or "").strip().lower() == "cst":
                     with reactive.isolate():
                         prot_data = protein_dataset.get()
+                        metabolite_data = metabolite_dataset.get()
+                        ptm_data = ptm_dataset.get()
                     cst_payload = load_cst_pathway_payload(
                         selected_id,
                         Path(BASE_DIR),
                         protein_dataset=prot_data,
+                        metabolite_dataset=metabolite_data,
+                        ptm_dataset=ptm_data,
+                        ptm_settings={
+                            "ptm_max_display": settings_override.get("ptm_max_display", DEFAULT_SETTINGS["ptm_max_display"]),
+                            "ptm_label_font": settings_override.get("ptm_label_font", DEFAULT_SETTINGS["ptm_label_font"]),
+                            "ptm_label_color": settings_override.get("ptm_label_color", DEFAULT_SETTINGS["ptm_label_color"]),
+                            "ptm_label_size": settings_override.get("ptm_label_size", DEFAULT_SETTINGS["ptm_label_size"]),
+                            "ptm_circle_radius": settings_override.get("ptm_circle_radius", DEFAULT_SETTINGS["ptm_circle_radius"]),
+                            "ptm_circle_spacing": settings_override.get("ptm_circle_spacing", DEFAULT_SETTINGS["ptm_circle_spacing"]),
+                            "ptm_outline_width": settings_override.get("ptm_outline_width", DEFAULT_SETTINGS["ptm_outline_width"]),
+                            "ptm_shape": (_get_input_value(input, "input_ptm_shape") or "circle"),
+                        },
                         negative_color=settings_override.get("negative_color", DEFAULT_SETTINGS["negative_color"]),
                         positive_color=settings_override.get("positive_color", DEFAULT_SETTINGS["positive_color"]),
                         max_negative=settings_override.get("max_negative", DEFAULT_SETTINGS["max_negative"]),
                         max_positive=settings_override.get("max_positive", DEFAULT_SETTINGS["max_positive"]),
+                        prot_outline_width=settings_override.get("prot_outline_width", DEFAULT_SETTINGS["prot_outline_width"]),
+                        use_black_protein_outlines=bool(settings_override.get("use_black_protein_outlines", DEFAULT_SETTINGS.get("use_black_protein_outlines", False))),
+                        simple_kegg_mode=bool(settings_override.get("simple_kegg_mode", True)),
                     )
                     if not cst_payload:
                         state["json"].set(None)
@@ -6478,6 +7753,7 @@ def server(input, output, session):  # type: ignore[override]
                 merged_settings["ptm_circle_spacing"] = settings_override.get("ptm_circle_spacing", DEFAULT_SETTINGS["ptm_circle_spacing"])
                 merged_settings["prot_outline_width"] = settings_override.get("prot_outline_width", DEFAULT_SETTINGS.get("prot_outline_width", 1))
                 merged_settings["ptm_outline_width"] = settings_override.get("ptm_outline_width", DEFAULT_SETTINGS.get("ptm_outline_width", 1))
+                merged_settings["use_black_protein_outlines"] = bool(settings_override.get("use_black_protein_outlines", DEFAULT_SETTINGS.get("use_black_protein_outlines", False)))
                 merged_settings["main_columns"] = settings_override.get("main_columns", [])
                 merged_settings["protein_tooltip_columns"] = settings_override.get("protein_tooltip_columns", DEFAULT_SETTINGS.get("protein_tooltip_columns", []))
                 merged_settings["species"] = settings_override.get("species")
@@ -7342,14 +8618,14 @@ def server(input, output, session):  # type: ignore[override]
                             if isinstance(value, dict):
                                 selected_score_bundle = value
                                 break
-                    source_score_maps: Dict[str, Dict[str, Dict[str, Any]]] = {"kegg": {}, "wikipathways": {}}
+                    source_score_maps: Dict[str, Dict[str, Dict[str, Any]]] = {"kegg": {}, "wikipathways": {}, "cst": {}}
                     if isinstance(selected_score_bundle, dict):
-                        for source_key in ("kegg", "wikipathways"):
+                        for source_key in ("kegg", "wikipathways", "cst"):
                             source_obj = selected_score_bundle.get(source_key)
                             if isinstance(source_obj, dict):
                                 source_score_maps[source_key] = source_obj
                         # Backward compatibility: legacy flat KEGG-only map.
-                        if not source_score_maps["kegg"] and not source_score_maps["wikipathways"]:
+                        if not source_score_maps["kegg"] and not source_score_maps["wikipathways"] and not source_score_maps["cst"]:
                             maybe_pathway_id = next(iter(selected_score_bundle.keys()), "")
                             maybe_row = selected_score_bundle.get(maybe_pathway_id) if maybe_pathway_id else None
                             if isinstance(maybe_row, dict) and "final_score" in maybe_row:
@@ -7394,6 +8670,9 @@ def server(input, output, session):  # type: ignore[override]
                             "id": str(opt.get("id") or "").strip(),
                             "pathway": str(opt.get("name") or "").strip(),
                             "source": "CST",
+                            "has_save_file": bool(opt.get("has_save_file")),
+                            "has_saved_edges": bool(opt.get("has_saved_edges")),
+                            "has_saved_textboxes": bool(opt.get("has_saved_textboxes")),
                             "prot_fisher_p": None,
                             "phos_fisher_p": None,
                         }
@@ -7546,6 +8825,7 @@ def server(input, output, session):  # type: ignore[override]
                                     "data-value": entry["id"],
                                     "data-source": entry.get("source", ""),
                                     "data-name": entry.get("pathway", ""),
+                                    "data-pathway-full-name": entry.get("pathway", ""),
                                     "class": " ".join(classes),
                                     "onclick": (
                                         "(() => {"
@@ -7561,7 +8841,10 @@ def server(input, output, session):  # type: ignore[override]
                                 },
                                 ui.tags.td(entry["source"]),
                                 ui.tags.td(
-                                    ui.tags.div(entry["pathway"]),
+                                    ui.tags.div(
+                                        {},
+                                        entry["pathway"],
+                                    ),
                                     ui.tags.small({"style": "color:#6b7280;"}, entry["id"]),
                                 ),
                                 ui.tags.td({"title": _metric_title(entry, "prot")}, _fmt_metric(entry.get("prot_fisher_p"), 5)),
@@ -7573,6 +8856,7 @@ def server(input, output, session):  # type: ignore[override]
                     prot_arrow = "▲" if sort_col == "prot_fisher_p" and sort_dir == "asc" else ("▼" if sort_col == "prot_fisher_p" else "")
                     phos_arrow = "▲" if sort_col == "phos_fisher_p" and sort_dir == "asc" else ("▼" if sort_col == "phos_fisher_p" else "")
                     page_nav_input_id = _prefixed_id(prefix, "pathway_table_page_nav")
+                    table_id = _prefixed_id(prefix, "pathway_table_element")
 
                     def _pagination_controls(location: str) -> Any:
                         prev_attrs: Dict[str, Any] = {
@@ -7616,7 +8900,7 @@ def server(input, output, session):  # type: ignore[override]
                         )
 
                     table = ui.tags.table(
-                        {"class": "table table-sm table-hover pathway-table"},
+                        {"id": table_id, "class": "table table-sm table-hover pathway-table"},
                         ui.tags.thead(
                             ui.tags.tr(
                                 ui.tags.th(
@@ -7656,18 +8940,85 @@ def server(input, output, session):  # type: ignore[override]
                         table,
                         _pagination_controls("bottom"),
                         ui.tags.script(
-                            """
-                            (function(){
-                                const table = document.querySelector('.pathway-table');
+                            f"""
+                            (function(){{
+                                const table = document.getElementById('{table_id}');
                                 if(!table) return;
-                                table.addEventListener('click', (ev) => {
+                                const tooltipId = '{table_id}_hover_tooltip';
+                                let tooltip = document.getElementById(tooltipId);
+                                if(!tooltip){{
+                                    tooltip = document.createElement('div');
+                                    tooltip.id = tooltipId;
+                                    tooltip.className = 'pathway-table-hover-tooltip';
+                                    document.body.appendChild(tooltip);
+                                }}
+                                let hoverTimer = null;
+                                let activeRow = null;
+                                let lastX = 0;
+                                let lastY = 0;
+
+                                const hideTooltip = () => {{
+                                    if (hoverTimer) {{
+                                        clearTimeout(hoverTimer);
+                                        hoverTimer = null;
+                                    }}
+                                    activeRow = null;
+                                    tooltip.style.display = 'none';
+                                }};
+
+                                const positionTooltip = (x, y) => {{
+                                    const margin = 14;
+                                    const maxLeft = window.innerWidth - tooltip.offsetWidth - margin;
+                                    const maxTop = window.innerHeight - tooltip.offsetHeight - margin;
+                                    const left = Math.max(margin, Math.min(x + 16, maxLeft));
+                                    const top = Math.max(margin, Math.min(y + 18, maxTop));
+                                    tooltip.style.left = left + 'px';
+                                    tooltip.style.top = top + 'px';
+                                }};
+
+                                const scheduleTooltip = (row) => {{
+                                    hideTooltip();
+                                    if (!row) return;
+                                    const fullName = row.getAttribute('data-pathway-full-name') || '';
+                                    if (!fullName) return;
+                                    activeRow = row;
+                                    hoverTimer = window.setTimeout(() => {{
+                                        if (activeRow !== row) return;
+                                        tooltip.textContent = fullName;
+                                        tooltip.style.display = 'block';
+                                        positionTooltip(lastX, lastY);
+                                    }}, 500);
+                                }};
+
+                                table.addEventListener('click', (ev) => {{
                                     const row = ev.target.closest('tr');
                                     if(!row || !row.dataset.value) return;
                                     const rows = table.querySelectorAll('tr');
                                     rows.forEach(r => r.classList.remove('table-active'));
                                     row.classList.add('table-active');
-                                });
-                            })();
+                                    hideTooltip();
+                                }});
+                                table.addEventListener('mousemove', (ev) => {{
+                                    lastX = ev.clientX;
+                                    lastY = ev.clientY;
+                                    const row = ev.target.closest('tbody tr[data-pathway-full-name]');
+                                    if (row !== activeRow) {{
+                                        scheduleTooltip(row);
+                                        return;
+                                    }}
+                                    if (tooltip.style.display === 'block') {{
+                                        positionTooltip(lastX, lastY);
+                                    }}
+                                }});
+                                table.addEventListener('mouseleave', hideTooltip);
+                                table.addEventListener('mousedown', hideTooltip);
+                                window.addEventListener('scroll', hideTooltip, true);
+                                window.addEventListener('resize', hideTooltip);
+                                document.addEventListener('keydown', hideTooltip);
+                                document.addEventListener('mousedown', (ev) => {{
+                                    if (!table.contains(ev.target)) hideTooltip();
+                                }});
+                            }})();
                             """
                         ),
                     )
@@ -8024,20 +9375,45 @@ def server(input, output, session):  # type: ignore[override]
                         (function(){{
                             const overlay = document.getElementById('{_prefixed_id(prefix, "viewer_overlay_panel")}');
                             const editor = document.getElementById('{_prefixed_id(prefix, "viewer_create_panel")}');
-                            if (overlay) overlay.style.display = 'none';
-                            if (editor) editor.style.display = 'none';
+                            const shell = document.querySelector('#{_prefixed_id(prefix, "viewer_card")} .cst-viewer-shell');
+                            const fullscreenBtn = document.getElementById('{_prefixed_id(prefix, "fullscreen_btn")}');
+                            if (overlay) {{
+                                overlay.style.display = '';
+                                if (shell && shell !== overlay.parentElement) {{
+                                    shell.appendChild(overlay);
+                                }}
+                            }}
+                            if (editor) editor.classList.add('is-hidden-for-cst');
+                            if (shell && fullscreenBtn && shell !== fullscreenBtn.parentElement) {{
+                                shell.appendChild(fullscreenBtn);
+                            }}
                         }})();
                         """
                     ),
-                    create_cst_pathway_viewer(cst_payload),
+                    _cst_create_panel(prefix),
+                    create_cst_pathway_viewer(
+                        cst_payload,
+                        save_input_id=_prefixed_id(prefix, "cst_save_state"),
+                        export_key=prefix,
+                    ),
                 )
             hide_cst_script = ui.tags.script(
                 f"""
                 (function(){{
                     const overlay = document.getElementById('{_prefixed_id(prefix, "viewer_overlay_panel")}');
                     const editor = document.getElementById('{_prefixed_id(prefix, "viewer_create_panel")}');
-                    if (overlay) overlay.style.display = '';
-                    if (editor) editor.style.display = '';
+                    const body = document.querySelector('#{_prefixed_id(prefix, "viewer_card")} .pathway-viewer-body');
+                    const fullscreenBtn = document.getElementById('{_prefixed_id(prefix, "fullscreen_btn")}');
+                    if (overlay) {{
+                        overlay.style.display = '';
+                        if (body && body !== overlay.parentElement) {{
+                            body.appendChild(overlay);
+                        }}
+                    }}
+                    if (editor) editor.classList.remove('is-hidden-for-cst');
+                    if (body && fullscreenBtn && body !== fullscreenBtn.parentElement) {{
+                        body.insertBefore(fullscreenBtn, body.firstChild);
+                    }}
                 }})();
                 """
             )
@@ -8054,6 +9430,76 @@ def server(input, output, session):  # type: ignore[override]
         @render.text
         def status_message() -> str:
             return state["status"].get()
+
+        @reactive.effect
+        @reactive.event(getattr(input, _prefixed_id(prefix, "cst_save_state")))
+        def _handle_cst_save_state() -> None:
+            payload = _get_input_value(input, _prefixed_id(prefix, "cst_save_state"))
+            if not payload or not isinstance(payload, dict):
+                return
+            file_path_raw = str(payload.get("file_path") or "").strip()
+            pathway_id = str(payload.get("pathway_id") or "").strip()
+            pathway_name = str(payload.get("pathway_name") or "").strip()
+            nodes = list(payload.get("nodes") or [])
+            edges = list(payload.get("edges") or [])
+            groups = list(payload.get("groups") or [])
+            disable_pdf_reader = bool(payload.get("disable_pdf_reader"))
+            if not file_path_raw or not pathway_id:
+                return
+            file_path = Path(file_path_raw)
+            try:
+                save_cst_overlay_state(
+                    file_path,
+                    pathway_id=pathway_id,
+                    pathway_name=pathway_name,
+                    nodes=nodes,
+                    edges=edges,
+                    groups=groups,
+                    disable_pdf_reader=disable_pdf_reader,
+                )
+            except Exception as exc:
+                state["status"].set(f"Failed to save CST pathway edits: {exc}")
+                return
+
+            with reactive.isolate():
+                prot_data = protein_dataset.get()
+                metabolite_data = metabolite_dataset.get()
+                ptm_data = ptm_dataset.get()
+            settings_override = collect_settings(input, cfg)
+            refreshed = load_cst_pathway_payload(
+                pathway_id,
+                Path(BASE_DIR),
+                protein_dataset=prot_data,
+                metabolite_dataset=metabolite_data,
+                ptm_dataset=ptm_data,
+                ptm_settings={
+                    "ptm_max_display": settings_override.get("ptm_max_display", DEFAULT_SETTINGS["ptm_max_display"]),
+                    "ptm_label_font": settings_override.get("ptm_label_font", DEFAULT_SETTINGS["ptm_label_font"]),
+                    "ptm_label_color": settings_override.get("ptm_label_color", DEFAULT_SETTINGS["ptm_label_color"]),
+                    "ptm_label_size": settings_override.get("ptm_label_size", DEFAULT_SETTINGS["ptm_label_size"]),
+                    "ptm_circle_radius": settings_override.get("ptm_circle_radius", DEFAULT_SETTINGS["ptm_circle_radius"]),
+                    "ptm_circle_spacing": settings_override.get("ptm_circle_spacing", DEFAULT_SETTINGS["ptm_circle_spacing"]),
+                    "ptm_outline_width": settings_override.get("ptm_outline_width", DEFAULT_SETTINGS["ptm_outline_width"]),
+                    "ptm_shape": (_get_input_value(input, "input_ptm_shape") or "circle"),
+                },
+                negative_color=settings_override.get("negative_color", DEFAULT_SETTINGS["negative_color"]),
+                positive_color=settings_override.get("positive_color", DEFAULT_SETTINGS["positive_color"]),
+                max_negative=settings_override.get("max_negative", DEFAULT_SETTINGS["max_negative"]),
+                max_positive=settings_override.get("max_positive", DEFAULT_SETTINGS["max_positive"]),
+                prot_outline_width=settings_override.get("prot_outline_width", DEFAULT_SETTINGS["prot_outline_width"]),
+                use_black_protein_outlines=bool(settings_override.get("use_black_protein_outlines", DEFAULT_SETTINGS.get("use_black_protein_outlines", False))),
+                simple_kegg_mode=bool(settings_override.get("simple_kegg_mode", True)),
+            )
+            current_json = dict(state["json"].get() or {})
+            if (
+                refreshed
+                and current_json.get("_viewer_kind") == "cst_pdf"
+                and not bool(settings_override.get("simple_kegg_mode", True))
+            ):
+                current_json["_cst_payload"] = refreshed
+                current_json["_persist_token"] = time.time()
+                state["json"].set(current_json)
+            state["status"].set(f"Saved CST pathway edits for {pathway_name or file_path.stem}.")
 
         @output(id=_prefixed_id(prefix, "json_summary"))
         @render.text
@@ -8160,6 +9606,36 @@ def server(input, output, session):  # type: ignore[override]
 
         if cfg.get("start_blank"):
             build_json()
+
+    @output(id="download_sample_protein_dataset")
+    @render.download(filename=os.path.basename(SAMPLE_PROTEIN_FILE))
+    def download_sample_protein_dataset():
+        try:
+            with open(SAMPLE_PROTEIN_FILE, "rb") as sample_fh:
+                yield sample_fh.read()
+        except Exception as exc:
+            print(f"download_sample_protein_dataset error: {exc}")
+            yield b""
+
+    @output(id="download_sample_ptm_dataset")
+    @render.download(filename=os.path.basename(SAMPLE_PTM_FILE))
+    def download_sample_ptm_dataset():
+        try:
+            with open(SAMPLE_PTM_FILE, "rb") as sample_fh:
+                yield sample_fh.read()
+        except Exception as exc:
+            print(f"download_sample_ptm_dataset error: {exc}")
+            yield b""
+
+    @output(id="download_sample_metabolite_dataset")
+    @render.download(filename=os.path.basename(SAMPLE_METABOLITE_FILE))
+    def download_sample_metabolite_dataset():
+        try:
+            with open(SAMPLE_METABOLITE_FILE, "rb") as sample_fh:
+                yield sample_fh.read()
+        except Exception as exc:
+            print(f"download_sample_metabolite_dataset error: {exc}")
+            yield b""
 
     for cfg in BOOKMARK_CONFIGS:
         _register_bookmark(cfg)

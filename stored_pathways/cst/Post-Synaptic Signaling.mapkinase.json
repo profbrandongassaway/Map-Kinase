@@ -1,0 +1,1852 @@
+{
+  "version": 3,
+  "saved_at_utc": "2026-03-29T20:00:22.308194+00:00",
+  "pathway_id": "cst_post_synaptic_signaling",
+  "pathway_name": "Post-Synaptic Signaling",
+  "pathway_file": "Post-Synaptic Signaling.ai",
+  "nodes": [
+    {
+      "id": "cst_overlay_mn6xavtd_73",
+      "originalLabel": "Neuroligin 3/4",
+      "displayLabel": "Neuroligin 3/4",
+      "label": "Neuroligin 3/4",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "NLGN3"
+      ],
+      "suggested_uniprot_ids": [
+        "E7EVK0"
+      ],
+      "isCustom": true,
+      "cx": 717.0357142857143,
+      "cy": 353.6009259259259,
+      "rx": 42.03333333333336,
+      "ry": 7.48247978436666,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_1",
+      "originalLabel": "GKAP",
+      "displayLabel": "GKAP",
+      "label": "GKAP",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "DLGAP1"
+      ],
+      "suggested_uniprot_ids": [
+        "O14490"
+      ],
+      "isCustom": false,
+      "cx": 380.2183,
+      "cy": 302.8154,
+      "rx": 15.2885,
+      "ry": 6.235,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_3",
+      "originalLabel": "SHANK",
+      "displayLabel": "SHANK",
+      "label": "SHANK",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "SH2D1A"
+      ],
+      "suggested_uniprot_ids": [
+        "O60880"
+      ],
+      "isCustom": false,
+      "cx": 401.40515,
+      "cy": 313.13065,
+      "rx": 18.92,
+      "ry": 6.692,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_4",
+      "originalLabel": "SLITRK3",
+      "displayLabel": "SLITRK3",
+      "label": "SLITRK3",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SLITRK3"
+      ],
+      "suggested_uniprot_ids": [
+        "C9K0R4"
+      ],
+      "isCustom": false,
+      "cx": 619.705369735849,
+      "cy": 352.7444962962962,
+      "rx": 22.435200000000002,
+      "ry": 7.2141298436657735,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_6",
+      "originalLabel": "Cdc42",
+      "displayLabel": "Cdc42",
+      "label": "Cdc42",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "CDC42"
+      ],
+      "suggested_uniprot_ids": [
+        "P60953-1"
+      ],
+      "isCustom": false,
+      "cx": 502.03071886792463,
+      "cy": 358.45297777777785,
+      "rx": 19.37334814814818,
+      "ry": 5.593387331536519,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_7",
+      "originalLabel": "MDGA1",
+      "displayLabel": "MDGA1",
+      "label": "MDGA1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "MDGA1"
+      ],
+      "suggested_uniprot_ids": [
+        "D6RFG6"
+      ],
+      "isCustom": false,
+      "cx": 491.3961991913747,
+      "cy": 281.6086592592592,
+      "rx": 21.28551111111102,
+      "ry": 6.991212668463618,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_8",
+      "originalLabel": "NMDAR",
+      "displayLabel": "NMDAR",
+      "label": "NMDAR",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "GRIN1",
+        "GRIN2A",
+        "GRIN2B",
+        "GRIN2C",
+        "GRIN2D",
+        "GRIN3B",
+        "GRINA",
+        "GRIN3A"
+      ],
+      "suggested_uniprot_ids": [
+        "Q05586",
+        "Q12879",
+        "Q13224",
+        "Q14957",
+        "O15399",
+        "O60391",
+        "Q7Z429",
+        "Q8TCU5"
+      ],
+      "isCustom": false,
+      "cx": 258.67355983827497,
+      "cy": 426.15984814814817,
+      "rx": 22.290403703703703,
+      "ry": 6.7645301886792595,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 7.38967
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_9",
+      "originalLabel": "mGluR",
+      "displayLabel": "mGluR",
+      "label": "mGluR",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "GSR"
+      ],
+      "suggested_uniprot_ids": [
+        "P00390"
+      ],
+      "isCustom": false,
+      "cx": 428.87940485175216,
+      "cy": 291.24657407407403,
+      "rx": 19.040406469002676,
+      "ry": 6.234500000000001,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_10",
+      "originalLabel": "TARP",
+      "displayLabel": "TARP",
+      "label": "TARP",
+      "annotation": "",
+      "mappingType": "ambiguous",
+      "suggested_gene_symbols": [
+        "TRGC1"
+      ],
+      "suggested_uniprot_ids": [
+        "A2JGV3"
+      ],
+      "isCustom": false,
+      "cx": 341.4972991913747,
+      "cy": 284.4669629629629,
+      "rx": 21.03167654986521,
+      "ry": 7.461407407407364,
+      "shapeType": "ellipse",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_11",
+      "originalLabel": "NMDAR",
+      "displayLabel": "NMDAR",
+      "label": "NMDAR",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "GRIN1",
+        "GRIN2A",
+        "GRIN2B",
+        "GRIN2C",
+        "GRIN2D",
+        "GRIN3B",
+        "GRINA",
+        "GRIN3A"
+      ],
+      "suggested_uniprot_ids": [
+        "Q05586",
+        "Q12879",
+        "Q13224",
+        "Q14957",
+        "O15399",
+        "O60391",
+        "Q7Z429",
+        "Q8TCU5"
+      ],
+      "isCustom": false,
+      "cx": 249.83246110175202,
+      "cy": 280.37111203703705,
+      "rx": 22.37574166666667,
+      "ry": 8.015075657008055,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.24833
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_12",
+      "originalLabel": "GABARAP",
+      "displayLabel": "GABARAP",
+      "label": "GABARAP",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "GABARAP"
+      ],
+      "suggested_uniprot_ids": [
+        "H6UMI1"
+      ],
+      "isCustom": false,
+      "cx": 461.59987419137457,
+      "cy": 385.7532337962963,
+      "rx": 27.0746541105122,
+      "ry": 7.442,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_13",
+      "originalLabel": "Eph",
+      "displayLabel": "Eph",
+      "label": "Eph",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "EPHA1"
+      ],
+      "suggested_uniprot_ids": [
+        "P21709"
+      ],
+      "isCustom": false,
+      "cx": 278.18041886792446,
+      "cy": 222.81326666666664,
+      "rx": 42.79845185185184,
+      "ry": 7.252521293800498,
+      "shapeType": "ellipse",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_14",
+      "originalLabel": "Calcineurin",
+      "displayLabel": "Calcineurin",
+      "label": "Calcineurin",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "PPP3CA",
+        "PPP3CB",
+        "PPP3CC",
+        "PPP3R1",
+        "PPP3R2"
+      ],
+      "suggested_uniprot_ids": [
+        "Q08209",
+        "P16298",
+        "P48454",
+        "P63098",
+        "Q96LZ3"
+      ],
+      "isCustom": false,
+      "cx": 510.85362499999997,
+      "cy": 455.196125,
+      "rx": 27.585,
+      "ry": 7.3149999999999995,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_15",
+      "originalLabel": "PKC",
+      "displayLabel": "PKC",
+      "label": "PKC",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "PRKCI",
+        "PRKCZ"
+      ],
+      "suggested_uniprot_ids": [
+        "P41743",
+        "Q05513"
+      ],
+      "isCustom": false,
+      "cx": 472.06835,
+      "cy": 424.9355,
+      "rx": 11.338000000000001,
+      "ry": 6.415,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_16",
+      "originalLabel": "PP1",
+      "displayLabel": "PP1",
+      "label": "PP1",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "PPP1CA",
+        "PPP1CB",
+        "PPP1CC"
+      ],
+      "suggested_uniprot_ids": [
+        "P62136",
+        "P62140",
+        "P36873"
+      ],
+      "isCustom": false,
+      "cx": 195.2284,
+      "cy": 419.90099999999995,
+      "rx": 10.913499999999999,
+      "ry": 6.2545,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_17",
+      "originalLabel": "CaMKII",
+      "displayLabel": "CaMKII",
+      "label": "CaMKII",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "CAMK2A",
+        "CAMK2B",
+        "CAMK2D",
+        "CAMK2G"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9UQM7",
+        "Q13554",
+        "Q13557",
+        "Q13555"
+      ],
+      "isCustom": false,
+      "cx": 214.74588750000004,
+      "cy": 371.7222259259259,
+      "rx": 17.8865,
+      "ry": 9.8245,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.519270000000001
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_18",
+      "originalLabel": "CaMKII",
+      "displayLabel": "CaMKII",
+      "label": "CaMKII",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "CAMK2A",
+        "CAMK2B",
+        "CAMK2D",
+        "CAMK2G"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9UQM7",
+        "Q13554",
+        "Q13557",
+        "Q13555"
+      ],
+      "isCustom": false,
+      "cx": 147.2575,
+      "cy": 291.98545,
+      "rx": 18.8225,
+      "ry": 6.452500000000001,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_19",
+      "originalLabel": "CaMKII",
+      "displayLabel": "CaMKII",
+      "label": "CaMKII",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "CAMK2A",
+        "CAMK2B",
+        "CAMK2D",
+        "CAMK2G"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9UQM7",
+        "Q13554",
+        "Q13557",
+        "Q13555"
+      ],
+      "isCustom": false,
+      "cx": 177.31445000000002,
+      "cy": 338.4403,
+      "rx": 18.519000000000002,
+      "ry": 6.596,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_20",
+      "originalLabel": "FYN",
+      "displayLabel": "FYN",
+      "label": "FYN",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "FYN"
+      ],
+      "suggested_uniprot_ids": [
+        "P06241"
+      ],
+      "isCustom": false,
+      "cx": 283.7061,
+      "cy": 391.4855,
+      "rx": 11.088,
+      "ry": 6.250500000000001,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_21",
+      "originalLabel": "JNK",
+      "displayLabel": "JNK",
+      "label": "JNK",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "MAPK8",
+        "MAPK9",
+        "MAPK10"
+      ],
+      "suggested_uniprot_ids": [
+        "P45983",
+        "P45984",
+        "P53779"
+      ],
+      "isCustom": false,
+      "cx": 258.3738,
+      "cy": 391.484,
+      "rx": 11.2865,
+      "ry": 6.25,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_22",
+      "originalLabel": "Mena/VASP",
+      "displayLabel": "Mena/VASP",
+      "label": "Mena/VASP",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "ENAH"
+      ],
+      "suggested_uniprot_ids": [
+        "Q8N8S7"
+      ],
+      "isCustom": false,
+      "cx": 526.15629375,
+      "cy": 396.20251874999997,
+      "rx": 27.157,
+      "ry": 6.687703935185141,
+      "shapeType": "ellipse",
+      "angle": -14.837767562766189,
+      "opacity": 0.98,
+      "strokeWidth": 4.4031199999999995
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_23",
+      "originalLabel": "GRIP1",
+      "displayLabel": "GRIP1",
+      "label": "GRIP1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "GRIP1"
+      ],
+      "suggested_uniprot_ids": [
+        "F5H3F9"
+      ],
+      "isCustom": false,
+      "cx": 305.1234,
+      "cy": 291.3643,
+      "rx": 18.9625,
+      "ry": 6.235,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_24",
+      "originalLabel": "GRASP",
+      "displayLabel": "GRASP",
+      "label": "GRASP",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "TAMALIN"
+      ],
+      "suggested_uniprot_ids": [
+        "Q7Z6J2"
+      ],
+      "isCustom": false,
+      "cx": 298.37902339622633,
+      "cy": 302.75679629629616,
+      "rx": 17.328,
+      "ry": 7.129018518518421,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_25",
+      "originalLabel": "GKAP",
+      "displayLabel": "GKAP",
+      "label": "GKAP",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "DLGAP1"
+      ],
+      "suggested_uniprot_ids": [
+        "O14490"
+      ],
+      "isCustom": false,
+      "cx": 241.6110607648248,
+      "cy": 330.3244138888889,
+      "rx": 13.7455,
+      "ry": 8.49158600433369,
+      "shapeType": "ellipse",
+      "angle": 42.88188576916241,
+      "opacity": 0.98,
+      "strokeWidth": 5.838780000000001
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_26",
+      "originalLabel": "SHANK",
+      "displayLabel": "SHANK",
+      "label": "SHANK",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "SH2D1A"
+      ],
+      "suggested_uniprot_ids": [
+        "O60880"
+      ],
+      "isCustom": false,
+      "cx": 354.7215125,
+      "cy": 354.3465625,
+      "rx": 19.444,
+      "ry": 6.50088487346699,
+      "shapeType": "ellipse",
+      "angle": -18.24406890271125,
+      "opacity": 0.98,
+      "strokeWidth": 4.72282
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_27",
+      "originalLabel": "PICK1",
+      "displayLabel": "PICK1",
+      "label": "PICK1",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "PICK1"
+      ],
+      "suggested_uniprot_ids": [
+        "E7EX80"
+      ],
+      "isCustom": false,
+      "cx": 328.40101875000005,
+      "cy": 325.31389375,
+      "rx": 7.729372044624232,
+      "ry": 16.071,
+      "shapeType": "ellipse",
+      "angle": -20.224811112352413,
+      "opacity": 0.98,
+      "strokeWidth": 4.08411
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_28",
+      "originalLabel": "SynGAP",
+      "displayLabel": "SynGAP",
+      "label": "SynGAP",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "SYNGAP1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q96PV0"
+      ],
+      "isCustom": false,
+      "cx": 269.88935000000004,
+      "cy": 314.59355,
+      "rx": 20.0755,
+      "ry": 6.543,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_29",
+      "originalLabel": "SHANK",
+      "displayLabel": "SHANK",
+      "label": "SHANK",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "SH2D1A"
+      ],
+      "suggested_uniprot_ids": [
+        "O60880"
+      ],
+      "isCustom": false,
+      "cx": 260.6363214117251,
+      "cy": 354.93897638888893,
+      "rx": 7.64459765597767,
+      "ry": 18.0535,
+      "shapeType": "ellipse",
+      "angle": -34.02685652728235,
+      "opacity": 0.98,
+      "strokeWidth": 6.408950000000001
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_30",
+      "originalLabel": "AMPAR",
+      "displayLabel": "AMPAR",
+      "label": "AMPAR",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "AMPAR"
+      ],
+      "suggested_uniprot_ids": [
+        "P42261",
+        "P42262",
+        "P42263",
+        "P48058"
+      ],
+      "isCustom": false,
+      "cx": 333.27545789757414,
+      "cy": 424.76759629629635,
+      "rx": 21.674077777777825,
+      "ry": 6.06723687331538,
+      "shapeType": "ellipse",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn6wv6jp_31",
+      "originalLabel": "TARP",
+      "displayLabel": "TARP",
+      "label": "TARP",
+      "annotation": "",
+      "mappingType": "ambiguous",
+      "suggested_gene_symbols": [
+        "TRGC1"
+      ],
+      "suggested_uniprot_ids": [
+        "A2JGV3"
+      ],
+      "isCustom": false,
+      "cx": 346.2220991913746,
+      "cy": 425.3741888888889,
+      "rx": 21.892707407407386,
+      "ry": 6.374188888888909,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn6wwnus_32",
+      "originalLabel": "Eph",
+      "displayLabel": "EphR",
+      "label": "EphR",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "EPH"
+      ],
+      "suggested_uniprot_ids": [
+        "P21709"
+      ],
+      "isCustom": false,
+      "cx": 290.2397180592991,
+      "cy": 245.7364148148148,
+      "rx": 42.79845185185184,
+      "ry": 7.252521293800498,
+      "shapeType": "ellipse",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn6x12c7_33",
+      "originalLabel": "AMPAR",
+      "displayLabel": "AMPAR",
+      "label": "AMPAR",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "AMPAR"
+      ],
+      "suggested_uniprot_ids": [
+        "P42261",
+        "P42262",
+        "P42263",
+        "P48058"
+      ],
+      "isCustom": false,
+      "cx": 328.25658997304583,
+      "cy": 287.0740777777778,
+      "rx": 21.674077777777825,
+      "ry": 6.06723687331538,
+      "shapeType": "ellipse",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.453759999999999
+    },
+    {
+      "id": "cst_overlay_mn6x2gl9_34",
+      "originalLabel": "GABARAP",
+      "displayLabel": "GABAR",
+      "label": "GABAR",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "GABRA1"
+      ],
+      "suggested_uniprot_ids": [
+        "E5RHL6"
+      ],
+      "isCustom": false,
+      "cx": 432.9044564016173,
+      "cy": 425.3587893518519,
+      "rx": 23.7395,
+      "ry": 7.442,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6x2tf2_35",
+      "originalLabel": "GABARAP",
+      "displayLabel": "GABAR",
+      "label": "GABAR",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "GABRA1"
+      ],
+      "suggested_uniprot_ids": [
+        "E5RHL6"
+      ],
+      "isCustom": false,
+      "cx": 458.1605210916442,
+      "cy": 350.1273078703704,
+      "rx": 26.954159722222187,
+      "ry": 7.442,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    },
+    {
+      "id": "cst_overlay_mn6x3a9p_37",
+      "originalLabel": "N-Cadherin",
+      "displayLabel": "N-Cadherin",
+      "label": "N-Cadherin",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "CDH2"
+      ],
+      "suggested_uniprot_ids": [
+        "C9J126"
+      ],
+      "isCustom": true,
+      "cx": 201.06266846361189,
+      "cy": 264.5907407407407,
+      "rx": 28.722371967654965,
+      "ry": 6.595370370370375,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3bj1_38",
+      "originalLabel": "β-Catenin",
+      "displayLabel": "β-Catenin",
+      "label": "β-Catenin",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "CTNNB1"
+      ],
+      "suggested_uniprot_ids": [
+        "B4DGU4"
+      ],
+      "isCustom": true,
+      "cx": 200.80461875,
+      "cy": 300.9780125,
+      "rx": 25.331000000000003,
+      "ry": 7.6780125000000226,
+      "shapeType": "ellipse",
+      "angle": -17.055827535959793,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3cdk_39",
+      "originalLabel": "Homer",
+      "displayLabel": "Homer",
+      "label": "Homer",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "HOMER1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q86YM6"
+      ],
+      "isCustom": true,
+      "cx": 217.562675,
+      "cy": 354.104825,
+      "rx": 36.1135,
+      "ry": 6.9544999999999995,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3eb3_40",
+      "originalLabel": "PSD-95",
+      "displayLabel": "PSD-95",
+      "label": "PSD-95",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "DLG4"
+      ],
+      "suggested_uniprot_ids": [
+        "B7Z3U2"
+      ],
+      "isCustom": true,
+      "cx": 238.18825625,
+      "cy": 312.184075,
+      "rx": 19.216,
+      "ry": 9.2355,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3f44_41",
+      "originalLabel": "Homer",
+      "displayLabel": "Homer",
+      "label": "Homer",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "HOMER1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q86YM6"
+      ],
+      "isCustom": true,
+      "cx": 306.4104,
+      "cy": 366.62147500000003,
+      "rx": 36.188500000000005,
+      "ry": 7.6195,
+      "shapeType": "ellipse",
+      "angle": -7.050947801182417,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3fyr_42",
+      "originalLabel": "Homer",
+      "displayLabel": "Homer",
+      "label": "Homer",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "HOMER1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q86YM6"
+      ],
+      "isCustom": true,
+      "cx": 394.4032204851751,
+      "cy": 337.6796553240741,
+      "rx": 35.93820394866531,
+      "ry": 6.254501611478692,
+      "shapeType": "ellipse",
+      "angle": -38.91544342190369,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3gu6_43",
+      "originalLabel": "PKG",
+      "displayLabel": "PKG",
+      "label": "PKG",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "PRKG1"
+      ],
+      "suggested_uniprot_ids": [
+        "B1ALS0"
+      ],
+      "isCustom": true,
+      "cx": 335.1177,
+      "cy": 391.48310000000004,
+      "rx": 11.756,
+      "ry": 6.252000000000001,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3hf6_44",
+      "originalLabel": "PKC",
+      "displayLabel": "PKC",
+      "label": "PKC",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "PRKCI",
+        "PRKCZ"
+      ],
+      "suggested_uniprot_ids": [
+        "P41743",
+        "Q05513"
+      ],
+      "isCustom": true,
+      "cx": 309.1772,
+      "cy": 391.485,
+      "rx": 10.949,
+      "ry": 6.25,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3iie_45",
+      "originalLabel": "PP2B",
+      "displayLabel": "PP2B",
+      "label": "PP2B",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "PPP3CA"
+      ],
+      "suggested_uniprot_ids": [
+        "E7ETC2"
+      ],
+      "isCustom": true,
+      "cx": 214.5203,
+      "cy": 434.24649999999997,
+      "rx": 13.667,
+      "ry": 6.2595,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3k4r_46",
+      "originalLabel": "Ankyrin G",
+      "displayLabel": "Ankyrin G",
+      "label": "Ankyrin G",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "ANK3"
+      ],
+      "suggested_uniprot_ids": [
+        "B1AQT1"
+      ],
+      "isCustom": true,
+      "cx": 463.540575,
+      "cy": 399.3319375,
+      "rx": 23.7395,
+      "ry": 7.442,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3ks5_47",
+      "originalLabel": "Profilin",
+      "displayLabel": "Profilin",
+      "label": "Profilin",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "PFN1",
+        "PFN2"
+      ],
+      "suggested_uniprot_ids": [
+        "P07737",
+        "P35080"
+      ],
+      "isCustom": true,
+      "cx": 529.9906098382748,
+      "cy": 382.9451668981481,
+      "rx": 19.244,
+      "ry": 7.3189746551295976,
+      "shapeType": "ellipse",
+      "angle": -15.469986930135377,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3n6r_49",
+      "originalLabel": "Homer",
+      "displayLabel": "Homer",
+      "label": "Homer",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "HOMER1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q86YM6"
+      ],
+      "isCustom": true,
+      "cx": 417.2352,
+      "cy": 302.4975,
+      "rx": 17.3585,
+      "ry": 6.234500000000001,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3ro9_54",
+      "originalLabel": "GABAR",
+      "displayLabel": "GABAR",
+      "label": "GABAR",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "GABRA1"
+      ],
+      "suggested_uniprot_ids": [
+        "E5RHL6"
+      ],
+      "isCustom": true,
+      "cx": 572.5128032345013,
+      "cy": 352.27037037037036,
+      "rx": 22.50185185185188,
+      "ry": 6.595370370370347,
+      "shapeType": "ellipse",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3th0_57",
+      "originalLabel": "PTPδ",
+      "displayLabel": "PTPδ",
+      "label": "PTPδ",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "PTPRD"
+      ],
+      "suggested_uniprot_ids": [
+        "C9J6E4"
+      ],
+      "isCustom": true,
+      "cx": 625.6880053908355,
+      "cy": 313.86203703703706,
+      "rx": 21.725925925925935,
+      "ry": 7.3746630727762295,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3vqd_58",
+      "originalLabel": "DHHC-12",
+      "displayLabel": "DHHC-12",
+      "label": "DHHC-12",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "ZDHHC12"
+      ],
+      "suggested_uniprot_ids": [
+        "Q5T266"
+      ],
+      "isCustom": true,
+      "cx": 618.6678999999999,
+      "cy": 451.937,
+      "rx": 23.668,
+      "ry": 7.4005,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3wie_59",
+      "originalLabel": "Collybistin",
+      "displayLabel": "Collybistin",
+      "label": "Collybistin",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "ARHGEF9"
+      ],
+      "suggested_uniprot_ids": [
+        "B1AMR3"
+      ],
+      "isCustom": true,
+      "cx": 652.4696765498652,
+      "cy": 423.2675925925926,
+      "rx": 28.5409814764836,
+      "ry": 7.64923207222698,
+      "shapeType": "ellipse",
+      "angle": 61.655971861700024,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3xc1_60",
+      "originalLabel": "Dystrobrevin",
+      "displayLabel": "Dystrobrevin",
+      "label": "Dystrobrevin",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "DTNA"
+      ],
+      "suggested_uniprot_ids": [
+        "K7EIV1"
+      ],
+      "isCustom": true,
+      "cx": 695.5532345013478,
+      "cy": 415.50833333333344,
+      "rx": 31.827493261455515,
+      "ry": 6.595370370370404,
+      "shapeType": "ellipse",
+      "angle": -13.805547109806938,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3xsb_61",
+      "originalLabel": "Syntrophin",
+      "displayLabel": "Syntrophin",
+      "label": "Syntrophin",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "SNTA1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q13424"
+      ],
+      "isCustom": true,
+      "cx": 716.3146606469002,
+      "cy": 397.04155578703705,
+      "rx": 27.974,
+      "ry": 7.996251759709702,
+      "shapeType": "ellipse",
+      "angle": -12.076730212425247,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3yfv_62",
+      "originalLabel": "Dystrophin",
+      "displayLabel": "Dystrophin",
+      "label": "Dystrophin",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "DMD"
+      ],
+      "suggested_uniprot_ids": [
+        "H0Y304"
+      ],
+      "isCustom": true,
+      "cx": 737.5093374999999,
+      "cy": 416.522244212963,
+      "rx": 27.9645,
+      "ry": 8.443695180916656,
+      "shapeType": "ellipse",
+      "angle": -11.6373820381028,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3zmf_64",
+      "originalLabel": "Neurexin",
+      "displayLabel": "Neurexin",
+      "label": "Neurexin",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "NRXN1"
+      ],
+      "suggested_uniprot_ids": [
+        "E7EQN4"
+      ],
+      "isCustom": true,
+      "cx": 705.6448787061995,
+      "cy": 310.3703703703704,
+      "rx": 43.839814814814815,
+      "ry": 6.210242587601101,
+      "shapeType": "ellipse",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x40jj_65",
+      "originalLabel": "GLYR",
+      "displayLabel": "GLYR",
+      "label": "GLYR",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "GLRA1"
+      ],
+      "suggested_uniprot_ids": [
+        "E5RJ70"
+      ],
+      "isCustom": true,
+      "cx": 659.8443396226417,
+      "cy": 357.31388888888887,
+      "rx": 24.053703703703718,
+      "ry": 6.986522911051338,
+      "shapeType": "ellipse",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x5aj4_66",
+      "originalLabel": "N-Cadherin",
+      "displayLabel": "N-Cadherin",
+      "label": "N-Cadherin",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "CDH2"
+      ],
+      "suggested_uniprot_ids": [
+        "C9J126"
+      ],
+      "isCustom": true,
+      "cx": 208.07614555256072,
+      "cy": 214.57685185185187,
+      "rx": 31.07037037037037,
+      "ry": 6.595370370370375,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x5nms_67",
+      "originalLabel": "Neurexin",
+      "displayLabel": "Neurexin",
+      "label": "Neurexin",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "NRXN1"
+      ],
+      "suggested_uniprot_ids": [
+        "E7EQN4"
+      ],
+      "isCustom": true,
+      "cx": 359.4777628032345,
+      "cy": 209.95462962962966,
+      "rx": 42.742592592592615,
+      "ry": 6.595370370370375,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x61j7_68",
+      "originalLabel": "Neuroligin 1/3",
+      "displayLabel": "Neuroligin 1/3",
+      "label": "Neuroligin 1/3",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "NLGN1"
+      ],
+      "suggested_uniprot_ids": [
+        "C9J4D3"
+      ],
+      "isCustom": true,
+      "cx": 370.372641509434,
+      "cy": 248.39629629629627,
+      "rx": 40.448148148148135,
+      "ry": 6.595370370370375,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x3nnv_50",
+      "originalLabel": "PSD-95",
+      "displayLabel": "PSD-95",
+      "label": "PSD-95",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "DLG4"
+      ],
+      "suggested_uniprot_ids": [
+        "B7Z3U2"
+      ],
+      "isCustom": true,
+      "cx": 380.39155000000005,
+      "cy": 292.1734,
+      "rx": 19.477,
+      "ry": 6.7005,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x6s0g_69",
+      "originalLabel": "PICK1",
+      "displayLabel": "GKAP",
+      "label": "GKAP",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "DLGAP1"
+      ],
+      "suggested_uniprot_ids": [
+        "O14490"
+      ],
+      "isCustom": false,
+      "cx": 350.5519621462266,
+      "cy": 333.8824122685185,
+      "rx": 7.729372044624232,
+      "ry": 16.071,
+      "shapeType": "ellipse",
+      "angle": -16.61248793354963,
+      "opacity": 0.98,
+      "strokeWidth": 4.08411
+    },
+    {
+      "id": "cst_overlay_mn6x78ok_70",
+      "originalLabel": "PSD-95",
+      "displayLabel": "PSD-95",
+      "label": "PSD-95",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "DLG4"
+      ],
+      "suggested_uniprot_ids": [
+        "B7Z3U2"
+      ],
+      "isCustom": true,
+      "cx": 356.35381415094344,
+      "cy": 315.87247407407403,
+      "rx": 19.477,
+      "ry": 6.7005,
+      "shapeType": "ellipse",
+      "angle": 26.89790993781625,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x7go8_71",
+      "originalLabel": "IP3R",
+      "displayLabel": "IP3R",
+      "label": "IP3R",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 360.7619048517519,
+      "cy": 373.282174074074,
+      "rx": 11.756,
+      "ry": 6.252000000000001,
+      "shapeType": "ellipse",
+      "angle": 65.81845375084566,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6x8033_72",
+      "originalLabel": "Neuroligin 2",
+      "displayLabel": "Neuroligin 2",
+      "label": "Neuroligin 2",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "NLGN2"
+      ],
+      "suggested_uniprot_ids": [
+        "I3L498"
+      ],
+      "isCustom": true,
+      "cx": 481.01954177897585,
+      "cy": 326.4101851851852,
+      "rx": 42.03333333333336,
+      "ry": 7.48247978436666,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6xbwr8_74",
+      "originalLabel": "Neurexin",
+      "displayLabel": "Neurexin",
+      "label": "Neurexin",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "NRXN1"
+      ],
+      "suggested_uniprot_ids": [
+        "E7EQN4"
+      ],
+      "isCustom": true,
+      "cx": 594.6637466307278,
+      "cy": 338.72499999999997,
+      "rx": 43.839814814814815,
+      "ry": 6.210242587601101,
+      "shapeType": "ellipse",
+      "angle": 270.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6xc0lm_75",
+      "originalLabel": "Neuroligin 2",
+      "displayLabel": "Neuroligin 2",
+      "label": "Neuroligin 2",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "NLGN2"
+      ],
+      "suggested_uniprot_ids": [
+        "I3L498"
+      ],
+      "isCustom": true,
+      "cx": 607.1920485175203,
+      "cy": 366.01574074074074,
+      "rx": 42.03333333333336,
+      "ry": 7.48247978436666,
+      "shapeType": "ellipse",
+      "angle": -90.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6xcloz_76",
+      "originalLabel": "Collybistin",
+      "displayLabel": "Collybistin",
+      "label": "Collybistin",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "ARHGEF9"
+      ],
+      "suggested_uniprot_ids": [
+        "B1AMR3"
+      ],
+      "isCustom": true,
+      "cx": 546.5343665768194,
+      "cy": 356.5712962962963,
+      "rx": 28.5409814764836,
+      "ry": 7.64923207222698,
+      "shapeType": "ellipse",
+      "angle": 61.655971861700024,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    }
+  ],
+  "edges": [
+    {
+      "id": "cst_ai_edge_1",
+      "startX": 491.2363,
+      "startY": 448.54380000000003,
+      "endX": 475.2613,
+      "endY": 367.1128,
+      "controlX": 495.19088876045157,
+      "controlY": 404.06690629970774,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 495.19088876045157,
+          "y": 404.06690629970774
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_2",
+      "startX": 297.0483,
+      "startY": 411.20500000000004,
+      "endX": 246.8773,
+      "endY": 396.882,
+      "controlX": 274.53837400476164,
+      "controlY": 400.40500000000003,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 274.53837400476164,
+          "y": 400.40500000000003
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_3",
+      "startX": 336.2109,
+      "startY": 314.9813,
+      "endX": 295.87489999999997,
+      "endY": 379.2503,
+      "controlX": 330.20518713150517,
+      "controlY": 354.67100395864907,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 330.20518713150517,
+          "y": 354.67100395864907
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_4",
+      "startX": 197.7617,
+      "startY": 365.09749999999997,
+      "endX": 229.71869999999998,
+      "endY": 301.6305,
+      "controlX": 205.23220058186175,
+      "controlY": 328.9057100970383,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 205.23220058186175,
+          "y": 328.9057100970383
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_5",
+      "startX": 234.6313,
+      "startY": 366.8583,
+      "endX": 312.4973,
+      "endY": 311.4363,
+      "controlX": 275.7892554857526,
+      "controlY": 342.2666831249229,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 275.7892554857526,
+          "y": 342.2666831249229
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_6",
+      "startX": 349.6963,
+      "startY": 260.8485,
+      "endX": 354.5203,
+      "endY": 443.5025,
+      "controlX": 445.49525070585446,
+      "controlY": 311.87144827304553,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": true,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 445.49525070585446,
+          "y": 311.87144827304553
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_7",
+      "startX": 436.792,
+      "startY": 385.22069999999997,
+      "endX": 486.98699999999997,
+      "endY": 385.22069999999997,
+      "controlX": 461.8896174717303,
+      "controlY": 391.8816918028414,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 461.8896174717303,
+          "y": 391.8816918028414
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_8",
+      "startX": 280.334,
+      "startY": 302.1748,
+      "endX": 318.257,
+      "endY": 302.1748,
+      "controlX": 299.2956083514778,
+      "controlY": 308.40378385736943,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 299.2956083514778,
+          "y": 308.40378385736943
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_9",
+      "startX": 245.584,
+      "startY": 285.5663,
+      "endX": 183.566,
+      "endY": 327.55330000000004,
+      "controlX": 214.575,
+      "controlY": 306.5598,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 214.575,
+          "y": 306.5598
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774814403835_568724",
+      "startX": 213.45594435075884,
+      "startY": 424.5323371283997,
+      "endX": 213.82019392917368,
+      "endY": 404.12563251106894,
+      "controlX": 213.63806913996626,
+      "controlY": 414.32898481973433,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 213.63806913996626,
+          "y": 414.32898481973433
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774814405624_140827",
+      "startX": 194.15071669477234,
+      "startY": 408.86290322580646,
+      "endX": 195.24346543001687,
+      "endY": 403.76122707147374,
+      "controlX": 194.6970910623946,
+      "controlY": 406.3120651486401,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 194.6970910623946,
+          "y": 406.3120651486401
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774814416231_831504",
+      "startX": 230.57567453625634,
+      "startY": 378.61725173940545,
+      "endX": 243.68865935919058,
+      "endY": 388.4561986084757,
+      "controlX": 237.13216694772348,
+      "controlY": 383.53672517394057,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 237.13216694772348,
+          "y": 383.53672517394057
+        }
+      ]
+    }
+  ],
+  "disable_pdf_reader": false
+}

@@ -1,0 +1,2397 @@
+{
+  "version": 3,
+  "saved_at_utc": "2026-03-30T03:47:48.373138+00:00",
+  "pathway_id": "cst_regulation_of_eif2",
+  "pathway_name": "Regulation of eIF2",
+  "pathway_file": "Regulation of eIF2.ai",
+  "nodes": [
+    {
+      "id": "cst_overlay_mn70m2ya_4",
+      "originalLabel": "PP1",
+      "displayLabel": "PP1",
+      "label": "PP1",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "PPP1CA",
+        "PPP1CB",
+        "PPP1CC"
+      ],
+      "suggested_uniprot_ids": [
+        "P62136",
+        "P62140",
+        "P36873"
+      ],
+      "isCustom": false,
+      "cx": 243.970125,
+      "cy": 314.24623125000005,
+      "rx": 16.3115,
+      "ry": 10.549,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.85254
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_5",
+      "originalLabel": "GCN2",
+      "displayLabel": "GCN2",
+      "label": "GCN2",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF2AK4"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9P2K8"
+      ],
+      "isCustom": false,
+      "cx": 379.165575,
+      "cy": 196.4986,
+      "rx": 25.9065,
+      "ry": 13.206,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 6.07476
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_6",
+      "originalLabel": "eIF2",
+      "displayLabel": "eIF2 γ",
+      "label": "eIF2 γ",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "EIF5B"
+      ],
+      "suggested_uniprot_ids": [
+        "O60841"
+      ],
+      "isCustom": false,
+      "cx": 341.37428125,
+      "cy": 311.7685687500001,
+      "rx": 45.619,
+      "ry": 15.836500000000001,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 7.284790000000001
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_7",
+      "originalLabel": "eIF2B",
+      "displayLabel": "eIF2B",
+      "label": "eIF2B",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF2S2"
+      ],
+      "suggested_uniprot_ids": [
+        "P20042"
+      ],
+      "isCustom": false,
+      "cx": 470.85355000000004,
+      "cy": 421.53111250000006,
+      "rx": 21.359,
+      "ry": 12.566,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.780360000000001
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_8",
+      "originalLabel": "eIF2B",
+      "displayLabel": "eIF2B",
+      "label": "eIF2B",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF2S2"
+      ],
+      "suggested_uniprot_ids": [
+        "P20042"
+      ],
+      "isCustom": false,
+      "cx": 195.27294375,
+      "cy": 467.81550000000004,
+      "rx": 21.3595,
+      "ry": 12.566,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.780360000000001
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_9",
+      "originalLabel": "eIF5",
+      "displayLabel": "eIF5",
+      "label": "eIF5",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF5",
+        "EIF5A",
+        "EIF5B"
+      ],
+      "suggested_uniprot_ids": [
+        "P55010",
+        "P63241",
+        "O60841"
+      ],
+      "isCustom": false,
+      "cx": 397.31668750000006,
+      "cy": 324.26566875000003,
+      "rx": 18.315,
+      "ry": 11.811499999999999,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.4332899999999995
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_10",
+      "originalLabel": "eIF5",
+      "displayLabel": "eIF5",
+      "label": "eIF5",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF5",
+        "EIF5A",
+        "EIF5B"
+      ],
+      "suggested_uniprot_ids": [
+        "P55010",
+        "P63241",
+        "O60841"
+      ],
+      "isCustom": false,
+      "cx": 404.7466101239669,
+      "cy": 386.37210000000005,
+      "rx": 18.315,
+      "ry": 11.812,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.43352
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_11",
+      "originalLabel": "eIF5",
+      "displayLabel": "eIF5",
+      "label": "eIF5",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF5",
+        "EIF5A",
+        "EIF5B"
+      ],
+      "suggested_uniprot_ids": [
+        "P55010",
+        "P63241",
+        "O60841"
+      ],
+      "isCustom": false,
+      "cx": 302.81140625,
+      "cy": 601.8634000000001,
+      "rx": 18.3145,
+      "ry": 11.812,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.43352
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_12",
+      "originalLabel": "eIF5",
+      "displayLabel": "eIF5",
+      "label": "eIF5",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF5",
+        "EIF5A",
+        "EIF5B"
+      ],
+      "suggested_uniprot_ids": [
+        "P55010",
+        "P63241",
+        "O60841"
+      ],
+      "isCustom": false,
+      "cx": 240.0770125,
+      "cy": 517.8961,
+      "rx": 18.315,
+      "ry": 11.811499999999999,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.4332899999999995
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_13",
+      "originalLabel": "PP1",
+      "displayLabel": "PP1",
+      "label": "PP1",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "PPP1CA",
+        "PPP1CB",
+        "PPP1CC"
+      ],
+      "suggested_uniprot_ids": [
+        "P62136",
+        "P62140",
+        "P36873"
+      ],
+      "isCustom": false,
+      "cx": 225.165325,
+      "cy": 283.99860000000007,
+      "rx": 25.9065,
+      "ry": 13.206,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 6.07476
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_14",
+      "originalLabel": "PTEN",
+      "displayLabel": "PTEN",
+      "label": "PTEN",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "PTEN"
+      ],
+      "suggested_uniprot_ids": [
+        "P60484"
+      ],
+      "isCustom": false,
+      "cx": 132.39331250000004,
+      "cy": 157.00171875000012,
+      "rx": 20.815,
+      "ry": 10.789,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.96294
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_15",
+      "originalLabel": "SirT1",
+      "displayLabel": "SirT1",
+      "label": "SirT1",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "SIRT1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q96EB6"
+      ],
+      "isCustom": false,
+      "cx": 175.3535625,
+      "cy": 285.74623125000005,
+      "rx": 17.411,
+      "ry": 10.549,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.85254
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_16",
+      "originalLabel": "SirT1",
+      "displayLabel": "SirT1",
+      "label": "SirT1",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "SIRT1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q96EB6"
+      ],
+      "isCustom": false,
+      "cx": 265.88507500000003,
+      "cy": 329.74623125000005,
+      "rx": 18.197,
+      "ry": 10.549,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.85254
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_17",
+      "originalLabel": "HRI",
+      "displayLabel": "HRI",
+      "label": "HRI",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "EIF2AK1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9BQI3"
+      ],
+      "isCustom": false,
+      "cx": 447.27886875,
+      "cy": 224.88580000000002,
+      "rx": 25.9065,
+      "ry": 13.206,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 6.07476
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_18",
+      "originalLabel": "PKR",
+      "displayLabel": "PKR",
+      "label": "PKR",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF2AK2"
+      ],
+      "suggested_uniprot_ids": [
+        "P19525"
+      ],
+      "isCustom": false,
+      "cx": 235.165325,
+      "cy": 236.49860000000007,
+      "rx": 25.9065,
+      "ry": 13.206,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 6.07476
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_19",
+      "originalLabel": "PKR",
+      "displayLabel": "PKR",
+      "label": "PKR",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF2AK2"
+      ],
+      "suggested_uniprot_ids": [
+        "P19525"
+      ],
+      "isCustom": false,
+      "cx": 201.67994375,
+      "cy": 224.49860000000007,
+      "rx": 26.8815,
+      "ry": 13.206,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 6.07476
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_20",
+      "originalLabel": "PERK",
+      "displayLabel": "PERK",
+      "label": "PERK",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF2AK1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9BQI3"
+      ],
+      "isCustom": false,
+      "cx": 287.165325,
+      "cy": 211.49860000000007,
+      "rx": 25.9065,
+      "ry": 13.206,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 6.07476
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_21",
+      "originalLabel": "PERK",
+      "displayLabel": "PERK",
+      "label": "PERK",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF2AK1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9BQI3"
+      ],
+      "isCustom": false,
+      "cx": 258.165325,
+      "cy": 196.4986,
+      "rx": 25.9065,
+      "ry": 13.206,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 6.07476
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_22",
+      "originalLabel": "GCN2",
+      "displayLabel": "GCN2",
+      "label": "GCN2",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF2AK4"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9P2K8"
+      ],
+      "isCustom": false,
+      "cx": 349.23546875,
+      "cy": 210.99860000000007,
+      "rx": 26.965,
+      "ry": 13.206,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 6.07476
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_23",
+      "originalLabel": "HRI",
+      "displayLabel": "HRI",
+      "label": "HRI",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "EIF2AK1"
+      ],
+      "suggested_uniprot_ids": [
+        "Q9BQI3"
+      ],
+      "isCustom": false,
+      "cx": 410.665575,
+      "cy": 238.99860000000007,
+      "rx": 25.9065,
+      "ry": 13.206,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 6.07476
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_24",
+      "originalLabel": "GSK-3",
+      "displayLabel": "GSK-3β",
+      "label": "GSK-3β",
+      "annotation": "",
+      "mappingType": "family",
+      "suggested_gene_symbols": [
+        "GSK3A",
+        "GSK3B"
+      ],
+      "suggested_uniprot_ids": [
+        "A8MT37",
+        "P49841"
+      ],
+      "isCustom": false,
+      "cx": 505.165575,
+      "cy": 358.9927343283582,
+      "rx": 25.9065,
+      "ry": 13.206,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 6.07476
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_25",
+      "originalLabel": "eIF2B",
+      "displayLabel": "eIF2B",
+      "label": "eIF2B",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF2S2"
+      ],
+      "suggested_uniprot_ids": [
+        "P20042"
+      ],
+      "isCustom": false,
+      "cx": 173.57443750000002,
+      "cy": 391.24735000000004,
+      "rx": 21.359,
+      "ry": 12.566,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.780360000000001
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_26",
+      "originalLabel": "eIF1",
+      "displayLabel": "eIF1",
+      "label": "eIF1",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF1"
+      ],
+      "suggested_uniprot_ids": [
+        "P41567"
+      ],
+      "isCustom": false,
+      "cx": 404.98581875,
+      "cy": 573.5025312500001,
+      "rx": 23.247,
+      "ry": 12.243,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.63178
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_27",
+      "originalLabel": "eIF1A",
+      "displayLabel": "eIF1A",
+      "label": "eIF1A",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF1"
+      ],
+      "suggested_uniprot_ids": [
+        "P41567"
+      ],
+      "isCustom": false,
+      "cx": 403.98581875,
+      "cy": 598.5025312500001,
+      "rx": 23.247,
+      "ry": 12.243,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.63178
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_28",
+      "originalLabel": "eIF3",
+      "displayLabel": "eIF3",
+      "label": "eIF3",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "EIF3J",
+        "EIF3I",
+        "EIF3G",
+        "EIF3F",
+        "EIF3B",
+        "EIF3A",
+        "CLUH",
+        "EIF3D",
+        "EIF3C",
+        "EIF3E",
+        "EIF3I",
+        "EIF3K",
+        "EIF3M",
+        "EIF3H"
+      ],
+      "suggested_uniprot_ids": [
+        "O75822",
+        "Q13347",
+        "O75821",
+        "O00303",
+        "P55884",
+        "Q14152",
+        "O75153",
+        "O15371",
+        "Q99613",
+        "P60228",
+        "B0BNA7",
+        "Q9UBQ5",
+        "Q7L2H7",
+        "O15372"
+      ],
+      "isCustom": false,
+      "cx": 300.98556875,
+      "cy": 571.5025312500001,
+      "rx": 23.247,
+      "ry": 12.243,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.63178
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_29",
+      "originalLabel": "GADD34",
+      "displayLabel": "GADD34",
+      "label": "GADD34",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "PPP1R15A"
+      ],
+      "suggested_uniprot_ids": [
+        "O75807"
+      ],
+      "isCustom": false,
+      "cx": 198.45644375,
+      "cy": 303.49860000000007,
+      "rx": 28.5905,
+      "ry": 13.206,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 6.07476
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_30",
+      "originalLabel": "NCK",
+      "displayLabel": "NCK",
+      "label": "NCK",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "NCK1"
+      ],
+      "suggested_uniprot_ids": [
+        "P16333"
+      ],
+      "isCustom": false,
+      "cx": 455.65721874999997,
+      "cy": 378.97114375,
+      "rx": 25.949,
+      "ry": 12.31,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 5.6626
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_31",
+      "originalLabel": "BiP",
+      "displayLabel": "BiP",
+      "label": "BiP",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "HSPA5"
+      ],
+      "suggested_uniprot_ids": [
+        "P11021"
+      ],
+      "isCustom": false,
+      "cx": 322.73563749999994,
+      "cy": 163.74623125000005,
+      "rx": 15.585,
+      "ry": 10.549,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.85254
+    },
+    {
+      "id": "cst_overlay_mn70m2ya_32",
+      "originalLabel": "Akt",
+      "displayLabel": "Akt",
+      "label": "Akt",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "AKT1",
+        "AKT2",
+        "AKT3"
+      ],
+      "suggested_uniprot_ids": [
+        "P31749",
+        "P31751",
+        "Q9Y243"
+      ],
+      "isCustom": false,
+      "cx": 203.5096125,
+      "cy": 125.50171875000012,
+      "rx": 16.2845,
+      "ry": 10.789,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.96294
+    },
+    {
+      "id": "cst_overlay_mn70mo40_33",
+      "originalLabel": "eIF2",
+      "displayLabel": "eIF2 γ",
+      "label": "eIF2 γ",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "EIF5B"
+      ],
+      "suggested_uniprot_ids": [
+        "O60841"
+      ],
+      "isCustom": false,
+      "cx": 352.84535563016533,
+      "cy": 370.7906135261195,
+      "rx": 45.619,
+      "ry": 15.836500000000001,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 7.284790000000001
+    },
+    {
+      "id": "cst_overlay_mn70mtk0_34",
+      "originalLabel": "eIF2",
+      "displayLabel": "eIF2 γ",
+      "label": "eIF2 γ",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "EIF5B"
+      ],
+      "suggested_uniprot_ids": [
+        "O60841"
+      ],
+      "isCustom": false,
+      "cx": 353.1891572830579,
+      "cy": 460.1645986007463,
+      "rx": 45.619,
+      "ry": 15.836500000000001,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 7.284790000000001
+    },
+    {
+      "id": "cst_overlay_mn70mwxi_35",
+      "originalLabel": "eIF2",
+      "displayLabel": "eIF2 γ",
+      "label": "eIF2 γ",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "EIF5B"
+      ],
+      "suggested_uniprot_ids": [
+        "O60841"
+      ],
+      "isCustom": false,
+      "cx": 183.08337215909097,
+      "cy": 506.03413591417916,
+      "rx": 45.619,
+      "ry": 15.836500000000001,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 7.284790000000001
+    },
+    {
+      "id": "cst_overlay_mn70nq1v_36",
+      "originalLabel": "CreP",
+      "displayLabel": "CreP",
+      "label": "CreP",
+      "annotation": "",
+      "mappingType": "forced_review",
+      "suggested_gene_symbols": [
+        "PPP1R15B"
+      ],
+      "suggested_uniprot_ids": [
+        "Q5SWA1"
+      ],
+      "isCustom": true,
+      "cx": 229.92326875,
+      "cy": 331.74623125000005,
+      "rx": 17.3425,
+      "ry": 10.549,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn70nrjy_37",
+      "originalLabel": "40S",
+      "displayLabel": "40S",
+      "label": "40S",
+      "annotation": "",
+      "mappingType": "complex_forced",
+      "suggested_gene_symbols": [
+        "RPS2",
+        "RPS3",
+        "RPS3A",
+        "RPS4X",
+        "RPS4Y1",
+        "RPS5",
+        "RPS6",
+        "RPS7",
+        "RPS8",
+        "RPS9",
+        "RPS10",
+        "RPS11",
+        "RPS12",
+        "RPS13",
+        "RPS14",
+        "RPS15",
+        "RPS15A",
+        "RPS16",
+        "RPS17",
+        "RPS18",
+        "RPS19",
+        "RPS20",
+        "RPS21",
+        "RPS23",
+        "RPS24",
+        "RPS25",
+        "RPS26",
+        "RPS27",
+        "RPS27A",
+        "RPS28",
+        "RPS29",
+        "RPS30",
+        "RPSA"
+      ],
+      "suggested_uniprot_ids": [
+        "E9PM36",
+        "E9PJH4",
+        "D6R9B6",
+        "P62701",
+        "M0QZN2",
+        "A2A3R5",
+        "B5MCP9",
+        "P62241",
+        "A8MXK4",
+        "F6U211",
+        "M0QZ90",
+        "P25398",
+        "E9PS50",
+        "E5RH77",
+        "K7EJ78",
+        "H3BT37",
+        "M0QX76",
+        "H0YN73",
+        "J3JS69",
+        "M0QYF7",
+        "E5RIP1",
+        "P63220",
+        "D6R9I7",
+        "E7ETK0",
+        "E9PK60",
+        "P62854",
+        "P42677",
+        "J3QTR3",
+        "P62857",
+        "P62273",
+        "C9J9K3"
+      ],
+      "isCustom": true,
+      "cx": 299.97053125,
+      "cy": 546.246575,
+      "rx": 16.3115,
+      "ry": 10.549,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn70nslc_38",
+      "originalLabel": "43S",
+      "displayLabel": "43S",
+      "label": "43S",
+      "annotation": "",
+      "mappingType": "complex_forced",
+      "suggested_gene_symbols": [
+        "RPS2",
+        "RPS3",
+        "RPS3A",
+        "RPS4X",
+        "RPS4Y1",
+        "RPS5",
+        "RPS6",
+        "RPS7",
+        "RPS8",
+        "RPS9",
+        "RPS10",
+        "RPS11",
+        "RPS12",
+        "RPS13",
+        "RPS14",
+        "RPS15",
+        "RPS15A",
+        "RPS16",
+        "RPS17",
+        "RPS18",
+        "RPS19",
+        "RPS20",
+        "RPS21",
+        "RPS23",
+        "RPS24",
+        "RPS25",
+        "RPS26",
+        "RPS27",
+        "RPS27A",
+        "RPS28",
+        "RPS29",
+        "RPS30",
+        "RPSA",
+        "EIF1",
+        "EIF1AX",
+        "EIF2S1",
+        "EIF2S2",
+        "EIF2S3",
+        "EIF3A",
+        "EIF3B",
+        "EIF3C",
+        "EIF3D",
+        "EIF3E",
+        "EIF3F",
+        "EIF3G",
+        "EIF3H",
+        "EIF3I",
+        "EIF3J",
+        "EIF3K",
+        "EIF3L",
+        "EIF3M",
+        "EIF5"
+      ],
+      "suggested_uniprot_ids": [
+        "E9PM36",
+        "E9PJH4",
+        "D6R9B6",
+        "P62701",
+        "M0QZN2",
+        "A2A3R5",
+        "B5MCP9",
+        "P62241",
+        "A8MXK4",
+        "F6U211",
+        "M0QZ90",
+        "P25398",
+        "E9PS50",
+        "E5RH77",
+        "K7EJ78",
+        "H3BT37",
+        "M0QX76",
+        "H0YN73",
+        "J3JS69",
+        "M0QYF7",
+        "E5RIP1",
+        "P63220",
+        "D6R9I7",
+        "E7ETK0",
+        "E9PK60",
+        "P62854",
+        "P42677",
+        "J3QTR3",
+        "P62857",
+        "P62273",
+        "C9J9K3",
+        "K7EM18",
+        "P47813",
+        "G3V4T5",
+        "P20042",
+        "H7BZU1",
+        "Q14152",
+        "C9JQN7",
+        "H3BPE3",
+        "B0QYA4",
+        "B3KW56",
+        "E9PQV8",
+        "K7EL20",
+        "B3KS98",
+        "Q13347",
+        "H0YGJ7",
+        "B4DQ48",
+        "B0QY89",
+        "E7ESM3",
+        "H0YK11"
+      ],
+      "isCustom": true,
+      "cx": 352.48563125,
+      "cy": 628.27768125,
+      "rx": 36.099,
+      "ry": 18.308,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mncnc5oa_1",
+      "originalLabel": "Heme Deficiency,\nOxidative Stress",
+      "displayLabel": "Heme Deficiency,\nOxidative Stress",
+      "label": "Heme Deficiency,\nOxidative Stress",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 450.66244834710744,
+      "cy": 171.99432835820897,
+      "rx": 48.76,
+      "ry": 10.58,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncnc6c9_2",
+      "originalLabel": "Glucose Deprivation,\nUV Light, Amino Acid\nStarvation",
+      "displayLabel": "Glucose Deprivation,\nUV Light, Amino Acid\nStarvation",
+      "label": "Glucose Deprivation,\nUV Light, Amino Acid\nStarvation",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 370.74839876033064,
+      "cy": 142.6541194029851,
+      "rx": 59.199999999999996,
+      "ry": 13.37,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncnc736_3",
+      "originalLabel": "Unfolded Protein\nResponse, Hypoxia",
+      "displayLabel": "Unfolded Protein\nResponse, Hypoxia",
+      "label": "Unfolded Protein\nResponse, Hypoxia",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 263.52195247933884,
+      "cy": 124.4429552238806,
+      "rx": 51.37,
+      "ry": 10.58,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncnc7pt_4",
+      "originalLabel": "Growth Factors,\nER Stress,\nViral Infection\ndsRNA",
+      "displayLabel": "Growth Factors,\nER Stress,\nViral Infection\ndsRNA",
+      "label": "Growth Factors,\nER Stress,\nViral Infection\ndsRNA",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 188.6657541322314,
+      "cy": 159.85355223880597,
+      "rx": 46.15,
+      "ry": 16.16,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncnc88p_5",
+      "originalLabel": "Salubrinal",
+      "displayLabel": "Salubrinal",
+      "label": "Salubrinal",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 122.91368801652892,
+      "cy": 191.21722388059703,
+      "rx": 33.099999999999994,
+      "ry": 8.0,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncnc9wu_6",
+      "originalLabel": "ATF-4, CHOP, mRNA\nTranslation",
+      "displayLabel": "ATF-4, CHOP, mRNA\nTranslation",
+      "label": "ATF-4, CHOP, mRNA\nTranslation",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 110.26905991735538,
+      "cy": 566.0636865671643,
+      "rx": 51.37,
+      "ry": 10.58,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncncapo_7",
+      "originalLabel": "Apoptosis, Changes in\nMetabolism & Redox Status",
+      "displayLabel": "Apoptosis, Changes in\nMetabolism & Redox Status",
+      "label": "Apoptosis, Changes in\nMetabolism & Redox Status",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 104.70542355371902,
+      "cy": 646.496328358209,
+      "rx": 72.25,
+      "ry": 10.58,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncncbme_8",
+      "originalLabel": "Global Translation Off",
+      "displayLabel": "Global Translation Off",
+      "label": "Global Translation Off",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 237.22112603305786,
+      "cy": 675.8365373134329,
+      "rx": 64.41999999999999,
+      "ry": 8.0,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncnccel_9",
+      "originalLabel": "Global Translation On",
+      "displayLabel": "Global Translation On",
+      "label": "Global Translation On",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 353.5517045454545,
+      "cy": 675.8365373134328,
+      "rx": 61.809999999999995,
+      "ry": 8.0,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncncdg4_10",
+      "originalLabel": "Met-tRNAi",
+      "displayLabel": "Met-tRNAi",
+      "label": "Met-tRNAi",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 403.11864669421493,
+      "cy": 481.58411940298515,
+      "rx": 30.49,
+      "ry": 8.0,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncncdtf_11",
+      "originalLabel": "GTP",
+      "displayLabel": "GTP",
+      "label": "GTP",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 397.5550103305785,
+      "cy": 507.88913432835824,
+      "rx": 14.829999999999998,
+      "ry": 8.0,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncncfr7_13",
+      "originalLabel": "GTP",
+      "displayLabel": "GTP",
+      "label": "GTP",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 316.12360537190085,
+      "cy": 479.56065671641795,
+      "rx": 14.829999999999998,
+      "ry": 8.0,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncncgbl_14",
+      "originalLabel": "GDP",
+      "displayLabel": "GDP",
+      "label": "GDP",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 323.204597107438,
+      "cy": 424.42129850746267,
+      "rx": 14.829999999999998,
+      "ry": 8.0,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncncgrs_15",
+      "originalLabel": "GTP",
+      "displayLabel": "GTP",
+      "label": "GTP",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 385.92195247933887,
+      "cy": 402.1632089552239,
+      "rx": 14.829999999999998,
+      "ry": 8.0,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "left",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncnchce_16",
+      "originalLabel": "GDP",
+      "displayLabel": "GDP",
+      "label": "GDP",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 318.65253099173555,
+      "cy": 390.02243283582095,
+      "rx": 14.829999999999998,
+      "ry": 8.0,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncnci34_17",
+      "originalLabel": "GDP",
+      "displayLabel": "GDP",
+      "label": "GDP",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 315.61782024793393,
+      "cy": 331.847880597015,
+      "rx": 14.829999999999998,
+      "ry": 8.0,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    },
+    {
+      "id": "cst_overlay_mncndabj_18",
+      "originalLabel": "Growth Factors,\nHormones, etc.",
+      "displayLabel": "Growth Factors,\nHormones, etc.",
+      "label": "Growth Factors,\nHormones, etc.",
+      "annotation": "",
+      "mappingType": "text",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 525.012861570248,
+      "cy": 264.061880597015,
+      "rx": 46.15,
+      "ry": 10.58,
+      "shapeType": "text",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 1.0,
+      "stroke": "rgb(107, 114, 128)",
+      "fillColor": "transparent",
+      "textColor": "#0f172a",
+      "fontSize": 9.0,
+      "fontWeight": "600",
+      "fontFamily": "g_d0_f1",
+      "textAlign": "center",
+      "title": "Custom text box"
+    }
+  ],
+  "edges": [
+    {
+      "id": "cst_ai_edge_1",
+      "startX": 148.1523,
+      "startY": 519.288,
+      "endX": 126.4453,
+      "endY": 547.5260000000001,
+      "controlX": 137.2988,
+      "controlY": 533.407,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 137.2988,
+          "y": 533.407
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_2",
+      "startX": 109.6006,
+      "startY": 579.5097000000001,
+      "endX": 109.6006,
+      "endY": 597.9947000000001,
+      "controlX": 109.6006,
+      "controlY": 588.7522,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 109.6006,
+          "y": 588.7522
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_3",
+      "startX": 109.6006,
+      "startY": 608.4032000000001,
+      "endX": 109.6006,
+      "endY": 626.8882000000001,
+      "controlX": 109.6006,
+      "controlY": 617.6457,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 109.6006,
+          "y": 617.6457
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_4",
+      "startX": 131.0,
+      "startY": 198.49990000000003,
+      "endX": 198.745,
+      "endY": 276.0679,
+      "controlX": 164.8725,
+      "controlY": 237.28390000000002,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 164.8725,
+          "y": 237.28390000000002
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_5",
+      "startX": 496.293,
+      "startY": 374.34020000000004,
+      "endX": 483.991,
+      "endY": 408.7862,
+      "controlX": 490.142,
+      "controlY": 391.56320000000005,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 490.142,
+          "y": 391.56320000000005
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_6",
+      "startX": 516.0,
+      "startY": 316.4999,
+      "endX": 508.405,
+      "endY": 342.4349,
+      "controlX": 512.2025,
+      "controlY": 329.4674,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 512.2025,
+          "y": 329.4674
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_7",
+      "startX": 260.2861,
+      "startY": 242.56530000000004,
+      "endX": 296.0521,
+      "endY": 283.8613,
+      "controlX": 278.16909999999996,
+      "controlY": 263.2133,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 278.16909999999996,
+          "y": 263.2133
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_8",
+      "startX": 295.3701,
+      "startY": 225.79390000000006,
+      "endX": 307.8071,
+      "endY": 279.05390000000006,
+      "controlX": 301.5886,
+      "controlY": 252.42390000000006,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 301.5886,
+          "y": 252.42390000000006
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_9",
+      "startX": 316.2861,
+      "startY": 175.77430000000004,
+      "endX": 305.8871,
+      "endY": 198.76030000000003,
+      "controlX": 311.0866,
+      "controlY": 187.26730000000006,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 311.0866,
+          "y": 187.26730000000006
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_10",
+      "startX": 386.332,
+      "startY": 247.35590000000002,
+      "endX": 339.836,
+      "endY": 285.4109,
+      "controlX": 363.084,
+      "controlY": 266.38340000000005,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 363.084,
+          "y": 266.38340000000005
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_11",
+      "startX": 340.333,
+      "startY": 225.33340000000004,
+      "endX": 325.165,
+      "endY": 279.29240000000004,
+      "controlX": 332.749,
+      "controlY": 252.3129,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 332.749,
+          "y": 252.3129
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_12",
+      "startX": 261.25,
+      "startY": 309.7499,
+      "endX": 288.75,
+      "endY": 300.0049,
+      "controlX": 275.0,
+      "controlY": 304.8774,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 275.0,
+          "y": 304.8774
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_13",
+      "startX": 216.6841,
+      "startY": 134.4452,
+      "endX": 241.7341,
+      "endY": 182.49019999999996,
+      "controlX": 229.2091,
+      "controlY": 158.4677,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 229.2091,
+          "y": 158.4677
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_14",
+      "startX": 336.6396,
+      "startY": 406.54480000000007,
+      "endX": 308.67159999999996,
+      "endY": 398.93880000000007,
+      "controlX": 323.1139457634882,
+      "controlY": 401.18990152459855,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 323.1139457634882,
+          "y": 401.18990152459855
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_15",
+      "startX": 526.7852,
+      "startY": 277.1376,
+      "endX": 518.0362,
+      "endY": 308.4676,
+      "controlX": 522.4107,
+      "controlY": 292.8026,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 522.4107,
+          "y": 292.8026
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_16",
+      "startX": 351.9844,
+      "startY": 429.94230000000005,
+      "endX": 351.9844,
+      "endY": 398.44730000000004,
+      "controlX": 351.9844,
+      "controlY": 414.19480000000004,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 351.9844,
+          "y": 414.19480000000004
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_17",
+      "startX": 352.0566,
+      "startY": 559.7470000000001,
+      "endX": 352.0976,
+      "endY": 602.351,
+      "controlX": 352.0771,
+      "controlY": 581.049,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 352.0771,
+          "y": 581.049
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_18",
+      "startX": 445.0508,
+      "startY": 421.2128,
+      "endX": 361.9908,
+      "endY": 416.4148,
+      "controlX": 403.5208,
+      "controlY": 418.8138,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 403.5208,
+          "y": 418.8138
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_19",
+      "startX": 361.6592,
+      "startY": 160.3514,
+      "endX": 349.6342,
+      "endY": 190.49340000000007,
+      "controlX": 355.6467,
+      "controlY": 175.42240000000004,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 355.6467,
+          "y": 175.42240000000004
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_20",
+      "startX": 426.3057,
+      "startY": 185.75430000000006,
+      "endX": 412.90070000000003,
+      "endY": 218.88230000000004,
+      "controlX": 419.6032,
+      "controlY": 202.31830000000002,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 419.6032,
+          "y": 202.31830000000002
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_21",
+      "startX": 448.0293,
+      "startY": 184.87830000000008,
+      "endX": 447.88829999999996,
+      "endY": 205.21130000000005,
+      "controlX": 447.9588,
+      "controlY": 195.04480000000004,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 447.9588,
+          "y": 195.04480000000004
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_22",
+      "startX": 272.3115,
+      "startY": 139.50330000000008,
+      "endX": 288.7105,
+      "endY": 191.59630000000004,
+      "controlX": 280.511,
+      "controlY": 165.5498000000001,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 280.511,
+          "y": 165.5498000000001
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_23",
+      "startX": 256.1938,
+      "startY": 138.9779000000001,
+      "endX": 256.1938,
+      "endY": 176.6549000000001,
+      "controlX": 256.1938,
+      "controlY": 157.81640000000007,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 256.1938,
+          "y": 157.81640000000007
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_24",
+      "startX": 205.7383,
+      "startY": 179.62240000000008,
+      "endX": 232.57330000000002,
+      "endY": 217.14440000000008,
+      "controlX": 219.1558,
+      "controlY": 198.38340000000005,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 219.1558,
+          "y": 198.38340000000005
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_25",
+      "startX": 147.0488,
+      "startY": 167.88470000000007,
+      "endX": 180.09879999999998,
+      "endY": 209.5977000000001,
+      "controlX": 163.5738,
+      "controlY": 188.74120000000005,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 163.5738,
+          "y": 188.74120000000005
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_26",
+      "startX": 194.1758,
+      "startY": 180.49840000000006,
+      "endX": 200.6438,
+      "endY": 205.19540000000006,
+      "controlX": 197.40980000000002,
+      "controlY": 192.8469000000001,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 197.40980000000002,
+          "y": 192.8469000000001
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815032433_73171",
+      "startX": 383.8988119834711,
+      "startY": 161.37114925373135,
+      "endX": 383.3930268595042,
+      "endY": 180.0881791044776,
+      "controlX": 383.64591942148763,
+      "controlY": 170.72966417910447,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 383.64591942148763,
+          "y": 170.72966417910447
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815035465_134213",
+      "startX": 253.40625,
+      "startY": 283.28477611940303,
+      "endX": 289.82277892561984,
+      "endY": 290.87276119402986,
+      "controlX": 271.6145144628099,
+      "controlY": 287.0787686567164,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 271.6145144628099,
+          "y": 287.0787686567164
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815040324_288253",
+      "startX": 98.63600206611571,
+      "startY": 410.25705970149255,
+      "endX": 172.9864152892562,
+      "endY": 317.177776119403,
+      "controlX": 133.53517561983472,
+      "controlY": 357.14116417910446,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 133.53517561983472,
+          "y": 357.14116417910446
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815046121_11413",
+      "startX": 89.0260847107438,
+      "startY": 546.8407910447762,
+      "endX": 96.61286157024793,
+      "endY": 417.33917910447764,
+      "controlX": 83.96823347107438,
+      "controlY": 484.1134477611941,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 83.96823347107438,
+          "y": 484.1134477611941
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815053161_466765",
+      "startX": 176.08138558884298,
+      "startY": 408.0253654529307,
+      "endX": 193.4677492252066,
+      "endY": 450.69261900532865,
+      "controlX": 189.67436079545456,
+      "controlY": 431.7293952042629,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "inhibitor",
+      "bendPoints": [
+        {
+          "x": 189.67436079545456,
+          "y": 431.7293952042629
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815060442_161531",
+      "startX": 304.1082450929752,
+      "startY": 326.1674493783304,
+      "endX": 193.15163352272728,
+      "endY": 450.69261900532865,
+      "controlX": 237.72394757231407,
+      "controlY": 380.52869094138543,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "none",
+      "bendPoints": [
+        {
+          "x": 237.72394757231407,
+          "y": 380.52869094138543
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815071236_247320",
+      "startX": 342.99047649793386,
+      "startY": 330.9082553285968,
+      "endX": 350.8933690599174,
+      "endY": 344.49856571936056,
+      "controlX": 346.94192277892563,
+      "controlY": 337.7034105239787,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 346.94192277892563,
+          "y": 337.7034105239787
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815073551_711194",
+      "startX": 442.5669227789256,
+      "startY": 365.99021936056846,
+      "endX": 408.1103112086777,
+      "endY": 354.92833880994675,
+      "controlX": 427.3933690599174,
+      "controlY": 359.03703730017764,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 427.3933690599174,
+          "y": 359.03703730017764
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815085989_127205",
+      "startX": 351.2094847623967,
+      "startY": 480.71772335701604,
+      "endX": 351.52560046487605,
+      "endY": 501.5772695381883,
+      "controlX": 351.3675426136364,
+      "controlY": 491.1474964476022,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 351.3675426136364,
+          "y": 491.1474964476022
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815088924_941249",
+      "startX": 375.2342781508264,
+      "startY": 480.71772335701604,
+      "endX": 350.577253357438,
+      "endY": 492.41171136767326,
+      "controlX": 361.32518724173553,
+      "controlY": 485.1424755772647,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "none",
+      "bendPoints": [
+        {
+          "x": 361.32518724173553,
+          "y": 485.1424755772647
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815096600_991934",
+      "startX": 317.38510459710744,
+      "startY": 553.726134991119,
+      "endX": 351.2094847623967,
+      "endY": 570.7930364120782,
+      "controlX": 338.2487409607438,
+      "controlY": 560.0472095914743,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "none",
+      "bendPoints": [
+        {
+          "x": 338.2487409607438,
+          "y": 560.0472095914743
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815101541_155407",
+      "startX": 379.0276665805785,
+      "startY": 572.6893587921847,
+      "endX": 352.47394757231405,
+      "endY": 580.274648312611,
+      "controlX": 361.9574186466942,
+      "controlY": 571.109090142096,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "none",
+      "bendPoints": [
+        {
+          "x": 361.9574186466942,
+          "y": 571.109090142096
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815107569_420294",
+      "startX": 327.1846913739669,
+      "startY": 568.5806603019539,
+      "endX": 349.94502195247935,
+      "endY": 578.3783259325045,
+      "controlX": 343.3065922004132,
+      "controlY": 572.0572513321492,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "none",
+      "bendPoints": [
+        {
+          "x": 343.3065922004132,
+          "y": 572.0572513321492
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815112685_947089",
+      "startX": 380.2921293904959,
+      "startY": 590.0723139431617,
+      "endX": 351.52560046487605,
+      "endY": 591.020475133215,
+      "controlX": 362.2735343491736,
+      "controlY": 585.9636154529308,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "none",
+      "bendPoints": [
+        {
+          "x": 362.2735343491736,
+          "y": 585.9636154529308
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815126564_153832",
+      "startX": 317.7012202995868,
+      "startY": 592.284690053286,
+      "endX": 349.94502195247935,
+      "endY": 590.0723139431617,
+      "controlX": 334.4553525309917,
+      "controlY": 586.2796691829485,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "none",
+      "bendPoints": [
+        {
+          "x": 334.4553525309917,
+          "y": 586.2796691829485
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815133044_713380",
+      "startX": 191.57105501033058,
+      "startY": 528.7578903197159,
+      "endX": 230.45328641528926,
+      "endY": 664.028886767318,
+      "controlX": 217.8086583161157,
+      "controlY": 594.1810124333925,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 217.8086583161157,
+          "y": 594.1810124333925
+        }
+      ]
+    },
+    {
+      "id": "cst_edge_1774815144704_989114",
+      "startX": 365.7508070764463,
+      "startY": 402.6524520426288,
+      "endX": 336.9842781508264,
+      "endY": 422.5638370337478,
+      "controlX": 351.52560046487605,
+      "controlY": 414.03038632326826,
+      "stroke": "#dc2626",
+      "strokeWidth": 1.6,
+      "opacity": 0.98,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 351.52560046487605,
+          "y": 414.03038632326826
+        }
+      ]
+    }
+  ],
+  "disable_pdf_reader": false
+}

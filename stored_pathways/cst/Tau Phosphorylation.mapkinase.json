@@ -1,0 +1,119 @@
+{
+  "version": 3,
+  "saved_at_utc": "2026-03-29T20:25:08.207372+00:00",
+  "pathway_id": "cst_tau_phosphorylation",
+  "pathway_name": "Tau Phosphorylation",
+  "pathway_file": "Tau Phosphorylation.ai",
+  "nodes": [
+    {
+      "id": "cst_overlay_mn7jbj79_2",
+      "originalLabel": "Tau",
+      "displayLabel": "Tau",
+      "label": "Tau",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "MAPT"
+      ],
+      "suggested_uniprot_ids": [
+        "P10636"
+      ],
+      "isCustom": false,
+      "cx": -13.089,
+      "cy": 403.031,
+      "rx": 12.0,
+      "ry": 9.36,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.3056
+    }
+  ],
+  "edges": [
+    {
+      "id": "cst_ai_edge_1",
+      "startX": 530.168,
+      "startY": 329.3839,
+      "endX": 510.236,
+      "endY": 332.68489999999997,
+      "controlX": 520.3586037686857,
+      "controlY": 331.9819851852652,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 520.3586037686857,
+          "y": 331.9819851852652
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_2",
+      "startX": 402.6153,
+      "startY": 329.64959999999996,
+      "endX": 382.5903,
+      "endY": 326.9746,
+      "controlX": 392.47534363754176,
+      "controlY": 329.263714868389,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 392.47534363754176,
+          "y": 329.263714868389
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_3",
+      "startX": 480.3253,
+      "startY": 321.1906,
+      "endX": 460.12730000000005,
+      "endY": 321.6176,
+      "controlX": 470.20565559186286,
+      "controlY": 320.4445140411722,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 470.20565559186286,
+          "y": 320.4445140411722
+        }
+      ]
+    },
+    {
+      "id": "cst_ai_edge_4",
+      "startX": 350.9512,
+      "startY": 315.1427,
+      "endX": 331.00519999999995,
+      "endY": 318.3547,
+      "controlX": 340.825218219912,
+      "controlY": 315.80080163141326,
+      "stroke": "#0f172a",
+      "strokeWidth": 1.6,
+      "opacity": 0.95,
+      "dashed": false,
+      "startType": "none",
+      "endType": "arrow",
+      "bendPoints": [
+        {
+          "x": 340.825218219912,
+          "y": 315.80080163141326
+        }
+      ]
+    }
+  ],
+  "disable_pdf_reader": false
+}

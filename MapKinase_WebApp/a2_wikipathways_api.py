@@ -34,7 +34,10 @@ _ID_MAPPING_CACHE: dict[str, dict | None] = {}
 def _resolve_id_mapping_table(species_code: str) -> Path | None:
     if not species_code:
         return None
-    target = f"{species_code.lower()}_id_mapping_table.txt"
+    targets = {
+        f"{species_code.lower()}_id_mapping_table.txt",
+        f"{species_code.lower()}_mapping_table.txt",
+    }
     base_dir = Path(__file__).resolve().parent
     ann_dirs = [base_dir / "annotation_files"]
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
@@ -46,7 +49,7 @@ def _resolve_id_mapping_table(species_code: str) -> Path | None:
         if not ann_dir.exists():
             continue
         for path in ann_dir.iterdir():
-            if path.is_file() and path.name.lower() == target:
+            if path.is_file() and path.name.lower() in targets:
                 return path
     return None
 
@@ -63,35 +66,45 @@ def _load_id_mapping_table(species_code: str) -> dict | None:
         return None
     try:
         with path.open("r", encoding="utf-8", errors="replace", newline="") as fh:
-            reader = csv.DictReader(fh, delimiter="\t")
-            raw_fieldnames = reader.fieldnames or []
+            reader = csv.reader(fh, delimiter="\t")
+            raw_fieldnames = next(reader, [])
             cleaned_fieldnames = [
-                f.lstrip("\ufeff").strip() if f else "" for f in raw_fieldnames
+                f.lstrip("\ufeff").strip() if isinstance(f, str) else "" for f in raw_fieldnames
             ]
-            reader.fieldnames = cleaned_fieldnames
             fieldnames = [f for f in cleaned_fieldnames if f]
             if not fieldnames:
                 _ID_MAPPING_CACHE[key] = None
                 return None
-            uniprot_col = fieldnames[0]
-            for col in fieldnames:
-                if "uniprot" in col.lower():
-                    uniprot_col = col
-                    break
-            columns = {col.lower(): col for col in fieldnames}
+
+            def _normalize_col(name: str) -> str:
+                lowered = (name or "").strip().lower()
+                lowered = re.sub(r"[^a-z0-9]+", " ", lowered).strip()
+                return lowered
+
+            uniprot_col = next((col for col in fieldnames if "uniprot" in col.lower()), fieldnames[0])
+            columns = {_normalize_col(col): col for col in fieldnames}
             index: dict[str, dict[str, str]] = {col_key: {} for col_key in columns}
             rows: list[tuple[str, dict[str, str]]] = []
-            for row in reader:
-                if not isinstance(row, dict):
+
+            for raw_row in reader:
+                if not isinstance(raw_row, list):
                     continue
-                uni = (row.get(uniprot_col) or "").strip()
-                if not uni or uni.lower() == "na":
+                if len(raw_row) < len(cleaned_fieldnames):
+                    raw_row = list(raw_row) + [""] * (len(cleaned_fieldnames) - len(raw_row))
+                normalized_row = {}
+                for idx, col_name in enumerate(cleaned_fieldnames):
+                    if not col_name:
+                        continue
+                    normalized_row[col_name] = raw_row[idx] if idx < len(raw_row) else ""
+                uni = str(normalized_row.get(uniprot_col) or "").strip()
+                # Some mapping tables repeat a header-like row at the top; ignore it.
+                if not uni or uni.lower() in {"na", "uniprotid", "uniprot_id"}:
                     continue
-                rows.append((uni, row))
+                rows.append((uni, normalized_row))
                 for col_key, col_name in columns.items():
                     if col_name == uniprot_col:
                         continue
-                    cell = (row.get(col_name) or "").strip()
+                    cell = str(normalized_row.get(col_name) or "").strip()
                     if not cell or cell.lower() == "na":
                         continue
                     for token in re.split(r"[;,\s]+", cell):
@@ -99,6 +112,20 @@ def _load_id_mapping_table(species_code: str) -> dict | None:
                         if not tok or tok.lower() == "na":
                             continue
                         index[col_key].setdefault(tok, uni)
+
+            # Add a few normalized aliases so database names from GPML match the table reliably.
+            alias_pairs = {
+                "entrez gene": ["entrez", "entrezgene"],
+                "ensembl transcript": ["ensembl transcript", "ensembltranscript"],
+                "ensembl protein": ["ensembl protein", "ensemblprotein"],
+                "ensembl gene": ["ensembl gene", "ensemblgene"],
+                "kegg genes": ["kegg genes", "kegg gene id", "kegg gene"],
+            }
+            for canonical, aliases in alias_pairs.items():
+                if canonical in index:
+                    for alias in aliases:
+                        index.setdefault(alias, index[canonical])
+
             mapping = {
                 "path": path,
                 "uniprot_col": uniprot_col,
@@ -107,7 +134,7 @@ def _load_id_mapping_table(species_code: str) -> dict | None:
                 "rows": rows,
             }
             _ID_MAPPING_CACHE[key] = mapping
-            print(f"Loaded ID mapping table: {path.name}")
+            print(f"Loaded ID mapping table: {path.name} ({len(rows)} rows)")
             return mapping
     except Exception as exc:
         print(f"Warning: failed to load ID mapping table '{path}': {exc}")
@@ -118,7 +145,7 @@ def _load_id_mapping_table(species_code: str) -> dict | None:
 def _lookup_uniprot_from_table(mapping: dict, db: str, xid: str) -> str | None:
     if not mapping or not db or not xid:
         return None
-    db_key = db.strip().lower()
+    db_key = re.sub(r"[^a-z0-9]+", " ", db.strip().lower()).strip()
     xid_clean = xid.strip()
     if "uniprot" in db_key:
         return xid_clean or None
@@ -127,11 +154,11 @@ def _lookup_uniprot_from_table(mapping: dict, db: str, xid: str) -> str | None:
     if db_key == "ensembl" and xid_clean:
         xid_upper = xid_clean.upper()
         if xid_upper.startswith("ENST"):
-            candidate_keys.insert(0, "ensembl_transcript")
+            candidate_keys.insert(0, "ensembl transcript")
         elif xid_upper.startswith("ENSP"):
-            candidate_keys.insert(0, "ensembl_protein")
+            candidate_keys.insert(0, "ensembl protein")
         elif xid_upper.startswith("ENSG"):
-            candidate_keys.insert(0, "ensembl_gene")
+            candidate_keys.insert(0, "ensembl gene")
     for key in candidate_keys:
         col = columns.get(key)
         if not col:

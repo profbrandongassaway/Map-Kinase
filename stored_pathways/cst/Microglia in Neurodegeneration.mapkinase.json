@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "saved_at_utc": "2026-03-26T02:30:29.917965+00:00",
+  "pathway_id": "cst_microglia_in_neurodegeneration",
+  "pathway_name": "Microglia in Neurodegeneration",
+  "pathway_file": "Microglia in Neurodegeneration.ai",
+  "nodes": [
+    {
+      "id": "cst_overlay_mn6uu7j5_5",
+      "originalLabel": "mTOR",
+      "displayLabel": "mTOR",
+      "label": "mTOR",
+      "annotation": "",
+      "mappingType": "alias",
+      "suggested_gene_symbols": [
+        "MTOR"
+      ],
+      "suggested_uniprot_ids": [
+        "P42345"
+      ],
+      "isCustom": false,
+      "cx": 478.27133125,
+      "cy": 186.65638124999998,
+      "rx": 25.7735,
+      "ry": 14.9505,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 6.87723
+    },
+    {
+      "id": "cst_overlay_mn6uu7j5_9",
+      "originalLabel": "Syk",
+      "displayLabel": "Syk",
+      "label": "Syk",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "SYK"
+      ],
+      "suggested_uniprot_ids": [
+        "P43405"
+      ],
+      "isCustom": false,
+      "cx": 438.9463,
+      "cy": 196.6515,
+      "rx": 8.083,
+      "ry": 12.852527905323935,
+      "shapeType": "ellipse",
+      "angle": -25.965162539645704,
+      "opacity": 0.98,
+      "strokeWidth": 4.0
+    }
+  ]
+}

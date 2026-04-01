@@ -1,17 +1,19 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import re
 from datetime import UTC, datetime
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_CST_PATHWAYS_DIR = BASE_DIR / "cache" / "CST_Pathways"
 DEFAULT_CST_INDEX_FILE = BASE_DIR / "cache" / "CST_pathway_module_index.json"
+DEFAULT_CST_LOADED_MODULES_CSV = BASE_DIR / "cache" / "cst_loaded_protein_modules.csv"
+DEFAULT_CST_UNIQUE_NAMES_CSV = BASE_DIR / "cache" / "cst_unique_protein_module_names.csv"
 _PATHWAY_STOPWORDS = {"pathway", "diagram", "interactive", "overview"}
 
 
@@ -90,6 +92,154 @@ def build_cst_pathway_index(
     return payload
 
 
+def _display_name_from_saved_node(node: Dict[str, Any]) -> str:
+    for key in ("displayLabel", "label", "originalLabel", "annotation"):
+        text = _normalize_text(str(node.get(key) or ""))
+        if text:
+            return text
+    return ""
+
+
+def _mapping_for_saved_node(node: Dict[str, Any], file_path: Path) -> Dict[str, Any]:
+    from MapKinase_WebApp.m7_cst_viewer import _resolve_cst_label_mapping
+
+    saved_ids = [str(item).strip().upper() for item in list(node.get("suggested_uniprot_ids") or []) if str(item).strip()]
+    saved_genes = [str(item).strip().upper() for item in list(node.get("suggested_gene_symbols") or []) if str(item).strip()]
+    saved_type = str(node.get("mappingType") or node.get("mapping_type") or "").strip().lower()
+    if saved_type or saved_ids or saved_genes:
+        return {
+            "mapping_type": saved_type or ("cst_index" if saved_ids else "unresolved"),
+            "suggested_uniprot_ids": saved_ids,
+            "suggested_gene_symbols": saved_genes,
+        }
+    display_name = _display_name_from_saved_node(node)
+    return _resolve_cst_label_mapping(display_name, file_path) if display_name else {
+        "mapping_type": "unresolved",
+        "suggested_uniprot_ids": [],
+        "suggested_gene_symbols": [],
+    }
+
+
+def _module_row(
+    pathway_name: str,
+    protein_name: str,
+    mapping: Dict[str, Any],
+) -> Dict[str, str]:
+    mapping_type = str(mapping.get("mapping_type") or "").strip().lower()
+    uniprot_ids = [str(item).strip().upper() for item in list(mapping.get("suggested_uniprot_ids") or []) if str(item).strip()]
+    gene_symbols = [str(item).strip().upper() for item in list(mapping.get("suggested_gene_symbols") or []) if str(item).strip()]
+    if mapping_type == "cst_index":
+        psp_ids = uniprot_ids
+        backup_ids: List[str] = []
+    elif mapping_type == "unresolved":
+        psp_ids = []
+        backup_ids = []
+    else:
+        psp_ids = []
+        backup_ids = uniprot_ids
+    return {
+        "pathway": pathway_name,
+        "protein_module_name": protein_name,
+        "psp_uniprot_ids": "; ".join(psp_ids),
+        "backup_uniprot_ids": "; ".join(backup_ids),
+        "gene_symbols": "; ".join(gene_symbols),
+        "mapping_type": mapping_type,
+    }
+
+
+def iter_effective_cst_modules(base_dir: Path) -> Iterable[Dict[str, str]]:
+    from MapKinase_WebApp.m7_cst_viewer import (
+        get_cst_pathway_catalog,
+        load_cst_overlay_state,
+    )
+
+    for row in get_cst_pathway_catalog(base_dir):
+        file_path = Path(str(row.get("file_path") or ""))
+        pathway_name = _normalize_text(str(row.get("name") or file_path.stem))
+        sidecar = load_cst_overlay_state(file_path)
+        saved_nodes = list(sidecar.get("nodes") or [])
+        if saved_nodes:
+            for node in saved_nodes:
+                protein_name = _display_name_from_saved_node(node)
+                mapping = _mapping_for_saved_node(node, file_path)
+                yield _module_row(pathway_name, protein_name, mapping)
+            continue
+        indexed = get_cst_pathway_mapping(pathway_name)
+        for module in list(indexed.get("modules") or []):
+            protein_name = _normalize_text(str(module.get("label") or ""))
+            mapping = {
+                "mapping_type": "cst_index",
+                "suggested_uniprot_ids": [str(item).strip().upper() for item in list(module.get("uniprot_ids") or []) if str(item).strip()],
+                "suggested_gene_symbols": [str(item).strip().upper() for item in list(module.get("gene_symbols") or []) if str(item).strip()],
+            }
+            yield _module_row(pathway_name, protein_name, mapping)
+
+
+def build_cst_loaded_module_reports(
+    cst_ai_dir: Path,
+    loaded_modules_csv: Path = DEFAULT_CST_LOADED_MODULES_CSV,
+    unique_names_csv: Path = DEFAULT_CST_UNIQUE_NAMES_CSV,
+) -> Dict[str, Any]:
+    rows = list(iter_effective_cst_modules(cst_ai_dir))
+    rows.sort(key=lambda item: (str(item.get("pathway") or "").lower(), str(item.get("protein_module_name") or "").lower()))
+
+    loaded_modules_csv.parent.mkdir(parents=True, exist_ok=True)
+    with loaded_modules_csv.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=["pathway", "protein_module_name", "psp_uniprot_ids", "backup_uniprot_ids"],
+            extrasaction="ignore",
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+
+    unique_map: Dict[str, Dict[str, Any]] = {}
+    for row in rows:
+        protein_name = _normalize_text(str(row.get("protein_module_name") or ""))
+        key = protein_name.upper()
+        entry = unique_map.setdefault(
+            key,
+            {
+                "protein_module_name": protein_name,
+                "psp_ids": set(),
+                "backup_ids": set(),
+            },
+        )
+        for item in str(row.get("psp_uniprot_ids") or "").split(";"):
+            token = item.strip().upper()
+            if token:
+                entry["psp_ids"].add(token)
+        for item in str(row.get("backup_uniprot_ids") or "").split(";"):
+            token = item.strip().upper()
+            if token:
+                entry["backup_ids"].add(token)
+
+    unique_rows = [
+        {
+            "protein_module_name": entry["protein_module_name"],
+            "psp_uniprot_count": len(entry["psp_ids"]),
+            "backup_uniprot_count": len(entry["backup_ids"]),
+        }
+        for entry in unique_map.values()
+    ]
+    unique_rows.sort(key=lambda item: str(item.get("protein_module_name") or "").lower())
+
+    with unique_names_csv.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=["protein_module_name", "psp_uniprot_count", "backup_uniprot_count"],
+        )
+        writer.writeheader()
+        writer.writerows(unique_rows)
+
+    return {
+        "pathway_rows": len(rows),
+        "unique_protein_names": len(unique_rows),
+        "loaded_modules_csv": str(loaded_modules_csv.resolve()),
+        "unique_names_csv": str(unique_names_csv.resolve()),
+    }
+
+
 @lru_cache(maxsize=4)
 def load_cst_pathway_index(index_file: str = str(DEFAULT_CST_INDEX_FILE)) -> Dict[str, Any]:
     path = Path(index_file)
@@ -138,11 +288,25 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build a consolidated CST pathway protein-module index.")
     parser.add_argument("--input-dir", default=str(DEFAULT_CST_PATHWAYS_DIR), help="Directory containing per-pathway CST JSON files.")
     parser.add_argument("--output", default=str(DEFAULT_CST_INDEX_FILE), help="Output JSON index file.")
+    parser.add_argument("--report-cst-ai-dir", default="", help="If set, build the CST loaded-module reports from the .ai pathways in this directory.")
+    parser.add_argument("--loaded-modules-csv", default=str(DEFAULT_CST_LOADED_MODULES_CSV), help="Output CSV for the pathway-by-pathway loaded protein modules.")
+    parser.add_argument("--unique-names-csv", default=str(DEFAULT_CST_UNIQUE_NAMES_CSV), help="Output CSV for the unique loaded protein module names.")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    if str(args.report_cst_ai_dir or "").strip():
+        result = build_cst_loaded_module_reports(
+            Path(args.report_cst_ai_dir),
+            Path(args.loaded_modules_csv),
+            Path(args.unique_names_csv),
+        )
+        print(f"Pathway rows: {result.get('pathway_rows')}")
+        print(f"Unique protein names: {result.get('unique_protein_names')}")
+        print(f"Loaded modules CSV: {result.get('loaded_modules_csv')}")
+        print(f"Unique names CSV: {result.get('unique_names_csv')}")
+        return
     result = build_cst_pathway_index(Path(args.input_dir), Path(args.output))
     print(f"Pathways indexed: {result.get('pathway_count')}")
     print(f"Output: {Path(args.output).resolve()}")

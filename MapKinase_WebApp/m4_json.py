@@ -10,6 +10,7 @@ import json
 import html
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from functools import lru_cache
 from MapKinase_WebApp.a1_factory import get_pathway_api
 
 
@@ -152,6 +153,121 @@ def _resolve_outline_columns(fold_change_columns, headers):
         key = _normalize_fc_suffix(col)
         resolved.append(outline_map.get(key))
     return resolved
+
+
+HMDB_METABOLITES_PARSED_FILE = Path(__file__).resolve().parent.parent / "stored_pathways" / "hmdb_metabolites_parsed.csv"
+
+
+def _normalize_metabolite_token(value):
+    if value is None:
+        return ""
+    try:
+        if pd.isna(value):
+            return ""
+    except Exception:
+        pass
+    text = str(value).strip()
+    if not text:
+        return ""
+    text = text.replace("cpd:", "").replace("CPD:", "")
+    text = text.replace("_", " ")
+    text = re.sub(r"\s+", " ", text)
+    return text.casefold()
+
+
+def _display_metabolite_name(value):
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    return re.sub(r"\s+", " ", raw.replace("_", " ")).strip()
+
+
+def _split_metabolite_values(value):
+    if value is None:
+        return []
+    try:
+        if pd.isna(value):
+            return []
+    except Exception:
+        pass
+    text = str(value).strip()
+    if not text:
+        return []
+    if "|" in text:
+        return [part.strip() for part in text.split("|") if part.strip()]
+    if ";" in text:
+        return [part.strip() for part in text.split(";") if part.strip()]
+    return [text]
+
+
+@lru_cache(maxsize=1)
+def _load_hmdb_metabolite_reference():
+    if not HMDB_METABOLITES_PARSED_FILE.exists():
+        return pd.DataFrame(), {}
+    try:
+        df = pd.read_csv(HMDB_METABOLITES_PARSED_FILE, dtype=str).fillna("")
+    except Exception as exc:
+        print(f"Warning: could not load HMDB metabolite reference {HMDB_METABOLITES_PARSED_FILE}: {exc}")
+        return pd.DataFrame(), {}
+    hmdb_map = {}
+    for _, row in df.iterrows():
+        accession = str(row.get("accession", "") or "").strip()
+        for candidate in [accession, * _split_metabolite_values(row.get("secondary_accessions", ""))]:
+            key = _normalize_metabolite_token(candidate)
+            if key and key not in hmdb_map:
+                hmdb_map[key] = row.to_dict()
+    return df, hmdb_map
+
+
+@lru_cache(maxsize=4)
+def _build_cached_reference_metabolite_index(source_name):
+    source = str(source_name or 'kegg').lower()
+    ref_df, _ = _load_hmdb_metabolite_reference()
+    if ref_df is None or ref_df.empty:
+        return {}
+    index = {}
+    for _, row in ref_df.iterrows():
+        ref = row.to_dict()
+        accession = str(ref.get('accession', '') or '').strip()
+        display_label = _display_metabolite_name(ref.get('wikipedia_id') or ref.get('name') or accession)
+        native_keys = set()
+        if source == 'kegg':
+            for raw_id in _split_metabolite_values(ref.get('kegg_id', '')):
+                key = _normalize_metabolite_token(raw_id)
+                if key:
+                    native_keys.add(key)
+        if source == 'wikipathways':
+            for raw_name in _split_metabolite_values(ref.get('wikipedia_id', '')):
+                key = _normalize_metabolite_token(raw_name)
+                if key:
+                    native_keys.add(key)
+        for raw_name in [ref.get('name', ''), ref.get('wikipedia_id', ''), *_split_metabolite_values(ref.get('synonyms', ''))]:
+            key = _normalize_metabolite_token(raw_name)
+            if key:
+                native_keys.add(key)
+        for raw_id in [
+            ref.get('chebi_id', ''),
+            ref.get('pubchem_compound_id', ''),
+            ref.get('drugbank_id', ''),
+            ref.get('foodb_id', ''),
+        ]:
+            key = _normalize_metabolite_token(raw_id)
+            if key:
+                native_keys.add(key)
+        if not native_keys:
+            continue
+        match_payload = {
+            'hmdb_id': accession,
+            'display_label': display_label,
+            'pathway_ids': sorted(native_keys),
+            'reference': ref,
+            'row_map': {},
+        }
+        for native_key in native_keys:
+            existing = index.get(native_key)
+            if not existing or (not existing.get('display_label') and display_label):
+                index[native_key] = match_payload
+    return index
 
 def parse_exceptions_file(file_path='exceptions_file.txt'):
     exceptions = {
@@ -381,7 +497,7 @@ def classify_phosphosite_function(phospho_data, ptm_symbol_list, reg_site_col='C
     return phospho_data
 
 class PathwayProcessor:
-    def __init__(self, entries, proteomic_data, ptm_datasets, settings):
+    def __init__(self, entries, proteomic_data, ptm_datasets, settings, metabolite_data=None, metabolite_config=None):
         self.proteomic_data = proteomic_data
         self.ptm_datasets = {f"ptm_{i}": dataset for i, dataset in enumerate(ptm_datasets)}
         self.protein_data_map = {}  # Initialize protein_data_map
@@ -439,6 +555,130 @@ class PathwayProcessor:
         default_workers = os.cpu_count() or 4
         self._ptm_worker_count = max(1, min(settings.get('ptm_worker_count', default_workers), 16))
         self._ptm_summary_cache = {}
+        self.metabolite_data = metabolite_data.copy() if isinstance(metabolite_data, pd.DataFrame) else pd.DataFrame()
+        self.metabolite_config = dict(metabolite_config or {})
+        self.metabolite_main_columns = list(self.metabolite_config.get('main_columns') or [])
+        self.metabolite_tooltip_columns = list(self.metabolite_config.get('tooltip_columns') or [])
+        self.metabolite_hmdb_column = self.metabolite_config.get('hmdb_column') or (self.metabolite_data.columns[0] if not self.metabolite_data.empty else 'HMDB_ID')
+        self.pathway_source = str(self.settings.get('pathway_source', 'kegg') or 'kegg').lower()
+        self.metabolite_reference_df, self.hmdb_reference_map = _load_hmdb_metabolite_reference()
+        self.metabolite_index = self._build_metabolite_index()
+        self.reference_metabolite_index = _build_cached_reference_metabolite_index(self.pathway_source)
+
+    def _choose_metabolite_match(self, matches):
+        if not matches:
+            return None
+        if len(matches) == 1:
+            return matches[0]
+        best = None
+        best_score = -1
+        for match in matches:
+            row_map = match.get('row_map') or {}
+            score = -1
+            for col in self.metabolite_main_columns:
+                value = self._safe_float(row_map.get(col))
+                if value is not None:
+                    score = max(score, abs(value))
+            if score > best_score:
+                best = match
+                best_score = score
+        return best or matches[0]
+
+    def _build_metabolite_index(self):
+        source = self.pathway_source
+        if self.metabolite_data.empty or self.metabolite_hmdb_column not in self.metabolite_data.columns:
+            return {}
+        index = {}
+        for _, row in self.metabolite_data.iterrows():
+            hmdb_raw = row.get(self.metabolite_hmdb_column, '')
+            hmdb_key = _normalize_metabolite_token(hmdb_raw)
+            if not hmdb_key:
+                continue
+            ref = self.hmdb_reference_map.get(hmdb_key)
+            if not ref:
+                continue
+            display_label = _display_metabolite_name(ref.get('wikipedia_id') or ref.get('name') or hmdb_raw)
+            native_keys = set()
+            if source == 'kegg':
+                for raw_id in _split_metabolite_values(ref.get('kegg_id', '')):
+                    key = _normalize_metabolite_token(raw_id)
+                    if key:
+                        native_keys.add(key)
+            elif source == 'wikipathways':
+                for raw_name in _split_metabolite_values(ref.get('wikipedia_id', '')):
+                    key = _normalize_metabolite_token(raw_name)
+                    if key:
+                        native_keys.add(key)
+            if source == 'wikipathways':
+                for raw_name in [ref.get('name', ''), * _split_metabolite_values(ref.get('synonyms', ''))]:
+                    key = _normalize_metabolite_token(raw_name)
+                    if key:
+                        native_keys.add(key)
+            if not native_keys:
+                continue
+            row_map = row.to_dict()
+            row_map = {str(k): ('' if pd.isna(v) else v) for k, v in row_map.items()}
+            match_payload = {
+                'hmdb_id': str(ref.get('accession') or hmdb_raw or '').strip(),
+                'display_label': display_label,
+                'pathway_ids': sorted(native_keys),
+                'reference': ref,
+                'row_map': row_map,
+            }
+            for native_key in native_keys:
+                index.setdefault(native_key, []).append(match_payload)
+        return index
+
+    def _resolve_metabolite_match(self, entry):
+        if not isinstance(entry, dict):
+            return None
+        candidates = []
+        seen = set()
+        for raw_value in [
+            entry.get('name', ''),
+            entry.get('first_name', ''),
+            entry.get('label', ''),
+            ((entry.get('xref') or {}).get('ID', '') if isinstance(entry.get('xref'), dict) else ''),
+        ]:
+            key = _normalize_metabolite_token(raw_value)
+            if key and key not in seen:
+                seen.add(key)
+                candidates.append(key)
+        for key in candidates:
+            chosen = self._choose_metabolite_match(self.metabolite_index.get(key) or [])
+            if chosen:
+                return dict(chosen, pathway_match_id=key)
+        for key in candidates:
+            chosen = self.reference_metabolite_index.get(key)
+            if chosen:
+                return dict(chosen, pathway_match_id=key)
+        return None
+
+    def _build_metabolite_tooltip(self, match):
+        if not match:
+            return "", ""
+        tooltip_plain = []
+        tooltip_html = []
+        display_label = str(match.get('display_label') or '').strip()
+        hmdb_id = str(match.get('hmdb_id') or '').strip()
+        pathway_match_id = str(match.get('pathway_match_id') or '').strip()
+        if display_label:
+            tooltip_plain.append(f"Metabolite: {display_label}")
+            tooltip_html.append(f"<strong>Metabolite:</strong> {html.escape(display_label)}")
+        if hmdb_id:
+            tooltip_plain.append(f"HMDB ID: {hmdb_id}")
+            tooltip_html.append(f"<strong>HMDB ID:</strong> {html.escape(hmdb_id)}")
+        if pathway_match_id:
+            tooltip_plain.append(f"Pathway Match: {pathway_match_id}")
+            tooltip_html.append(f"<strong>Pathway Match:</strong> {html.escape(pathway_match_id)}")
+        row_map = match.get('row_map') or {}
+        for col in self.metabolite_tooltip_columns:
+            value = str(row_map.get(col, '') or '').strip()
+            if not value:
+                continue
+            tooltip_plain.append(f"{col}: {value}")
+            tooltip_html.append(f"<strong>{html.escape(col)}:</strong> {html.escape(value)}")
+        return "\n".join(tooltip_plain), "<br/>".join(tooltip_html)
 
     def get_color(self, fold_change):
         if pd.isna(fold_change):
@@ -615,7 +855,8 @@ class PathwayProcessor:
                         'prot_outline_width': self.settings.get('prot_outline_width', 1),
                         'ptm_outline_width': self.settings.get('ptm_outline_width', 1),
                         'protein_tooltip_columns': self.settings.get('protein_tooltip_columns', ['Gene Symbol', 'Uniprot_ID']),
-                        'protein_file_path': self.settings.get('protein_file_path', '')
+                        'protein_file_path': self.settings.get('protein_file_path', ''),
+                        'metabolite_file_path': self.settings.get('metabolite_file_path', '')
                     },
                     'data': {
                         'protein': {
@@ -638,7 +879,13 @@ class PathwayProcessor:
                                 'tooltip_columns': dataset.get('tooltip_columns', []),
                                 'ptm_symbol_list': dataset.get('ptm_symbol_list', [])
                             } for dataset in ptm_datasets
-                        ]
+                        ],
+                        'metabolite': {
+                            'file_path': self.metabolite_config.get('file_path', ''),
+                            'hmdb_column': self.metabolite_hmdb_column,
+                            'main_columns': self.metabolite_main_columns,
+                            'tooltip_columns': self.metabolite_tooltip_columns,
+                        }
                     }
                 },
                 'protein_data': {},
@@ -1135,10 +1382,17 @@ class PathwayProcessor:
                         center_y = entry['y'] + entry['height'] / 2
                     # Match KEGG default compound size (8x8 circle); viewer treats x/y as center
                     default_size = 8
+                    metabolite_match = self._resolve_metabolite_match(entry)
+                    tooltip, tooltip_html = self._build_metabolite_tooltip(metabolite_match)
+                    display_label = (
+                        metabolite_match.get('display_label')
+                        if metabolite_match else
+                        (entry.get('first_name', '') or entry.get('label') or '')
+                    )
                     compound = {
                         'compound_id': entry['id'],  # KGML numeric id
                         'kegg_compound': entry['name'],  # e.g., 'cpd:C00165'
-                        'label': entry.get('first_name', ''),  # usually the C-number in MAPK
+                        'label': display_label,
                         'x': center_x,
                         'y': center_y,
                         'width': default_size,
@@ -1146,8 +1400,18 @@ class PathwayProcessor:
                         'fgcolor': entry.get('fgcolor', '#000000'),
                         'bgcolor': entry.get('bgcolor', '#FFFFFF'),
                         'graphics_type': entry.get('graphics_type', ''),  # likely 'circle'
-                        'link': entry.get('link', '')
+                        'link': entry.get('link', ''),
+                        'tooltip': tooltip,
+                        'tooltip_html': tooltip_html,
                     }
+                    if metabolite_match:
+                        compound['hmdb_id'] = metabolite_match.get('hmdb_id', '')
+                        compound['pathway_match_id'] = metabolite_match.get('pathway_match_id', '')
+                        row_map = metabolite_match.get('row_map') or {}
+                        for idx, fc_col in enumerate(self.metabolite_main_columns, 1):
+                            fc_value = self._safe_float(row_map.get(fc_col))
+                            compound[f'fold_change_{idx}'] = fc_value
+                            compound[f'fc_color_{idx}'] = self.get_color(fc_value) if fc_value is not None else [128, 128, 128]
                     json_data['compound_data'].append(compound)
             for entry in entries:
                 entry_type = entry.get('type')
@@ -1255,6 +1519,7 @@ class PathwayProcessor:
                     self.proteomic_data[self.hsa_id_column] == protein, self.gene_name_column].values[0]
                 protein_entry['label'] = gene_name
                 outline_cols = self.outline_columns or []
+                use_black_outlines = bool(self.settings.get('use_black_protein_outlines', False))
                 for idx, fc_col in enumerate(self.fold_change_columns, 1):
                     fold_change = self.proteomic_data.loc[
                         self.proteomic_data[self.hsa_id_column] == protein, fc_col].values
@@ -1280,7 +1545,9 @@ class PathwayProcessor:
                         if len(outline_vals) > 0:
                             outline_value = self._safe_float(outline_vals[0])
                     protein_entry[f'outline_fold_change_{idx}'] = outline_value
-                    if outline_value is not None:
+                    if use_black_outlines:
+                        protein_entry[f'outline_color_{idx}'] = [0, 0, 0]
+                    elif outline_value is not None:
                         protein_entry[f'outline_color_{idx}'] = self.get_color(outline_value)
                     else:
                         protein_entry[f'outline_color_{idx}'] = [0, 0, 0]
@@ -1744,6 +2011,7 @@ class PathwayProcessor:
                 'PTMs': self._build_ptm_summary(uniprot_id)
             }
             outline_cols = self.outline_columns or []
+            use_black_outlines = bool(self.settings.get('use_black_protein_outlines', False))
             for idx, fc_col in enumerate(self.fold_change_columns, 1):
                 protein_entry[f'fc_color_{idx}'] = [128, 128, 128]
                 protein_entry[f'fold_change_{idx}'] = None
@@ -1756,9 +2024,53 @@ class PathwayProcessor:
                 outline_col = outline_cols[idx - 1] if idx - 1 < len(outline_cols) else None
                 outline_value = self._safe_float(row.get(outline_col)) if outline_col else None
                 protein_entry[f'outline_fold_change_{idx}'] = outline_value
-                if outline_value is not None:
+                if use_black_outlines:
+                    protein_entry[f'outline_color_{idx}'] = [0, 0, 0]
+                elif outline_value is not None:
                     protein_entry[f'outline_color_{idx}'] = self.get_color(outline_value)
             catalog[uniprot_id] = protein_entry
+        return catalog
+
+    def build_full_metabolite_catalog(self):
+        catalog = {}
+        if self.metabolite_data.empty or self.metabolite_hmdb_column not in self.metabolite_data.columns:
+            return catalog
+        seen = set()
+        for _, row in self.metabolite_data.iterrows():
+            hmdb_raw = row.get(self.metabolite_hmdb_column, '')
+            hmdb_key = _normalize_metabolite_token(hmdb_raw)
+            if not hmdb_key or hmdb_key in seen:
+                continue
+            seen.add(hmdb_key)
+            ref = self.hmdb_reference_map.get(hmdb_key)
+            if not ref:
+                continue
+            display_label = _display_metabolite_name(ref.get('wikipedia_id') or ref.get('name') or hmdb_raw)
+            row_map = row.to_dict()
+            row_map = {str(k): ('' if pd.isna(v) else v) for k, v in row_map.items()}
+            match_payload = {
+                'hmdb_id': str(ref.get('accession') or hmdb_raw or '').strip(),
+                'display_label': display_label,
+                'pathway_ids': [],
+                'reference': ref,
+                'row_map': row_map,
+            }
+            tooltip, tooltip_html = self._build_metabolite_tooltip(match_payload)
+            entry = {
+                'hmdb_id': str(ref.get('accession') or hmdb_raw or '').strip(),
+                'display_label': display_label,
+                'wikipedia_id': _display_metabolite_name(ref.get('wikipedia_id') or ''),
+                'kegg_id': str(ref.get('kegg_id') or '').strip(),
+                'name': str(ref.get('name') or '').strip(),
+                'synonyms': str(ref.get('synonyms') or '').strip(),
+                'tooltip': tooltip,
+                'tooltip_html': tooltip_html,
+            }
+            for idx, fc_col in enumerate(self.metabolite_main_columns, 1):
+                fc_value = self._safe_float(row_map.get(fc_col))
+                entry[f'fold_change_{idx}'] = fc_value
+                entry[f'fc_color_{idx}'] = self.get_color(fc_value) if fc_value is not None else [128, 128, 128]
+            catalog[entry['hmdb_id'] or hmdb_key] = entry
         return catalog
 
 def generate_pathway_json(pathway_id, data, settings, skip_disk_write=False, debug_write=False):
@@ -1804,9 +2116,13 @@ def generate_pathway_json(pathway_id, data, settings, skip_disk_write=False, deb
             raise RuntimeError("No protein data provided.")
 
         ptm_datasets = data['ptm']
+        metabolite_dataset = data.get('metabolite') or {}
         settings['protein_file_path'] = data['protein'].get('file_path', '')
         settings['main_columns'] = data['protein']['main_columns']
         settings['protein_tooltip_columns'] = data['protein'].get('tooltip_columns', ['Gene Symbol', 'Uniprot_ID'])
+        settings['metabolite_file_path'] = metabolite_dataset.get('file_path', '')
+        settings['metabolite_main_columns'] = metabolite_dataset.get('main_columns', [])
+        settings['metabolite_tooltip_columns'] = metabolite_dataset.get('tooltip_columns', [])
         pathway_api = get_pathway_api(settings.get('pathway_source', 'kegg'))
         species_code = settings.get("species_code") or ""
         if species_code:
@@ -1851,9 +2167,13 @@ def generate_pathway_json(pathway_id, data, settings, skip_disk_write=False, deb
                 ds['file_path'] = dataset.get('file_path', '')
             loaded_ptm.append(ds)
 
-        processor = PathwayProcessor(entries, proteomic_data, loaded_ptm, settings)
+        metabolite_df = _load_df(metabolite_dataset) if metabolite_dataset else None
+        processor = PathwayProcessor(entries, proteomic_data, loaded_ptm, settings, metabolite_data=metabolite_df, metabolite_config=metabolite_dataset)
         print("PathwayProcessor created")
         json_data = processor.process_pathway(entries, groups, arrows, proteomic_data, loaded_ptm, skip_disk_write=skip_disk_write)
+        metabolite_catalog = processor.build_full_metabolite_catalog()
+        if metabolite_catalog:
+            json_data["_global_metabolite_catalog"] = metabolite_catalog
         print("Pathway JSON generated")
 
         # Debug logging: capture what m4 returns (consumed by m5/m3)
@@ -1897,6 +2217,7 @@ DEFAULT_SETTINGS = {
     'ptm_circle_spacing': 4,
     'prot_outline_width': 1,
     'ptm_outline_width': 1,
+    'use_black_protein_outlines': False,
     'protein_tooltip_columns': ['Gene Symbol', 'Uniprot_ID', 'ER+_Est-_x-y_TNBC'],
     'use_original_protbox_size': False
 }

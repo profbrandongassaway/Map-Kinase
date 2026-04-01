@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "saved_at_utc": "2026-03-26T02:50:04.869338+00:00",
+  "pathway_id": "cst_neuronal_activity_dependent_app_processing",
+  "pathway_name": "Neuronal Activity-dependent APP Processing",
+  "pathway_file": "Neuronal Activity-dependent APP Processing.ai",
+  "nodes": [
+    {
+      "id": "cst_overlay_mn6vj7yp_10",
+      "originalLabel": "γ-Secretase",
+      "displayLabel": "γ-Secretase",
+      "label": "γ-Secretase",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 207.90243750000002,
+      "cy": 184.75316875000004,
+      "rx": 30.4775,
+      "ry": 16.2195,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6vj8wq_11",
+      "originalLabel": "α-Secretase (ADAM 10/17)",
+      "displayLabel": "α-Secretase (ADAM 10/17)",
+      "label": "α-Secretase (ADAM 10/17)",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 314.30816875,
+      "cy": 203.34746875000002,
+      "rx": 33.285,
+      "ry": 16.2195,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6vja0l_12",
+      "originalLabel": "β-Secretase (BACE1/2)",
+      "displayLabel": "β-Secretase (BACE1/2)",
+      "label": "β-Secretase (BACE1/2)",
+      "annotation": "",
+      "mappingType": "exact_gene",
+      "suggested_gene_symbols": [
+        "BACE1"
+      ],
+      "suggested_uniprot_ids": [
+        "E9PJG7"
+      ],
+      "isCustom": true,
+      "cx": 404.4075375,
+      "cy": 208.77233124999998,
+      "rx": 30.4775,
+      "ry": 16.2195,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6vjas1_13",
+      "originalLabel": "γ-Secretase",
+      "displayLabel": "γ-Secretase",
+      "label": "γ-Secretase",
+      "annotation": "",
+      "mappingType": "unresolved",
+      "suggested_gene_symbols": [],
+      "suggested_uniprot_ids": [],
+      "isCustom": true,
+      "cx": 508.44978125,
+      "cy": 184.75316875000004,
+      "rx": 30.4775,
+      "ry": 16.2195,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    }
+  ]
+}

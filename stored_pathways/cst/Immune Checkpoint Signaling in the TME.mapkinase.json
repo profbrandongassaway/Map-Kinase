@@ -1,0 +1,284 @@
+{
+  "version": 1,
+  "saved_at_utc": "2026-03-25T23:01:47.779758+00:00",
+  "pathway_id": "cst_immune_checkpoint_signaling_in_the_tme",
+  "pathway_name": "Immune Checkpoint Signaling in the TME",
+  "pathway_file": "Immune Checkpoint Signaling in the TME.ai",
+  "nodes": [
+    {
+      "id": "cst_overlay_mn6nd85m_1",
+      "originalLabel": "Arginase",
+      "displayLabel": "Arginase",
+      "label": "Arginase",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "ARF6"
+      ],
+      "suggested_uniprot_ids": [
+        "P62330"
+      ],
+      "isCustom": true,
+      "cx": 157.61310046487606,
+      "cy": 379.20492647058825,
+      "rx": 25.99664132231402,
+      "ry": 11.0,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6ndc1q_4",
+      "originalLabel": "NF-κB",
+      "displayLabel": "NF-κB",
+      "label": "NF-κB",
+      "annotation": "",
+      "mappingType": "ambiguous",
+      "suggested_gene_symbols": [
+        "ITGB3",
+        "B2M"
+      ],
+      "suggested_uniprot_ids": [
+        "Q16157",
+        "Q16446"
+      ],
+      "isCustom": true,
+      "cx": 384.5421153409091,
+      "cy": 601.8523904411765,
+      "rx": 18.0,
+      "ry": 11.0,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6ndcp4_5",
+      "originalLabel": "Stat3",
+      "displayLabel": "Stat3",
+      "label": "Stat3",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "STAT3"
+      ],
+      "suggested_uniprot_ids": [
+        "P40763"
+      ],
+      "isCustom": true,
+      "cx": 401.8732095557851,
+      "cy": 624.6046860294117,
+      "rx": 18.0,
+      "ry": 11.0,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6ndd3i_6",
+      "originalLabel": "Akt",
+      "displayLabel": "Akt",
+      "label": "Akt",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "AKT1",
+        "AKT2",
+        "AKT3"
+      ],
+      "suggested_uniprot_ids": [
+        "P31749",
+        "P31751",
+        "Q9Y243"
+      ],
+      "isCustom": true,
+      "cx": 408.9139665805785,
+      "cy": 642.4814897058824,
+      "rx": 18.0,
+      "ry": 11.0,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6nddnc_7",
+      "originalLabel": "MAPK",
+      "displayLabel": "MAPK",
+      "label": "MAPK",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "MAPK3",
+        "MAPK1",
+        "MAPK6",
+        "MAPK4",
+        "MAPK15"
+      ],
+      "suggested_uniprot_ids": [
+        "P27361",
+        "P28482",
+        "Q16659",
+        "P31152",
+        "Q8TD08"
+      ],
+      "isCustom": true,
+      "cx": 411.080353357438,
+      "cy": 658.7331294117647,
+      "rx": 18.0,
+      "ry": 11.0,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6ndehu_8",
+      "originalLabel": "Jak",
+      "displayLabel": "Jak",
+      "label": "Jak",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "JAK1",
+        "JAK2",
+        "JAK3"
+      ],
+      "suggested_uniprot_ids": [
+        "P23458",
+        "O60674",
+        "P52333"
+      ],
+      "isCustom": true,
+      "cx": 499.90221120867767,
+      "cy": 606.1861610294118,
+      "rx": 18.0,
+      "ry": 11.0,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6ndff4_9",
+      "originalLabel": "Stat1",
+      "displayLabel": "Stat1",
+      "label": "Stat1",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "STAT1"
+      ],
+      "suggested_uniprot_ids": [
+        "P42224"
+      ],
+      "isCustom": true,
+      "cx": 241.01899137396694,
+      "cy": 622.4378007352941,
+      "rx": 18.0,
+      "ry": 11.0,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6ndg4s_10",
+      "originalLabel": "Stat3",
+      "displayLabel": "Stat3",
+      "label": "Stat3",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "STAT3"
+      ],
+      "suggested_uniprot_ids": [
+        "P40763"
+      ],
+      "isCustom": true,
+      "cx": 219.35512360537192,
+      "cy": 669.0258345588235,
+      "rx": 18.0,
+      "ry": 11.0,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6ndgtg_11",
+      "originalLabel": "Jak",
+      "displayLabel": "Jak",
+      "label": "Jak",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "JAK1",
+        "JAK2",
+        "JAK3"
+      ],
+      "suggested_uniprot_ids": [
+        "P23458",
+        "O60674",
+        "P52333"
+      ],
+      "isCustom": true,
+      "cx": 207.98159302685949,
+      "cy": 574.7663242647059,
+      "rx": 18.0,
+      "ry": 11.0,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6ndy6n_12",
+      "originalLabel": "Arginase",
+      "displayLabel": "Arginase",
+      "label": "Arginase",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "ARF6"
+      ],
+      "suggested_uniprot_ids": [
+        "P62330"
+      ],
+      "isCustom": true,
+      "cx": 507.4030508780992,
+      "cy": 406.20623823529417,
+      "rx": 25.99664132231402,
+      "ry": 11.0,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    },
+    {
+      "id": "cst_overlay_mn6ne1rk_13",
+      "originalLabel": "Arginase",
+      "displayLabel": "Arginase",
+      "label": "Arginase",
+      "annotation": "",
+      "mappingType": "cst_index",
+      "suggested_gene_symbols": [
+        "ARF6"
+      ],
+      "suggested_uniprot_ids": [
+        "P62330"
+      ],
+      "isCustom": true,
+      "cx": 537.6509517045455,
+      "cy": 297.7772191176471,
+      "rx": 25.99664132231402,
+      "ry": 11.0,
+      "shapeType": "ellipse",
+      "angle": 0.0,
+      "opacity": 0.98,
+      "strokeWidth": 4.5
+    }
+  ]
+}
