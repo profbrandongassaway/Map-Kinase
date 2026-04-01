@@ -5449,7 +5449,7 @@ def server(input, output, session):  # type: ignore[override]
                         ),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
-                            "Use the UniProt ID for each protein or PTM row.",
+                            "Use the UniProt ID for each protein or PTM row. This must be the first column in the Protein and PTM files.",
                         ),
                     ),
                     ui.div(
@@ -5461,7 +5461,7 @@ def server(input, output, session):  # type: ignore[override]
                         ),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
-                            "Use the matching gene symbol for each protein entry.",
+                            "Use the matching gene symbol for each protein entry. This must be the second column in the Protein file.",
                         ),
                     ),
                     ui.div(
@@ -5473,7 +5473,7 @@ def server(input, output, session):  # type: ignore[override]
                         ),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
-                            "Use the modified residue position for each PTM entry.",
+                            "Use the modified residue position for each PTM entry. This must be the second column in the PTM file.",
                         ),
                     ),
                     ui.div(
@@ -5816,12 +5816,9 @@ def server(input, output, session):  # type: ignore[override]
             missing.append(f"Protein file not found: {SAMPLE_PROTEIN_FILE}")
         if not os.path.exists(SAMPLE_PTM_FILE):
             missing.append(f"PTM file not found: {SAMPLE_PTM_FILE}")
-        if not os.path.exists(SAMPLE_METABOLITE_FILE):
-            missing.append(f"Metabolite file not found: {SAMPLE_METABOLITE_FILE}")
         if missing:
             protein_validation.set({"status": "Demo mode files missing.", "errors": missing, "valid": False, "comparisons": []})
             ptm_validation.set({"status": "Demo mode files missing.", "errors": missing, "valid": False})
-            metabolite_validation.set({"status": "Demo mode files missing.", "errors": missing, "valid": False, "comparisons": []})
             protein_dataset.set(None)
             ptm_dataset.set(None)
             metabolite_dataset.set(None)
@@ -5838,7 +5835,7 @@ def server(input, output, session):  # type: ignore[override]
             if not prot_result.valid:
                 protein_validation.set({"status": "Demo protein file failed validation.", "errors": prot_result.errors, "valid": False, "comparisons": []})
                 ptm_validation.set({"status": "PTM upload disabled until demo protein is valid.", "errors": [], "valid": False})
-                metabolite_validation.set({"status": "Metabolite upload disabled until demo protein is valid.", "errors": [], "valid": False, "comparisons": []})
+                metabolite_validation.set({"status": "Metabolite upload optional. Sample metabolite file available below.", "errors": [], "valid": False, "comparisons": []})
                 protein_dataset.set(None)
                 ptm_dataset.set(None)
                 metabolite_dataset.set(None)
@@ -5884,7 +5881,10 @@ def server(input, output, session):  # type: ignore[override]
                 ptm_validation.set({"status": "Demo PTM file failed validation.", "errors": ptm_result.errors, "valid": False})
                 ptm_dataset.set(None)
                 ptm_preview_dataset.set(None)
-                metabolite_validation.set({"status": "Metabolite upload optional. Demo metabolite file still available.", "errors": [], "valid": False, "comparisons": []})
+                metabolite_dataset.set(None)
+                metabolite_preview_dataset.set(None)
+                metabolite_dataset_path.set(None)
+                metabolite_validation.set({"status": "Metabolite upload optional. Sample metabolite file available below.", "errors": [], "valid": False, "comparisons": []})
                 nav_lock_status.set("Demo mode: sample PTM validation failed.")
                 _refresh_pathway_scores()
                 return
@@ -5909,42 +5909,25 @@ def server(input, output, session):  # type: ignore[override]
                 "valid": True,
             })
             _write_debug_dump("user_ptm_dataset_debug.txt", demo_ptm_payload)
-            metabolite_result = _validate_metabolite_file(SAMPLE_METABOLITE_FILE, prot_result.comparisons)
-            if metabolite_result.valid:
-                demo_metabolite_payload = _load_dataset(SAMPLE_METABOLITE_FILE)
-                metabolite_preview_dataset.set(demo_metabolite_payload)
-                metabolite_dataset.set(demo_metabolite_payload)
-                metabolite_dataset_path.set(SAMPLE_METABOLITE_FILE)
-                metabolite_validation.set({
-                    "status": (
-                        f"Demo metabolite loaded. Rows: {metabolite_result.summary.get('rows', 0)}, "
-                        f"Comparison columns: {metabolite_result.summary.get('comparisons', 0)}, "
-                        f"Tooltip columns: {metabolite_result.summary.get('tooltips', 0)}."
-                    ),
-                    "errors": [],
-                    "valid": True,
-                    "comparisons": metabolite_result.comparisons,
-                })
-            else:
-                metabolite_dataset.set(None)
-                metabolite_preview_dataset.set(_load_dataset(SAMPLE_METABOLITE_FILE))
-                metabolite_dataset_path.set(None)
-                metabolite_validation.set({
-                    "status": "Demo metabolite file failed validation.",
-                    "errors": metabolite_result.errors,
-                    "valid": False,
-                    "comparisons": [],
-                })
+            metabolite_dataset.set(None)
+            metabolite_preview_dataset.set(None)
+            metabolite_dataset_path.set(None)
+            metabolite_validation.set({
+                "status": "Metabolite upload optional. Sample metabolite file available below.",
+                "errors": [],
+                "valid": False,
+                "comparisons": [],
+            })
             _refresh_global_catalog_from_current()
             _update_ks_index()
             _refresh_pathway_scores()
             nav_lock_status.set("Demo mode: sample datasets loaded. Navigation unlocked.")
-            print("Demo mode: sample protein/PTM/metabolite loaded successfully.")
+            print("Demo mode: sample protein/PTM loaded successfully.")
         except Exception as exc:
             print(f"Warning: demo mode encountered an unexpected error: {exc}")
             protein_validation.set({"status": "Demo mode failed to load sample protein.", "errors": [str(exc)], "valid": False, "comparisons": []})
             ptm_validation.set({"status": "Demo mode failed to load sample PTM.", "errors": [str(exc)], "valid": False})
-            metabolite_validation.set({"status": "Demo mode failed to load sample metabolite.", "errors": [str(exc)], "valid": False, "comparisons": []})
+            metabolite_validation.set({"status": "Metabolite upload optional. Sample metabolite file available below.", "errors": [], "valid": False, "comparisons": []})
             protein_dataset.set(None)
             ptm_dataset.set(None)
             metabolite_dataset.set(None)
