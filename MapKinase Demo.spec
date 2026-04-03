@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('MapKinase_WebApp\\annotation_files', 'MapKinase_WebApp\\annotation_files'), ('MapKinase_WebApp\\sample_files', 'MapKinase_WebApp\\sample_files'), ('MapKinase_WebApp\\cache', 'MapKinase_WebApp\\cache'), ('MapKinase_WebApp\\exceptions_file.txt', 'MapKinase_WebApp'), ('MapKinase_WebApp\\kegg_pathways.txt', 'MapKinase_WebApp'), ('MapKinase_WebApp\\species_ref_list.csv', 'MapKinase_WebApp'), ('sample_input_files', 'sample_input_files')]
+datas = [('MapKinase_WebApp\\annotation_files', 'MapKinase_WebApp\\annotation_files'), ('MapKinase_WebApp\\sample_files', 'MapKinase_WebApp\\sample_files'), ('MapKinase_WebApp\\cache', 'MapKinase_WebApp\\cache'), ('MapKinase_WebApp\\icons', 'MapKinase_WebApp\\icons'), ('MapKinase_WebApp\\index_files', 'MapKinase_WebApp\\index_files'), ('MapKinase_WebApp\\JSONfiles', 'MapKinase_WebApp\\JSONfiles'), ('MapKinase_WebApp\\search_pathways', 'MapKinase_WebApp\\search_pathways'), ('MapKinase_WebApp\\exceptions_file.txt', 'MapKinase_WebApp'), ('MapKinase_WebApp\\kegg_pathways.txt', 'MapKinase_WebApp'), ('MapKinase_WebApp\\species_ref_list.csv', 'MapKinase_WebApp'), ('sample_input_files', 'sample_input_files'), ('stored_pathways', 'stored_pathways')]
 binaries = []
 hiddenimports = []
 tmp_ret = collect_all('shiny')

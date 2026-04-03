@@ -552,7 +552,6 @@ def candidate_uniprots_for_node(node_obj: Dict[str, Any], gene_to_uniprot: Dict[
     kegg_genes = candidates.get("kegg_genes", []) if isinstance(candidates, dict) else []
     gene_ids = candidates.get("gene_ids", []) if isinstance(candidates, dict) else []
     pre_mapped_unis = candidates.get("uniprot", []) if isinstance(candidates, dict) else []
-    symbols = candidates.get("symbols", []) if isinstance(candidates, dict) else []
 
     out: set[str] = set()
 
@@ -583,16 +582,6 @@ def candidate_uniprots_for_node(node_obj: Dict[str, Any], gene_to_uniprot: Dict[
             normalized = normalize_uniprot(uni)
             if normalized:
                 out.add(normalized)
-
-    if isinstance(symbols, list):
-        for symbol in symbols:
-            sym = str(symbol or "").strip().upper()
-            if not sym:
-                continue
-            for uni in gene_to_uniprot.get(sym, []):
-                normalized = normalize_uniprot(uni)
-                if normalized:
-                    out.add(normalized)
 
     return sorted(out)
 

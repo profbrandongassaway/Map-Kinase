@@ -4,10 +4,12 @@ import pandas as pd
 import numpy as np
 import os
 import re
+import math
 from datetime import datetime
 from collections import defaultdict
 import json
 import html
+import sys
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
@@ -27,6 +29,35 @@ def _safe_debug_print(*parts):
 _SYMBOL_ICON_CACHE = {}
 
 
+def _resolve_icons_dir() -> Path:
+    candidates = [Path(__file__).resolve().parent / "icons"]
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        candidates.extend([
+            Path(sys._MEIPASS) / "MapKinase_WebApp" / "icons",
+            Path(sys._MEIPASS) / "icons",
+        ])
+    for path in candidates:
+        if path.is_dir():
+            return path
+    return candidates[0]
+
+
+_ICONS_DIR = _resolve_icons_dir()
+
+
+def normalize_uniprot(value):
+    token = str(value or "").strip().upper()
+    if not token:
+        return ""
+    token = token.split(";")[0].strip()
+    token = token.split(",")[0].strip()
+    if "-" in token:
+        base, suffix = token.split("-", 1)
+        if suffix.isdigit():
+            token = base
+    return token
+
+
 def _load_symbol_icon_data_uri(icon_name):
     if not icon_name:
         return None
@@ -35,7 +66,7 @@ def _load_symbol_icon_data_uri(icon_name):
         return None
     if cache_key in _SYMBOL_ICON_CACHE:
         return _SYMBOL_ICON_CACHE[cache_key]
-    icon_path = Path(__file__).resolve().parent / "icons" / cache_key
+    icon_path = _ICONS_DIR / cache_key
     if not icon_path.exists():
         _SYMBOL_ICON_CACHE[cache_key] = None
         return None
@@ -564,6 +595,99 @@ class PathwayProcessor:
         self.metabolite_reference_df, self.hmdb_reference_map = _load_hmdb_metabolite_reference()
         self.metabolite_index = self._build_metabolite_index()
         self.reference_metabolite_index = _build_cached_reference_metabolite_index(self.pathway_source)
+        self._protein_id_index = self._build_protein_match_index(self.hsa_id_column)
+        self._protein_gene_index = self._build_protein_match_index(self.gene_name_column)
+        self._protein_uniprot_index = self._build_protein_match_index(self.prot_uniprot_column, normalize_uniprot_values=True)
+
+    def _build_protein_match_index(self, column_name, normalize_uniprot_values=False):
+        index = {}
+        if (
+            self.proteomic_data is None
+            or self.proteomic_data.empty
+            or not column_name
+            or column_name not in self.proteomic_data.columns
+        ):
+            return index
+        for row_idx, raw_value in self.proteomic_data[column_name].items():
+            if raw_value is None or pd.isna(raw_value):
+                continue
+            raw_text = str(raw_value).strip()
+            if not raw_text:
+                continue
+            if normalize_uniprot_values:
+                keys = [normalize_uniprot(raw_text)]
+            else:
+                keys = [raw_text.upper()]
+            for key in keys:
+                if key:
+                    index.setdefault(key, []).append(row_idx)
+        return index
+
+    def _lookup_protein_row_indexes(self, protein_token):
+        token = str(protein_token or '').strip()
+        if not token:
+            return []
+        upper_token = token.upper()
+        indexes = list(self._protein_id_index.get(upper_token, []))
+        if indexes:
+            return indexes
+        indexes = list(self._protein_gene_index.get(upper_token, []))
+        if indexes:
+            return indexes
+        uni_token = normalize_uniprot(token)
+        if uni_token:
+            indexes = list(self._protein_uniprot_index.get(uni_token, []))
+            if indexes:
+                return indexes
+        return []
+
+    def _pick_best_row_index(self, row_indexes):
+        if not row_indexes:
+            return None
+        best_idx = None
+        best_score = -1.0
+        for row_idx in row_indexes:
+            try:
+                row = self.proteomic_data.loc[row_idx]
+            except Exception:
+                continue
+            candidate_score = -1.0
+            for fc_col in self.fold_change_columns:
+                if fc_col not in self.proteomic_data.columns:
+                    continue
+                value = self._safe_float(row.get(fc_col))
+                if value is not None and math.isfinite(value):
+                    candidate_score = max(candidate_score, abs(value))
+            if best_idx is None or candidate_score > best_score:
+                best_idx = row_idx
+                best_score = candidate_score
+        return best_idx if best_idx is not None else row_indexes[0]
+
+    def _build_protein_match_payload(self, protein_token):
+        row_indexes = self._lookup_protein_row_indexes(protein_token)
+        if not row_indexes:
+            return None
+        row_idx = self._pick_best_row_index(row_indexes)
+        if row_idx is None:
+            return None
+        try:
+            row = self.proteomic_data.loc[row_idx]
+        except Exception:
+            return None
+        uniprot_id = row.get(self.prot_uniprot_column) if self.prot_uniprot_column in self.proteomic_data.columns else None
+        annotations = []
+        for col in self.protein_tooltip_columns:
+            value = row.get(col, '') if col in self.proteomic_data.columns else ''
+            if value is None or pd.isna(value):
+                value = ''
+            annotations.append(str(value))
+        return {
+            'protein': protein_token,
+            'uniprot_id': uniprot_id,
+            'annotations': annotations,
+            'row_index': row_idx,
+            'row': row,
+        }
 
     def _choose_metabolite_match(self, matches):
         if not matches:
@@ -697,7 +821,11 @@ class PathwayProcessor:
         return [r, g, b]
 
     def choose_protein(self, proteins):
-        valid_proteins = [p for p in proteins if p in self.proteomic_data[self.hsa_id_column].values]
+        valid_proteins = []
+        for protein in proteins:
+            payload = self._build_protein_match_payload(protein)
+            if payload is not None:
+                valid_proteins.append(payload)
         if not valid_proteins:
             return None
         try:
@@ -707,30 +835,22 @@ class PathwayProcessor:
                 max_fold_change = -float('inf')
                 selected_protein = None
                 for protein in valid_proteins:
+                    row = protein.get('row')
+                    if row is None:
+                        continue
                     for fc_col in self.fold_change_columns:
-                        fold_change = self.proteomic_data.loc[
-                            self.proteomic_data[self.hsa_id_column] == protein, fc_col].values
-                        if len(fold_change) > 0:
-                            try:
-                                fc_val = float(fold_change[0])
-                            except (TypeError, ValueError):
-                                fc_val = None
-                            if fc_val is not None and abs(fc_val) > max_fold_change:
-                                max_fold_change = abs(fc_val)
-                                selected_protein = protein
+                        try:
+                            fc_val = float(row.get(fc_col))
+                        except (TypeError, ValueError):
+                            fc_val = None
+                        if fc_val is not None and abs(fc_val) > max_fold_change:
+                            max_fold_change = abs(fc_val)
+                            selected_protein = protein
                 if not selected_protein:
                     selected_protein = valid_proteins[0]
             else:
                 selected_protein = valid_proteins[0]
-            uniprot_id = self.proteomic_data.loc[
-                self.proteomic_data[self.hsa_id_column] == selected_protein, self.prot_uniprot_column].values
-            uniprot_id = uniprot_id[0] if len(uniprot_id) > 0 else None
-            annotations = []
-            for col in self.protein_tooltip_columns:
-                value = self.proteomic_data.loc[
-                    self.proteomic_data[self.hsa_id_column] == selected_protein, col].values
-                annotations.append(str(value[0]) if len(value) > 0 else '')
-            return {'protein': selected_protein, 'uniprot_id': uniprot_id, 'annotations': annotations}
+            return selected_protein
         except (KeyError, IndexError) as e:
             return None
 
@@ -1276,18 +1396,13 @@ class PathwayProcessor:
                 valid_protein_dicts = []
                 uniprot_ids = []
                 for protein in proteins:
-                    if protein not in self.proteomic_data[self.hsa_id_column].values:
+                    protein_payload = self._build_protein_match_payload(protein)
+                    if not protein_payload:
                         continue
-                    mask = self.proteomic_data[self.hsa_id_column] == protein
-                    uniprot_vals = self.proteomic_data.loc[mask, self.prot_uniprot_column].values
-                    uniprot_id = uniprot_vals[0] if len(uniprot_vals) > 0 else None
+                    uniprot_id = protein_payload.get('uniprot_id')
                     if not uniprot_id:
                         continue
-                    annotations = []
-                    for col in self.protein_tooltip_columns:
-                        value = self.proteomic_data.loc[mask, col].values
-                        annotations.append(str(value[0]) if len(value) > 0 else '')
-                    valid_protein_dicts.append({'protein': protein, 'uniprot_id': uniprot_id, 'annotations': annotations})
+                    valid_protein_dicts.append(protein_payload)
                     uniprot_ids.append(uniprot_id)
                     all_uniprot_ids.add(uniprot_id)
                 protbox_protein_cache[entry["id"]] = {
@@ -1498,8 +1613,9 @@ class PathwayProcessor:
             protein = protein_dict['protein']
             uniprot_id = protein_dict['uniprot_id']
             annotations = protein_dict.get('annotations', [])
-            protein_in_data = protein in self.proteomic_data[self.hsa_id_column].values
-            valid_proteins = [p for p in proteins if p in self.proteomic_data[self.hsa_id_column].values]
+            protein_row = protein_dict.get('row')
+            protein_in_data = protein_row is not None
+            valid_proteins = [p for p in proteins if self._build_protein_match_payload(p) is not None]
             protein_entry = {
                 'label': '',
                 'label_color': [0, 0, 0],
@@ -1515,35 +1631,27 @@ class PathwayProcessor:
                 protein_entry[f'outline_color_{idx}'] = [0, 0, 0]
                 protein_entry[f'outline_fold_change_{idx}'] = None
             if protein_in_data:
-                gene_name = self.proteomic_data.loc[
-                    self.proteomic_data[self.hsa_id_column] == protein, self.gene_name_column].values[0]
+                gene_name = protein_row.get(self.gene_name_column, protein)
                 protein_entry['label'] = gene_name
                 outline_cols = self.outline_columns or []
                 use_black_outlines = bool(self.settings.get('use_black_protein_outlines', False))
                 for idx, fc_col in enumerate(self.fold_change_columns, 1):
-                    fold_change = self.proteomic_data.loc[
-                        self.proteomic_data[self.hsa_id_column] == protein, fc_col].values
-                    if len(fold_change) > 0:
-                        raw_value = fold_change[0]
-                        fc_value = None
-                        if raw_value is not None and not pd.isna(raw_value):
-                            try:
-                                fc_value = float(raw_value)
-                            except (TypeError, ValueError):
-                                fc_value = None
-                        protein_entry[f'fold_change_{idx}'] = fc_value
-                        if fc_value is not None:
-                            protein_entry[f'fc_color_{idx}'] = self.get_color(fc_value)
-                        else:
-                            protein_entry[f'fc_color_{idx}'] = [128, 128, 128]
+                    raw_value = protein_row.get(fc_col) if fc_col in self.proteomic_data.columns else None
+                    fc_value = None
+                    if raw_value is not None and not pd.isna(raw_value):
+                        try:
+                            fc_value = float(raw_value)
+                        except (TypeError, ValueError):
+                            fc_value = None
+                    protein_entry[f'fold_change_{idx}'] = fc_value
+                    if fc_value is not None:
+                        protein_entry[f'fc_color_{idx}'] = self.get_color(fc_value)
+                    else:
+                        protein_entry[f'fc_color_{idx}'] = [128, 128, 128]
                     outline_col = outline_cols[idx - 1] if idx - 1 < len(outline_cols) else None
                     outline_value = None
                     if outline_col and outline_col in self.proteomic_data.columns:
-                        outline_vals = self.proteomic_data.loc[
-                            self.proteomic_data[self.hsa_id_column] == protein, outline_col
-                        ].values
-                        if len(outline_vals) > 0:
-                            outline_value = self._safe_float(outline_vals[0])
+                        outline_value = self._safe_float(protein_row.get(outline_col))
                     protein_entry[f'outline_fold_change_{idx}'] = outline_value
                     if use_black_outlines:
                         protein_entry[f'outline_color_{idx}'] = [0, 0, 0]
@@ -1558,13 +1666,11 @@ class PathwayProcessor:
             tooltip_plain_lines = []
             tooltip_html_lines = []
             if protein_in_data:
-                mask = self.proteomic_data[self.hsa_id_column] == protein
                 for col in self.protein_tooltip_columns:
                     label = str(col)
-                    val_series = self.proteomic_data.loc[mask, col] if col in self.proteomic_data.columns else []
                     value = ''
-                    if len(val_series) > 0:
-                        cell = val_series.values[0]
+                    if col in self.proteomic_data.columns:
+                        cell = protein_row.get(col, '')
                         if cell is not None and not pd.isna(cell):
                             value = str(cell)
                     if str(value).strip() == '':
@@ -2345,6 +2451,7 @@ def get_default_json(data_override=None, settings_override=None, skip_disk_write
         for k, v in data_override.items():
             data[k] = v
 
+    generation_error = ""
     try:
         json_data = generate_pathway_json(
             settings.get('pathway_id', 'hsa04010'),
@@ -2357,8 +2464,10 @@ def get_default_json(data_override=None, settings_override=None, skip_disk_write
             raise RuntimeError('generate_pathway_json returned None')
         return json_data
     except FileNotFoundError as e:
+        generation_error = str(e)
         print(f"Warning: data file not found while generating default JSON: {e}")
     except Exception as e:
+        generation_error = str(e)
         print(f"Warning: could not generate default JSON ({e}). Falling back to minimal structure.")
 
     # Fallback minimal structure so consumers can still render/debug the UI
@@ -2369,7 +2478,8 @@ def get_default_json(data_override=None, settings_override=None, skip_disk_write
         'groups': [],
         'arrows': [],
         'compound_data': [],
-        'text_data': []
+        'text_data': [],
+        '_generation_error': generation_error,
     }
 
 

@@ -187,7 +187,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
     // Use `var` for globals so re-rendering the HTML (which runs this script again)
     // won't throw a 'Identifier ... has already been declared' error.
     var selectedElement = null, selectedType = null, selectedId = null, selectedProtboxId = null, selectedVisual = null;
-    var zoomLevel = 1, minZoom = 0.5, maxZoom = 2;
+    var zoomLevel = 1, minZoom = 0.5, maxZoom = 20;
     var viewBox = {{ x: 0, y: 0, width: {max_x}, height: {max_y} }};
     var isPanning = false, startPanX = null, startPanY = null, startViewBoxX = null, startViewBoxY = null;
     var arrowHandleGroups = arrowHandleGroups || {{}};
@@ -792,6 +792,84 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 }});
                 return Array.from(ids);
             }};
+            const clearArrowClipboardAttachments = (arrow) => {{
+                if (!arrow || typeof arrow !== 'object') return arrow;
+                [
+                    'protbox_id', 'protbox_id_1', 'protbox_id_2',
+                    'protbox_id_1_side', 'protbox_id_2_side',
+                    'side', 'attached_arrow', 'attached_end',
+                    'attached_arrow_1', 'attached_arrow_2',
+                    'attached_end_1', 'attached_end_2'
+                ].forEach((key) => {{
+                    if (key in arrow) delete arrow[key];
+                }});
+                return arrow;
+            }};
+            const normalizeClipboardArrowSnapshot = (snapshot) => {{
+                const clone = cloneData(snapshot);
+                if (!clone || typeof clone !== 'object') return null;
+                clearArrowClipboardAttachments(clone);
+                if (!Array.isArray(clone.control_points) || !clone.control_points.length) {{
+                    clone.control_points = [];
+                }} else {{
+                    clone.control_points = clone.control_points
+                        .map((point) => {{
+                            if (!point) return null;
+                            return {{
+                                x: Number(point.x || 0),
+                                y: Number(point.y || 0),
+                            }};
+                        }})
+                        .filter(Boolean);
+                }}
+                return clone;
+            }};
+            const getSelectedArrowIdsForClipboard = () => {{
+                const ids = new Set();
+                selectionMap.forEach((entry) => {{
+                    if (!entry) return;
+                    if (entry.type === 'arrow' || entry.type === 'arrow-hitbox') {{
+                        if (entry.id) ids.add(String(entry.id));
+                        return;
+                    }}
+                    if (entry.type === 'arrow-start' || entry.type === 'arrow-end' || entry.type === 'arrow-mid') {{
+                        if (entry.id) ids.add(String(entry.id).replace(/_(start|end|mid)$/, ''));
+                    }}
+                }});
+                const activeArrowId = resolveSelectedArrowActionId();
+                if (activeArrowId) ids.add(String(activeArrowId));
+                return Array.from(ids).filter((arrowId) => !!getArrowById(arrowId));
+            }};
+            const copySelectedArrowsToClipboard = () => {{
+                const snapshots = getSelectedArrowIdsForClipboard()
+                    .map((arrowId) => normalizeClipboardArrowSnapshot(getArrowById(arrowId)))
+                    .filter(Boolean);
+                if (!snapshots.length) return 0;
+                arrowClipboard = snapshots;
+                arrowClipboardPasteCount = 0;
+                return snapshots.length;
+            }};
+            const buildArrowInputPayload = (arrow) => {{
+                if (!arrow) return null;
+                const payload = {{
+                    line: arrow.line || 'arrow',
+                    x1: Number(arrow.x1 || 0),
+                    y1: Number(arrow.y1 || 0),
+                    x2: Number(arrow.x2 || 0),
+                    y2: Number(arrow.y2 || 0)
+                }};
+                if ('dashed' in arrow) payload.dashed = !!arrow.dashed;
+                if (arrow.color) payload.color = arrow.color;
+                if (Array.isArray(arrow.control_points) && arrow.control_points.length) {{
+                    payload.control_points = arrow.control_points.map((point) => {{
+                        return {{
+                            x: Number(point?.x || 0),
+                            y: Number(point?.y || 0),
+                        }};
+                    }});
+                }}
+                return payload;
+            }};
             const setArrowDashState = (arrowId, dashedOn) => {{
                 const arrow = getArrowById(arrowId);
                 if (!arrow) return;
@@ -901,16 +979,23 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     tip: {{ x: tipX, y: tipY }},
                 }};
             }};
-            const getArrowInhibitorBar = (tipX, tipY, angle, size) => {{
-                const perp = angle + (Math.PI / 2);
+            const getArrowInhibitorBarAngle = (arrow, fallbackAngle) => {{
+                const side = String(arrow?.protbox_id_2_side || '').trim().toLowerCase();
+                if (arrow?.protbox_id_2 && side) {{
+                    if (side === 'north' || side === 'south') return 0;
+                    if (side === 'east' || side === 'west') return Math.PI / 2;
+                }}
+                return fallbackAngle + (Math.PI / 2);
+            }};
+            const getArrowInhibitorBar = (tipX, tipY, barAngle, size) => {{
                 return {{
                     left: {{
-                        x: tipX + Math.cos(perp) * size,
-                        y: tipY + Math.sin(perp) * size,
+                        x: tipX + Math.cos(barAngle) * size,
+                        y: tipY + Math.sin(barAngle) * size,
                     }},
                     right: {{
-                        x: tipX - Math.cos(perp) * size,
-                        y: tipY - Math.sin(perp) * size,
+                        x: tipX - Math.cos(barAngle) * size,
+                        y: tipY - Math.sin(barAngle) * size,
                     }},
                 }};
             }};
@@ -956,10 +1041,27 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                         head.plot([[decor.tip.x, decor.tip.y], [decor.left.x, decor.left.y], [decor.right.x, decor.right.y]]);
                     }} else if (baseType === 'inhibition') {{
                         const angle = getArrowTangentAngle(arrow, false);
-                        const bar = getArrowInhibitorBar(x2, y2, angle, arrowSize);
+                        const barAngle = getArrowInhibitorBarAngle(arrow, angle);
+                        const bar = getArrowInhibitorBar(x2, y2, barAngle, arrowSize);
                         head.plot(bar.left.x, bar.left.y, bar.right.x, bar.right.y);
                     }}
                 }}
+                bringArrowControlsToFront(arrowId);
+            }};
+            const bringArrowControlsToFront = (arrowId) => {{
+                if (!arrowId) return;
+                const line = draw.findOne(`[data-id="${{arrowId}}"]`);
+                const hit = draw.findOne(`[data-id="${{arrowId}}_hit"]`);
+                const head = draw.findOne(`[data-id="${{arrowId}}_head"]`);
+                const group = arrowHandleGroups[arrowId] || {{}};
+                try {{ if (handleGroup?.front) handleGroup.front(); }} catch (err) {{}}
+                try {{ if (line?.front) line.front(); }} catch (err) {{}}
+                try {{ if (head?.front) head.front(); }} catch (err) {{}}
+                try {{ if (hit?.front) hit.front(); }} catch (err) {{}}
+                try {{ if (group.headHitbox?.front) group.headHitbox.front(); }} catch (err) {{}}
+                try {{ if (group.startHandle?.front) group.startHandle.front(); }} catch (err) {{}}
+                try {{ if (group.endHandle?.front) group.endHandle.front(); }} catch (err) {{}}
+                try {{ if (group.midHandle?.front) group.midHandle.front(); }} catch (err) {{}}
             }};
             const findArrowBetweenProtboxes = (idA, idB) => {{
                 const a = normalizeProtboxId(idA);
@@ -2001,6 +2103,82 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             const compoundGroup = draw.group();  
             const textGroup = foregroundGroup.group();     
             const alignmentGuideGroup = foregroundGroup.group();
+            const clearArrowPlacementPreview = () => {{
+                if (arrowPlacementPreviewLine) {{
+                    arrowPlacementPreviewLine.hide();
+                }}
+            }};
+            const ensureArrowPlacementOverlay = () => {{
+                if (arrowPlacementOverlay) return arrowPlacementOverlay;
+                arrowPlacementOverlay = handleGroup.rect({max_x}, {max_y})
+                    .move(0, 0)
+                    .fill({{ color: '#ffffff', opacity: 0.001 }})
+                    .attr({{ 'data-type': 'arrow-placement-overlay' }})
+                    .hide();
+                arrowPlacementOverlay.node.style.pointerEvents = 'none';
+                arrowPlacementOverlay.node.addEventListener('mousemove', (evt) => {{
+                    if (!arrowPlacementMode || !arrowPlacementStart) return;
+                    const point = draw.point(evt.clientX, evt.clientY);
+                    if (!point) return;
+                    if (!arrowPlacementPreviewLine) {{
+                        arrowPlacementPreviewLine = handleGroup.line(0, 0, 0, 0)
+                            .stroke({{ color: '#0f172a', width: 1.25, dasharray: '5,4' }})
+                            .attr({{ 'data-type': 'arrow-placement-preview', 'pointer-events': 'none' }})
+                            .hide();
+                    }}
+                    arrowPlacementPreviewLine.plot(
+                        Number(arrowPlacementStart.x || 0),
+                        Number(arrowPlacementStart.y || 0),
+                        Number(point.x || 0),
+                        Number(point.y || 0),
+                    );
+                    arrowPlacementPreviewLine.show();
+                    handleGroup.front();
+                }});
+                arrowPlacementOverlay.node.addEventListener('mousedown', (evt) => {{
+                    if (evt.button !== 0 || !arrowPlacementMode) return;
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    const point = draw.point(evt.clientX, evt.clientY);
+                    if (!point) return;
+                    if (!arrowPlacementStart) {{
+                        arrowPlacementStart = {{ x: Number(point.x || 0), y: Number(point.y || 0) }};
+                        clearArrowPlacementPreview();
+                        handleGroup.front();
+                        return;
+                    }}
+                    const startX = Number(arrowPlacementStart.x || 0);
+                    const startY = Number(arrowPlacementStart.y || 0);
+                    const endX = Number(point.x || 0);
+                    const endY = Number(point.y || 0);
+                    if (Math.hypot(endX - startX, endY - startY) < 2) {{
+                        return;
+                    }}
+                    createStandaloneArrow(arrowPlacementMode, startX, startY, endX, endY);
+                    arrowPlacementStart = null;
+                    clearArrowPlacementPreview();
+                    handleGroup.front();
+                }});
+                return arrowPlacementOverlay;
+            }};
+            const setArrowPlacementMode = (type = null) => {{
+                arrowPlacementMode = type ? String(type || 'arrow') : null;
+                arrowPlacementStart = null;
+                clearArrowPlacementPreview();
+                const overlay = ensureArrowPlacementOverlay();
+                if (arrowPlacementMode) {{
+                    overlay.show();
+                    overlay.front();
+                    overlay.node.style.pointerEvents = 'all';
+                    handleGroup.front();
+                }} else {{
+                    overlay.hide();
+                    overlay.node.style.pointerEvents = 'none';
+                }}
+                syncCanvasCursor();
+                emitArrowPlacementState();
+                return !!arrowPlacementMode;
+            }};
             const setSelectorVisibility = (selector, visible) => {{
                 const nodes = draw.find(selector);
                 for (let i = 0; i < nodes.length; i++) {{
@@ -2124,6 +2302,15 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     detail: {{ key: exportKey, mode: mouseMode }}
                 }}));
             }};
+            const emitArrowPlacementState = () => {{
+                document.dispatchEvent(new CustomEvent('mk-viewer-arrow-placement-state', {{
+                    detail: {{
+                        key: exportKey,
+                        active: !!arrowPlacementMode,
+                        type: arrowPlacementMode || ''
+                    }}
+                }}));
+            }};
             const shouldUseSelectionBoxEvent = (evt) => {{
                 const modifier = !!(evt && (evt.ctrlKey || evt.metaKey));
                 return mouseMode === 'selection' ? !modifier : modifier;
@@ -2146,6 +2333,13 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             let selectionBoxEndScreen = null;
             let suppressNextBackgroundClick = false;
             let suppressHoverTooltips = false;
+            let arrowPlacementMode = null;
+            let arrowPlacementStart = null;
+            let arrowPlacementOverlay = null;
+            let arrowPlacementPreviewLine = null;
+            let arrowClipboard = null;
+            let arrowClipboardPasteCount = 0;
+            const ARROW_CLIPBOARD_PASTE_OFFSET = 24;
             const normalizeBounds = (a, b) => {{
                 if (!a || !b) return null;
                 const left = Math.min(a.x, b.x);
@@ -2174,6 +2368,23 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     }}
                 }} catch (err) {{}}
                 return null;
+            }};
+            const syncCanvasCursor = () => {{
+                const canvasEl = getCanvasEl();
+                if (!canvasEl) return;
+                if (arrowPlacementMode) {{
+                    canvasEl.style.cursor = 'crosshair';
+                    return;
+                }}
+                if (selectionBoxActive) {{
+                    canvasEl.style.cursor = 'crosshair';
+                    return;
+                }}
+                if (isPanning) {{
+                    canvasEl.style.cursor = 'grab';
+                    return;
+                }}
+                canvasEl.style.cursor = 'default';
             }};
             const findTextBlockByDomId = (id) => textBlocks.find(tb => tb && (tb._client_id === id || `text_${{tb.text_id}}` === id));
             const baseTextStyle = () => ({{
@@ -3039,10 +3250,11 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 visited.add(arrowId);
                 const group = ensureArrowHandleGroup(arrowId);
                 if (group) {{
-                    group.headHitbox?.attr({{ 'pointer-events': 'none' }});
+                    group.headHitbox?.attr({{ 'pointer-events': 'all' }});
                     group.startHandle?.show();
                     group.endHandle?.show();
                     group.midHandle?.show();
+                    bringArrowControlsToFront(arrowId);
                 }}
                 const arrow = getArrowById(arrowId);
                 if (arrow) {{
@@ -3067,6 +3279,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                                 ensureArrowHandleGroup(sId);
                                 const freeEnd = slaveInfo.slaveEnd === 'start' ? 'endHandle' : 'startHandle';
                                 arrowHandleGroups[sId]?.[freeEnd]?.show();
+                                bringArrowControlsToFront(sId);
                                 showRelatedHandles(sId, visited);
                             }});
                         }}
@@ -4434,7 +4647,7 @@ function rebuildGroupIndexes() {{
                     selectionBoxEndScreen = {{ x: e.clientX, y: e.clientY }};
                     if (selectionBoxRect) selectionBoxRect.remove();
                     selectionBoxRect = handleGroup.rect(0, 0).move(pt.x, pt.y).fill({{ color: '#4da3ff', opacity: 0.12 }}).stroke({{ color: '#4da3ff', width: 1, dasharray: '4,2' }});
-                    getCanvasEl().style.cursor = 'crosshair';
+                    syncCanvasCursor();
                     return;
                 }}
                 e.preventDefault();
@@ -4445,7 +4658,7 @@ function rebuildGroupIndexes() {{
                 startPanY = e.clientY;
                 startViewBoxX = viewBox.x;
                 startViewBoxY = viewBox.y;
-                getCanvasEl().style.cursor = 'grab';
+                syncCanvasCursor();
             }};
             const pan = e => {{
                 if (selectionBoxActive && selectionBoxRect && selectionBoxStart) {{
@@ -4470,7 +4683,7 @@ function rebuildGroupIndexes() {{
                 if (selectionBoxActive) {{
                     selectionBoxActive = false;
                     suppressHoverTooltips = false;
-                    getCanvasEl().style.cursor = 'default';
+                    syncCanvasCursor();
                     if (selectionBoxRect) {{
                         const latestPt = e ? draw.point(e.clientX, e.clientY) : null;
                         selectionBoxEnd = latestPt || selectionBoxEnd || selectionBoxStart;
@@ -4548,7 +4761,7 @@ function rebuildGroupIndexes() {{
                 if (isPanning) {{
                     isPanning = false;
                     suppressHoverTooltips = false;
-                    getCanvasEl().style.cursor = 'default';
+                    syncCanvasCursor();
                 }}
             }};
             const resetView = () => {{
@@ -6224,7 +6437,7 @@ function rebuildGroupIndexes() {{
                 const cx = Number(whichEnd === 'start' ? arrow.x1 : arrow.x2) || 0;
                 const cy = Number(whichEnd === 'start' ? arrow.y1 : arrow.y2) || 0;
                 const handleId = `${{arrowId}}_${{whichEnd}}`;
-                const handle = arrowGroup.circle(6).cx(cx).cy(cy).fill('red').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': handleId, 'data-type': whichEnd === 'start' ? 'arrow-start' : 'arrow-end' }}).hide();
+                const handle = handleGroup.circle(6).cx(cx).cy(cy).fill('red').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': handleId, 'data-type': whichEnd === 'start' ? 'arrow-start' : 'arrow-end' }}).hide();
                 arrowHandleGroups[arrowId][handleKey] = handle;
                 makeDraggable(handle, whichEnd === 'start' ? 'arrow-start' : 'arrow-end', handleId);
             }};
@@ -6250,22 +6463,22 @@ function rebuildGroupIndexes() {{
                 const y2 = Number(arrow.y2 || 0);
                 if (!arrow.attached_arrow_1 && !group.startHandle) {{
                     const startId = arrowId + '_start';
-                    group.startHandle = arrowGroup.circle(6).cx(x1).cy(y1).fill('red').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': startId, 'data-type': 'arrow-start' }}).hide();
+                    group.startHandle = handleGroup.circle(6).cx(x1).cy(y1).fill('red').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': startId, 'data-type': 'arrow-start' }}).hide();
                     makeDraggable(group.startHandle, 'arrow-start', startId);
                 }}
                 if (!arrow.attached_arrow_2 && !group.endHandle) {{
                     const endId = arrowId + '_end';
-                    group.endHandle = arrowGroup.circle(6).cx(x2).cy(y2).fill('red').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': endId, 'data-type': 'arrow-end' }}).hide();
+                    group.endHandle = handleGroup.circle(6).cx(x2).cy(y2).fill('red').stroke({{ color: 'black', width: 1 }}).attr({{ 'data-id': endId, 'data-type': 'arrow-end' }}).hide();
                     makeDraggable(group.endHandle, 'arrow-end', endId);
                 }}
                 if (!group.midHandle) {{
                     const midPoint = getArrowMidpoint(arrow);
-                    group.midHandle = arrowGroup.circle(5.5).cx(Number(midPoint.x || 0)).cy(Number(midPoint.y || 0)).fill(isArrowBent(arrow) ? '#2563eb' : '#94a3b8').stroke({{ color: 'white', width: 1.1 }}).attr({{ 'data-id': arrowId + '_mid', 'data-type': 'arrow-mid', 'data-arrow-id': arrowId }}).hide();
+                    group.midHandle = handleGroup.circle(5.5).cx(Number(midPoint.x || 0)).cy(Number(midPoint.y || 0)).fill(isArrowBent(arrow) ? '#2563eb' : '#94a3b8').stroke({{ color: 'white', width: 1.1 }}).attr({{ 'data-id': arrowId + '_mid', 'data-type': 'arrow-mid', 'data-arrow-id': arrowId }}).hide();
                     makeDraggable(group.midHandle, 'arrow-mid', arrowId + '_mid');
                     if (group.midHandle.node) group.midHandle.node.addEventListener('contextmenu', openArrowMenuLazy);
                 }}
                 if (!group.headHitbox) {{
-                    group.headHitbox = arrowGroup.circle(18).cx(x2).cy(y2).fill({{ color: 'transparent', opacity: 0 }}).stroke({{ color: 'transparent', width: 0 }}).attr({{ 'data-id': arrowId + '_head_hit', 'data-type': 'arrow-hitbox', 'data-arrow-id': arrowId }});
+                    group.headHitbox = handleGroup.circle(18).cx(x2).cy(y2).fill({{ color: 'transparent', opacity: 0 }}).stroke({{ color: 'transparent', width: 0 }}).attr({{ 'data-id': arrowId + '_head_hit', 'data-type': 'arrow-hitbox', 'data-arrow-id': arrowId }});
                     group.headHitbox.node.addEventListener('mousedown', () => {{
                         suppressNextBackgroundClick = true;
                     }});
@@ -6273,6 +6486,7 @@ function rebuildGroupIndexes() {{
                     makeDraggable(group.headHitbox, 'arrow', arrowId);
                 }}
                 refreshArrowGeometry(arrowId);
+                bringArrowControlsToFront(arrowId);
                 return group;
             }}
             const detachDependentArrows = (arrowId) => {{
@@ -6413,7 +6627,8 @@ function rebuildGroupIndexes() {{
                     head = arrowGroup.polygon([[decor.tip.x, decor.tip.y],[decor.left.x, decor.left.y],[decor.right.x, decor.right.y]]).fill(arrowColor).stroke({{ color: arrowColor, width: 0 }}).attr({{ 'data-id': `${{arrowId}}_head`, 'data-type': 'arrow-head' }});
                 }} else if (baseType === 'inhibition') {{
                     const angle = getArrowTangentAngle(arrow, false);
-                    const bar = getArrowInhibitorBar(x2, y2, angle, arrowSize);
+                    const barAngle = getArrowInhibitorBarAngle(arrow, angle);
+                    const bar = getArrowInhibitorBar(x2, y2, barAngle, arrowSize);
                     head = arrowGroup.line(bar.left.x, bar.left.y, bar.right.x, bar.right.y).stroke({{ color: arrowColor, width: 1 }}).attr({{ 'data-id': `${{arrowId}}_head`, 'data-type': 'arrow-head' }});
                 }}
                 updateArrowHeadHitbox(arrowId, x2, y2);
@@ -7275,6 +7490,32 @@ function rebuildGroupIndexes() {{
                 }}
                 return false;
             }};
+            const tryHandleArrowClipboardShortcut = (e) => {{
+                if (!e) return false;
+                if (e.__mkHistoryHandled) return true;
+                const keyLower = typeof e.key === 'string' ? e.key.toLowerCase() : '';
+                if (!(e.ctrlKey || e.metaKey)) return false;
+                if (isEditableTarget(e.target)) return false;
+                if (keyLower === 'c') {{
+                    const copied = copySelectedArrowsToClipboard();
+                    if (!copied) return false;
+                    e.__mkHistoryHandled = true;
+                    e.preventDefault();
+                    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+                    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                    return true;
+                }}
+                if (keyLower === 'v') {{
+                    const created = pasteArrowsFromClipboard();
+                    if (!created.length) return false;
+                    e.__mkHistoryHandled = true;
+                    e.preventDefault();
+                    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+                    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                    return true;
+                }}
+                return false;
+            }};
             document.addEventListener('keydown', e => {{
                 if (e.key === 'Shift') {{
                     shiftKeyDown = true;
@@ -7284,6 +7525,9 @@ function rebuildGroupIndexes() {{
                     return;
                 }}
                 if (tryHandleHistoryShortcut(e)) {{
+                    return;
+                }}
+                if (tryHandleArrowClipboardShortcut(e)) {{
                     return;
                 }}
                 if (isTextEditing && activeTextEditorId) {{
@@ -7447,6 +7691,7 @@ function rebuildGroupIndexes() {{
                 if (e.ctrlKey && !targetEditable) {{
                     if (keyLower === 'a' && e.shiftKey && selectedProtIds.length >= 2) {{ e.preventDefault(); autoConnectSelectedProtboxesShortest?.(); return; }}
                     if (keyLower === 'a' && selectedProtIds.length >= 2) {{ e.preventDefault(); autoConnectSelectedProtboxes(); return; }}
+                    if (keyLower === 'a' && !e.shiftKey && selectionMap.size === 0) {{ e.preventDefault(); setArrowPlacementMode(arrowPlacementMode === 'arrow' ? null : 'arrow'); return; }}
                     if (keyLower === 'i' && selectedProtIds.length === 2) {{ e.preventDefault(); ensureArrowBetweenSelected('inhibition'); return; }}
                     if (keyLower === 'l' && selectedProtIds.length === 2) {{ e.preventDefault(); ensureArrowBetweenSelected('line'); return; }}
                     if (keyLower === 'd') {{
@@ -7488,6 +7733,10 @@ function rebuildGroupIndexes() {{
                 }}
                 if (e.key === 'Escape') {{
                     e.preventDefault();
+                    if (arrowPlacementMode) {{
+                        setArrowPlacementMode(null);
+                        return;
+                    }}
                     exitGroupEditMode();
                     deselectElement();
                     return;
@@ -9176,7 +9425,8 @@ function rebuildGroupIndexes() {{
                             arrowHead = arrowGroup.polygon([[decor.tip.x, decor.tip.y],[decor.left.x, decor.left.y],[decor.right.x, decor.right.y]]).fill(arrowColor).stroke({{ color: arrowColor, width: 0 }}).attr({{ 'data-id': arrowId + '_head', 'data-type': 'arrow-head' }});
                         }} else if (baseLineType === 'inhibition') {{
                             const angle = getArrowTangentAngle(arrow, false);
-                            const bar = getArrowInhibitorBar(x2, y2, angle, arrowSize);
+                            const barAngle = getArrowInhibitorBarAngle(arrow, angle);
+                            const bar = getArrowInhibitorBar(x2, y2, barAngle, arrowSize);
                             arrowHead = arrowGroup.line(bar.left.x, bar.left.y, bar.right.x, bar.right.y).stroke({{ color: arrowColor, width: 1 }}).attr({{ 'data-id': arrowId + '_head', 'data-type': 'arrow-head' }});
                         }}
                         arrowHandleGroups[arrowId] = arrowHandleGroups[arrowId] || {{ startHandle: null, endHandle: null, midHandle: null, headHitbox: null }};
@@ -9619,23 +9869,37 @@ function rebuildGroupIndexes() {{
                 renderTextBox(tb, textBlocks.length - 1, {{ recordHistory: true, startEditing: false }});
                 Shiny?.setInputValue('add_text_box', {{ text_block: tb }}, {{ priority: 'event' }});
             }};
-            const addNewArrow = (type, svgX, svgY) => {{
-                const x1 = svgX - 20;
-                const y1 = svgY;
-                const x2 = svgX + 20;
-                const y2 = svgY;
-                const newArrow = {{ line: type, x1, y1, x2, y2 }};
-                arrows.push(newArrow);
-                drawArrows([newArrow]);
+            const createArrowFromSnapshot = (snapshot, options = {{}}) => {{
+                const clone = normalizeClipboardArrowSnapshot(snapshot);
+                if (!clone) return null;
+                const offsetX = Number(options.offsetX || 0);
+                const offsetY = Number(options.offsetY || 0);
+                clone.x1 = Number(clone.x1 || 0) + offsetX;
+                clone.y1 = Number(clone.y1 || 0) + offsetY;
+                clone.x2 = Number(clone.x2 || 0) + offsetX;
+                clone.y2 = Number(clone.y2 || 0) + offsetY;
+                if (Array.isArray(clone.control_points) && clone.control_points.length) {{
+                    clone.control_points = clone.control_points.map((point) => {{
+                        return {{
+                            x: Number(point?.x || 0) + offsetX,
+                            y: Number(point?.y || 0) + offsetY,
+                        }};
+                    }});
+                }}
+                arrows.push(clone);
+                drawArrows([clone], {{ force: true }});
+                rebuildAttachmentsIndex();
+                const idx = arrows.length - 1;
+                const arrowId = arrowIdFromIndex(idx);
+                updateAttachedArrows(arrowId, 'start');
+                updateAttachedArrows(arrowId, 'end');
                 if (mkHistory) {{
-                    const idx = arrows.length - 1;
-                    const arrowId = arrowIdFromIndex(idx);
-                    const snapshot = cloneData(newArrow);
+                    const snapshotCopy = cloneData(clone);
                     const entry = {{
                         kind: 'arrow-create',
                         arrowId,
                         index: idx,
-                        snapshot
+                        snapshot: snapshotCopy
                     }};
                     entry.handlers = {{
                         undo: () => mkHistory.runWithoutRecording(() => {{
@@ -9657,39 +9921,73 @@ function rebuildGroupIndexes() {{
                     }};
                     mkHistory.recordAction(entry);
                 }}
-                Shiny?.setInputValue('add_arrow', {{ line: type, x1, y1, x2, y2 }}, {{ priority: 'event' }});
+                if (options.sync !== false) {{
+                    const payload = buildArrowInputPayload(clone);
+                    if (payload) {{
+                        Shiny?.setInputValue('add_arrow', payload, {{ priority: 'event' }});
+                    }}
+                }}
+                return arrowId;
+            }};
+            const pasteArrowsFromClipboard = () => {{
+                if (!Array.isArray(arrowClipboard) || !arrowClipboard.length) return [];
+                setArrowPlacementMode(null);
+                arrowClipboardPasteCount += 1;
+                const offset = ARROW_CLIPBOARD_PASTE_OFFSET * arrowClipboardPasteCount;
+                const createdIds = arrowClipboard
+                    .map((snapshot) => createArrowFromSnapshot(snapshot, {{ offsetX: offset, offsetY: offset }}))
+                    .filter(Boolean);
+                if (!createdIds.length) return [];
+                deselectElement();
+                createdIds.forEach((arrowId, idx) => {{
+                    const target = draw.findOne(`[data-id="${{arrowId}}"]`);
+                    if (target) {{
+                        selectElement(target, 'arrow', arrowId, null, {{ additive: idx > 0 }});
+                    }}
+                }});
+                return createdIds;
+            }};
+            const createStandaloneArrow = (type, x1, y1, x2, y2) => {{
+                return createArrowFromSnapshot({{ line: type, x1, y1, x2, y2 }});
+            }};
+            const addNewArrow = (type, svgX, svgY) => {{
+                return createStandaloneArrow(type, svgX - 20, svgY, svgX + 20, svgY);
             }};
             Object.assign(viewerControlApi, {{
                 searchObjects: (query, limit = 40) => searchObjectCatalog(query, limit),
                 searchProteins: (query, limit = 40) => searchProteinCatalog(query, limit),
                 addProtbox: (uniprot) => {{
                     if (!uniprot) return false;
+                    setArrowPlacementMode(null);
                     const center = getViewportCenter();
                     createProtboxAtPosition(uniprot, center.x, center.y);
                     return true;
                 }},
                 addCompound: (hmdbId) => {{
                     if (!hmdbId) return false;
+                    setArrowPlacementMode(null);
                     const center = getViewportCenter();
                     createCompoundAtPosition(hmdbId, center.x, center.y);
                     return true;
                 }},
                 addArrow: (type = 'arrow') => {{
-                    const center = getViewportCenter();
-                    addNewArrow(type, center.x, center.y);
+                    setArrowPlacementMode(arrowPlacementMode === String(type || 'arrow') ? null : String(type || 'arrow'));
                     return true;
                 }},
                 addShape: (shapeType = 'square') => {{
+                    setArrowPlacementMode(null);
                     const center = getViewportCenter();
                     addNewShape(shapeType, center.x, center.y);
                     return true;
                 }},
                 addText: () => {{
+                    setArrowPlacementMode(null);
                     const center = getViewportCenter();
                     addNewTextBox(center.x, center.y);
                     return true;
                 }},
                 addLegend: (orientation = 'vertical') => {{
+                    setArrowPlacementMode(null);
                     const center = getViewportCenter();
                     createFigureKey(orientation, center.x, center.y);
                     return true;
@@ -9727,7 +10025,9 @@ function rebuildGroupIndexes() {{
                     const arrowId = resolveSelectedArrowActionId();
                     return arrowId ? flipArrowId(arrowId) : null;
                 }},
+                getArrowPlacementMode: () => (arrowPlacementMode || ''),
                 setMouseMode: (mode = 'drag') => {{
+                    setArrowPlacementMode(null);
                     mouseMode = mode === 'selection' ? 'selection' : 'drag';
                     emitMouseModeState();
                     return mouseMode;
@@ -10302,6 +10602,21 @@ def server(input, output, session):
                         arrow['dashed'] = bool(moved.get('dashed'))
                     if 'color' in moved and moved.get('color') is not None:
                         arrow['color'] = moved.get('color')
+                    if 'control_points' in moved:
+                        control_points = moved.get('control_points')
+                        if isinstance(control_points, list):
+                            normalized_control_points = []
+                            for point in control_points:
+                                if not isinstance(point, dict):
+                                    continue
+                                try:
+                                    normalized_control_points.append({
+                                        'x': float(point.get('x', 0)),
+                                        'y': float(point.get('y', 0))
+                                    })
+                                except (TypeError, ValueError):
+                                    continue
+                            arrow['control_points'] = normalized_control_points
         _set_active_json(json_data)
 
     @reactive.Effect
@@ -10378,6 +10693,25 @@ def server(input, output, session):
             'x2': added['x2'],
             'y2': added['y2']
         }
+        if 'dashed' in added:
+            new_arrow['dashed'] = bool(added.get('dashed'))
+        if added.get('color') is not None:
+            new_arrow['color'] = added.get('color')
+        control_points = added.get('control_points')
+        if isinstance(control_points, list):
+            normalized_control_points = []
+            for point in control_points:
+                if not isinstance(point, dict):
+                    continue
+                try:
+                    normalized_control_points.append({
+                        'x': float(point.get('x', 0)),
+                        'y': float(point.get('y', 0))
+                    })
+                except (TypeError, ValueError):
+                    continue
+            if normalized_control_points:
+                new_arrow['control_points'] = normalized_control_points
         json_data['arrows'].append(new_arrow)
         _set_active_json(json_data)
     @reactive.Effect

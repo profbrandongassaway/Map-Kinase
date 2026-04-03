@@ -37,6 +37,8 @@ _DEFAULT_NEGATIVE_COLOR = (0, 114, 178)
 _DEFAULT_POSITIVE_COLOR = (0, 158, 115)
 _DEFAULT_MAX_NEGATIVE = -2.0
 _DEFAULT_MAX_POSITIVE = 2.0
+HUMAN_ORTHOLOG_UNIPROT_COLUMN = "Human_Ortholog_UniProt"
+HUMAN_ORTHOLOG_GENE_COLUMN = "Human_Ortholog_Gene"
 _CST_CONTEXT_WORDS = {
     "ACTIVATION",
     "SIGNALING",
@@ -73,6 +75,21 @@ _PDF_BOX_RE = re.compile(
 
 def _resolve_base_dir(base_dir: Optional[Path] = None) -> Path:
     return Path(base_dir) if base_dir is not None else Path(__file__).resolve().parent
+
+
+def _resolve_cst_dataset_keys(headers: Sequence[Any]) -> Dict[str, str]:
+    header_list = [str(header or "").strip() for header in list(headers or []) if str(header or "").strip()]
+    display_uniprot_key = header_list[0] if header_list else ""
+    display_gene_key = header_list[1] if len(header_list) > 1 else ""
+    normalized_headers = {header: header for header in header_list}
+    ortholog_uniprot_key = normalized_headers.get(HUMAN_ORTHOLOG_UNIPROT_COLUMN, "")
+    ortholog_gene_key = normalized_headers.get(HUMAN_ORTHOLOG_GENE_COLUMN, "")
+    return {
+        "display_uniprot_key": display_uniprot_key,
+        "display_gene_key": display_gene_key,
+        "match_uniprot_key": ortholog_uniprot_key or display_uniprot_key,
+        "match_gene_key": ortholog_gene_key or (display_gene_key if not ortholog_uniprot_key else ""),
+    }
 
 
 def _normalize_forced_pathway_key(file_path: Path) -> str:
@@ -249,13 +266,14 @@ def _build_cst_ptm_index(
     rows = list(ptm_dataset.get("rows") or [])
     if len(headers) < 2:
         return {"enabled": False, "max_display": max_display, "items_by_uniprot": {}}
+    dataset_keys = _resolve_cst_dataset_keys(headers)
     classified_rows = _classify_cst_ptm_rows(headers, rows)
     main_headers = _normalize_fc_headers(
         ptm_dataset.get("main_columns") or [header for header in headers if str(header).startswith("C:")]
     )
     outline_headers = list(ptm_dataset.get("outline_columns") or _resolve_outline_columns(main_headers, headers))
     tooltip_columns = _infer_ptm_tooltip_columns(ptm_dataset)
-    uniprot_key = headers[0]
+    uniprot_key = str(dataset_keys.get("match_uniprot_key") or (headers[0] if headers else "")).strip()
     site_key = headers[1]
     label_font = str(settings.get("ptm_label_font") or "Arial")
     label_color = _coerce_rgb(settings.get("ptm_label_color"), (0, 0, 0))
@@ -1577,6 +1595,10 @@ def _build_dataset_index(dataset: Optional[Dict[str, Any]]) -> Dict[str, Any]:
             "rows_by_gene": {},
             "tooltip_columns": [],
             "headers": [],
+            "display_uniprot_key": "",
+            "display_gene_key": "",
+            "match_uniprot_key": "",
+            "match_gene_key": "",
         }
     headers = list(dataset.get("headers") or [])
     rows = list(dataset.get("rows") or [])
@@ -1588,6 +1610,10 @@ def _build_dataset_index(dataset: Optional[Dict[str, Any]]) -> Dict[str, Any]:
             "rows_by_gene": {},
             "tooltip_columns": [],
             "headers": [],
+            "display_uniprot_key": "",
+            "display_gene_key": "",
+            "match_uniprot_key": "",
+            "match_gene_key": "",
         }
     fc_headers = _normalize_fc_headers(dataset.get("main_columns") or [h for h in headers if str(h).startswith("C:")])
     outline_headers = list(dataset.get("outline_columns") or _resolve_outline_columns(fc_headers, headers))
@@ -1600,8 +1626,9 @@ def _build_dataset_index(dataset: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         tooltip_columns.extend([header for header in headers if str(header).startswith("T:") and header not in tooltip_columns])
     rows_by_uniprot: Dict[str, Dict[str, Any]] = {}
     rows_by_gene: Dict[str, List[Dict[str, Any]]] = {}
-    uniprot_key = headers[0]
-    gene_key = headers[1] if len(headers) > 1 else ""
+    dataset_keys = _resolve_cst_dataset_keys(headers)
+    uniprot_key = str(dataset_keys.get("match_uniprot_key") or "").strip()
+    gene_key = str(dataset_keys.get("match_gene_key") or "").strip()
     for row in rows:
         values = list(row)
         if len(values) < len(headers):
@@ -1621,6 +1648,10 @@ def _build_dataset_index(dataset: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "rows_by_gene": rows_by_gene,
         "tooltip_columns": tooltip_columns,
         "headers": headers,
+        "display_uniprot_key": str(dataset_keys.get("display_uniprot_key") or ""),
+        "display_gene_key": str(dataset_keys.get("display_gene_key") or ""),
+        "match_uniprot_key": str(dataset_keys.get("match_uniprot_key") or ""),
+        "match_gene_key": str(dataset_keys.get("match_gene_key") or ""),
     }
 
 
@@ -1636,8 +1667,8 @@ def _build_cst_search_catalog(
     headers = list(dataset_index.get("headers") or [])
     if not headers:
         return []
-    uniprot_key = headers[0]
-    gene_key = headers[1] if len(headers) > 1 else ""
+    uniprot_key = str(dataset_index.get("match_uniprot_key") or (headers[0] if headers else "")).strip()
+    gene_key = str(dataset_index.get("display_gene_key") or (headers[1] if len(headers) > 1 else "")).strip()
     fc_headers = list(dataset_index.get("fc_headers") or [])
     outline_headers = list(dataset_index.get("outline_headers") or [])
     tooltip_columns = list(dataset_index.get("tooltip_columns") or [])
@@ -1824,15 +1855,16 @@ def _build_dataset_tooltip(row_map: Optional[Dict[str, Any]], tooltip_columns: S
 
 def _select_dataset_tooltip_row(
     matches: Sequence[Dict[str, Any]],
-    headers: Sequence[Any],
+    dataset_index: Dict[str, Any],
     matched_uniprot: str = "",
     matched_gene: str = "",
 ) -> Optional[Dict[str, Any]]:
     rows = [row for row in list(matches or []) if isinstance(row, dict)]
     if not rows:
         return None
-    uniprot_key = str(headers[0] or "").strip() if headers else ""
-    gene_key = str(headers[1] or "").strip() if len(list(headers or [])) > 1 else ""
+    headers = list(dataset_index.get("headers") or [])
+    uniprot_key = str(dataset_index.get("match_uniprot_key") or (headers[0] if headers else "")).strip()
+    gene_key = str(dataset_index.get("display_gene_key") or (headers[1] if len(headers) > 1 else "")).strip()
     matched_uniprot_norm = str(matched_uniprot or "").strip().upper().split("-", 1)[0]
     matched_gene_norm = str(matched_gene or "").strip().upper()
     if matched_uniprot_norm and uniprot_key:
@@ -1867,19 +1899,22 @@ def _build_cst_protein_options(
     outline_headers = list(dataset_index.get("outline_headers") or [])
     if not matches or not headers:
         return []
-    uniprot_key = headers[0]
-    gene_key = headers[1] if len(headers) > 1 else ""
+    match_uniprot_key = str(dataset_index.get("match_uniprot_key") or (headers[0] if headers else "")).strip()
+    display_gene_key = str(dataset_index.get("display_gene_key") or (headers[1] if len(headers) > 1 else "")).strip()
+    match_gene_key = str(dataset_index.get("match_gene_key") or "").strip()
     options: List[Dict[str, Any]] = []
     seen: set[str] = set()
     for row in matches:
-        uniprot = str(row.get(uniprot_key, "") or "").strip()
+        uniprot = str(row.get(match_uniprot_key, "") or "").strip()
         if not uniprot or uniprot in seen:
             continue
         seen.add(uniprot)
-        gene_symbol = str(row.get(gene_key, "") or "").strip() if gene_key else ""
+        gene_symbol = str(row.get(display_gene_key, "") or "").strip() if display_gene_key else ""
+        match_gene_symbol = str(row.get(match_gene_key, "") or "").strip() if match_gene_key else gene_symbol
         option: Dict[str, Any] = {
             "uniprot": uniprot,
             "gene_symbol": gene_symbol,
+            "match_gene_symbol": match_gene_symbol,
         }
         option.update(_build_dataset_tooltip(row, tooltip_columns))
         for idx, header in enumerate(fc_headers, 1):
@@ -1944,13 +1979,15 @@ def _choose_complex_display_members(
     fc_headers = list(dataset_index.get("fc_headers") or [])
     rows_by_uniprot = dataset_index.get("rows_by_uniprot", {})
     rows_by_gene = dataset_index.get("rows_by_gene", {})
+    match_uniprot_key = str(dataset_index.get("match_uniprot_key") or (headers[0] if headers else "")).strip()
+    display_gene_key = str(dataset_index.get("display_gene_key") or (headers[1] if len(headers) > 1 else "")).strip()
     output: List[Dict[str, Any]] = []
     for component in list(mapping.get("complex_components") or []):
         component_label = str(component.get("component_label") or "").strip()
         for group in list(component.get("member_groups") or []):
             candidate_genes = [str(item or "").strip().upper() for item in list(group.get("candidate_gene_symbols") or []) if str(item or "").strip()]
             candidate_ids = [str(item or "").strip().upper().split("-", 1)[0] for item in list(group.get("candidate_uniprot_ids") or []) if str(item or "").strip()]
-            chosen_gene = candidate_genes[0] if candidate_genes else ""
+            chosen_gene = component_label or (candidate_genes[0] if candidate_genes else "")
             chosen_uniprot = candidate_ids[0] if candidate_ids else ""
             chosen_row: Optional[Dict[str, Any]] = None
             chosen_fc: Optional[float] = None
@@ -1969,8 +2006,8 @@ def _choose_complex_display_members(
                         continue
                     chosen_uniprot = uniprot_id
                     chosen_row = matched_row
-                    if headers and len(headers) > 1:
-                        chosen_gene = str(matched_row.get(headers[1], "") or chosen_gene)
+                    if display_gene_key:
+                        chosen_gene = str(matched_row.get(display_gene_key, "") or chosen_gene)
                     break
 
             fill_rgb = [229, 231, 235]
@@ -1996,9 +2033,9 @@ def _choose_complex_display_members(
                         max_positive,
                     )
                 if headers:
-                    matched_uniprot = str(chosen_row.get(headers[0], "") or matched_uniprot)
-                    if len(headers) > 1:
-                        matched_gene = str(chosen_row.get(headers[1], "") or matched_gene)
+                    matched_uniprot = str(chosen_row.get(match_uniprot_key, "") or matched_uniprot)
+                    if display_gene_key:
+                        matched_gene = str(chosen_row.get(display_gene_key, "") or matched_gene)
 
             output.append({
                 "component_label": component_label,
@@ -2090,7 +2127,7 @@ def _build_cst_overlay_nodes(
             "tooltip_html": "",
         }
         if matches:
-            tooltip_row = _select_dataset_tooltip_row(matches, dataset_index.get("headers") or [])
+            tooltip_row = _select_dataset_tooltip_row(matches, dataset_index)
             overlay_node.update(_build_dataset_tooltip(tooltip_row, tooltip_columns))
 
         for idx, header in enumerate(fc_headers, 1):
@@ -2130,8 +2167,8 @@ def _build_cst_overlay_nodes(
                 )
             )
             if dataset_index.get("headers"):
-                uniprot_key = dataset_index["headers"][0]
-                gene_key = dataset_index["headers"][1] if len(dataset_index["headers"]) > 1 else ""
+                uniprot_key = str(dataset_index.get("match_uniprot_key") or (dataset_index["headers"][0] if dataset_index["headers"] else "")).strip()
+                gene_key = str(dataset_index.get("display_gene_key") or (dataset_index["headers"][1] if len(dataset_index["headers"]) > 1 else "")).strip()
                 overlay_node[f"matched_uniprot_{idx}"] = str(chosen_row.get(uniprot_key, "") or "")
                 overlay_node[f"matched_gene_symbol_{idx}"] = str(chosen_row.get(gene_key, "") or "") if gene_key else ""
         overlay_node["stroke_width"] = max(0.6, float(prot_outline_width or 1.0))
@@ -2266,6 +2303,8 @@ def _build_editable_node_from_saved_entry(
     outline_headers = list(dataset_index.get("outline_headers") or [])
     tooltip_columns = list(dataset_index.get("tooltip_columns") or [])
     headers = list(dataset_index.get("headers") or [])
+    match_uniprot_key = str(dataset_index.get("match_uniprot_key") or (headers[0] if headers else "")).strip()
+    display_gene_key = str(dataset_index.get("display_gene_key") or (headers[1] if len(headers) > 1 else "")).strip()
     complex_members = _choose_complex_display_members(
         mapping,
         dataset_index,
@@ -2331,15 +2370,15 @@ def _build_editable_node_from_saved_entry(
             stroke_rgb = list(outline_color)
             fold_text = f"{chosen_value:.3f}"
             if headers:
-                matched_uniprot = str(chosen_row.get(headers[0], "") or "")
-                if len(headers) > 1:
-                    matched_gene = str(chosen_row.get(headers[1], "") or "")
+                matched_uniprot = str(chosen_row.get(match_uniprot_key, "") or "")
+                if display_gene_key:
+                    matched_gene = str(chosen_row.get(display_gene_key, "") or "")
         else:
             break
 
     tooltip_row = _select_dataset_tooltip_row(
         matches,
-        headers,
+        dataset_index,
         matched_uniprot=matched_uniprot,
         matched_gene=matched_gene,
     )
@@ -5744,6 +5783,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     pushUndoSnapshot(local, buildSnapshot(local));
                     const nextGene = String(option.gene_symbol || '').trim();
                     const nextUniprot = String(option.uniprot || '').trim();
+                    const nextMatchGene = String(option.match_gene_symbol || nextGene || '').trim();
                     node.matchedGene = nextGene;
                     node.matchedUniprot = nextUniprot;
                     const currentCandidates = Array.isArray(node.candidateUniprotIds) ? node.candidateUniprotIds : [];
@@ -5753,8 +5793,8 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     ];
                     const currentGenes = Array.isArray(node.suggestedGeneSymbols) ? node.suggestedGeneSymbols : [];
                     node.suggestedGeneSymbols = [
-                        ...(nextGene ? [nextGene] : []),
-                        ...currentGenes.filter((item) => String(item || '').trim() && String(item || '').trim() !== nextGene),
+                        ...(nextMatchGene ? [nextMatchGene] : []),
+                        ...currentGenes.filter((item) => String(item || '').trim() && String(item || '').trim() !== nextMatchGene),
                     ];
                     if (nextGene) {{
                         node.displayLabel = nextGene;

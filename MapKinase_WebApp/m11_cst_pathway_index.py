@@ -14,6 +14,7 @@ DEFAULT_CST_PATHWAYS_DIR = BASE_DIR / "cache" / "CST_Pathways"
 DEFAULT_CST_INDEX_FILE = BASE_DIR / "cache" / "CST_pathway_module_index.json"
 DEFAULT_CST_LOADED_MODULES_CSV = BASE_DIR / "cache" / "cst_loaded_protein_modules.csv"
 DEFAULT_CST_UNIQUE_NAMES_CSV = BASE_DIR / "cache" / "cst_unique_protein_module_names.csv"
+DEFAULT_INDEX_FILES_DIR = BASE_DIR / "index_files"
 _PATHWAY_STOPWORDS = {"pathway", "diagram", "interactive", "overview"}
 
 
@@ -238,6 +239,69 @@ def build_cst_loaded_module_reports(
         "loaded_modules_csv": str(loaded_modules_csv.resolve()),
         "unique_names_csv": str(unique_names_csv.resolve()),
     }
+
+
+def build_cst_fisher_index(
+    cst_ai_dir: Path,
+    output_file: Optional[Path] = None,
+    species_code: str = "",
+) -> Dict[str, Any]:
+    grouped: Dict[str, Dict[str, Any]] = {}
+    for row in iter_effective_cst_modules(cst_ai_dir):
+        if not isinstance(row, dict):
+            continue
+        pathway_name = _normalize_text(str(row.get("pathway") or ""))
+        protein_name = _normalize_text(str(row.get("protein_module_name") or ""))
+        if not pathway_name or not protein_name:
+            continue
+        pathway_id = "cst_" + re.sub(r"[^a-z0-9]+", "_", pathway_name.strip().lower()).strip("_")
+        pathway_entry = grouped.setdefault(
+            pathway_id,
+            {
+                "pathway_id": pathway_id,
+                "name": pathway_name,
+                "modules": [],
+                "resolved_uniprots": [],
+                "gene_symbols": [],
+            },
+        )
+        module_uniprots: List[str] = []
+        for field_name in ("psp_uniprot_ids", "backup_uniprot_ids"):
+            raw_val = str(row.get(field_name) or "")
+            for item in raw_val.split(";"):
+                token = str(item or "").strip().upper()
+                if token and token not in module_uniprots:
+                    module_uniprots.append(token)
+                if token and token not in pathway_entry["resolved_uniprots"]:
+                    pathway_entry["resolved_uniprots"].append(token)
+        module_gene_symbols: List[str] = []
+        raw_genes = str(row.get("gene_symbols") or "")
+        for item in raw_genes.split(";"):
+            symbol = str(item or "").strip().upper()
+            if symbol and symbol not in module_gene_symbols:
+                module_gene_symbols.append(symbol)
+            if symbol and symbol not in pathway_entry["gene_symbols"]:
+                pathway_entry["gene_symbols"].append(symbol)
+        pathway_entry["modules"].append(
+            {
+                "label": protein_name,
+                "uniprot_ids": module_uniprots,
+                "gene_symbols": module_gene_symbols,
+            }
+        )
+
+    payload = {
+        "generated_at_utc": datetime.now(UTC).isoformat(),
+        "species_code": str(species_code or "").strip().lower(),
+        "source_dir": str(cst_ai_dir.resolve()),
+        "pathway_count": len(grouped),
+        "pathways": list(grouped.values()),
+        "nodes": {},
+    }
+    if output_file is not None:
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        output_file.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    return payload
 
 
 @lru_cache(maxsize=4)

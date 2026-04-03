@@ -79,7 +79,143 @@ DISPLAY_TYPE_CHOICES = sorted({
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 INDEX_FILES_DIR = os.path.join(BASE_DIR, "index_files")
 ANNOTATION_FILES_DIR = os.path.join(BASE_DIR, "annotation_files")
-ICONS_DIR = os.path.join(BASE_DIR, "icons")
+HUMAN_ORTHOLOG_UNIPROT_COLUMN = "Human_Ortholog_UniProt"
+HUMAN_ORTHOLOG_GENE_COLUMN = "Human_Ortholog_Gene"
+_HUMAN_ORTHOLOG_LOOKUP_CACHE: Optional[Dict[str, Dict[str, Dict[str, str]]]] = None
+
+
+def _resolve_human_ortholog_map_file() -> Optional[Path]:
+    candidates = [
+        Path(ANNOTATION_FILES_DIR) / "hsa_uniprot_map_ortholog_map_long.tsv",
+    ]
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        candidates.extend([
+            Path(sys._MEIPASS) / "MapKinase_WebApp" / "annotation_files" / "hsa_uniprot_map_ortholog_map_long.tsv",
+            Path(sys._MEIPASS) / "annotation_files" / "hsa_uniprot_map_ortholog_map_long.tsv",
+        ])
+    for path in candidates:
+        if path.exists():
+            return path
+    return None
+
+
+def _ortholog_priority(entry: Dict[str, str]) -> Tuple[int, float]:
+    orthology_type = str(entry.get("orthology_type") or "").strip().lower()
+    try:
+        identity = float(entry.get("identity") or 0.0)
+    except (TypeError, ValueError):
+        identity = 0.0
+    if orthology_type == "ortholog_one2one":
+        return (3, identity)
+    if orthology_type == "ortholog_one2many":
+        return (2, identity)
+    if orthology_type == "ortholog_many2many":
+        return (1, identity)
+    return (0, identity)
+
+
+def _load_human_ortholog_lookup() -> Dict[str, Dict[str, Dict[str, str]]]:
+    global _HUMAN_ORTHOLOG_LOOKUP_CACHE
+    if _HUMAN_ORTHOLOG_LOOKUP_CACHE is not None:
+        return _HUMAN_ORTHOLOG_LOOKUP_CACHE
+    lookup: Dict[str, Dict[str, Dict[str, str]]] = {"mmu": {}, "rno": {}}
+    ortholog_path = _resolve_human_ortholog_map_file()
+    if ortholog_path is None:
+        print("Warning: human ortholog mapping file not found.")
+        _HUMAN_ORTHOLOG_LOOKUP_CACHE = lookup
+        return lookup
+    try:
+        with ortholog_path.open("r", encoding="utf-8", newline="") as fh:
+            reader = csv.DictReader(fh, delimiter="\t")
+            for raw_row in reader:
+                row = {str(k or "").strip(): str(v or "").strip() for k, v in dict(raw_row or {}).items()}
+                human_uniprot = normalize_uniprot(
+                    row.get("Human UniProt (resolved)") or row.get("Human UniProt (input)") or ""
+                )
+                human_gene = str(row.get("Human gene") or "").strip()
+                if not human_uniprot:
+                    continue
+                for species_code, prefix in (("mmu", "Mouse"), ("rno", "Rat")):
+                    source_uniprot = normalize_uniprot(row.get(f"{prefix} UniProt") or "")
+                    if not source_uniprot:
+                        continue
+                    candidate = {
+                        "human_uniprot": human_uniprot,
+                        "human_gene": human_gene,
+                        "source_gene": str(row.get(f"{prefix} gene") or "").strip(),
+                        "orthology_type": str(row.get(f"{prefix} orthology type") or "").strip(),
+                        "identity": str(row.get(f"{prefix} % identity") or "").strip(),
+                    }
+                    current = lookup[species_code].get(source_uniprot)
+                    if current is None or _ortholog_priority(candidate) > _ortholog_priority(current):
+                        lookup[species_code][source_uniprot] = candidate
+    except Exception as exc:
+        print(f"Warning: failed to load human ortholog mappings: {exc}")
+    _HUMAN_ORTHOLOG_LOOKUP_CACHE = lookup
+    return lookup
+
+
+def _annotate_dataset_with_human_orthologs(dataset: Dict[str, Any], species_code: str) -> Dict[str, Any]:
+    code = str(species_code or "").strip().lower()
+    if code not in {"mmu", "rno"}:
+        return dataset
+    headers = list(dataset.get("headers") or [])
+    rows = list(dataset.get("rows") or [])
+    if not headers:
+        return dataset
+    ortholog_lookup = _load_human_ortholog_lookup().get(code, {})
+    out_headers = list(headers)
+    if HUMAN_ORTHOLOG_UNIPROT_COLUMN in out_headers:
+        human_uniprot_idx = out_headers.index(HUMAN_ORTHOLOG_UNIPROT_COLUMN)
+    else:
+        human_uniprot_idx = len(out_headers)
+        out_headers.append(HUMAN_ORTHOLOG_UNIPROT_COLUMN)
+    if HUMAN_ORTHOLOG_GENE_COLUMN in out_headers:
+        human_gene_idx = out_headers.index(HUMAN_ORTHOLOG_GENE_COLUMN)
+    else:
+        human_gene_idx = len(out_headers)
+        out_headers.append(HUMAN_ORTHOLOG_GENE_COLUMN)
+    out_rows: List[List[str]] = []
+    for row in rows:
+        values = list(row or [])
+        if len(values) < len(headers):
+            values.extend([""] * (len(headers) - len(values)))
+        if len(values) < len(out_headers):
+            values.extend([""] * (len(out_headers) - len(values)))
+        source_uniprot = normalize_uniprot(values[0] if values else "")
+        ortholog_entry = ortholog_lookup.get(source_uniprot, {})
+        values[human_uniprot_idx] = str(ortholog_entry.get("human_uniprot") or "")
+        values[human_gene_idx] = str(ortholog_entry.get("human_gene") or "")
+        out_rows.append(values)
+    output = dict(dataset)
+    output["headers"] = out_headers
+    output["rows"] = out_rows
+    return output
+
+
+def _resolve_cst_ortholog_columns(columns: Sequence[Any]) -> Tuple[str, str]:
+    normalized = {str(col or "").strip(): str(col or "").strip() for col in list(columns or []) if str(col or "").strip()}
+    return (
+        normalized.get(HUMAN_ORTHOLOG_UNIPROT_COLUMN, ""),
+        normalized.get(HUMAN_ORTHOLOG_GENE_COLUMN, ""),
+    )
+
+
+def _resolve_icons_dir() -> str:
+    candidates = [os.path.join(BASE_DIR, "icons")]
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        candidates.extend([
+            os.path.join(sys._MEIPASS, "MapKinase_WebApp", "icons"),
+            os.path.join(sys._MEIPASS, "icons"),
+        ])
+    for path in candidates:
+        if os.path.isdir(path):
+            return path
+    print(f"Warning: icons directory not found (searched: {candidates})")
+    return candidates[0]
+
+
+ICONS_DIR = _resolve_icons_dir()
 
 
 def _resolve_kegg_pathways_file() -> str:
@@ -1270,6 +1406,12 @@ CUSTOM_STYLES = ui.tags.style(
     .mk-export-spinner { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #1f2937; }
     .mk-export-spinner::before { content: ""; width: 14px; height: 14px; border: 2px solid #cbd5e1;
         border-top-color: #1f2937; border-radius: 50%; animation: mk-spin 0.8s linear infinite; }
+    .web-load-spinner { display: none; align-items: center; gap: 6px; font-size: 12px; color: #1f2937; white-space: nowrap; }
+    .web-load-spinner::before { content: ""; width: 14px; height: 14px; border: 2px solid #cbd5e1;
+        border-top-color: #1f2937; border-radius: 50%; animation: mk-spin 0.8s linear infinite; }
+    .web-load-spinner.active { display: inline-flex; }
+    .web-load-error { display: inline-flex; align-items: center; font-size: 12px; font-weight: 700; color: #b91c1c; max-width: 520px;
+        line-height: 1.35; }
     @keyframes mk-spin { to { transform: rotate(360deg); } }
     .mode-controls { margin-top: 0.75rem; padding-top: 0.75rem; padding-bottom: 0.75rem;
         border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; margin-bottom: 0.75rem; }
@@ -1348,6 +1490,36 @@ CUSTOM_STYLES = ui.tags.style(
     .mk-input-busy-copy { min-width: 0; }
     .mk-input-busy-title { font-size: 15px; font-weight: 800; color: #0f172a; line-height: 1.2; }
     .mk-input-busy-text { margin-top: 4px; font-size: 12px; color: #475569; line-height: 1.45; }
+    .input-run-btn {
+        width: 100%;
+        min-height: 48px;
+        border: 0;
+        border-radius: 14px;
+        background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+        box-shadow: 0 12px 28px rgba(22, 163, 74, 0.24);
+    }
+    .input-run-btn:hover,
+    .input-run-btn:focus {
+        background: linear-gradient(180deg, #1fb956 0%, #15803d 100%);
+        color: #ffffff;
+    }
+    .input-run-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+    .input-run-status {
+        margin-top: 10px;
+        font-size: 12px;
+        line-height: 1.45;
+        color: #475569;
+        min-height: 34px;
+        white-space: normal;
+    }
     .input-sample-download-row { display: inline-flex; align-items: center; gap: 8px; margin-top: 2px; }
     .input-sample-download-btn {
         width: 34px; height: 34px; min-width: 34px; padding: 0; border-radius: 10px;
@@ -1449,6 +1621,9 @@ CUSTOM_STYLES = ui.tags.style(
     .viewer-create-field:focus { outline: none; border-color: #94a3b8; box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.18); }
     .viewer-create-field.viewer-create-search { width: 190px; }
     .viewer-create-field.viewer-create-select { min-width: 51px; width: 51px; padding-left: 22px; padding-right: 10px; color: transparent; text-shadow: none; }
+    .viewer-create-select-wrap.is-active .viewer-create-field.viewer-create-select { background: linear-gradient(180deg, #dbeafe, #bfdbfe);
+        border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18); }
+    .viewer-create-select-wrap.is-active .viewer-create-select-icon { color: #1d4ed8; }
     .viewer-create-field.viewer-create-select-interaction { width: 51px; min-width: 51px; }
     .viewer-create-field.viewer-create-select-shape { width: 51px; min-width: 51px; }
     .viewer-create-field.viewer-create-select option { color: #0f172a; }
@@ -1576,8 +1751,15 @@ INPUT_BUSY_SCRIPT = ui.tags.script(
     """
     (function(){
         let datasetLoadPending = false;
+        let forcedBusy = false;
         function overlay(){
             return document.getElementById("mk-input-busy-overlay");
+        }
+        function titleEl(){
+            return document.querySelector('#mk-input-busy-overlay .mk-input-busy-title');
+        }
+        function textEl(){
+            return document.querySelector('#mk-input-busy-overlay .mk-input-busy-text');
         }
         function inputTabActive(){
             return !!document.querySelector('#bookmark_selector a.nav-link.active[data-value="input"]');
@@ -1592,6 +1774,23 @@ INPUT_BUSY_SCRIPT = ui.tags.script(
             if (!el) return;
             el.classList.remove("is-visible");
         }
+        if (window.Shiny && Shiny.addCustomMessageHandler){
+            Shiny.addCustomMessageHandler("set_input_busy_state", function(msg){
+                forcedBusy = !!(msg && msg.active);
+                const nextTitle = msg && msg.title ? String(msg.title) : '';
+                const nextText = msg && msg.text ? String(msg.text) : '';
+                const title = titleEl();
+                const text = textEl();
+                if (nextTitle && title) title.textContent = nextTitle;
+                if (nextText && text) text.textContent = nextText;
+                if (forcedBusy && inputTabActive()){
+                    showOverlay();
+                } else {
+                    datasetLoadPending = false;
+                    hideOverlay();
+                }
+            });
+        }
         document.addEventListener("change", function(ev){
             const target = ev && ev.target;
             if (!target) return;
@@ -1603,17 +1802,27 @@ INPUT_BUSY_SCRIPT = ui.tags.script(
                 hideOverlay();
             }
         }, true);
+        document.addEventListener("click", function(ev){
+            const target = ev && ev.target && ev.target.closest ? ev.target.closest("#input_run_pipeline") : null;
+            if (!target) return;
+            forcedBusy = true;
+            if (inputTabActive()){
+                showOverlay();
+            }
+        }, true);
         document.addEventListener("shiny:busy", function(){
-            if (datasetLoadPending && inputTabActive()){
+            if ((datasetLoadPending || forcedBusy) && inputTabActive()){
                 showOverlay();
             }
         });
         document.addEventListener("shiny:idle", function(){
             datasetLoadPending = false;
-            hideOverlay();
+            if (!forcedBusy){
+                hideOverlay();
+            }
         });
         document.addEventListener("shown.bs.tab", function(){
-            if (!(datasetLoadPending && inputTabActive())){
+            if (!((datasetLoadPending || forcedBusy) && inputTabActive())){
                 hideOverlay();
             }
         });
@@ -1928,12 +2137,110 @@ SVG_DOWNLOAD_SCRIPT = ui.tags.script(
                 reader.readAsDataURL(blob);
             });
         }
+        function coerceNumber(value, fallback){
+            var num = Number(value);
+            return Number.isFinite(num) ? num : fallback;
+        }
+        function htmlToExportLines(html){
+            var source = String(html || "");
+            if (!source) return [];
+            var normalized = source
+                .replace(/<br\\s*\\/?>/gi, "\\n")
+                .replace(/<\\/div\\s*>/gi, "\\n")
+                .replace(/<div[^>]*>/gi, "")
+                .replace(/<\\/p\\s*>/gi, "\\n")
+                .replace(/<p[^>]*>/gi, "")
+                .replace(/<\\/li\\s*>/gi, "\\n")
+                .replace(/<li[^>]*>/gi, "• ");
+            var tmp = document.createElement("div");
+            tmp.innerHTML = normalized;
+            var text = (tmp.textContent || tmp.innerText || "").replace(/\\r\\n?/g, "\\n");
+            return text
+                .split("\\n")
+                .map(function(line){ return line.replace(/\\s+/g, " ").trim(); })
+                .filter(function(line){ return line.length > 0; });
+        }
+        function replaceForeignObjectsForExport(svg){
+            if (!svg || !svg.querySelectorAll) return;
+            var SVG_NS = "http://www.w3.org/2000/svg";
+            var groups = Array.prototype.slice.call(svg.querySelectorAll('g[data-type="text-box"]'));
+            groups.forEach(function(group){
+                var foreign = group.querySelector('[data-role="text-fo"]');
+                if (!foreign) return;
+                var editor = foreign.querySelector('.mk-text-editor');
+                if (!editor) {
+                    foreign.remove();
+                    return;
+                }
+                var lines = htmlToExportLines(editor.innerHTML);
+                if (!lines.length) {
+                    lines = htmlToExportLines(editor.textContent || "");
+                }
+                if (!lines.length) {
+                    foreign.remove();
+                    return;
+                }
+                var x = coerceNumber(foreign.getAttribute('x'), 0);
+                var y = coerceNumber(foreign.getAttribute('y'), 0);
+                var width = coerceNumber(foreign.getAttribute('width'), 160);
+                var height = coerceNumber(foreign.getAttribute('height'), 80);
+                var fontSize = coerceNumber(editor.style.fontSize, 14);
+                var lineHeight = fontSize * 1.2;
+                var align = String(editor.style.textAlign || 'left').toLowerCase();
+                var justify = String(editor.style.justifyContent || 'flex-start').toLowerCase();
+                var xPad = 4;
+                var xPos = x + xPad;
+                var anchor = 'start';
+                if (align === 'center') {
+                    xPos = x + width / 2;
+                    anchor = 'middle';
+                } else if (align === 'right' || align === 'end') {
+                    xPos = x + width - xPad;
+                    anchor = 'end';
+                }
+                var textHeight = Math.max(lineHeight, lines.length * lineHeight);
+                var startY = y + fontSize;
+                if (justify === 'center') {
+                    startY = y + (height - textHeight) / 2 + fontSize;
+                } else if (justify === 'flex-end' || justify === 'end') {
+                    startY = y + height - textHeight + fontSize;
+                }
+                var textNode = document.createElementNS(SVG_NS, 'text');
+                textNode.setAttribute('x', String(xPos));
+                textNode.setAttribute('y', String(startY));
+                textNode.setAttribute('fill', editor.style.color || '#000000');
+                textNode.setAttribute('font-family', editor.style.fontFamily || 'Arial');
+                textNode.setAttribute('font-size', String(fontSize));
+                textNode.setAttribute('text-anchor', anchor);
+                textNode.setAttribute('dominant-baseline', 'alphabetic');
+                textNode.setAttribute('pointer-events', 'none');
+                if (editor.style.fontWeight) textNode.setAttribute('font-weight', editor.style.fontWeight);
+                if (editor.style.fontStyle) textNode.setAttribute('font-style', editor.style.fontStyle);
+                if (editor.style.textDecoration && editor.style.textDecoration !== 'none') {
+                    textNode.setAttribute('text-decoration', editor.style.textDecoration);
+                }
+                lines.forEach(function(line, idx){
+                    var tspan = document.createElementNS(SVG_NS, 'tspan');
+                    tspan.setAttribute('x', String(xPos));
+                    if (idx === 0) {
+                        tspan.setAttribute('dy', '0');
+                    } else {
+                        tspan.setAttribute('dy', String(lineHeight));
+                    }
+                    tspan.textContent = line;
+                    textNode.appendChild(tspan);
+                });
+                group.appendChild(textNode);
+                foreign.remove();
+            });
+        }
         function serializeSvg(svg){
             if (!svg) return null;
             var clone = svg.cloneNode(true);
             if (!clone.getAttribute("xmlns")){
                 clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
             }
+            replaceForeignObjectsForExport(clone);
             var vb = clone.viewBox && clone.viewBox.baseVal;
             var rect = svg.getBoundingClientRect();
             var width = (vb && vb.width) ? vb.width : (rect.width || 1200);
@@ -2686,7 +2993,17 @@ def _settings_panel(cfg: Dict[str, Any]) -> ui.card:
                 )
                 if cfg.get("key") == "web":
                     load_btn = ui.div(
+                        {"style": "display:flex; align-items:center; gap:10px;"},
                         load_btn_control,
+                        ui.tags.span(
+                            {
+                                "id": _prefixed_id(prefix, "generate_spinner"),
+                                "class": "web-load-spinner",
+                                "aria-live": "polite",
+                            },
+                            "Loading pathway..."
+                        ),
+                        ui.output_ui(_prefixed_id(prefix, "generate_feedback")),
                         ui.output_ui(_prefixed_id(prefix, "generate_button_state")),
                     )
                 else:
@@ -3174,6 +3491,7 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                 const proteinItem = document.getElementById('{protein_item_id}');
                 const proteinPopover = document.getElementById('{protein_popover_id}');
                 const arrowSelect = document.getElementById('{arrow_select_id}');
+                const arrowSelectWrap = arrowSelect?.closest('.viewer-create-select-wrap') || null;
                 const shapeSelect = document.getElementById('{shape_select_id}');
                 const textAdd = document.getElementById('{text_add_id}');
                 const legendAdd = document.getElementById('{legend_add_id}');
@@ -3196,6 +3514,7 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                 const proteinMatches = new Map();
                 const proteinSearchDelayMs = 1500;
                 let proteinSearchTimer = null;
+                let activeArrowPlacementType = '';
                 const clearProteinSearchTimer = () => {{
                     if (proteinSearchTimer) {{
                         window.clearTimeout(proteinSearchTimer);
@@ -3247,6 +3566,16 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                 const syncMouseModeButtons = (mode = 'drag') => {{
                     dragModeBtn?.classList.toggle('is-active', mode === 'drag');
                     selectModeBtn?.classList.toggle('is-active', mode === 'selection');
+                }};
+                const syncArrowPlacementState = (state = {{}}) => {{
+                    activeArrowPlacementType = state && state.active ? String(state.type || 'arrow') : '';
+                    if (arrowSelect) {{
+                        arrowSelect.classList.toggle('is-active', !!activeArrowPlacementType);
+                        arrowSelect.title = activeArrowPlacementType
+                            ? 'Arrow placement is active. Click again to cancel.'
+                            : 'Add Arrow';
+                    }}
+                    arrowSelectWrap?.classList.toggle('is-active', !!activeArrowPlacementType);
                 }};
                 const syncSnapButtons = (state = {{}}) => {{
                     const protboxSnap = state.protboxSnap !== false;
@@ -3439,6 +3768,15 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                     }}
                     arrowSelect.value = '';
                 }});
+                arrowSelect?.addEventListener('mousedown', (evt) => {{
+                    if (!activeArrowPlacementType) return;
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    const api = getApi();
+                    if (api && typeof api.addArrow === 'function') {{
+                        api.addArrow(activeArrowPlacementType);
+                    }}
+                }});
                 shapeSelect?.addEventListener('change', () => {{
                     const value = shapeSelect?.value || '';
                     if (!value) return;
@@ -3584,6 +3922,11 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                         syncMouseModeButtons(evt.detail.mode || 'drag');
                     }}
                 }});
+                document.addEventListener('mk-viewer-arrow-placement-state', (evt) => {{
+                    if (evt?.detail?.key === viewerKey) {{
+                        syncArrowPlacementState(evt.detail || {{}});
+                    }}
+                }});
                 document.addEventListener('mk-viewer-snap-state', (evt) => {{
                     if (evt?.detail?.key === viewerKey) {{
                         syncSnapButtons(evt.detail || {{}});
@@ -3604,6 +3947,12 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                     syncMouseModeButtons(api.getMouseMode() || 'drag');
                 }} else {{
                     syncMouseModeButtons('drag');
+                }}
+                if (api && typeof api.getArrowPlacementMode === 'function') {{
+                    const arrowPlacementType = String(api.getArrowPlacementMode() || '');
+                    syncArrowPlacementState({{ active: !!arrowPlacementType, type: arrowPlacementType }});
+                }} else {{
+                    syncArrowPlacementState({{}});
                 }}
                 if (api && typeof api.getSnapState === 'function') {{
                     syncSnapButtons(api.getSnapState() || {{}});
@@ -4702,6 +5051,8 @@ def server(input, output, session):  # type: ignore[override]
         bookmark_state[cfg["key"]] = {
             "json": reactive.Value(None),
             "status": reactive.Value(STATUS_READY),
+            "loading": reactive.Value(False),
+            "load_feedback": reactive.Value(""),
             "custom_layout": reactive.Value(None),
             "fc_index": reactive.Value(1),
             "export_snapshot": reactive.Value(None),
@@ -4717,8 +5068,11 @@ def server(input, output, session):  # type: ignore[override]
     metabolite_validation = reactive.Value(
         {"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []}  # type: ignore[var-annotated]
     )
-    nav_lock_status = reactive.Value("User mode: upload valid Protein file to unlock other tabs. PTM optional.")
+    nav_lock_status = reactive.Value("User mode: upload and validate files, then press Run to unlock other tabs.")
     extra_datasets = reactive.Value([])  # type: ignore[var-annotated]
+    validated_protein_dataset = reactive.Value(None)
+    validated_ptm_dataset = reactive.Value(None)
+    validated_metabolite_dataset = reactive.Value(None)
     protein_dataset = reactive.Value(None)
     ptm_dataset = reactive.Value(None)
     metabolite_dataset = reactive.Value(None)
@@ -4749,6 +5103,8 @@ def server(input, output, session):  # type: ignore[override]
             "updated_at": 0.0,
         }
     )
+    pipeline_ready = reactive.Value(False)
+    pipeline_running = reactive.Value(False)
 
     def _clear_pathway_scores(status: str = "Pathway scoring pending.") -> None:
         pathway_score_cache.set(
@@ -4770,6 +5126,44 @@ def server(input, output, session):  # type: ignore[override]
 
     def _mark_pathway_scores_pending(status: str = "Run Fisher's Exact Test to score pathways.") -> None:
         _clear_pathway_scores(status)
+
+    def _status_has_blocking_error(status: Any) -> bool:
+        text = str(status or "").strip().lower()
+        if not text:
+            return False
+        return any(token in text for token in ("failed", "missing", "could not", "error"))
+
+    def _validation_has_explicit_error(state: Optional[Dict[str, Any]]) -> bool:
+        payload = dict(state or {})
+        if payload.get("errors"):
+            return True
+        return _status_has_blocking_error(payload.get("status"))
+
+    def _validation_has_blocking_error(state: Optional[Dict[str, Any]], optional: bool = False) -> bool:
+        payload = dict(state or {})
+        if _validation_has_explicit_error(payload):
+            return True
+        if optional and not payload.get("valid"):
+            return False
+        return not bool(payload.get("valid"))
+
+    def _clear_live_user_datasets(score_status: str = "Validation complete. Click Run to process datasets.") -> None:
+        protein_dataset.set(None)
+        ptm_dataset.set(None)
+        metabolite_dataset.set(None)
+        protein_kegg_warning.set("")
+        _refresh_global_catalog_from_current(reset=True)
+        _write_debug_dump("user_protein_dataset_debug.txt", {"info": "Processed dataset not generated yet"})
+        _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "Processed dataset not generated yet"})
+        _update_ks_index(reset=True)
+        _clear_pathway_scores(score_status)
+
+    def _invalidate_user_run(score_status: str = "Validation complete. Click Run to process datasets.") -> None:
+        if _current_mode() == "demo":
+            return
+        pipeline_ready.set(False)
+        pipeline_running.set(False)
+        _clear_live_user_datasets(score_status)
 
     def _dataset_to_df(dataset: Optional[Dict[str, Any]]) -> pd.DataFrame:
         if not dataset:
@@ -4853,6 +5247,19 @@ def server(input, output, session):  # type: ignore[override]
         pathway_uniprots: set[str] = set()
         modules = list(pathway.get("modules", []))
         if modules:
+            prebuilt_uniprots = list(pathway.get("resolved_uniprots") or [])
+            prebuilt_gene_symbols = list(pathway.get("gene_symbols") or [])
+            if prebuilt_uniprots or prebuilt_gene_symbols:
+                for uni in prebuilt_uniprots:
+                    normalized = normalize_uniprot(uni)
+                    if normalized:
+                        pathway_uniprots.add(normalized)
+                for gene_symbol in prebuilt_gene_symbols:
+                    for uni in gene_to_uniprot.get(str(gene_symbol or "").strip().upper(), []):
+                        normalized = normalize_uniprot(uni)
+                        if normalized:
+                            pathway_uniprots.add(normalized)
+                return pathway_uniprots
             for module in modules:
                 if not isinstance(module, dict):
                     continue
@@ -4938,6 +5345,7 @@ def server(input, output, session):  # type: ignore[override]
         protein_rows["_uniprot"] = protein_rows[protein_id_col].map(normalize_uniprot)
         protein_rows = protein_rows[protein_rows["_uniprot"] != ""].copy()
         protein_gene_col = protein_rows.columns[1] if len(protein_rows.columns) > 1 else None
+        protein_cst_uniprot_col, protein_cst_gene_col = _resolve_cst_ortholog_columns(list(protein_rows.columns))
         if protein_gene_col:
             protein_rows["_gene_symbol"] = (
                 protein_rows[protein_gene_col]
@@ -4947,6 +5355,21 @@ def server(input, output, session):  # type: ignore[override]
             )
         else:
             protein_rows["_gene_symbol"] = ""
+        if protein_cst_uniprot_col:
+            protein_rows["_cst_uniprot"] = protein_rows[protein_cst_uniprot_col].map(normalize_uniprot)
+        else:
+            protein_rows["_cst_uniprot"] = protein_rows["_uniprot"]
+        if protein_cst_gene_col:
+            protein_rows["_cst_gene_symbol"] = (
+                protein_rows[protein_cst_gene_col]
+                .astype(str)
+                .str.strip()
+                .str.upper()
+            )
+        elif protein_cst_uniprot_col:
+            protein_rows["_cst_gene_symbol"] = ""
+        else:
+            protein_rows["_cst_gene_symbol"] = protein_rows["_gene_symbol"]
         protein_rows["_fc"] = _coerce_numeric_series(protein_rows[fc_col])
         protein_rows["_significant"] = _fisher_significance_mask(
             protein_rows["_fc"],
@@ -4956,10 +5379,22 @@ def server(input, output, session):  # type: ignore[override]
         )
         protein_rows = protein_rows.drop_duplicates(subset=["_uniprot"], keep="first")
 
-        total_proteins = int(len(protein_rows))
-        significant_proteins = int(protein_rows["_significant"].sum()) if total_proteins else 0
         protein_uniprots = set(protein_rows["_uniprot"].tolist())
         significant_protein_uniprots = set(protein_rows.loc[protein_rows["_significant"], "_uniprot"].tolist())
+        total_proteins = int(len(protein_uniprots))
+        significant_proteins = int(len(significant_protein_uniprots)) if total_proteins else 0
+        protein_cst_uniprots = set(
+            str(item or "").strip()
+            for item in protein_rows["_cst_uniprot"].tolist()
+            if str(item or "").strip()
+        )
+        significant_protein_cst_uniprots = set(
+            str(item or "").strip()
+            for item in protein_rows.loc[protein_rows["_significant"], "_cst_uniprot"].tolist()
+            if str(item or "").strip()
+        )
+        total_cst_proteins = int(len(protein_cst_uniprots))
+        significant_cst_proteins = int(len(significant_protein_cst_uniprots)) if total_cst_proteins else 0
 
         effective_gene_map: Dict[str, List[str]] = {
             str(key or "").strip().upper(): list(dict.fromkeys(str(item or "").strip().upper() for item in values if str(item or "").strip()))
@@ -4976,15 +5411,34 @@ def server(input, output, session):  # type: ignore[override]
                 bucket = effective_gene_map.setdefault(symbol, [])
                 if uni not in bucket:
                     bucket.append(uni)
+        effective_cst_gene_map: Dict[str, List[str]] = {}
+        if not protein_cst_uniprot_col:
+            effective_cst_gene_map = {key: list(values) for key, values in effective_gene_map.items()}
+        for row in protein_rows.itertuples(index=False):
+            row_map = dict(zip(protein_rows.columns, row))
+            symbol = str(row_map.get("_cst_gene_symbol") or "").strip().upper()
+            uni = normalize_uniprot(row_map.get("_cst_uniprot"))
+            if not symbol or not uni:
+                continue
+            bucket = effective_cst_gene_map.setdefault(symbol, [])
+            if uni not in bucket:
+                bucket.append(uni)
 
         site_rows = pd.DataFrame()
         total_sites = 0
         significant_sites = 0
+        total_cst_sites = 0
+        significant_cst_sites = 0
         if site_df is not None and not site_df.empty:
             site_rows = site_df.copy()
             site_uniprot_col = site_rows.columns[0]
             site_rows["_parent_uniprot"] = site_rows[site_uniprot_col].map(normalize_uniprot)
             site_rows = site_rows[site_rows["_parent_uniprot"] != ""].copy()
+            site_cst_uniprot_col, _site_cst_gene_col = _resolve_cst_ortholog_columns(list(site_rows.columns))
+            if site_cst_uniprot_col:
+                site_rows["_parent_cst_uniprot"] = site_rows[site_cst_uniprot_col].map(normalize_uniprot)
+            else:
+                site_rows["_parent_cst_uniprot"] = site_rows["_parent_uniprot"]
             active_site_fc_col = site_fc_col if site_fc_col and site_fc_col in site_rows.columns else None
             if active_site_fc_col:
                 site_rows["_fc"] = _coerce_numeric_series(site_rows[active_site_fc_col])
@@ -4998,45 +5452,58 @@ def server(input, output, session):  # type: ignore[override]
                 site_rows["_significant"] = False
             total_sites = int(len(site_rows))
             significant_sites = int(site_rows["_significant"].sum()) if total_sites else 0
+            cst_site_mask = site_rows["_parent_cst_uniprot"].astype(str).str.strip() != ""
+            total_cst_sites = int(cst_site_mask.sum())
+            significant_cst_sites = int((site_rows["_significant"] & cst_site_mask).sum()) if total_cst_sites else 0
 
         combined_rows: List[Dict[str, Any]] = []
         nested_rows: Dict[str, Dict[str, Dict[str, Any]]] = {}
         for source_key, source_index, _source_file in index_sources:
             source_rows: Dict[str, Dict[str, Any]] = {}
+            is_cst_source = str(source_key or "").strip().lower() == "cst"
+            active_gene_map = effective_cst_gene_map if is_cst_source else effective_gene_map
+            active_protein_uniprots = protein_cst_uniprots if is_cst_source else protein_uniprots
+            active_significant_protein_uniprots = significant_protein_cst_uniprots if is_cst_source else significant_protein_uniprots
+            active_total_proteins = total_cst_proteins if is_cst_source else total_proteins
+            active_significant_proteins = significant_cst_proteins if is_cst_source else significant_proteins
+            active_site_key = "_parent_cst_uniprot" if is_cst_source else "_parent_uniprot"
+            active_total_sites = total_cst_sites if is_cst_source else total_sites
+            active_significant_sites = significant_cst_sites if is_cst_source else significant_sites
             for pathway in list(source_index.get("pathways", [])):
                 pathway_id = str(pathway.get("pathway_id", "")).strip().lower()
                 if not pathway_id:
                     continue
                 pathway_name = str(pathway.get("name") or pathway_id).strip()
-                pathway_uniprots = _pathway_uniprots(pathway, source_index.get("nodes", {}), effective_gene_map)
-                proteins_in_dataset = protein_uniprots & pathway_uniprots
-                sig_proteins_in_path = significant_protein_uniprots & pathway_uniprots
+                pathway_uniprots = _pathway_uniprots(pathway, source_index.get("nodes", {}), active_gene_map)
+                proteins_in_dataset = active_protein_uniprots & pathway_uniprots
+                sig_proteins_in_path = active_significant_protein_uniprots & pathway_uniprots
                 pathway_protein_total = len(proteins_in_dataset)
                 sig_protein_in_pathway = len(sig_proteins_in_path)
-                protein_p = _fisher_right_tail(total_proteins, pathway_protein_total, significant_proteins, sig_protein_in_pathway) if total_proteins else None
+                protein_p = _fisher_right_tail(active_total_proteins, pathway_protein_total, active_significant_proteins, sig_protein_in_pathway) if active_total_proteins else None
 
                 pathway_site_total = 0
                 sig_site_in_pathway = 0
                 site_p: Optional[float] = None
-                if total_sites and not site_rows.empty:
-                    in_path_mask = site_rows["_parent_uniprot"].isin(pathway_uniprots)
+                if active_total_sites and not site_rows.empty:
+                    valid_site_mask = site_rows[active_site_key].astype(str).str.strip() != ""
+                    in_path_mask = valid_site_mask & site_rows[active_site_key].isin(pathway_uniprots)
                     pathway_site_total = int(in_path_mask.sum())
                     if pathway_site_total:
                         sig_site_in_pathway = int((site_rows["_significant"] & in_path_mask).sum())
-                    site_p = _fisher_right_tail(total_sites, pathway_site_total, significant_sites, sig_site_in_pathway)
+                    site_p = _fisher_right_tail(active_total_sites, pathway_site_total, active_significant_sites, sig_site_in_pathway)
 
                 row = {
                     "pathway_source": source_key,
                     "pathway_id": pathway_id,
                     "name": pathway_name,
-                    "prot_dataset_total": total_proteins,
+                    "prot_dataset_total": active_total_proteins,
                     "prot_pathway_total": pathway_protein_total,
-                    "prot_significant_total": significant_proteins,
+                    "prot_significant_total": active_significant_proteins,
                     "prot_significant_in_pathway": sig_protein_in_pathway,
                     "prot_fisher_p": protein_p,
-                    "phos_dataset_total": total_sites,
+                    "phos_dataset_total": active_total_sites,
                     "phos_pathway_total": pathway_site_total,
-                    "phos_significant_total": significant_sites,
+                    "phos_significant_total": active_significant_sites,
                     "phos_significant_in_pathway": sig_site_in_pathway,
                     "phos_fisher_p": site_p,
                     "positive_cutoff": positive_cutoff,
@@ -5100,6 +5567,40 @@ def server(input, output, session):  # type: ignore[override]
             pass
         return ""
 
+    def _resolve_cst_index_file_for_species(species_code: str) -> str:
+        code = (species_code or "").strip().lower()
+        candidates: List[str] = []
+        if code:
+            candidates.extend([
+                os.path.join(INDEX_FILES_DIR, f"cst_index_{code}.json"),
+                os.path.join(INDEX_FILES_DIR, f"{code}_cst_index.json"),
+            ])
+        candidates.append(os.path.join(INDEX_FILES_DIR, "cst_index.json"))
+        for path in candidates:
+            if os.path.exists(path):
+                return path
+        try:
+            all_index_files = [
+                os.path.join(INDEX_FILES_DIR, name)
+                for name in os.listdir(INDEX_FILES_DIR)
+                if name.lower().startswith("cst_index_") and name.lower().endswith(".json")
+            ]
+            if len(all_index_files) == 1:
+                return all_index_files[0]
+        except Exception:
+            pass
+        return ""
+
+    def _load_cst_fisher_index(path: Path) -> Dict[str, Any]:
+        with open(path, "r", encoding="utf-8") as fh:
+            payload = json.load(fh)
+        if not isinstance(payload, dict):
+            raise ValueError(f"Invalid CST Fisher index format in {path}")
+        pathways = payload.get("pathways")
+        if not isinstance(pathways, list):
+            raise KeyError("Pathway index missing key: pathways")
+        return payload
+
     def _resolve_gene_to_uniprot_file_for_species(species_code: str) -> str:
         code = (species_code or "").strip().lower()
         if not code:
@@ -5126,16 +5627,18 @@ def server(input, output, session):  # type: ignore[override]
                 significance_mode = "both"
             positive_cutoff = abs(_to_float(_get_input_value(input, "web_fisher_sig_pos"), 1.5))
             negative_cutoff = -abs(_to_float(_get_input_value(input, "web_fisher_sig_neg"), -1.5))
+            existing_score_cache = dict(pathway_score_cache.get() or {})
 
         if not protein_ok or not protein_data:
-            _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
+            _clear_pathway_scores("Pathway scoring waiting for validated inputs and Run.")
             return
 
         species_code = (species_info.get("code") or "").strip().lower()
         kegg_index_file = _resolve_kegg_index_file_for_species(species_code)
         wikipathways_index_file = _resolve_wikipathways_index_file_for_species(species_code)
+        cst_index_file = _resolve_cst_index_file_for_species(species_code)
         cst_ai_dir = Path(BASE_DIR).resolve().parent / "stored_pathways" / "cst"
-        cst_available = cst_ai_dir.exists()
+        cst_available = bool(cst_index_file) or cst_ai_dir.exists()
         if not kegg_index_file and not wikipathways_index_file and not cst_available:
             _clear_pathway_scores(f"No pathway index files found for species '{species_code}' in index_files.")
             return
@@ -5152,9 +5655,11 @@ def server(input, output, session):  # type: ignore[override]
             return
 
         if selected_fc and selected_fc in fc_columns:
-            ordered_fc_cols = [selected_fc] + [c for c in fc_columns if c != selected_fc]
+            ordered_fc_cols = [selected_fc]
+            active_selected_fc = selected_fc
         else:
-            ordered_fc_cols = list(fc_columns)
+            ordered_fc_cols = [fc_columns[0]]
+            active_selected_fc = ordered_fc_cols[0]
 
         try:
             gene_map_file = _resolve_gene_to_uniprot_file_for_species(species_code)
@@ -5164,14 +5669,28 @@ def server(input, output, session):  # type: ignore[override]
                 index_sources.append(("kegg", load_kegg_index(Path(kegg_index_file)), kegg_index_file))
             if wikipathways_index_file:
                 index_sources.append(("wikipathways", load_kegg_index(Path(wikipathways_index_file)), wikipathways_index_file))
-            if cst_available:
+            if cst_index_file:
+                index_sources.append(("cst", _load_cst_fisher_index(Path(cst_index_file)), cst_index_file))
+            elif cst_ai_dir.exists():
                 index_sources.append(("cst", _build_cst_fisher_index(cst_ai_dir), str(cst_ai_dir)))
 
-            results_by_fc: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = {}
-            download_rows_by_fc: Dict[str, List[Dict[str, Any]]] = {}
+            same_context = (
+                str(existing_score_cache.get("species_code") or "").strip().lower() == species_code
+                and str(existing_score_cache.get("significance_mode") or "both").strip().lower() == significance_mode
+                and abs(abs(_to_float(existing_score_cache.get("positive_cutoff"), 1.5)) - positive_cutoff) < 1e-9
+                and abs((-abs(_to_float(existing_score_cache.get("negative_cutoff"), -1.5))) - negative_cutoff) < 1e-9
+            )
+            results_by_fc: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = (
+                dict(existing_score_cache.get("results_by_fc") or {}) if same_context else {}
+            )
+            download_rows_by_fc: Dict[str, List[Dict[str, Any]]] = (
+                dict(existing_score_cache.get("download_rows_by_fc") or {}) if same_context else {}
+            )
             site_headers = list(site_df.columns) if site_df is not None and not site_df.empty else []
 
             for fc_col in ordered_fc_cols:
+                if fc_col in results_by_fc and fc_col in download_rows_by_fc:
+                    continue
                 site_fc_col = fc_col if site_df is not None and fc_col in site_headers else None
                 source_maps, flat_rows = _compute_fisher_pathway_rows(
                     prot_df=prot_df,
@@ -5192,22 +5711,24 @@ def server(input, output, session):  # type: ignore[override]
                 index_files_obj["kegg"] = kegg_index_file
             if wikipathways_index_file:
                 index_files_obj["wikipathways"] = wikipathways_index_file
-            if cst_available:
+            if cst_index_file:
+                index_files_obj["cst"] = cst_index_file
+            elif cst_ai_dir.exists():
                 index_files_obj["cst"] = str(cst_ai_dir)
             source_label = ", ".join(sorted(index_files_obj.keys())) if index_files_obj else "none"
 
             pathway_score_cache.set(
                 {
                     "status": (
-                        f"Pathway scoring complete ({len(ordered_fc_cols)} main columns, "
+                        f"Pathway scoring complete ({len(results_by_fc)} of {len(fc_columns)} main columns cached, "
                         f"sources={source_label}, mode={current_mode}, "
                         f"fisher={significance_mode}, cutoffs={positive_cutoff:g}/{negative_cutoff:g})."
                     ),
                     "species_code": species_code,
                     "index_file": kegg_index_file or wikipathways_index_file or "",
                     "index_files": index_files_obj,
-                    "fc_columns": ordered_fc_cols,
-                    "selected_fc": ordered_fc_cols[0] if ordered_fc_cols else "",
+                    "fc_columns": list(fc_columns),
+                    "selected_fc": active_selected_fc,
                     "results_by_fc": results_by_fc,
                     "download_rows_by_fc": download_rows_by_fc,
                     "significance_mode": significance_mode,
@@ -5819,6 +6340,9 @@ def server(input, output, session):  # type: ignore[override]
         if missing:
             protein_validation.set({"status": "Demo mode files missing.", "errors": missing, "valid": False, "comparisons": []})
             ptm_validation.set({"status": "Demo mode files missing.", "errors": missing, "valid": False})
+            validated_protein_dataset.set(None)
+            validated_ptm_dataset.set(None)
+            validated_metabolite_dataset.set(None)
             protein_dataset.set(None)
             ptm_dataset.set(None)
             metabolite_dataset.set(None)
@@ -5826,6 +6350,8 @@ def server(input, output, session):  # type: ignore[override]
             ptm_preview_dataset.set(None)
             metabolite_preview_dataset.set(None)
             _refresh_global_catalog_from_current(reset=True)
+            pipeline_running.set(False)
+            pipeline_ready.set(False)
             nav_lock_status.set("Demo mode: sample files missing. Navigation locked.")
             _clear_pathway_scores("Demo datasets missing; pathway scoring unavailable.")
             return
@@ -5836,6 +6362,9 @@ def server(input, output, session):  # type: ignore[override]
                 protein_validation.set({"status": "Demo protein file failed validation.", "errors": prot_result.errors, "valid": False, "comparisons": []})
                 ptm_validation.set({"status": "PTM upload disabled until demo protein is valid.", "errors": [], "valid": False})
                 metabolite_validation.set({"status": "Metabolite upload optional. Sample metabolite file available below.", "errors": [], "valid": False, "comparisons": []})
+                validated_protein_dataset.set(None)
+                validated_ptm_dataset.set(None)
+                validated_metabolite_dataset.set(None)
                 protein_dataset.set(None)
                 ptm_dataset.set(None)
                 metabolite_dataset.set(None)
@@ -5843,6 +6372,8 @@ def server(input, output, session):  # type: ignore[override]
                 ptm_preview_dataset.set(None)
                 metabolite_preview_dataset.set(None)
                 _refresh_global_catalog_from_current(reset=True)
+                pipeline_running.set(False)
+                pipeline_ready.set(False)
                 nav_lock_status.set("Demo mode: sample protein validation failed.")
                 _clear_pathway_scores("Demo protein validation failed; pathway scoring unavailable.")
                 return
@@ -5862,6 +6393,10 @@ def server(input, output, session):  # type: ignore[override]
                 demo_prot_payload = annotate_protein_with_kegg(demo_prot_payload, species_code, _get_kegg_map(species_code))
             except Exception as exc:
                 print(f"Warning: demo protein KEGG annotation failed: {exc}")
+            try:
+                demo_prot_payload = _annotate_dataset_with_human_orthologs(demo_prot_payload, species_code)
+            except Exception as exc:
+                print(f"Warning: demo protein human ortholog annotation failed: {exc}")
             protein_dataset.set(demo_prot_payload)
             protein_dataset_path.set(SAMPLE_PROTEIN_FILE)
             protein_validation.set({
@@ -5879,12 +6414,17 @@ def server(input, output, session):  # type: ignore[override]
             ptm_result = validate_ptm_file(SAMPLE_PTM_FILE, prot_result.comparisons)
             if not ptm_result.valid:
                 ptm_validation.set({"status": "Demo PTM file failed validation.", "errors": ptm_result.errors, "valid": False})
+                validated_protein_dataset.set(None)
+                validated_ptm_dataset.set(None)
+                validated_metabolite_dataset.set(None)
                 ptm_dataset.set(None)
                 ptm_preview_dataset.set(None)
                 metabolite_dataset.set(None)
                 metabolite_preview_dataset.set(None)
                 metabolite_dataset_path.set(None)
                 metabolite_validation.set({"status": "Metabolite upload optional. Sample metabolite file available below.", "errors": [], "valid": False, "comparisons": []})
+                pipeline_running.set(False)
+                pipeline_ready.set(False)
                 nav_lock_status.set("Demo mode: sample PTM validation failed.")
                 _refresh_pathway_scores()
                 return
@@ -5897,6 +6437,10 @@ def server(input, output, session):  # type: ignore[override]
                 demo_ptm_payload = annotate_ptm_dataset_with_kinases(demo_ptm_payload, species_choice, _get_psp_ks_map())
             except Exception as exc:
                 print(f"Warning: demo PTM annotation failed: {exc}")
+            try:
+                demo_ptm_payload = _annotate_dataset_with_human_orthologs(demo_ptm_payload, species_code)
+            except Exception as exc:
+                print(f"Warning: demo PTM human ortholog annotation failed: {exc}")
             ptm_dataset.set(demo_ptm_payload)
             ptm_dataset_path.set(SAMPLE_PTM_FILE)
             ptm_validation.set({
@@ -5921,6 +6465,8 @@ def server(input, output, session):  # type: ignore[override]
             _refresh_global_catalog_from_current()
             _update_ks_index()
             _refresh_pathway_scores()
+            pipeline_running.set(False)
+            pipeline_ready.set(True)
             nav_lock_status.set("Demo mode: sample datasets loaded. Navigation unlocked.")
             print("Demo mode: sample protein/PTM loaded successfully.")
         except Exception as exc:
@@ -5935,6 +6481,8 @@ def server(input, output, session):  # type: ignore[override]
             ptm_preview_dataset.set(None)
             metabolite_preview_dataset.set(None)
             _refresh_global_catalog_from_current(reset=True)
+            pipeline_running.set(False)
+            pipeline_ready.set(False)
             nav_lock_status.set("Demo mode: sample datasets failed to load.")
             _clear_pathway_scores("Demo datasets failed to load; pathway scoring unavailable.")
 
@@ -6083,6 +6631,7 @@ def server(input, output, session):  # type: ignore[override]
     def _process_protein_upload():
         if str((_get_input_value(input, "input_mode") or "user")).lower() == "demo":
             protein_validation.set({"status": "Demo mode uses bundled sample files; switch to User mode to upload.", "errors": [], "valid": False, "comparisons": []})
+            validated_protein_dataset.set(None)
             protein_kegg_warning.set("")
             _clear_pathway_scores("Demo mode active in User upload handler; pathway scoring deferred.")
             return
@@ -6090,42 +6639,71 @@ def server(input, output, session):  # type: ignore[override]
         if not upload:
             protein_validation.set({"status": "Upload a protein file to begin.", "errors": [], "valid": False, "comparisons": []})
             ptm_validation.set({"status": "PTM upload disabled until a valid protein file is uploaded.", "errors": [], "valid": False})
-            protein_dataset.set(None)
+            metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
+            validated_protein_dataset.set(None)
+            validated_ptm_dataset.set(None)
+            validated_metabolite_dataset.set(None)
             protein_preview_dataset.set(None)
+            ptm_preview_dataset.set(None)
+            metabolite_preview_dataset.set(None)
+            protein_dataset_path.set(None)
+            ptm_dataset_path.set(None)
+            metabolite_dataset_path.set(None)
             _refresh_global_catalog_from_current(reset=True)
             _write_debug_dump("user_protein_dataset_debug.txt", {"info": "No dataset loaded"})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
-            _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
+            pipeline_ready.set(False)
+            pipeline_running.set(False)
+            _clear_pathway_scores("Pathway scoring waiting for validated inputs and Run.")
             return
         file_info = upload[0]
-        protein_validation.set({"status": "Processing protein upload...", "errors": [], "valid": False, "comparisons": []})
+        protein_validation.set({"status": "Validating protein upload...", "errors": [], "valid": False, "comparisons": []})
         datapath = getattr(file_info, "datapath", None)
         if datapath is None and isinstance(file_info, dict):
             datapath = file_info.get("datapath")
         if not datapath:
             protein_validation.set({"status": "Could not locate the uploaded protein file.", "errors": [], "valid": False, "comparisons": []})
             ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
-            protein_dataset.set(None)
+            metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
+            validated_protein_dataset.set(None)
+            validated_ptm_dataset.set(None)
+            validated_metabolite_dataset.set(None)
             protein_preview_dataset.set(None)
+            ptm_preview_dataset.set(None)
+            metabolite_preview_dataset.set(None)
+            protein_dataset_path.set(None)
+            ptm_dataset_path.set(None)
+            metabolite_dataset_path.set(None)
             _refresh_global_catalog_from_current(reset=True)
             _write_debug_dump("user_protein_dataset_debug.txt", {"info": "No dataset loaded"})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
-            _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
+            pipeline_ready.set(False)
+            pipeline_running.set(False)
+            _clear_pathway_scores("Pathway scoring waiting for validated inputs and Run.")
             return
         result = validate_protein_file(datapath)
         if not result.valid:
             protein_preview_dataset.set(_load_dataset(datapath))
             protein_validation.set({"status": "Protein file failed validation. See errors below.", "errors": result.errors, "valid": False, "comparisons": []})
             ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
-            protein_dataset.set(None)
+            metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
+            validated_protein_dataset.set(None)
+            validated_ptm_dataset.set(None)
+            validated_metabolite_dataset.set(None)
             protein_dataset_path.set(None)
+            ptm_dataset_path.set(None)
+            metabolite_dataset_path.set(None)
+            ptm_preview_dataset.set(None)
+            metabolite_preview_dataset.set(None)
             _refresh_global_catalog_from_current(reset=True)
             _write_debug_dump("user_protein_dataset_debug.txt", {"errors": result.errors})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
-            _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
+            pipeline_ready.set(False)
+            pipeline_running.set(False)
+            _clear_pathway_scores("Pathway scoring waiting for validated inputs and Run.")
             return
 
         status = (
@@ -6137,31 +6715,18 @@ def server(input, output, session):  # type: ignore[override]
         dataset_payload = _load_dataset(datapath)
         protein_preview_dataset.set(dataset_payload)
         _apply_outline_width_defaults(protein_headers=dataset_payload.get("headers") or [])
-        species_key, species_info = _resolve_species(_get_input_value(input, "input_species"))
-        species_code = species_info.get("code", "")
-        try:
-            kegg_map = _get_kegg_map(species_code)
-            dataset_payload = annotate_protein_with_kegg(dataset_payload, species_code, kegg_map)
-            headers = dataset_payload.get("headers") or []
-            kegg_idx = headers.index("KEGG_Gene_ID") if "KEGG_Gene_ID" in headers else -1
-            kegg_matches = 0
-            if kegg_idx >= 0:
-                for row in dataset_payload.get("rows") or []:
-                    if len(row) > kegg_idx and (row[kegg_idx] or "").strip():
-                        kegg_matches += 1
-            if kegg_matches <= 5:
-                protein_kegg_warning.set("Few KEGG matches detected. Check species selection or mapping file.")
-            else:
-                protein_kegg_warning.set("")
-        except Exception as exc:
-            print(f"Warning: KEGG annotation failed: {exc}")
+        validated_protein_dataset.set(dataset_payload)
         protein_kegg_warning.set("")
-        protein_dataset.set(dataset_payload)
         protein_dataset_path.set(datapath)
-        _write_debug_dump("user_protein_dataset_debug.txt", dataset_payload)
         ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
-        _refresh_global_catalog_from_current()
-        _refresh_pathway_scores()
+        metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
+        validated_ptm_dataset.set(None)
+        validated_metabolite_dataset.set(None)
+        ptm_dataset_path.set(None)
+        metabolite_dataset_path.set(None)
+        ptm_preview_dataset.set(None)
+        metabolite_preview_dataset.set(None)
+        _invalidate_user_run("Protein validated. Upload optional PTM/Metabolite files, then press Run.")
 
     @output
     @render.text
@@ -6339,19 +6904,22 @@ def server(input, output, session):  # type: ignore[override]
     def _process_metabolite_upload():
         if not protein_validation.get().get("valid"):
             metabolite_validation.set({"status": "Upload a valid protein file first.", "errors": ["Protein file not validated yet."], "valid": False, "comparisons": []})
-            metabolite_dataset.set(None)
+            validated_metabolite_dataset.set(None)
             metabolite_preview_dataset.set(None)
             metabolite_dataset_path.set(None)
+            _invalidate_user_run("Upload and validate a Protein dataset before running.")
             return
         if str((_get_input_value(input, "input_mode") or "user")).lower() == "demo":
             metabolite_validation.set({"status": "Demo mode uses bundled sample files; switch to User mode to upload.", "errors": [], "valid": False, "comparisons": []})
+            validated_metabolite_dataset.set(None)
             return
         upload = input.input_metabolite_upload()
         if not upload:
             metabolite_validation.set({"status": "No metabolite file uploaded (optional).", "errors": [], "valid": False, "comparisons": []})
-            metabolite_dataset.set(None)
+            validated_metabolite_dataset.set(None)
             metabolite_preview_dataset.set(None)
             metabolite_dataset_path.set(None)
+            _invalidate_user_run("Validation updated. Press Run to process datasets.")
             return
         file_info = upload[0]
         datapath = getattr(file_info, "datapath", None)
@@ -6359,16 +6927,17 @@ def server(input, output, session):  # type: ignore[override]
             datapath = file_info.get("datapath")
         if not datapath:
             metabolite_validation.set({"status": "Could not locate the uploaded metabolite file.", "errors": [], "valid": False, "comparisons": []})
-            metabolite_dataset.set(None)
+            validated_metabolite_dataset.set(None)
             metabolite_preview_dataset.set(None)
             metabolite_dataset_path.set(None)
+            _invalidate_user_run("Fix the Metabolite dataset issue, then press Run.")
             return
         protein_comparisons = protein_validation.get().get("comparisons") or []
         result = _validate_metabolite_file(datapath, protein_comparisons)
         preview_payload = _load_dataset(datapath)
         metabolite_preview_dataset.set(preview_payload)
         if result.valid:
-            metabolite_dataset.set(preview_payload)
+            validated_metabolite_dataset.set(preview_payload)
             metabolite_dataset_path.set(datapath)
             metabolite_validation.set({
                 "status": (
@@ -6380,8 +6949,9 @@ def server(input, output, session):  # type: ignore[override]
                 "valid": True,
                 "comparisons": result.comparisons,
             })
+            _invalidate_user_run("Metabolite validated. Press Run to process datasets.")
         else:
-            metabolite_dataset.set(None)
+            validated_metabolite_dataset.set(None)
             metabolite_dataset_path.set(None)
             metabolite_validation.set({
                 "status": "Metabolite file failed validation. See errors below.",
@@ -6389,30 +6959,152 @@ def server(input, output, session):  # type: ignore[override]
                 "valid": False,
                 "comparisons": [],
             })
+            _invalidate_user_run("Fix the Metabolite dataset errors before running.")
 
     @output
     @render.text
     def input_nav_lock_status():
         return nav_lock_status.get()
 
+    @output
+    @render.ui
+    def input_run_button_state():
+        mode = _current_mode()
+        running = bool(pipeline_running.get())
+        protein_valid = bool(protein_validation.get().get("valid"))
+        protein_error = _validation_has_explicit_error(protein_validation.get())
+        ptm_error = _validation_has_explicit_error(ptm_validation.get())
+        metabolite_error = _validation_has_explicit_error(metabolite_validation.get())
+        disabled = mode == "demo" or running or (not protein_valid) or protein_error or ptm_error or metabolite_error
+        return ui.tags.script(
+            f"""
+            (function(){{
+                const btn = document.getElementById('input_run_pipeline');
+                if (!btn) return;
+                btn.disabled = {str(disabled).lower()};
+            }})();
+            """
+        )
+
+    @reactive.Effect
+    @reactive.event(input.input_run_pipeline)
+    def _run_validated_input_pipeline():
+        if _current_mode() == "demo":
+            return
+        if pipeline_running.get():
+            return
+        if not bool(protein_validation.get().get("valid")):
+            _invalidate_user_run("Upload and validate a Protein dataset before running.")
+            return
+        if _validation_has_explicit_error(protein_validation.get()):
+            _invalidate_user_run("Fix the Protein dataset errors before running.")
+            return
+        if _validation_has_explicit_error(ptm_validation.get()):
+            _invalidate_user_run("Fix the PTM dataset errors before running.")
+            return
+        if _validation_has_explicit_error(metabolite_validation.get()):
+            _invalidate_user_run("Fix the Metabolite dataset errors before running.")
+            return
+
+        raw_protein = validated_protein_dataset.get() or {}
+        raw_ptm = validated_ptm_dataset.get() or {}
+        raw_metabolite = validated_metabolite_dataset.get() or {}
+        if not raw_protein or not raw_protein.get("headers"):
+            _invalidate_user_run("Upload and validate a Protein dataset before running.")
+            return
+
+        pipeline_running.set(True)
+        pipeline_ready.set(False)
+        _send_custom_message_safe(
+            "set_input_busy_state",
+            {
+                "active": True,
+                "title": "Running pipeline",
+                "text": "Annotating datasets, rebuilding indexes, and scoring pathways.",
+            },
+        )
+        try:
+            _species_key, species_info = _resolve_species(_get_input_value(input, "input_species"))
+            species_choice = str(species_info.get("label") or _species_key or "").strip().lower()
+            species_code = str(species_info.get("code") or "").strip().lower()
+
+            processed_protein = raw_protein
+            try:
+                kegg_map = _get_kegg_map(species_code)
+                processed_protein = annotate_protein_with_kegg(processed_protein, species_code, kegg_map)
+                headers = processed_protein.get("headers") or []
+                kegg_idx = headers.index("KEGG_Gene_ID") if "KEGG_Gene_ID" in headers else -1
+                kegg_matches = 0
+                if kegg_idx >= 0:
+                    for row in processed_protein.get("rows") or []:
+                        if len(row) > kegg_idx and str(row[kegg_idx] or "").strip():
+                            kegg_matches += 1
+                if kegg_matches <= 5:
+                    protein_kegg_warning.set("Few KEGG matches detected. Check species selection or mapping file.")
+                else:
+                    protein_kegg_warning.set("")
+            except Exception as exc:
+                print(f"Warning: KEGG annotation failed: {exc}")
+                protein_kegg_warning.set("")
+            try:
+                processed_protein = _annotate_dataset_with_human_orthologs(processed_protein, species_code)
+            except Exception as exc:
+                print(f"Warning: human ortholog annotation failed: {exc}")
+
+            processed_ptm: Optional[Dict[str, Any]] = None
+            if raw_ptm and raw_ptm.get("headers"):
+                processed_ptm = raw_ptm
+                try:
+                    processed_ptm = annotate_ptm_dataset(processed_ptm, species_choice, _get_psp_map())
+                    processed_ptm = annotate_ptm_dataset_with_kinases(processed_ptm, species_choice, _get_psp_ks_map())
+                except Exception as exc:
+                    print(f"Warning: PSP annotation failed: {exc}")
+                try:
+                    processed_ptm = _annotate_dataset_with_human_orthologs(processed_ptm, species_code)
+                except Exception as exc:
+                    print(f"Warning: PTM human ortholog annotation failed: {exc}")
+
+            processed_metabolite: Optional[Dict[str, Any]] = raw_metabolite if raw_metabolite and raw_metabolite.get("headers") else None
+
+            protein_dataset.set(processed_protein)
+            ptm_dataset.set(processed_ptm)
+            metabolite_dataset.set(processed_metabolite)
+            _write_debug_dump("user_protein_dataset_debug.txt", processed_protein)
+            _write_debug_dump("user_ptm_dataset_debug.txt", processed_ptm or {"info": "No PTM dataset loaded"})
+            _refresh_global_catalog_from_current()
+            _update_ks_index()
+            _refresh_pathway_scores()
+            pipeline_ready.set(True)
+        except Exception as exc:
+            print(f"Warning: input processing run failed: {exc}")
+            _invalidate_user_run(f"Run failed: {exc}")
+        finally:
+            pipeline_running.set(False)
+            _send_custom_message_safe(
+                "set_input_busy_state",
+                {
+                    "active": False,
+                    "title": "Processing input",
+                    "text": "Validating files or preparing annotations, pathway scoring, and lookup indexes. This may take up to one minute.",
+                },
+            )
+
     @reactive.Effect
     @reactive.event(input.input_ptm_upload)
     def _process_ptm_upload():
         if not protein_validation.get().get("valid"):
             ptm_validation.set({"status": "Upload a valid protein file first.", "errors": ["Protein file not validated yet."], "valid": False})
-            _update_ks_index(reset=True)
-            _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
+            validated_ptm_dataset.set(None)
+            _invalidate_user_run("Upload and validate a Protein dataset before running.")
             return
         upload = input.input_ptm_upload()
         if not upload:
             ptm_validation.set({"status": "No PTM file uploaded (optional).", "errors": [], "valid": False})
-            ptm_dataset.set(None)
+            validated_ptm_dataset.set(None)
             ptm_preview_dataset.set(None)
             ptm_dataset_path.set(None)
-            _refresh_global_catalog_from_current()
             _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "No dataset loaded"})
-            _update_ks_index(reset=True)
-            _refresh_pathway_scores()
+            _invalidate_user_run("Validation updated. Press Run to process datasets.")
             return
         file_info = upload[0]
         datapath = getattr(file_info, "datapath", None)
@@ -6420,13 +7112,11 @@ def server(input, output, session):  # type: ignore[override]
             datapath = file_info.get("datapath")
         if not datapath:
             ptm_validation.set({"status": "Could not locate the uploaded PTM file.", "errors": [], "valid": False})
-            ptm_dataset.set(None)
+            validated_ptm_dataset.set(None)
             ptm_preview_dataset.set(None)
             ptm_dataset_path.set(None)
-            _refresh_global_catalog_from_current()
             _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "No dataset loaded"})
-            _update_ks_index(reset=True)
-            _refresh_pathway_scores()
+            _invalidate_user_run("Fix the PTM dataset issue, then press Run.")
             return
         protein_comparisons = protein_validation.get().get("comparisons") or []
         result = validate_ptm_file(datapath, protein_comparisons)
@@ -6440,47 +7130,45 @@ def server(input, output, session):  # type: ignore[override]
             dataset_payload = _load_dataset(datapath)
             ptm_preview_dataset.set(dataset_payload)
             _apply_outline_width_defaults(ptm_headers=dataset_payload.get("headers") or [])
-            try:
-                species_choice, _ = _resolve_species(_get_input_value(input, "input_species"))
-                dataset_payload = annotate_ptm_dataset(dataset_payload, species_choice, _get_psp_map())
-                dataset_payload = annotate_ptm_dataset_with_kinases(dataset_payload, species_choice, _get_psp_ks_map())
-            except Exception as exc:
-                print(f"Warning: PSP annotation failed: {exc}")
-            ptm_dataset.set(dataset_payload)
+            validated_ptm_dataset.set(dataset_payload)
             ptm_dataset_path.set(datapath)
-            _refresh_global_catalog_from_current()
-            _write_debug_dump("user_ptm_dataset_debug.txt", dataset_payload)
-            _update_ks_index()
-            _refresh_pathway_scores()
+            _invalidate_user_run("PTM validated. Press Run to process datasets.")
         else:
             ptm_preview_dataset.set(_load_dataset(datapath))
             ptm_validation.set({"status": "PTM file failed validation. See errors below.", "errors": result.errors, "valid": False})
-            ptm_dataset.set(None)
+            validated_ptm_dataset.set(None)
             ptm_dataset_path.set(None)
-            _refresh_global_catalog_from_current()
             _write_debug_dump("user_ptm_dataset_debug.txt", {"errors": result.errors})
-            _update_ks_index(reset=True)
-            _refresh_pathway_scores()
+            _invalidate_user_run("Fix the PTM dataset errors before running.")
 
     @reactive.Effect
     def _enforce_nav_lock():
         mode = _current_mode()
         selected = _get_input_value(input, "bookmark_selector") or "home"
         protein_ok = bool(protein_validation.get().get("valid"))
+        protein_blocked = _validation_has_explicit_error(protein_validation.get())
+        ptm_blocked = _validation_has_explicit_error(ptm_validation.get())
+        metabolite_blocked = _validation_has_explicit_error(metabolite_validation.get())
+        ready = bool(pipeline_ready.get())
         if mode == "demo":
             status_msg = "Demo mode: sample datasets loaded. Navigation unlocked." if protein_ok else "Demo mode: loading sample datasets..."
             nav_lock_status.set(status_msg)
             locked = False
             _send_custom_message_safe("toggle_nav_lock", {"locked": locked})
             return
-        ready = protein_ok
         locked = not ready
         if locked and selected not in {"input", "home"}:
             session.send_input_message("bookmark_selector", {"value": "home"})
         if ready:
-            nav_lock_status.set("User mode: protein validated. Navigation unlocked. PTM optional.")
+            nav_lock_status.set("User mode: run complete. Navigation unlocked.")
+        elif pipeline_running.get():
+            nav_lock_status.set("User mode: running dataset processing. Tabs will unlock when processing finishes.")
+        elif protein_blocked or ptm_blocked or metabolite_blocked:
+            nav_lock_status.set("User mode: fix input errors, then press Run.")
+        elif protein_ok:
+            nav_lock_status.set("User mode: validation complete. Press Run to process datasets and unlock other tabs.")
         else:
-            nav_lock_status.set("User mode: upload valid Protein file to unlock other tabs. PTM optional.")
+            nav_lock_status.set("User mode: upload and validate a Protein dataset, then press Run. PTM and Metabolite are optional.")
         _send_custom_message_safe("toggle_nav_lock", {"locked": locked})
 
     @reactive.Effect
@@ -6503,6 +7191,11 @@ def server(input, output, session):  # type: ignore[override]
                 _refresh_global_catalog_from_current(reset=True)
                 protein_validation.set({"status": "Demo mode failed to load sample protein.", "errors": [str(exc)], "valid": False, "comparisons": []})
                 ptm_validation.set({"status": "Demo mode failed to load sample PTM.", "errors": [str(exc)], "valid": False})
+                validated_protein_dataset.set(None)
+                validated_ptm_dataset.set(None)
+                validated_metabolite_dataset.set(None)
+                pipeline_running.set(False)
+                pipeline_ready.set(False)
                 nav_lock_status.set("Demo mode: sample datasets failed to load.")
                 _clear_pathway_scores("Demo datasets failed to load; pathway scoring unavailable.")
         else:
@@ -6513,6 +7206,9 @@ def server(input, output, session):  # type: ignore[override]
             protein_dataset.set(None)
             ptm_dataset.set(None)
             metabolite_dataset.set(None)
+            validated_protein_dataset.set(None)
+            validated_ptm_dataset.set(None)
+            validated_metabolite_dataset.set(None)
             protein_preview_dataset.set(None)
             ptm_preview_dataset.set(None)
             metabolite_preview_dataset.set(None)
@@ -6521,9 +7217,11 @@ def server(input, output, session):  # type: ignore[override]
             protein_validation.set({"status": "Upload a protein file to begin.", "errors": [], "valid": False, "comparisons": []})
             ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
             metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
-            nav_lock_status.set("User mode: upload valid Protein file to unlock other tabs. PTM optional.")
+            pipeline_running.set(False)
+            pipeline_ready.set(False)
+            nav_lock_status.set("User mode: upload and validate files, then press Run to unlock other tabs.")
             _update_ks_index(reset=True)
-            _clear_pathway_scores("Pathway scoring waiting for valid protein upload.")
+            _clear_pathway_scores("Pathway scoring waiting for validated inputs and Run.")
 
     @reactive.Effect
     @reactive.event(input.input_species)
@@ -6534,7 +7232,7 @@ def server(input, output, session):  # type: ignore[override]
             if _current_mode() == "demo":
                 _refresh_pathway_scores()
             else:
-                _mark_pathway_scores_pending("Species changed. Run Fisher's Exact Test to refresh pathway scores.")
+                _invalidate_user_run("Species changed. Press Run to reprocess datasets for the selected organism.")
 
     @reactive.Effect
     @reactive.event(input.settings_gradient_preset)
@@ -6668,11 +7366,23 @@ def server(input, output, session):  # type: ignore[override]
             ui.card_body(
                 ui.div(
                     {"style": species_wrap_style},
-                    ui.input_select(
-                        "input_species",
-                        "Select Species",
-                        choices=SPECIES_OPTIONS,
-                        selected=current_species,
+                    ui.div(
+                        ui.input_select(
+                            "input_species",
+                            "Select Species",
+                            choices=SPECIES_OPTIONS,
+                            selected=current_species,
+                        ),
+                        ui.input_action_button(
+                            "input_run_pipeline",
+                            "Run",
+                            class_="btn input-run-btn",
+                        ),
+                        ui.div(
+                            {"class": "input-run-status"},
+                            ui.output_text("input_nav_lock_status"),
+                        ),
+                        ui.output_ui("input_run_button_state"),
                     ),
                 ),
             ),
@@ -6832,10 +7542,10 @@ def server(input, output, session):  # type: ignore[override]
                         ui.div({"class": "mk-input-busy-spinner"}),
                         ui.div(
                             {"class": "mk-input-busy-copy"},
-                            ui.div({"class": "mk-input-busy-title"}, "Loading dataset"),
+                            ui.div({"class": "mk-input-busy-title"}, "Processing input"),
                             ui.div(
                                 {"class": "mk-input-busy-text"},
-                                "Validating, annotating, and preparing your uploaded file. This may take up to one minute.",
+                                "Validating files or preparing annotations, pathway scoring, and lookup indexes. This may take up to one minute.",
                             ),
                         ),
                     ),
@@ -6944,6 +7654,9 @@ def server(input, output, session):  # type: ignore[override]
         web_filter_tick = reactive.Value(0) if prefix == "web" else None
         web_filter_refresh_evt = reactive.Value(0) if prefix == "web" else None
         web_page = reactive.Value(1) if prefix == "web" else None
+
+        def _set_load_feedback(message: str = "") -> None:
+            state["load_feedback"].set(str(message or "").strip())
 
         def _get_custom_layout():
             # Access reactive value safely even outside a reactive context
@@ -7787,6 +8500,12 @@ def server(input, output, session):  # type: ignore[override]
                     skip_disk_write=True,
                     debug_write=debug_var,
                 )
+                generation_error = str(payload.get("_generation_error") or "").strip() if isinstance(payload, dict) else ""
+                if generation_error:
+                    if prefix == "web":
+                        _set_load_feedback(generation_error)
+                    state["status"].set(f"Error generating JSON: {generation_error}")
+                    return
                 show_bg_flag = bool(settings_override.get("show_background_image", False))
                 payload, _ = _attach_kegg_background_image(payload, force=show_bg_flag)
                 payload = dict(payload)
@@ -7837,10 +8556,13 @@ def server(input, output, session):  # type: ignore[override]
                 else:
                     payload["_custom_layout_applied"] = False
                 state["json"].set(payload)
+                if prefix == "web":
+                    _set_load_feedback("")
                 state["status"].set(f"{cfg['label']} pathway generated.")
             except Exception as exc:
+                if prefix == "web":
+                    _set_load_feedback(str(exc))
                 state["status"].set(f"Error generating JSON: {exc}")
-                state["json"].set(None)
 
         if is_ks_bookmark:
             def _ks_table_rows() -> List[Dict[str, Any]]:
@@ -8409,9 +9131,25 @@ def server(input, output, session):  # type: ignore[override]
                         label = f"{label} | {name_val}" if label else name_val
                     if web_selected_label is not None:
                         web_selected_label.set(label)
+                    _set_load_feedback("")
                 state["status"].set("Pathway selected. Click Load Pathway to load with current settings.")
 
             if cfg.get("key") == "web":
+                @output(id=_prefixed_id(prefix, "generate_feedback"))
+                @render.ui
+                def generate_feedback():
+                    feedback = str(state.get("load_feedback").get() or "").strip()
+                    loading = bool(state.get("loading").get()) if state.get("loading") is not None else False
+                    if loading or not feedback:
+                        return None
+                    return ui.tags.span(
+                        {
+                            "class": "web-load-error",
+                            "aria-live": "polite",
+                        },
+                        feedback,
+                    )
+
                 @reactive.Effect
                 @reactive.event(getattr(input, _prefixed_id(prefix, "pathway_id")))
                 def _sync_web_selection_input():
@@ -8421,13 +9159,25 @@ def server(input, output, session):  # type: ignore[override]
                 @render.ui
                 def generate_button_state():
                     selected = (web_selected_id.get() if web_selected_id is not None else "") or ""
+                    loading = bool(state.get("loading").get()) if state.get("loading") is not None else False
                     class_name = "web-load-ready" if str(selected).strip() else ""
                     return ui.tags.script(
                         f"""
                         (function(){{
                             const btn = document.getElementById('{_prefixed_id(prefix, "generate")}');
-                            if (!btn) return;
+                            const spinner = document.getElementById('{_prefixed_id(prefix, "generate_spinner")}');
+                            if (!btn || !spinner) return;
+                            if (btn.dataset.mkLoadBound !== '1') {{
+                                btn.addEventListener('click', function(){{
+                                    if (btn.disabled) return;
+                                    spinner.classList.add('active');
+                                    btn.disabled = true;
+                                }});
+                                btn.dataset.mkLoadBound = '1';
+                            }}
                             btn.classList.toggle('web-load-ready', {str(bool(class_name)).lower()});
+                            btn.disabled = {str(loading).lower()};
+                            spinner.classList.toggle('active', {str(loading).lower()});
                         }})();
                         """
                     )
@@ -8436,7 +9186,12 @@ def server(input, output, session):  # type: ignore[override]
                 @reactive.Effect
                 @reactive.event(getattr(input, _prefixed_id(prefix, "run_fisher_test")))
                 def _handle_run_fisher_test():
-                    _refresh_pathway_scores()
+                    fc_choices = _fc_choices()
+                    fc_idx = state["fc_index"].get() or 1
+                    if fc_idx < 1 or fc_idx > len(fc_choices):
+                        fc_idx = 1
+                    selected_fc = fc_choices[fc_idx - 1] if fc_choices and fc_idx >= 1 else None
+                    _refresh_pathway_scores(selected_fc)
 
             if cfg.get("key") == "web":
                 @output(id=_prefixed_id(prefix, "fisher_run_state"))
@@ -9125,6 +9880,16 @@ def server(input, output, session):  # type: ignore[override]
                 updated["_active_fc_index"] = idx
                 updated["_persist_token"] = time.time()
                 state["json"].set(updated)
+            if (
+                cfg.get("key") == "web"
+                and bool(pipeline_ready.get())
+                and choices
+            ):
+                selected_fc = choices[idx - 1]
+                score_cache = pathway_score_cache.get() or {}
+                cached_results = score_cache.get("results_by_fc", {}) if isinstance(score_cache, dict) else {}
+                if selected_fc not in cached_results:
+                    _refresh_pathway_scores(selected_fc)
 
         @reactive.Effect
         @reactive.event(
@@ -9554,8 +10319,14 @@ def server(input, output, session):  # type: ignore[override]
         @reactive.Effect
         @reactive.event(getattr(input, _prefixed_id(prefix, "generate")))
         def _build_on_click():
-            state["status"].set("Generating pathway...")
-            build_json()
+            if prefix == "web":
+                _set_load_feedback("")
+            state["loading"].set(True)
+            try:
+                state["status"].set("Generating pathway...")
+                build_json()
+            finally:
+                state["loading"].set(False)
 
         @reactive.Effect
         @reactive.event(getattr(input, _prefixed_id(prefix, "upload_custom_pathway")))
