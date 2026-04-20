@@ -16,6 +16,40 @@ MapKinase is a Python Shiny web app for visualizing proteomics, PTM modification
 4. `python MapKinase_WebApp\m5_main_ui.py`
 5. Open `http://127.0.0.1:8004`
 
+## Temporary password protection
+The main web app now requires a username and password before the site loads. The current built-in login is:
+
+- Username: `gassawaylab`
+- Password: `Qs1xULa5XCrB`
+
+Run the app normally:
+
+```powershell
+python MapKinase_WebApp\m5_main_ui.py
+```
+
+The separate protected launcher also still works:
+
+```powershell
+python MapKinase_WebApp\m5_secure_ui.py
+```
+
+If you want to override the credentials later without editing code, set environment variables first:
+
+```powershell
+$env:MAPKINASE_LOGIN_USERNAME = "gassawaylab"
+$env:MAPKINASE_LOGIN_PASSWORD = "Qs1xULa5XCrB"
+python MapKinase_WebApp\m5_secure_ui.py
+```
+
+Optional environment variables:
+- `MAPKINASE_AUTH_SECRET`: overrides the cookie-signing secret. If omitted, a random secret is generated each time the app starts.
+- `MAPKINASE_AUTH_MAX_AGE_SECONDS`: login duration in seconds before re-authentication is required. Default is `43200` (12 hours).
+- `MAPKINASE_AUTH_COOKIE_SECURE`: set to `1` when serving over HTTPS so the auth cookie is marked `Secure`.
+- `MAPKINASE_ENABLE_LOGIN`: set to `0` only if you intentionally want to disable the login gate.
+
+The protected launcher blocks both normal page requests and the Shiny websocket until the login succeeds.
+
 ## Required PSP annotations
 To run the PTM annotation features properly, download the PhosphoSitePlus datasets from `https://www.phosphosite.org/staticDownloads` and place the compressed files (do not unzip) in `MapKinase_WebApp\annotation_files\`:
 - `Phosphorylation_site_dataset.gz`

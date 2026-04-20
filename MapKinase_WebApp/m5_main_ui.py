@@ -27,6 +27,7 @@ from shiny import App, reactive, render, ui
 
 from MapKinase_WebApp.m4_json import DEFAULT_DATA, DEFAULT_SETTINGS, get_default_json
 from MapKinase_WebApp.a1_factory import get_pathway_api
+from MapKinase_WebApp.auth_gate import maybe_wrap_with_login
 from MapKinase_WebApp.m2_protein_catalog import ensure_global_protein_catalog
 from MapKinase_WebApp.m1_file_processor import validate_protein_file, validate_ptm_file
 from MapKinase_WebApp.d2_psp_regulatorysites import load_regulatory_sites, annotate_ptm_dataset
@@ -10395,7 +10396,7 @@ def server(input, output, session):  # type: ignore[override]
         _register_bookmark(cfg)
 
 
-app = App(app_ui, server)
+app = maybe_wrap_with_login(App(app_ui, server))
 
 
 def _run_uvicorn_app():
