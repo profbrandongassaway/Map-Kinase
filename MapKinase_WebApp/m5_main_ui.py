@@ -11,12 +11,15 @@ import sys
 import csv
 import asyncio
 import html
+import hashlib
 import math
+import xml.etree.ElementTree as ET
 from argparse import Namespace
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import pandas as pd
+from PIL import Image
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
@@ -27,7 +30,6 @@ from shiny import App, reactive, render, ui
 
 from MapKinase_WebApp.m4_json import DEFAULT_DATA, DEFAULT_SETTINGS, get_default_json
 from MapKinase_WebApp.a1_factory import get_pathway_api
-from MapKinase_WebApp.auth_gate import maybe_wrap_with_login
 from MapKinase_WebApp.m2_protein_catalog import ensure_global_protein_catalog
 from MapKinase_WebApp.m1_file_processor import validate_protein_file, validate_ptm_file
 from MapKinase_WebApp.d2_psp_regulatorysites import load_regulatory_sites, annotate_ptm_dataset
@@ -53,6 +55,10 @@ from MapKinase_WebApp.m7_cst_viewer import (
     save_cst_overlay_state,
 )
 from MapKinase_WebApp.m11_cst_pathway_index import iter_effective_cst_modules
+from MapKinase_WebApp.pathway_banlist import (
+    filter_kegg_options_for_species,
+    filter_wikipathways_options,
+)
 
 try:
     import uvicorn  # type: ignore
@@ -310,6 +316,9 @@ DEFAULT_BG_OPACITY = 0.9
 DEFAULT_BG_SCALE = 1.0
 DEFAULT_BG_OFFSET_X = 0.0
 DEFAULT_BG_OFFSET_Y = 0.0
+DEFAULT_WIKIPATHWAYS_BG_SCALE = 1.0
+DEFAULT_WIKIPATHWAYS_BG_OFFSET_X = 0.0
+DEFAULT_WIKIPATHWAYS_BG_OFFSET_Y = 0.0
 DEFAULT_BOX_Y_STRETCH = 1.0
 JSON_PREVIEW_DIR = os.path.join(BASE_DIR, "JSONfiles")
 JSON_PREVIEW_FILE = os.path.join(JSON_PREVIEW_DIR, "latest_preview.json")
@@ -331,6 +340,15 @@ def _resolve_sample_data_dir() -> str:
 SAMPLE_DATA_DIR = _resolve_sample_data_dir()
 SAMPLE_PROTEIN_FILE = os.path.join(SAMPLE_DATA_DIR, "TCA_protein_for_mapk.txt")
 SAMPLE_PTM_FILE = os.path.join(SAMPLE_DATA_DIR, "TCA_phospho_for_mapk_singlesite.csv")
+
+
+def _write_preview_json(payload: Dict[str, Any]) -> None:
+    try:
+        os.makedirs(JSON_PREVIEW_DIR, exist_ok=True)
+        with open(JSON_PREVIEW_FILE, "w", encoding="utf-8") as preview_fh:
+            json.dump(payload, preview_fh, indent=2)
+    except OSError as write_err:
+        print(f"Warning: could not write preview JSON to {JSON_PREVIEW_FILE}: {write_err}")
 SAMPLE_METABOLITE_FILE = os.path.join(SAMPLE_DATA_DIR, "example_metabolite_file.txt")
 SPECIES_REF_PATH = _resolve_species_ref_file()
 UPLOAD_ACCEPT_TYPES = [
@@ -435,7 +453,7 @@ BOOKMARK_CONFIGS: List[Dict[str, Any]] = [
     },
     {
         "key": "ks",
-        "label": "Kinase Substrates",
+        "label": "Kinase-Substrate",
         "mode": "figure",
         "show_search": False,
         "start_blank": True,
@@ -517,14 +535,17 @@ def _load_kegg_pathways(path: str) -> List[Dict[str, str]]:
     return options
 
 
-KEGG_PATHWAY_OPTIONS = _load_kegg_pathways(KEGG_PATHWAYS_FILE)
+RAW_KEGG_PATHWAY_OPTIONS = _load_kegg_pathways(KEGG_PATHWAYS_FILE)
 WIKIPATHWAYS_CACHE: Dict[str, List[Dict[str, str]]] = {}
 WIKIPATHWAYS_ORG_CACHE: Optional[set] = None
 
 
-def _load_wikipathways_catalog_from_local_index(organism: str, fallback: Optional[str] = None) -> List[Dict[str, str]]:
+def _get_kegg_pathway_options_for_species(species_code: str) -> List[Dict[str, str]]:
+    return filter_kegg_options_for_species(RAW_KEGG_PATHWAY_OPTIONS, species_code)
+
+
+def _resolve_species_code_for_catalog(organism: str, fallback: Optional[str] = None) -> str:
     names = [str(v).strip().lower() for v in (organism, fallback) if v]
-    species_code = None
     for key, info in SPECIES_CHOICES.items():
         candidates = {
             key.strip().lower(),
@@ -533,8 +554,16 @@ def _load_wikipathways_catalog_from_local_index(organism: str, fallback: Optiona
             str(info.get("code") or "").strip().lower(),
         }
         if any(name in candidates for name in names):
-            species_code = str(info.get("code") or "").strip().lower()
-            break
+            return str(info.get("code") or "").strip().lower()
+    return ""
+
+
+def _normalize_catalog_species_name(value: Any) -> str:
+    return str(value or "").strip().lower().replace("_", " ")
+
+
+def _load_wikipathways_catalog_from_local_index(organism: str, fallback: Optional[str] = None) -> List[Dict[str, str]]:
+    species_code = _resolve_species_code_for_catalog(organism, fallback)
     if not species_code:
         return []
     index_path = Path(INDEX_FILES_DIR) / f"wikipathways_index_{species_code}.json"
@@ -565,6 +594,7 @@ def _load_wikipathways_catalog_from_local_index(organism: str, fallback: Optiona
         if org:
             label = f"{label} ({org})"
         options.append({"id": path_id, "name": name, "species": org, "label": label})
+    options = filter_wikipathways_options(options, species_code)
     options.sort(key=lambda opt: opt.get("name", "").lower())
     return options
 
@@ -622,13 +652,28 @@ def _load_wikipathways_catalog(organism: str, fallback: Optional[str] = None) ->
     def _fetch_rows(name: str, quiet: bool = False) -> List[Dict[str, Any]]:
         try:
             import requests
-            response = requests.get(
-                "https://webservice.wikipathways.org/listpathways",
-                params={"organism": name or "", "format": "json"},
-                timeout=5,
-            )
+            response = requests.get("https://www.wikipathways.org/json/listPathways.json", timeout=8)
             response.raise_for_status()
-            rows = _extract_rows(response.json())
+            payload = response.json()
+            organism_norm = _normalize_catalog_species_name(name)
+            rows = []
+            organisms = payload.get("organisms") if isinstance(payload, dict) else None
+            if isinstance(organisms, list):
+                for organism_row in organisms:
+                    if not isinstance(organism_row, dict):
+                        continue
+                    candidates = {
+                        _normalize_catalog_species_name(organism_row.get("latin")),
+                        _normalize_catalog_species_name(organism_row.get("common")),
+                    }
+                    if organism_norm and organism_norm not in candidates:
+                        continue
+                    pathways = organism_row.get("pathways")
+                    if isinstance(pathways, list):
+                        rows = [row for row in pathways if isinstance(row, dict)]
+                    break
+            if not rows:
+                rows = _extract_rows(payload)
             return rows
         except Exception as exc:  # pragma: no cover - network/service issues
             if not quiet:
@@ -663,6 +708,9 @@ def _load_wikipathways_catalog(organism: str, fallback: Optional[str] = None) ->
             if org:
                 label = f"{label} ({org})"
             options.append({"id": path_id, "name": name, "species": org, "label": label})
+        species_code = _resolve_species_code_for_catalog(organism, fallback)
+        if species_code:
+            options = filter_wikipathways_options(options, species_code)
         options.sort(key=lambda opt: opt.get("name", "").lower())
     except Exception as exc:
         print(f"Warning: failed to load WikiPathways catalogue for '{organism or fallback or 'all'}': {exc}")
@@ -677,9 +725,35 @@ def _coerce_float(value: Any) -> Optional[float]:
     if value in (None, "", False):
         return None
     try:
-        return float(value)
+        numeric = float(value)
     except (TypeError, ValueError):
         return None
+    if not math.isfinite(numeric):
+        return None
+    return numeric
+
+
+def _background_preview_from_settings(
+    settings: Optional[Dict[str, Any]] = None,
+    show: bool = False,
+) -> Dict[str, float | bool]:
+    cfg = dict(settings or {})
+    pathway_source = str(cfg.get("pathway_source") or "").strip().lower()
+    if pathway_source == "wikipathways":
+        scale = float(cfg.get("bg_scale", DEFAULT_WIKIPATHWAYS_BG_SCALE))
+        offset_x = float(cfg.get("bg_offset_x", DEFAULT_WIKIPATHWAYS_BG_OFFSET_X))
+        offset_y = float(cfg.get("bg_offset_y", DEFAULT_WIKIPATHWAYS_BG_OFFSET_Y))
+    else:
+        scale = DEFAULT_BG_SCALE
+        offset_x = DEFAULT_BG_OFFSET_X
+        offset_y = DEFAULT_BG_OFFSET_Y
+    return {
+        "show": bool(show),
+        "opacity": float(cfg.get("bg_opacity", DEFAULT_BG_OPACITY)),
+        "offset_x": offset_x,
+        "offset_y": offset_y,
+        "scale": scale,
+    }
 
 
 def _build_custom_layout_export(payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -915,7 +989,7 @@ if TERMINAL_LOG_ENABLED:
     _enable_terminal_logging(TERMINAL_LOG_FILE)
 
 
-def _attach_kegg_background_image(data: Any, force: bool = False) -> Tuple[Any, bool]:
+def _attach_pathway_background_image(data: Any, force: bool = False) -> Tuple[Any, bool]:
     if not isinstance(data, dict):
         return data, False
 
@@ -925,20 +999,55 @@ def _attach_kegg_background_image(data: Any, force: bool = False) -> Tuple[Any, 
     settings = data.get("general_data", {}).get("settings", {})
     pathway_source = str(settings.get("pathway_source", "")).lower()
     pathway_id = settings.get("pathway_id") or data.get("pathway_id")
-    if pathway_source != "kegg" or not pathway_id:
+    if pathway_source not in {"kegg", "wikipathways"} or not pathway_id:
         return data, False
 
     try:
-        api = get_pathway_api("kegg")
+        api = get_pathway_api(pathway_source)
         img = api.download_pathway_image(pathway_id)
         if img is None:
             return data, False
+        output_width = img.width
+        output_height = img.height
+        if pathway_source == "wikipathways":
+            gpml_path = api.download_pathway_data(pathway_id, species_hint=settings.get("species"))
+            if gpml_path and os.path.exists(gpml_path):
+                try:
+                    tree = ET.parse(gpml_path)
+                    root = tree.getroot()
+                    board_graphics = root.find("{http://pathvisio.org/GPML/2013a}Graphics")
+                    if board_graphics is not None:
+                        board_width = float(board_graphics.get("BoardWidth", "0") or 0)
+                        board_height = float(board_graphics.get("BoardHeight", "0") or 0)
+                        if board_width > 0 and board_height > 0 and img.width > 0 and img.height > 0:
+                            render_scale = min(img.width / board_width, img.height / board_height)
+                            render_width = board_width * render_scale
+                            render_height = board_height * render_scale
+                            margin_x = max(0.0, (img.width - render_width) / 2.0)
+                            margin_y = max(0.0, (img.height - render_height) / 2.0)
+                            left = max(0, int(round(margin_x)))
+                            top = max(0, int(round(margin_y)))
+                            right = min(img.width, int(round(img.width - margin_x)))
+                            bottom = min(img.height, int(round(img.height - margin_y)))
+                            if right > left and bottom > top:
+                                img = img.crop((left, top, right, bottom))
+                            output_width = max(1, int(round(board_width)))
+                            output_height = max(1, int(round(board_height)))
+                            if img.width != output_width or img.height != output_height:
+                                try:
+                                    resampling = Image.Resampling.LANCZOS
+                                except AttributeError:
+                                    resampling = Image.LANCZOS
+                                img = img.resize((output_width, output_height), resampling)
+                except Exception:
+                    output_width = img.width
+                    output_height = img.height
         buf = io.BytesIO()
         img.save(buf, format="PNG")
         b64 = base64.b64encode(buf.getvalue()).decode("ascii")
         updated = dict(data)
         updated["kegg_bg_image"] = f"data:image/png;base64,{b64}"
-        updated["kegg_bg_size"] = {"width": img.width, "height": img.height}
+        updated["kegg_bg_size"] = {"width": output_width, "height": output_height}
         return updated, True
     except Exception:
         return data, False
@@ -964,14 +1073,108 @@ def _coerce_float(value: Any) -> Optional[float]:
     if value in (None, "", False):
         return None
     try:
-        return float(value)
+        numeric = float(value)
     except (TypeError, ValueError):
         return None
-
-
-def _compute_gradient_color(value: Optional[float], neg: Sequence[int], pos: Sequence[int], max_neg: float, max_pos: float) -> Optional[List[int]]:
-    if value is None:
+    if not math.isfinite(numeric):
         return None
+    return numeric
+
+
+def _normalize_gradient_stop_entries(
+    gradient_stops: Any,
+) -> List[Dict[str, Any]]:
+    if not isinstance(gradient_stops, (list, tuple)):
+        return []
+    parsed: List[Tuple[float, List[int]]] = []
+    fallback_color = [128, 128, 128]
+    for entry in gradient_stops:
+        if not isinstance(entry, dict):
+            continue
+        raw_value = entry.get("value")
+        try:
+            value = float(raw_value)
+        except (TypeError, ValueError):
+            continue
+        if not math.isfinite(value):
+            continue
+        raw_color = entry.get("color", entry.get("rgb"))
+        color: List[int]
+        if isinstance(raw_color, str):
+            color = list(_hex_to_rgb(raw_color, tuple(fallback_color)))
+        elif isinstance(raw_color, (list, tuple)) and len(raw_color) >= 3:
+            color = [int(max(0, min(255, round(float(c))))) for c in list(raw_color)[:3]]
+        else:
+            continue
+        parsed.append((value, color))
+    if not parsed:
+        return []
+    dedup: Dict[float, List[int]] = {}
+    for value, color in parsed:
+        dedup[float(value)] = list(color)
+    ordered = sorted(dedup.items(), key=lambda kv: kv[0])
+    return [{"value": float(v), "color": list(c)} for v, c in ordered]
+
+
+def _default_gradient_stops() -> List[Dict[str, Any]]:
+    from_defaults = _normalize_gradient_stop_entries(DEFAULT_SETTINGS.get("gradient_stops"))
+    if len(from_defaults) >= 2:
+        return from_defaults
+    return _normalize_gradient_stop_entries(
+        [
+            {"value": float(DEFAULT_SETTINGS.get("max_negative", -2)), "color": list(DEFAULT_SETTINGS.get("negative_color", (179, 21, 41)))},
+            {"value": 0.0, "color": [255, 255, 255]},
+            {"value": float(DEFAULT_SETTINGS.get("max_positive", 2)), "color": list(DEFAULT_SETTINGS.get("positive_color", (16, 101, 171)))},
+        ]
+    )
+
+
+def _normalize_gradient_stops_with_fallback(gradient_stops: Any) -> List[Dict[str, Any]]:
+    normalized = _normalize_gradient_stop_entries(gradient_stops)
+    if len(normalized) >= 2:
+        return normalized
+    return _default_gradient_stops()
+
+
+def _gradient_color_from_stops(value: float, gradient_stops: List[Dict[str, Any]]) -> List[int]:
+    if not gradient_stops:
+        return [128, 128, 128]
+    if value <= float(gradient_stops[0]["value"]):
+        return list(gradient_stops[0]["color"])
+    if value >= float(gradient_stops[-1]["value"]):
+        return list(gradient_stops[-1]["color"])
+    for idx in range(len(gradient_stops) - 1):
+        left = gradient_stops[idx]
+        right = gradient_stops[idx + 1]
+        left_v = float(left["value"])
+        right_v = float(right["value"])
+        if value < left_v or value > right_v:
+            continue
+        if right_v == left_v:
+            return list(right["color"])
+        t = (value - left_v) / (right_v - left_v)
+        left_c = list(left["color"])
+        right_c = list(right["color"])
+        return [
+            int(max(0, min(255, round((1 - t) * left_c[c_idx] + t * right_c[c_idx]))))
+            for c_idx in range(3)
+        ]
+    return list(gradient_stops[-1]["color"])
+
+
+def _compute_gradient_color(
+    value: Optional[float],
+    neg: Sequence[int],
+    pos: Sequence[int],
+    max_neg: float,
+    max_pos: float,
+    gradient_stops: Optional[List[Dict[str, Any]]] = None,
+) -> Optional[List[int]]:
+    if value is None or not math.isfinite(value):
+        return None
+    stops = _normalize_gradient_stop_entries(gradient_stops or [])
+    if len(stops) >= 2:
+        return _gradient_color_from_stops(float(value), stops)
     white = (255, 255, 255)
     neg = _rgb_tuple_to_list(neg)
     pos = _rgb_tuple_to_list(pos)
@@ -1000,14 +1203,22 @@ def _apply_color_overrides(payload: Dict[str, Any], color_override: Dict[str, An
     pos = color_override.get("positive_color")
     max_neg = _coerce_float(color_override.get("max_negative")) or DEFAULT_SETTINGS["max_negative"]
     max_pos = _coerce_float(color_override.get("max_positive")) or DEFAULT_SETTINGS["max_positive"]
+    gradient_stops = _normalize_gradient_stop_entries(color_override.get("gradient_stops"))
     for protein in protein_data.values():
-        _recolor_entry(protein, neg, pos, max_neg, max_pos)
+        _recolor_entry(protein, neg, pos, max_neg, max_pos, gradient_stops=gradient_stops)
         ptms = protein.get("PTMs") or {}
         for ptm in ptms.values():
-            _recolor_entry(ptm, neg, pos, max_neg, max_pos)
+            _recolor_entry(ptm, neg, pos, max_neg, max_pos, gradient_stops=gradient_stops)
 
 
-def _recolor_entry(entry: Dict[str, Any], neg: Sequence[int], pos: Sequence[int], max_neg: float, max_pos: float) -> None:
+def _recolor_entry(
+    entry: Dict[str, Any],
+    neg: Sequence[int],
+    pos: Sequence[int],
+    max_neg: float,
+    max_pos: float,
+    gradient_stops: Optional[List[Dict[str, Any]]] = None,
+) -> None:
     if not isinstance(entry, dict):
         return
     for key, value in list(entry.items()):
@@ -1018,7 +1229,7 @@ def _recolor_entry(entry: Dict[str, Any], neg: Sequence[int], pos: Sequence[int]
         except IndexError:
             continue
         fc_value = _coerce_float(value)
-        new_color = _compute_gradient_color(fc_value, neg, pos, max_neg, max_pos)
+        new_color = _compute_gradient_color(fc_value, neg, pos, max_neg, max_pos, gradient_stops=gradient_stops)
         if new_color is not None:
             entry[f"fc_color_{idx}"] = new_color
 
@@ -1164,7 +1375,7 @@ def _normalize_pathway_id(raw_value: str, species_code: str) -> str:
         pattern = re.compile(cleaned, re.IGNORECASE)
     except re.error:
         return cleaned
-    for opt in KEGG_PATHWAY_OPTIONS:
+    for opt in _get_kegg_pathway_options_for_species(species_code):
         species_id = f"{species_code}{opt['digits']}"
         search_target = f"{species_id} | {opt['raw_id']} | {opt['name']}"
         if pattern.search(search_target):
@@ -1213,7 +1424,11 @@ def collect_settings(input, cfg: Dict[str, Any]) -> Dict[str, Any]:  # type: ign
     overrides["ptm_max_display"] = global_ptm_max
     overrides["use_original_protbox_size"] = _to_bool(
         _get_input_value(input, "settings_use_original_protbox_size"),
-        DEFAULT_SETTINGS.get("use_original_protbox_size", False),
+        DEFAULT_SETTINGS.get("use_original_protbox_size", True),
+    )
+    overrides["temporal_mode"] = _to_bool(
+        _get_input_value(input, "settings_temporal_mode"),
+        DEFAULT_SETTINGS.get("temporal_mode", False),
     )
     overrides["show_background_image"] = _to_bool(_get("show_background_image", _bool_default(cfg, "show_background_image")), _bool_default(cfg, "show_background_image"))
     overrides["display_types"] = list(DEFAULT_SETTINGS.get("display_types", []))
@@ -1233,20 +1448,53 @@ def collect_settings(input, cfg: Dict[str, Any]) -> Dict[str, Any]:  # type: ign
     overrides["show_text_boxes"] = _to_bool(_get("show_text_boxes", _bool_default(cfg, "show_text_boxes")), _bool_default(cfg, "show_text_boxes"))
     overrides["mode"] = str(cfg.get("mode", "analysis")).strip().lower()
     overrides["simple_kegg_mode"] = _to_bool(_get_input_value(input, _prefixed_id(prefix, "simple_kegg_mode")), prefix == "web")
-    overrides["negative_color"] = _hex_to_rgb(
+    overrides["bg_scale"] = DEFAULT_WIKIPATHWAYS_BG_SCALE
+    overrides["bg_offset_x"] = DEFAULT_WIKIPATHWAYS_BG_OFFSET_X
+    overrides["bg_offset_y"] = DEFAULT_WIKIPATHWAYS_BG_OFFSET_Y
+    legacy_neg = _hex_to_rgb(
         _get_input_value(input, "settings_negative_color") or _rgb_tuple_to_hex(DEFAULT_SETTINGS["negative_color"]),
         DEFAULT_SETTINGS["negative_color"],
     )
-    overrides["positive_color"] = _hex_to_rgb(
+    legacy_pos = _hex_to_rgb(
         _get_input_value(input, "settings_positive_color") or _rgb_tuple_to_hex(DEFAULT_SETTINGS["positive_color"]),
         DEFAULT_SETTINGS["positive_color"],
     )
-    overrides["max_negative"] = _to_float(
+    legacy_max_neg = _to_float(
         _get_input_value(input, "settings_max_negative"), DEFAULT_SETTINGS["max_negative"]
     )
-    overrides["max_positive"] = _to_float(
+    legacy_max_pos = _to_float(
         _get_input_value(input, "settings_max_positive"), DEFAULT_SETTINGS["max_positive"]
     )
+    stops_payload = _get_input_value(input, "settings_gradient_stops_json")
+    parsed_stops: List[Dict[str, Any]] = []
+    if isinstance(stops_payload, dict):
+        parsed_stops = _normalize_gradient_stop_entries(stops_payload.get("rows"))
+    elif isinstance(stops_payload, str) and stops_payload.strip():
+        try:
+            payload_obj = json.loads(stops_payload)
+            if isinstance(payload_obj, dict):
+                parsed_stops = _normalize_gradient_stop_entries(payload_obj.get("rows"))
+            elif isinstance(payload_obj, list):
+                parsed_stops = _normalize_gradient_stop_entries(payload_obj)
+        except Exception:
+            parsed_stops = []
+    if len(parsed_stops) < 2:
+        parsed_stops = _normalize_gradient_stop_entries(
+            [
+                {"value": legacy_max_neg, "color": list(legacy_neg)},
+                {"value": 0.0, "color": [255, 255, 255]},
+                {"value": legacy_max_pos, "color": list(legacy_pos)},
+            ]
+        )
+    if len(parsed_stops) < 2:
+        parsed_stops = _default_gradient_stops()
+    min_stop = parsed_stops[0]
+    max_stop = parsed_stops[-1]
+    overrides["gradient_stops"] = parsed_stops
+    overrides["negative_color"] = tuple(int(v) for v in list(min_stop.get("color", legacy_neg))[:3])
+    overrides["positive_color"] = tuple(int(v) for v in list(max_stop.get("color", legacy_pos))[:3])
+    overrides["max_negative"] = float(min_stop.get("value", legacy_max_neg))
+    overrides["max_positive"] = float(max_stop.get("value", legacy_max_pos))
     overrides["prot_label_font"] = DEFAULT_SETTINGS["prot_label_font"]
     global_prot_label = _to_int(_get_input_value(input, "settings_prot_label_size"), DEFAULT_SETTINGS["prot_label_size"])
     overrides["prot_label_size"] = global_prot_label
@@ -1306,7 +1554,13 @@ PTM_LABEL_DEFAULTS: Dict[str, Tuple[float, float, str]] = {
     "E2": (5, 2, "left"),   # 3, 2
 }
 
-KS_VERTICAL_SPACING = 25  
+KS_VERTICAL_SPACING = 25
+KS_LAYOUT_GAP_X_DEFAULT = 240.0
+KS_LAYOUT_CENTER_X_DEFAULT = 260.0
+KS_LAYOUT_CENTER_Y_DEFAULT = 200.0
+KS_CONCENTRIC_SPACE_DEFAULT = 70.0
+KS_CONCENTRIC_RADIUS_DEFAULT = 220.0
+KS_CONCENTRIC_ARROW_STOP_DEFAULT = 50.0
 
 
 def _compute_ptm_position(
@@ -1334,6 +1588,7 @@ def _gradient_color_from_fold(
     positive_color: Sequence[float],
     max_negative: float,
     max_positive: float,
+    gradient_stops: Optional[List[Dict[str, Any]]] = None,
 ) -> List[int]:
     try:
         if fold_value in (None, "", False):
@@ -1343,6 +1598,9 @@ def _gradient_color_from_fold(
         return [128, 128, 128]
     if not math.isfinite(fold):
         return [128, 128, 128]
+    stops = _normalize_gradient_stop_entries(gradient_stops or [])
+    if len(stops) >= 2:
+        return _gradient_color_from_stops(float(fold), stops)
     neg = [int(v) for v in negative_color][:3]
     pos = [int(v) for v in positive_color][:3]
     neg_limit = abs(max_negative) if max_negative else 1.0
@@ -1404,6 +1662,13 @@ CUSTOM_STYLES = ui.tags.style(
         border-radius: 6px; font-size: 0.85rem; }
     #settings_max_negative, #settings_max_positive { height: 48px; font-size: 1rem; }
     #settings_gradient_preview .gradient-preview { margin-top: 0.5rem; }
+    .gradient-table-wrap { margin-top: 8px; border: 1px solid #d5dde7; border-radius: 12px; overflow: hidden; background: #fff; }
+    .gradient-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .gradient-table thead th { background: #f8fafc; color: #334155; font-size: 12px; font-weight: 700; padding: 8px 10px; border-bottom: 1px solid #e5e7eb; }
+    .gradient-table tbody td { padding: 8px 10px; border-bottom: 1px solid #eef2f7; vertical-align: middle; }
+    .gradient-table tbody tr:last-child td { border-bottom: none; }
+    .gradient-table .mk-grad-value { width: 100%; height: 34px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 8px; font-size: 13px; }
+    .gradient-table .mk-grad-color { width: 100%; height: 34px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0; background: transparent; }
     .mk-export-spinner { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #1f2937; }
     .mk-export-spinner::before { content: ""; width: 14px; height: 14px; border: 2px solid #cbd5e1;
         border-top-color: #1f2937; border-radius: 50%; animation: mk-spin 0.8s linear infinite; }
@@ -1558,7 +1823,7 @@ CUSTOM_STYLES = ui.tags.style(
     .input-preview-table tbody td { color: #334155; white-space: nowrap; }
     .input-preview-table th, .input-preview-table td { padding: 10px 12px; border-color: #e5e7eb;
         overflow: hidden; text-overflow: ellipsis; }
-    .input-preview-guide-card { width: 1380px; min-width: 1080px; height: 224px; border: 1px solid #dbe2ea;
+    .input-preview-guide-card { width: 1380px; min-width: 1080px; height: 252px; border: 1px solid #dbe2ea;
         border-radius: 16px; background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
         box-shadow: 0 18px 36px rgba(15, 23, 42, 0.10); overflow: hidden; }
     .input-preview-guide-layout { display: block; height: 100%; }
@@ -2119,9 +2384,175 @@ MODE_BEHAVIOR_SCRIPT = ui.tags.script(
     """
 )
 
+GRADIENT_TABLE_SCRIPT = ui.tags.script(
+    """
+    (function () {
+        function setShinyInputValue(id, value, opts) {
+            if (!window.Shiny) return false;
+            if (typeof window.Shiny.setInputValue === 'function') {
+                window.Shiny.setInputValue(id, value, opts || { priority: 'event' });
+                return true;
+            }
+            if (typeof window.Shiny.onInputChange === 'function') {
+                window.Shiny.onInputChange(id, value);
+                return true;
+            }
+            return false;
+        }
+        function collectGradientRows() {
+            const table = document.getElementById('settings_gradient_table_editor');
+            if (!table) return [];
+            const rows = [];
+            const trs = table.querySelectorAll('tbody tr.mk-gradient-row');
+            trs.forEach((tr) => {
+                const valueEl = tr.querySelector('input.mk-grad-value');
+                const colorEl = tr.querySelector('input.mk-grad-color');
+                if (!valueEl || !colorEl) return;
+                const rawValueText = String(valueEl.value || '').trim();
+                if (!rawValueText) return;
+                const rawValue = Number(rawValueText);
+                const rawColor = String(colorEl.value || '').trim();
+                if (!Number.isFinite(rawValue)) return;
+                if (!/^#[0-9a-fA-F]{6}$/.test(rawColor)) return;
+                rows.push({ value: rawValue, color: rawColor });
+            });
+            return rows;
+        }
+        function syncLegacyFromRows(rows) {
+            if (!Array.isArray(rows) || rows.length < 2) return;
+            const sorted = [...rows].sort((a, b) => Number(a.value) - Number(b.value));
+            const minRow = sorted[0];
+            const maxRow = sorted[sorted.length - 1];
+            setShinyInputValue('settings_max_negative', Number(minRow.value), { priority: 'event' });
+            setShinyInputValue('settings_max_positive', Number(maxRow.value), { priority: 'event' });
+            setShinyInputValue('settings_negative_color', String(minRow.color || '#000000'), { priority: 'event' });
+            setShinyInputValue('settings_positive_color', String(maxRow.color || '#000000'), { priority: 'event' });
+        }
+        function pushGradientRows() {
+            const rows = collectGradientRows();
+            syncLegacyFromRows(rows);
+            setShinyInputValue(
+                'settings_gradient_stops_json',
+                { rows, ts: Date.now() },
+                { priority: 'event' }
+            );
+        }
+        window.mkGradientTableUpdate = pushGradientRows;
+        document.addEventListener('change', function (evt) {
+            const target = evt && evt.target;
+            if (!target || !target.closest) return;
+            if (target.closest('#settings_gradient_table_editor')) {
+                pushGradientRows();
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            pushGradientRows();
+        });
+        setTimeout(pushGradientRows, 300);
+    })();
+    """
+)
+
 SVG_DOWNLOAD_SCRIPT = ui.tags.script(
     """
     (function(){
+        function ensureCitationPopup(){
+            var existing = document.getElementById("mk-citation-popup-overlay");
+            if (existing) return existing;
+            var overlay = document.createElement("div");
+            overlay.id = "mk-citation-popup-overlay";
+            overlay.setAttribute("aria-hidden", "true");
+            overlay.style.cssText = [
+                "position:fixed",
+                "inset:0",
+                "background:rgba(15,23,42,0.52)",
+                "display:none",
+                "align-items:center",
+                "justify-content:center",
+                "z-index:9999",
+                "padding:16px"
+            ].join(";");
+            var panel = document.createElement("div");
+            panel.style.cssText = [
+                "position:relative",
+                "width:min(680px,calc(100vw - 24px))",
+                "background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%)",
+                "border:1px solid #cbd5e1",
+                "border-radius:16px",
+                "box-shadow:0 30px 70px rgba(15,23,42,0.28)",
+                "padding:18px 20px 18px 20px",
+                "font-family:Segoe UI,Tahoma,sans-serif",
+                "color:#0f172a"
+            ].join(";");
+            var closeBtn = document.createElement("button");
+            closeBtn.type = "button";
+            closeBtn.setAttribute("aria-label", "Close citation popup");
+            closeBtn.textContent = "×";
+            closeBtn.style.cssText = [
+                "position:absolute",
+                "top:10px",
+                "right:10px",
+                "width:30px",
+                "height:30px",
+                "border:1px solid #cbd5e1",
+                "background:#ffffff",
+                "border-radius:999px",
+                "font-size:20px",
+                "line-height:1",
+                "cursor:pointer",
+                "color:#334155"
+            ].join(";");
+            closeBtn.addEventListener("click", function(){
+                overlay.style.display = "none";
+                overlay.setAttribute("aria-hidden", "true");
+            });
+            var heading = document.createElement("div");
+            heading.textContent = "Please Cite MapKinase";
+            heading.style.cssText = "font-size:22px;font-weight:800;margin:0 34px 8px 0;color:#0b1f33;";
+            var sub = document.createElement("div");
+            sub.textContent = "Your file download is in progress. Please include this citation in manuscripts and presentations.";
+            sub.style.cssText = "font-size:14px;line-height:1.45;margin:0 0 12px 0;color:#334155;";
+            var citationWrap = document.createElement("div");
+            citationWrap.style.cssText = [
+                "background:#f1f5f9",
+                "border:1px solid #dbeafe",
+                "border-left:4px solid #2563eb",
+                "border-radius:12px",
+                "padding:12px 13px"
+            ].join(";");
+            var citationTitle = document.createElement("div");
+            citationTitle.textContent = "bioRxiv";
+            citationTitle.style.cssText = "font-size:12px;font-weight:700;letter-spacing:0.02em;text-transform:uppercase;color:#1d4ed8;margin:0 0 6px 0;";
+            var citationText = document.createElement("div");
+            citationText.textContent = "(placeholder)";
+            citationText.style.cssText = "font-size:14px;line-height:1.5;color:#0f172a;word-break:break-word;";
+            citationWrap.appendChild(citationTitle);
+            citationWrap.appendChild(citationText);
+            panel.appendChild(closeBtn);
+            panel.appendChild(heading);
+            panel.appendChild(sub);
+            panel.appendChild(citationWrap);
+            overlay.appendChild(panel);
+            overlay.addEventListener("click", function(ev){
+                if (ev.target === overlay){
+                    overlay.style.display = "none";
+                    overlay.setAttribute("aria-hidden", "true");
+                }
+            });
+            document.addEventListener("keydown", function(ev){
+                if (ev.key === "Escape" && overlay.style.display !== "none"){
+                    overlay.style.display = "none";
+                    overlay.setAttribute("aria-hidden", "true");
+                }
+            });
+            document.body.appendChild(overlay);
+            return overlay;
+        }
+        function showCitationPopup(){
+            var overlay = ensureCitationPopup();
+            overlay.style.display = "flex";
+            overlay.setAttribute("aria-hidden", "false");
+        }
         function downloadHref(href, filename){
             var link = document.createElement("a");
             link.href = href;
@@ -2452,6 +2883,7 @@ SVG_DOWNLOAD_SCRIPT = ui.tags.script(
             var btn = ev.target.closest("[data-mk-download]");
             if (!btn) return;
             ev.preventDefault();
+            showCitationPopup();
             var format = btn.getAttribute("data-mk-download");
             var target = findExportPayload(btn);
             if (!target){
@@ -2982,6 +3414,152 @@ def _settings_panel(cfg: Dict[str, Any]) -> ui.card:
                 ),
             )
         )
+        ks_layout_mode_id = _prefixed_id(prefix, "ks_layout_mode")
+        ks_layout_radius_mode_id = _prefixed_id(prefix, "ks_conc_radius_mode")
+        ks_two_col_side_id = _prefixed_id(prefix, "ks_two_col_focus_side")
+        ks_two_col_columns_id = _prefixed_id(prefix, "ks_two_col_columns")
+        ks_dataset_only_id = _prefixed_id(prefix, "ks_dataset_kinases_only")
+        controls.append(
+            ui.div(
+                {"class": "ks-filter-panel"},
+                ui.div(
+                    {"style": "display:flex; align-items:center; gap:8px;"},
+                    ui.tags.button(
+                        ui.tags.i({"class": "fa fa-sliders"}), "Settings",
+                        {"id": _prefixed_id(prefix, "ks_layout_btn"), "type": "button", "class": "ks-filter-button"}
+                    ),
+                ),
+                ui.div(
+                    {"id": _prefixed_id(prefix, "ks_layout_popup"), "class": "ks-filter-popup"},
+                    ui.div(
+                        {"style": "font-weight:600; margin-bottom:6px;"},
+                        "Data filters",
+                    ),
+                    ui.input_checkbox(
+                        ks_dataset_only_id,
+                        "Only include kinases present in uploaded protein dataset (table + viewer)",
+                        value=False,
+                    ),
+                    ui.tags.hr({"style": "margin:8px 0;"}),
+                    ui.div(
+                        {"style": "font-weight:600; margin-bottom:6px;"},
+                        "Layout",
+                    ),
+                    ui.input_radio_buttons(
+                        ks_layout_mode_id,
+                        "Protbox layout",
+                        choices={"two_column": "Two-column layout", "concentric": "Concentric layout"},
+                        selected="two_column",
+                        inline=True,
+                    ),
+                    ui.panel_conditional(
+                        f"input.{ks_layout_mode_id} == 'two_column'",
+                        ui.div(
+                            {"class": "ks-filter-row"},
+                            ui.input_numeric(
+                                _prefixed_id(prefix, "ks_layout_gap_x"),
+                                "Horizontal gap (px)",
+                                value=int(KS_LAYOUT_GAP_X_DEFAULT),
+                                min=80,
+                                max=1000,
+                                width="180px",
+                            ),
+                            ui.input_numeric(
+                                _prefixed_id(prefix, "ks_layout_spacing_y"),
+                                "Vertical spacing (px)",
+                                value=int(KS_VERTICAL_SPACING),
+                                min=10,
+                                max=300,
+                                width="180px",
+                            ),
+                        ),
+                        ui.div(
+                            {"class": "ks-filter-row"},
+                            ui.input_radio_buttons(
+                                ks_two_col_side_id,
+                                "Single-node side",
+                                choices={"left": "Left", "right": "Right", "top": "Top", "bottom": "Bottom"},
+                                selected="left",
+                                inline=True,
+                            ),
+                            ui.input_numeric(
+                                ks_two_col_columns_id,
+                                "Columns on multi-node side",
+                                value=1,
+                                min=1,
+                                max=6,
+                                width="180px",
+                            ),
+                        ),
+                        ui.div(
+                            {"style": "font-size:11px; color:#666; margin-top:2px;"},
+                            "Only nodes in the first column nearest the single node receive arrows.",
+                        ),
+                    ),
+                    ui.panel_conditional(
+                        f"input.{ks_layout_mode_id} == 'concentric'",
+                        ui.div(
+                            {"style": "display:flex; flex-direction:column; gap:8px;"},
+                            ui.input_checkbox(_prefixed_id(prefix, "ks_conc_arrows"), "Add arrows to center", value=True),
+                            ui.input_radio_buttons(
+                                ks_layout_radius_mode_id,
+                                "Ring radius",
+                                choices={"auto": "Auto", "fixed": "Fixed"},
+                                selected="auto",
+                                inline=True,
+                            ),
+                            ui.panel_conditional(
+                                f"input.{ks_layout_radius_mode_id} == 'fixed'",
+                                ui.input_numeric(
+                                    _prefixed_id(prefix, "ks_conc_radius_fixed"),
+                                    "Fixed radius (px)",
+                                    value=int(KS_CONCENTRIC_RADIUS_DEFAULT),
+                                    min=20,
+                                    max=2000,
+                                    width="220px",
+                                ),
+                            ),
+                            ui.panel_conditional(
+                                f"input.{ks_layout_radius_mode_id} == 'auto'",
+                                ui.input_numeric(
+                                    _prefixed_id(prefix, "ks_conc_space"),
+                                    "Protbox space (auto)",
+                                    value=int(KS_CONCENTRIC_SPACE_DEFAULT),
+                                    min=10,
+                                    max=400,
+                                    width="220px",
+                                ),
+                            ),
+                            ui.input_numeric(
+                                _prefixed_id(prefix, "ks_conc_arrow_stop"),
+                                "Arrow stop radius (px)",
+                                value=int(KS_CONCENTRIC_ARROW_STOP_DEFAULT),
+                                min=0,
+                                max=500,
+                                width="220px",
+                            ),
+                        ),
+                    ),
+                ),
+                ui.tags.script(
+                    f"""
+                    (function(){{
+                        const btn = document.getElementById('{_prefixed_id(prefix, "ks_layout_btn")}');
+                        const popup = document.getElementById('{_prefixed_id(prefix, "ks_layout_popup")}');
+                        if (!btn || !popup) return;
+                        btn.addEventListener('click', () => {{
+                            popup.classList.toggle('active');
+                        }});
+                        document.addEventListener('click', (ev) => {{
+                            if (!popup.contains(ev.target) && ev.target !== btn && !btn.contains(ev.target)) {{
+                                popup.classList.remove('active');
+                            }}
+                        }}, true);
+                    }})();
+                    """
+                ),
+            )
+        )
         controls.append(ui.output_ui(_prefixed_id(prefix, "ks_table")))
     if not is_ks:
         if cfg.get("show_search", False):
@@ -3100,11 +3678,11 @@ def _settings_panel(cfg: Dict[str, Any]) -> ui.card:
                                         "aria-label": "Data Analysis Mode help",
                                         "tabindex": "0",
                                         "data-help-tooltip-html": (
-                                            "<strong>When on:</strong> uses the simpler data-analysis view with the PDF background visible "
-                                            "and imported CST arrows/text hidden.<br/><br/>"
-                                            "<strong>When off:</strong> uses the full CST layout with imported arrows and text boxes, "
-                                            "while the PDF background starts hidden but can be shown again with the Background Image button."
-                                            "<br/><br/>Currently affects KEGG and CST pathways only."
+                                            "<strong>When on:</strong> uses the simpler data-analysis view for KEGG, WikiPathways, and CST. "
+                                            "KEGG and WikiPathways show the pathway image background, while CST shows the PDF background and keeps imported CST arrows/text hidden.<br/><br/>"
+                                            "<strong>When off:</strong> uses the full layout with arrows and text boxes, "
+                                            "while the pathway background starts hidden but can be shown again with the Background Image button."
+                                            "<br/><br/>Applies to KEGG, WikiPathways, and CST pathways."
                                         ),
                                     },
                                     "i",
@@ -3208,7 +3786,7 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
         protbox_align_btn_id = _prefixed_id(prefix, "viewer_create_protbox_align")
         arrow_snap_btn_id = _prefixed_id(prefix, "viewer_create_arrow_snap")
         control_specs = [
-            ("background", "media-image", "Hide or show the KEGG background image."),
+            ("background", "media-image", "Hide or show the pathway background image."),
             ("protboxes", "xmark-square", "Hide or show protein boxes."),
             ("ptms", "xmark-circle", "Hide or show PTM circles and labels."),
             ("ptmLabels", "phoscircle_label", "Hide or show PTM site labels."),
@@ -3662,7 +4240,7 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                             : `${{entry.uniprot}} - ${{entry.geneSymbol}}`;
                         proteinMatches.set(label, {{
                             kind: isMetabolite ? 'metabolite' : 'protein',
-                            value: isMetabolite ? entry.hmdbId : entry.uniprot
+                            value: isMetabolite ? entry.hmdbId : (entry.uniprot || entry.geneSymbol || '')
                         }});
                         const option = document.createElement('button');
                         option.className = 'viewer-create-option viewer-create-protein-option';
@@ -3684,7 +4262,7 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                                     api.addCompound(entry.hmdbId);
                                 }}
                             }} else if (api && typeof api.addProtbox === 'function') {{
-                                api.addProtbox(entry.uniprot);
+                                api.addProtbox(entry.uniprot || entry.geneSymbol || '');
                             }}
                             if (proteinSearch) {{
                                 proteinSearch.value = '';
@@ -4316,7 +4894,7 @@ def _cst_create_panel(prefix: str) -> ui.TagList:
                                     api.addCompound(entry.hmdbId);
                                 }}
                             }} else if (api && typeof api.addProtbox === 'function') {{
-                                api.addProtbox(entry.uniprot);
+                                api.addProtbox(entry.uniprot || entry.geneSymbol || '');
                             }}
                             if (proteinSearch) proteinSearch.value = '';
                             closeProteinResults();
@@ -4473,7 +5051,7 @@ def _cst_create_panel(prefix: str) -> ui.TagList:
     )
 
 
-def _apply_simple_kegg_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
+def _apply_simple_pathway_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     payload = dict(payload)
     payload["_active_mode"] = "analysis"
     payload.pop("_full_width_canvas", None)
@@ -4584,7 +5162,7 @@ def _home_tab() -> ui.nav_panel:
                     ui.div(
                         {"class": "home-hero-text"},
                         "MapKinase is an interactive pathway analysis and figure-building environment for protein and PTM datasets. "
-                        "It lets you score pathways from uploaded comparisons, open KEGG and WikiPathways maps, add or edit objects directly in the viewer, "
+                        "It lets you score pathways from uploaded comparisons, open KEGG, WikiPathways, and CST maps, add or edit objects directly in the viewer, "
                         "and turn pathway views into publication-ready figures without leaving the program.",
                     ),
                     ui.div(
@@ -4634,7 +5212,7 @@ def _home_tab() -> ui.nav_panel:
                     ui.tags.ol(
                         {"class": "home-quickstart-list"},
                         ui.tags.li("Upload a protein dataset and, if available, a PTM dataset in the Input tab."),
-                        ui.tags.li("Use Web Pathways to load scored KEGG or WikiPathways maps, or Figure Creation to start from a blank canvas."),
+                        ui.tags.li("Use Data Analysis Mode (Web Pathways) to load scored KEGG or WikiPathways maps, or Figure Creation to start from a blank canvas."),
                         ui.tags.li("Edit the pathway with Add Objects, Edit Controls, Snapping, and Hide Objects."),
                         ui.tags.li("Export figures or custom pathway layouts once the view looks the way you want."),
                     ),
@@ -4643,12 +5221,12 @@ def _home_tab() -> ui.nav_panel:
             ui.div(
                 {"class": "home-section-grid"},
                 _home_bookmark_card(
-                    "Web Pathways",
+                    "Data Analysis Mode: Web Pathways",
                     "Search, score, and load KEGG or WikiPathways pathway maps.",
                     [
-                        "The pathway catalogue is ranked by pathway score so the strongest matches rise to the top.",
+                        "Pathways are ranked using Over Representation Analysis (ORA) results from the uploaded dataset.",
                         "The Web Pathways viewer includes Full Screen, Hide Objects, Add Objects, Edit Controls, Snapping, and interaction editing tools.",
-                        "The Simple: KEGG option applies the simpler KEGG rendering style directly inside the Web Pathways workflow.",
+                        "Data Analysis Mode is the pathway-analysis workflow for loading and editing KEGG, WikiPathways, or CST pathways.",
                     ],
                     image_file="web_pathway (1).png",
                 ),
@@ -4663,7 +5241,7 @@ def _home_tab() -> ui.nav_panel:
                     image_file="fig_create_pic.png",
                 ),
                 _home_bookmark_card(
-                    "Kinase Substrates",
+                    "Kinase-Substrate",
                     "Inspect kinase-substrate relationships from the uploaded PTM dataset.",
                     [
                         "The in vivo and in vitro checkboxes determine which evidence types are considered in both the table and the viewer.",
@@ -4678,7 +5256,7 @@ def _home_tab() -> ui.nav_panel:
                     [
                         "Protein file core columns: UniProt, GeneSymbol, and one or more comparison columns beginning with C:.",
                         "PTM file core columns: UniProt, PTM Site, and comparison columns that match the protein comparison headers exactly.",
-                        "Optional text columns begin with T:, and optional outline columns begin with O: and should match the related comparison names.",
+                        "Optional tool-tip columns begin with T:, and optional Dual-Comparison columns begin with O: and should match the related comparison names.",
                         "Accepted upload types: .txt, .tsv, and .csv.",
                     ],
                 ),
@@ -4751,9 +5329,9 @@ def _home_tab() -> ui.nav_panel:
     )
 
 
-def _ptm_shape_picker() -> Any:
+def _ptm_shape_picker_for(input_id: str = "input_ptm_shape", width: str = "120px") -> Any:
     return ui.input_select(
-        "input_ptm_shape",
+        input_id,
         None,
         choices={
             "circle": "Circle",
@@ -4761,8 +5339,12 @@ def _ptm_shape_picker() -> Any:
             "diamond": "Diamond",
         },
         selected="circle",
-        width="120px",
+        width=width,
     )
+
+
+def _ptm_shape_picker() -> Any:
+    return _ptm_shape_picker_for("input_ptm_shape", "120px")
 
 
 def _bookmark_tab(cfg: Dict[str, Any]) -> ui.nav_panel:
@@ -4903,6 +5485,7 @@ app_ui = ui.page_fluid(
     EXPORT_DOWNLOAD_SCRIPT,
     INPUT_BUSY_SCRIPT,
     INLINE_HELP_TOOLTIP_SCRIPT,
+    GRADIENT_TABLE_SCRIPT,
     SVG_DOWNLOAD_SCRIPT,
     ui.navset_tab(
         _home_tab(),
@@ -4917,8 +5500,30 @@ app_ui = ui.page_fluid(
                     ui.card(
                     ui.card_header("Global Settings"),
                     ui.div(
-                        {"style": "margin-bottom: 10px; color:#555;"},
-                        "These settings apply to all bookmarks. Changes take effect when you load or generate a new pathway."
+                        {"class": "mk-mode-help-row"},
+                        ui.input_checkbox(
+                            "settings_temporal_mode",
+                            ui.TagList(
+                                "Multi-Comparison Mode",
+                                ui.tags.span(
+                                    {"class": "mk-inline-help-wrap"},
+                                    ui.tags.span(
+                                        {
+                                            "class": "mk-inline-help",
+                                            "aria-label": "Multi-Comparison Mode help",
+                                            "tabindex": "0",
+                                            "data-help-tooltip-html": (
+                                                "<strong>When on:</strong> nodes and PTMs display all comparison values as segmented shapes for multi-comparison datasets. "
+                                                "Comparisons are shown left-to-right in the same order as the Protein file comparison columns (C: columns).<br/><br/>"
+                                                "<strong>When off:</strong> nodes and PTMs use the single-comparison style."
+                                            ),
+                                        },
+                                        "i",
+                                    ),
+                                ),
+                            ),
+                            value=DEFAULT_SETTINGS.get("temporal_mode", False),
+                        ),
                     ),
                     ui.input_numeric(
                         "settings_prot_label_size",
@@ -4951,7 +5556,7 @@ app_ui = ui.page_fluid(
                     ui.input_checkbox(
                         "settings_use_original_protbox_size",
                         "Use original protbox size (for PTM placement)",
-                        value=DEFAULT_SETTINGS.get("use_original_protbox_size", False),
+                        value=DEFAULT_SETTINGS.get("use_original_protbox_size", True),
                     ),
                     ui.input_checkbox(
                         "settings_include_psp_tooltips",
@@ -4996,42 +5601,33 @@ app_ui = ui.page_fluid(
                         },
                         selected="main_default",
                     ),
-                    ui.layout_columns(
-                        ui.column(
-                            3,
-                            ui.input_numeric(
-                                "settings_max_negative",
-                                "Max negative",
-                                value=DEFAULT_SETTINGS["max_negative"],
-                                step=0.1,
-                                width="280px",
-                            ),
+                    ui.output_ui("settings_gradient_table"),
+                    ui.div(
+                        {"style": "display:none;"},
+                        ui.input_text("settings_gradient_stops_json", "Gradient stops payload", value="", width="100%"),
+                        ui.input_numeric(
+                            "settings_max_negative",
+                            "Max negative",
+                            value=DEFAULT_SETTINGS["max_negative"],
+                            step=0.1,
+                            width="100%",
                         ),
-                        ui.column(
-                            3,
-                            _color_picker_input(
-                                "settings_negative_color",
-                                "Negative color",
-                                _rgb_tuple_to_hex(DEFAULT_SETTINGS["negative_color"]),
-                            ),
+                        _color_picker_input(
+                            "settings_negative_color",
+                            "Negative color",
+                            _rgb_tuple_to_hex(DEFAULT_SETTINGS["negative_color"]),
                         ),
-                        ui.column(
-                            3,
-                            ui.input_numeric(
-                                "settings_max_positive",
-                                "Max positive",
-                                value=DEFAULT_SETTINGS["max_positive"],
-                                step=0.1,
-                                width="280px",
-                            ),
+                        ui.input_numeric(
+                            "settings_max_positive",
+                            "Max positive",
+                            value=DEFAULT_SETTINGS["max_positive"],
+                            step=0.1,
+                            width="100%",
                         ),
-                        ui.column(
-                            3,
-                            _color_picker_input(
-                                "settings_positive_color",
-                                "Positive color",
-                                _rgb_tuple_to_hex(DEFAULT_SETTINGS["positive_color"]),
-                            ),
+                        _color_picker_input(
+                            "settings_positive_color",
+                            "Positive color",
+                            _rgb_tuple_to_hex(DEFAULT_SETTINGS["positive_color"]),
                         ),
                     ),
                     ui.output_ui("settings_gradient_preview"),
@@ -5070,7 +5666,6 @@ def server(input, output, session):  # type: ignore[override]
         {"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []}  # type: ignore[var-annotated]
     )
     nav_lock_status = reactive.Value("User mode: upload and validate files, then press Run to unlock other tabs.")
-    extra_datasets = reactive.Value([])  # type: ignore[var-annotated]
     validated_protein_dataset = reactive.Value(None)
     validated_ptm_dataset = reactive.Value(None)
     validated_metabolite_dataset = reactive.Value(None)
@@ -5106,6 +5701,8 @@ def server(input, output, session):  # type: ignore[override]
     )
     pipeline_ready = reactive.Value(False)
     pipeline_running = reactive.Value(False)
+    mode_sync_in_progress = reactive.Value(False)
+    last_applied_input_mode = reactive.Value(None)
 
     def _clear_pathway_scores(status: str = "Pathway scoring pending.") -> None:
         pathway_score_cache.set(
@@ -5185,6 +5782,7 @@ def server(input, output, session):  # type: ignore[override]
                 vals = vals[:width]
             normalized_rows.append(vals)
         return pd.DataFrame(normalized_rows, columns=headers, dtype=str)
+
 
     def _fisher_right_tail(total_n: int, pathway_n: int, sig_n: int, sig_in_pathway: int) -> float:
         if total_n <= 0 or pathway_n < 0 or sig_n < 0 or sig_in_pathway < 0:
@@ -5807,6 +6405,23 @@ def server(input, output, session):  # type: ignore[override]
         except Exception as exc:
             return {"error": f"Debug load failed: {exc}"}
 
+    def _fill_blank_gene_with_uniprot(dataset: Dict[str, Any]) -> Dict[str, Any]:
+        """For protein datasets, fill blank gene symbol cells with UniProt IDs."""
+        headers = list(dataset.get("headers") or [])
+        rows = list(dataset.get("rows") or [])
+        if len(headers) < 2 or not rows:
+            return dataset
+        for row in rows:
+            if len(row) < 2:
+                row.extend([""] * (2 - len(row)))
+            uniprot = str(row[0] or "").strip()
+            gene = str(row[1] or "").strip()
+            if uniprot and not gene:
+                row[1] = uniprot
+        dataset["rows"] = rows
+        return dataset
+
+
     def _validate_metabolite_file(path: str, protein_comparisons: Sequence[str]) -> Namespace:
         errors: List[str] = []
         dataset = _load_dataset(path)
@@ -5966,7 +6581,7 @@ def server(input, output, session):  # type: ignore[override]
                         {"class": "input-preview-guide-pill"},
                         ui.div(
                             {"class": "input-preview-guide-pill-title"},
-                            "Uniprot",
+                            "UniProt ID",
                             ui.tags.span({"class": "input-preview-guide-required"}, "*"),
                         ),
                         ui.div(
@@ -6007,7 +6622,7 @@ def server(input, output, session):  # type: ignore[override]
                         ),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
-                            "Use log2 fold-change values comparing two conditions. Each comparison header must start with 'C:'.",
+                            "Use log2 fold-change values comparing two conditions. Each comparison header must start with 'C:' and comparison headers must match between datasets.",
                         ),
                     ),
                     ui.div(
@@ -6024,7 +6639,7 @@ def server(input, output, session):  # type: ignore[override]
                     ),
                     ui.div(
                         {"class": "input-preview-guide-pill"},
-                        ui.div({"class": "input-preview-guide-pill-title"}, "Text"),
+                        ui.div({"class": "input-preview-guide-pill-title"}, "Tooltip"),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
                             "Optional tooltip or descriptive columns. These headers should start with 'T:'.",
@@ -6032,18 +6647,10 @@ def server(input, output, session):  # type: ignore[override]
                     ),
                     ui.div(
                         {"class": "input-preview-guide-pill"},
-                        ui.div({"class": "input-preview-guide-pill-title"}, "Outline"),
+                        ui.div({"class": "input-preview-guide-pill-title"}, "Dual-Comparison"),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
-                            "Optional outline columns. These headers should start with 'O:' and correspond to a comparison header.",
-                        ),
-                    ),
-                    ui.div(
-                        {"class": "input-preview-guide-pill"},
-                        ui.div({"class": "input-preview-guide-pill-title"}, "PTM Comparisons"),
-                        ui.div(
-                            {"class": "input-preview-guide-pill-text"},
-                            "PTM comparison headers must exactly match the comparison headers used in the protein dataset.",
+                            "Optional outline columns. These headers should start with 'O:' and correspond to a comparison header. Quantitative values are displayed on the outline of nodes.",
                         ),
                     ),
                 ),
@@ -6387,7 +6994,7 @@ def server(input, output, session):  # type: ignore[override]
             species_code = species_info.get("code", "") or SPECIES_CHOICES.get(DEFAULT_SPECIES, {}).get("code", "hsa")
             print(f"Demo mode: loading sample datasets for species '{species_choice}' code '{species_code}'")
 
-            demo_prot_payload = _load_dataset(SAMPLE_PROTEIN_FILE)
+            demo_prot_payload = _fill_blank_gene_with_uniprot(_load_dataset(SAMPLE_PROTEIN_FILE))
             protein_preview_dataset.set(demo_prot_payload)
             _apply_outline_width_defaults(protein_headers=demo_prot_payload.get("headers") or [])
             try:
@@ -6686,7 +7293,7 @@ def server(input, output, session):  # type: ignore[override]
             return
         result = validate_protein_file(datapath)
         if not result.valid:
-            protein_preview_dataset.set(_load_dataset(datapath))
+            protein_preview_dataset.set(_fill_blank_gene_with_uniprot(_load_dataset(datapath)))
             protein_validation.set({"status": "Protein file failed validation. See errors below.", "errors": result.errors, "valid": False, "comparisons": []})
             ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
             metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
@@ -6713,7 +7320,7 @@ def server(input, output, session):  # type: ignore[override]
             f"Tooltip columns: {result.summary.get('tooltips', 0)}."
         )
         protein_validation.set({"status": status, "errors": [], "valid": True, "comparisons": result.comparisons})
-        dataset_payload = _load_dataset(datapath)
+        dataset_payload = _fill_blank_gene_with_uniprot(_load_dataset(datapath))
         protein_preview_dataset.set(dataset_payload)
         _apply_outline_width_defaults(protein_headers=dataset_payload.get("headers") or [])
         validated_protein_dataset.set(dataset_payload)
@@ -6746,15 +7353,15 @@ def server(input, output, session):  # type: ignore[override]
         protein_preview_data = protein_preview_dataset.get()
         protein_headers, protein_row = _get_input_preview_content(
             protein_preview_data,
-            ["Uniprot", "GeneSymbol", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
+            ["Uniprot", "GeneSymbol", "C: Comparison (1)", "...", "T: Tooltip(1)", "...", "O: Outline(1)", "..."],
         )
         ptm_headers, ptm_row = _get_input_preview_content(
             ptm_preview_dataset.get(),
-            ["Uniprot", "PTM Site", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
+            ["Uniprot", "PTM Site", "C: Comparison (1)", "...", "T: Tooltip(1)", "...", "O: Outline(1)", "..."],
         )
         metabolite_headers, metabolite_row = _get_input_preview_content(
             metabolite_preview_dataset.get(),
-            ["HMDB ID", "C: Comparison (1)", "...", "T: Text(1)", "..."],
+            ["HMDB ID", "C: Comparison (1)", "...", "T: Tooltip(1)", "..."],
         )
         return ui.div(
             {"class": "input-preview-labeled-row"},
@@ -6800,15 +7407,15 @@ def server(input, output, session):  # type: ignore[override]
         ptm_preview_data = ptm_preview_dataset.get()
         protein_headers, protein_row = _get_input_preview_content(
             protein_preview_dataset.get(),
-            ["Uniprot", "GeneSymbol", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
+            ["Uniprot", "GeneSymbol", "C: Comparison (1)", "...", "T: Tooltip(1)", "...", "O: Outline(1)", "..."],
         )
         ptm_headers, ptm_row = _get_input_preview_content(
             ptm_preview_data,
-            ["Uniprot", "PTM Site", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
+            ["Uniprot", "PTM Site", "C: Comparison (1)", "...", "T: Tooltip(1)", "...", "O: Outline(1)", "..."],
         )
         metabolite_headers, metabolite_row = _get_input_preview_content(
             metabolite_preview_dataset.get(),
-            ["HMDB ID", "C: Comparison (1)", "...", "T: Text(1)", "..."],
+            ["HMDB ID", "C: Comparison (1)", "...", "T: Tooltip(1)", "..."],
         )
         return ui.div(
             {"class": "input-preview-labeled-row"},
@@ -6830,23 +7437,23 @@ def server(input, output, session):  # type: ignore[override]
     def input_metabolite_preview():
         protein_headers, protein_row = _get_input_preview_content(
             protein_preview_dataset.get(),
-            ["Uniprot", "GeneSymbol", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
+            ["Uniprot", "GeneSymbol", "C: Comparison (1)", "...", "T: Tooltip(1)", "...", "O: Outline(1)", "..."],
         )
         ptm_headers, ptm_row = _get_input_preview_content(
             ptm_preview_dataset.get(),
-            ["Uniprot", "PTM Site", "C: Comparison (1)", "...", "T: Text(1)", "...", "O: Outline(1)", "..."],
+            ["Uniprot", "PTM Site", "C: Comparison (1)", "...", "T: Tooltip(1)", "...", "O: Outline(1)", "..."],
         )
         metabolite_preview_data = metabolite_preview_dataset.get()
         metabolite_headers, metabolite_row = _get_input_preview_content(
             metabolite_preview_data,
-            ["HMDB ID", "C: Comparison (1)", "...", "T: Text(1)", "..."],
+            ["HMDB ID", "C: Comparison (1)", "...", "T: Tooltip(1)", "..."],
         )
         metabolite_headers = [
             metabolite_headers[0] if len(metabolite_headers) > 0 else "HMDB ID",
             "",
             metabolite_headers[1] if len(metabolite_headers) > 1 else "C: Comparison (1)",
             metabolite_headers[2] if len(metabolite_headers) > 2 else "...",
-            metabolite_headers[3] if len(metabolite_headers) > 3 else "T: Text(1)",
+            metabolite_headers[3] if len(metabolite_headers) > 3 else "T: Tooltip(1)",
             metabolite_headers[4] if len(metabolite_headers) > 4 else "...",
             "",
             "",
@@ -7006,7 +7613,6 @@ def server(input, output, session):  # type: ignore[override]
         if _validation_has_explicit_error(metabolite_validation.get()):
             _invalidate_user_run("Fix the Metabolite dataset errors before running.")
             return
-
         raw_protein = validated_protein_dataset.get() or {}
         raw_ptm = validated_ptm_dataset.get() or {}
         raw_metabolite = validated_metabolite_dataset.get() or {}
@@ -7176,12 +7782,18 @@ def server(input, output, session):  # type: ignore[override]
     @reactive.event(input.input_mode)
     def _sync_mode_status():
         mode = str((_get_input_value(input, "input_mode") or "user")).lower()
+        if mode_sync_in_progress.get():
+            return
+        previous_mode = str(last_applied_input_mode.get() or "").lower()
+        if mode == previous_mode:
+            return
+        mode_sync_in_progress.set(True)
         if mode == "demo":
             try:
-                session.send_input_message("settings_use_black_protein_outlines", {"value": True})
-            except Exception:
-                pass
-            try:
+                try:
+                    session.send_input_message("settings_use_black_protein_outlines", {"value": True})
+                except Exception:
+                    pass
                 _load_demo_datasets()
             except Exception as exc:
                 print(f"Warning: demo mode failed to load sample datasets: {exc}")
@@ -7199,30 +7811,37 @@ def server(input, output, session):  # type: ignore[override]
                 pipeline_ready.set(False)
                 nav_lock_status.set("Demo mode: sample datasets failed to load.")
                 _clear_pathway_scores("Demo datasets failed to load; pathway scoring unavailable.")
+            finally:
+                last_applied_input_mode.set(mode)
+                mode_sync_in_progress.set(False)
         else:
             try:
-                session.send_input_message("settings_use_black_protein_outlines", {"value": False})
-            except Exception:
-                pass
-            protein_dataset.set(None)
-            ptm_dataset.set(None)
-            metabolite_dataset.set(None)
-            validated_protein_dataset.set(None)
-            validated_ptm_dataset.set(None)
-            validated_metabolite_dataset.set(None)
-            protein_preview_dataset.set(None)
-            ptm_preview_dataset.set(None)
-            metabolite_preview_dataset.set(None)
-            _refresh_global_catalog_from_current(reset=True)
-            protein_kegg_warning.set("")
-            protein_validation.set({"status": "Upload a protein file to begin.", "errors": [], "valid": False, "comparisons": []})
-            ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
-            metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
-            pipeline_running.set(False)
-            pipeline_ready.set(False)
-            nav_lock_status.set("User mode: upload and validate files, then press Run to unlock other tabs.")
-            _update_ks_index(reset=True)
-            _clear_pathway_scores("Pathway scoring waiting for validated inputs and Run.")
+                try:
+                    session.send_input_message("settings_use_black_protein_outlines", {"value": False})
+                except Exception:
+                    pass
+                protein_dataset.set(None)
+                ptm_dataset.set(None)
+                metabolite_dataset.set(None)
+                validated_protein_dataset.set(None)
+                validated_ptm_dataset.set(None)
+                validated_metabolite_dataset.set(None)
+                protein_preview_dataset.set(None)
+                ptm_preview_dataset.set(None)
+                metabolite_preview_dataset.set(None)
+                _refresh_global_catalog_from_current(reset=True)
+                protein_kegg_warning.set("")
+                protein_validation.set({"status": "Upload a protein file to begin.", "errors": [], "valid": False, "comparisons": []})
+                ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
+                metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
+                pipeline_running.set(False)
+                pipeline_ready.set(False)
+                nav_lock_status.set("User mode: upload and validate files, then press Run to unlock other tabs.")
+                _update_ks_index(reset=True)
+                _clear_pathway_scores("Pathway scoring waiting for validated inputs and Run.")
+            finally:
+                last_applied_input_mode.set(mode)
+                mode_sync_in_progress.set(False)
 
     @reactive.Effect
     @reactive.event(input.input_species)
@@ -7234,6 +7853,61 @@ def server(input, output, session):  # type: ignore[override]
                 _refresh_pathway_scores()
             else:
                 _invalidate_user_run("Species changed. Press Run to reprocess datasets for the selected organism.")
+
+    def _gradient_stops_from_settings_inputs() -> List[Dict[str, Any]]:
+        payload = _get_input_value(input, "settings_gradient_stops_json")
+        parsed_stops: List[Dict[str, Any]] = []
+        if isinstance(payload, dict):
+            parsed_stops = _normalize_gradient_stop_entries(payload.get("rows"))
+        elif isinstance(payload, str) and payload.strip():
+            try:
+                parsed_obj = json.loads(payload)
+                if isinstance(parsed_obj, dict):
+                    parsed_stops = _normalize_gradient_stop_entries(parsed_obj.get("rows"))
+                elif isinstance(parsed_obj, list):
+                    parsed_stops = _normalize_gradient_stop_entries(parsed_obj)
+            except Exception:
+                parsed_stops = []
+        if len(parsed_stops) >= 2:
+            return parsed_stops
+        neg_hex = str(_get_input_value(input, "settings_negative_color") or _rgb_tuple_to_hex(DEFAULT_SETTINGS["negative_color"]))
+        pos_hex = str(_get_input_value(input, "settings_positive_color") or _rgb_tuple_to_hex(DEFAULT_SETTINGS["positive_color"]))
+        neg_val = _to_float(_get_input_value(input, "settings_max_negative"), DEFAULT_SETTINGS["max_negative"])
+        pos_val = _to_float(_get_input_value(input, "settings_max_positive"), DEFAULT_SETTINGS["max_positive"])
+        return _normalize_gradient_stop_entries(
+            [
+                {"value": neg_val, "color": neg_hex},
+                {"value": 0.0, "color": "#ffffff"},
+                {"value": pos_val, "color": pos_hex},
+            ]
+        ) or _default_gradient_stops()
+
+    def _gradient_editor_rows() -> List[Dict[str, Any]]:
+        stops = _gradient_stops_from_settings_inputs()
+        rows = sorted(stops, key=lambda item: float(item["value"]), reverse=True)
+        next_idx = len(rows) + 1
+        rows.append({"value": None, "color": "#ffffff", "_row_id": f"add_{next_idx}"})
+        for idx, row in enumerate(rows, start=1):
+            if "_row_id" not in row:
+                row["_row_id"] = f"stop_{idx}"
+        return rows
+
+    def _gradient_preview_style_and_labels() -> Tuple[str, List[str]]:
+        stops = _gradient_stops_from_settings_inputs()
+        if len(stops) < 2:
+            stops = _default_gradient_stops()
+        min_val = float(stops[0]["value"])
+        max_val = float(stops[-1]["value"])
+        span = (max_val - min_val) if max_val != min_val else 1.0
+        gradient_parts: List[str] = []
+        for stop in stops:
+            value = float(stop["value"])
+            pct = max(0.0, min(100.0, ((value - min_val) / span) * 100.0))
+            color_hex = _rgb_tuple_to_hex(tuple(int(c) for c in list(stop["color"])[:3]))
+            gradient_parts.append(f"{color_hex} {pct:.3f}%")
+        style = "background: linear-gradient(90deg, " + ", ".join(gradient_parts) + ");"
+        labels = [f"{float(stop['value']):g}" for stop in sorted(stops, key=lambda item: float(item["value"]), reverse=True)]
+        return style, labels
 
     @reactive.Effect
     @reactive.event(input.settings_gradient_preset)
@@ -7254,54 +7928,79 @@ def server(input, output, session):  # type: ignore[override]
             return
         neg_hex = _rgb_tuple_to_hex(preset["neg"])
         pos_hex = _rgb_tuple_to_hex(preset["pos"])
+        preset_rows = [
+            {"value": float(DEFAULT_SETTINGS.get("max_positive", 2)), "color": pos_hex},
+            {"value": 0.0, "color": "#ffffff"},
+            {"value": float(DEFAULT_SETTINGS.get("max_negative", -2)), "color": neg_hex},
+        ]
         try:
             session.send_input_message("settings_negative_color", {"value": neg_hex})
             session.send_input_message("settings_positive_color", {"value": pos_hex})
+            session.send_input_message(
+                "settings_gradient_stops_json",
+                {"value": json.dumps({"rows": preset_rows})},
+            )
         except Exception:
             pass
 
     @output
     @render.ui
-    def settings_gradient_preview():
-        neg_hex = str(_get_input_value(input, "settings_negative_color") or _rgb_tuple_to_hex(DEFAULT_SETTINGS["negative_color"]))
-        pos_hex = str(_get_input_value(input, "settings_positive_color") or _rgb_tuple_to_hex(DEFAULT_SETTINGS["positive_color"]))
-        neg_val = _to_float(_get_input_value(input, "settings_max_negative"), DEFAULT_SETTINGS["max_negative"])
-        pos_val = _to_float(_get_input_value(input, "settings_max_positive"), DEFAULT_SETTINGS["max_positive"])
-        style = (
-            "background: linear-gradient(90deg, "
-            f"{neg_hex}, #ffffff 50%, {pos_hex});"
+    def settings_gradient_table():
+        rows = _gradient_editor_rows()
+        body_rows: List[Any] = []
+        for row in rows:
+            row_id = str(row.get("_row_id") or "")
+            raw_value = row.get("value")
+            value_str = "" if raw_value in (None, "") else f"{float(raw_value):g}"
+            raw_color = row.get("color")
+            color_val = "#ffffff"
+            if isinstance(raw_color, str) and re.match(r"^#[0-9a-fA-F]{6}$", raw_color):
+                color_val = raw_color
+            elif isinstance(raw_color, (list, tuple)) and len(raw_color) >= 3:
+                try:
+                    color_val = _rgb_tuple_to_hex(tuple(int(float(c)) for c in list(raw_color)[:3]))
+                except Exception:
+                    color_val = "#ffffff"
+            value_input = ui.tags.input(
+                {
+                    "type": "number",
+                    "step": "any",
+                    "class": "mk-grad-value",
+                    "value": value_str,
+                    "placeholder": "Add value",
+                    "onchange": "window.mkGradientTableUpdate && window.mkGradientTableUpdate();",
+                    "data-row-id": row_id,
+                }
+            )
+            color_input = ui.tags.input(
+                {
+                    "type": "color",
+                    "class": "mk-grad-color",
+                    "value": color_val,
+                    "onchange": "window.mkGradientTableUpdate && window.mkGradientTableUpdate();",
+                    "data-row-id": row_id,
+                }
+            )
+            body_rows.append(ui.tags.tr({"class": "mk-gradient-row"}, ui.tags.td(value_input), ui.tags.td(color_input)))
+        return ui.div(
+            {"class": "gradient-table-wrap"},
+            ui.tags.table(
+                {"id": "settings_gradient_table_editor", "class": "gradient-table"},
+                ui.tags.thead(ui.tags.tr(ui.tags.th("Value"), ui.tags.th("Color"))),
+                ui.tags.tbody(*body_rows),
+            ),
         )
+
+    @output
+    @render.ui
+    def settings_gradient_preview():
+        style, labels = _gradient_preview_style_and_labels()
+        if not labels:
+            labels = ["-2", "0", "2"]
         return ui.div(
             {"class": "gradient-preview", "style": style},
-            ui.tags.span(f"{neg_val}"),
-            ui.tags.span("0"),
-            ui.tags.span(f"{pos_val}"),
+            *[ui.tags.span(label) for label in labels],
         )
-
-    @reactive.Effect
-    @reactive.event(input.input_dataset_add)
-    def _add_dynamic_dataset_card():
-        with reactive.isolate():
-            current = list(extra_datasets.get() or [])
-            next_id = max([d.get("id", 0) for d in current], default=0) + 1
-            current.append({"id": next_id, "label": f"Dataset {next_id}"})
-            extra_datasets.set(current)
-
-    @reactive.Effect
-    @reactive.event(input.input_dataset_remove)
-    def _remove_dynamic_dataset_card():
-        raw = _get_input_value(input, "input_dataset_remove")
-        try:
-            dataset_id = int(raw)
-        except (TypeError, ValueError):
-            return
-        with reactive.isolate():
-            remaining = [d for d in (extra_datasets.get() or []) if d.get("id") != dataset_id]
-            extra_datasets.set(remaining)
-        try:
-            session.send_input_message("input_dataset_remove", {"value": None})
-        except Exception:
-            pass
 
     @output
     @render.ui
@@ -7315,7 +8014,6 @@ def server(input, output, session):  # type: ignore[override]
         protein_wrap_style = "opacity:0.55; pointer-events:none;" if disabled else ""
         ptm_wrap_style = "opacity:0.55; pointer-events:none;" if ptm_disabled else ""
         metabolite_wrap_style = "opacity:0.55; pointer-events:none;" if metabolite_disabled else ""
-        add_wrap_style = "opacity:0.55; pointer-events:none;" if disabled else ""
         current_species = _get_input_value(input, "input_species") or DEFAULT_SPECIES
         if current_species not in SPECIES_OPTIONS:
             current_species = DEFAULT_SPECIES
@@ -7419,15 +8117,15 @@ def server(input, output, session):  # type: ignore[override]
                         ),
                         _ptm_shape_picker(),
                     ),
-                    ui.div(
-                        {"class": "input-sample-download-row"},
-                        ui.download_button(
-                            "download_sample_ptm_dataset",
-                            _icon_markup("download", "viewer-create-icon"),
-                            class_="btn btn-outline-secondary btn-sm input-sample-download-btn",
-                        ),
-                        ui.tags.span({"class": "input-sample-download-label"}, "Sample PTM Dataset"),
+                ),
+                ui.div(
+                    {"class": "input-sample-download-row", "style": "margin-top:-18px;"},
+                    ui.download_button(
+                        "download_sample_ptm_dataset",
+                        _icon_markup("download", "viewer-create-icon"),
+                        class_="btn btn-outline-secondary btn-sm input-sample-download-btn",
                     ),
+                    ui.tags.span({"class": "input-sample-download-label"}, "Sample PTM Dataset"),
                 )
             ),
         )
@@ -7461,19 +8159,19 @@ def server(input, output, session):  # type: ignore[override]
                         ),
                     ),
                     ui.div(
-                        {"class": "input-sample-download-row"},
-                        ui.download_button(
-                            "download_sample_protein_dataset",
-                            _icon_markup("download", "viewer-create-icon"),
-                            class_="btn btn-outline-secondary btn-sm input-sample-download-btn",
-                        ),
-                        ui.tags.span({"class": "input-sample-download-label"}, "Sample Protein Dataset"),
-                    ),
-                    ui.div(
                         "Demo mode uses bundled sample files. Switch to User mode to upload your own.",
                         style="color: #b00020; font-size: 12px;" if disabled else "display:none;",
                     ),
-                )
+                ),
+                ui.div(
+                    {"class": "input-sample-download-row", "style": "margin-top:-18px;"},
+                    ui.download_button(
+                        "download_sample_protein_dataset",
+                        _icon_markup("download", "viewer-create-icon"),
+                        class_="btn btn-outline-secondary btn-sm input-sample-download-btn",
+                    ),
+                    ui.tags.span({"class": "input-sample-download-label"}, "Sample Protein Dataset"),
+                ),
             ),
         )
 
@@ -7499,19 +8197,19 @@ def server(input, output, session):  # type: ignore[override]
                         accept=UPLOAD_ACCEPT_TYPES,
                     ),
                     ui.div(
-                        {"class": "input-sample-download-row"},
-                        ui.download_button(
-                            "download_sample_metabolite_dataset",
-                            _icon_markup("download", "viewer-create-icon"),
-                            class_="btn btn-outline-secondary btn-sm input-sample-download-btn",
-                        ),
-                        ui.tags.span({"class": "input-sample-download-label"}, "Sample Metabolite Dataset"),
-                    ),
-                    ui.div(
                         "Demo mode uses bundled sample files. Switch to User mode to upload your own.",
                         style="margin-top:6px; color:#b00020; font-size:12px;" if disabled else "display:none;",
                     ),
-                )
+                ),
+                ui.div(
+                    {"class": "input-sample-download-row", "style": "margin-top:-18px;"},
+                    ui.download_button(
+                        "download_sample_metabolite_dataset",
+                        _icon_markup("download", "viewer-create-icon"),
+                        class_="btn btn-outline-secondary btn-sm input-sample-download-btn",
+                    ),
+                    ui.tags.span({"class": "input-sample-download-label"}, "Sample Metabolite Dataset"),
+                ),
             ),
         )
 
@@ -7557,6 +8255,7 @@ def server(input, output, session):  # type: ignore[override]
                     protein_card,
                     ptm_card,
                     metabolite_card,
+                    add_card,
                 ),
                 ui.div({"class": "input-page-row"}, ui.output_ui("input_protein_preview_guide")),
                 ui.div({"class": "input-page-row input-preview-section"}, ui.output_ui("input_protein_preview")),
@@ -7567,70 +8266,19 @@ def server(input, output, session):  # type: ignore[override]
                 ),
                 ui.div({"class": "input-page-row input-preview-section"}, ui.output_ui("input_ptm_preview")),
                 ui.div({"class": "input-page-row input-preview-section"}, ui.output_ui("input_metabolite_preview")),
-                ui.div(
-                    {"class": "input-page-row", "style": "display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;"},
-                    ui.output_ui("input_extra_datasets_panel"),
-                    add_card,
-                ),
             )
         )
 
-    @output
-    @render.ui
-    def input_extra_datasets_panel():
-        cards: List[Any] = []
-        for entry in extra_datasets.get() or []:
-            dataset_id = entry.get("id")
-            label = entry.get("label") or f"Dataset {dataset_id}"
-            cards.append(
-                ui.card(
-                    {"class": "data-input-card", "style": "max-width: 400px; min-width: 350px; width: 380px;"},
-                    ui.card_header(
-                        ui.div(
-                            {"style": "display:flex; align-items:center; justify-content:space-between; gap:8px;"},
-                            ui.tags.span(label, style="font-weight:700; color:#0b1f33;"),
-                            ui.tags.button(
-                                "Remove",
-                                type="button",
-                                style=(
-                                    "padding:4px 10px; border:1px solid #d1d5db; background:#f9fafb; "
-                                    "border-radius:8px; font-size:12px; cursor:pointer;"
-                                ),
-                                onclick=f"Shiny.setInputValue('input_dataset_remove', {dataset_id}, {{priority:'event'}});",
-                            ),
-                        )
-                    ),
-                    ui.card_body(
-                        ui.input_text(f"input_dyn_{dataset_id}_name", "Dataset name", value=label),
-                        ui.input_select(
-                            f"input_dyn_{dataset_id}_type",
-                            "Dataset type",
-                            choices={
-                                "proteomics": "Proteomics",
-                                "phospho": "Phospho/PTM",
-                                "transcript": "Transcriptomics",
-                                "metabolomics": "Metabolomics",
-                                "other": "Other",
-                            },
-                            selected="other",
-                        ),
-                        ui.input_file(
-                            f"input_dyn_{dataset_id}_file",
-                            "Upload dataset",
-                            multiple=False,
-                            accept=UPLOAD_ACCEPT_TYPES,
-                        ),
-                    ),
-                )
-            )
-        return ui.TagList(*cards)
-
     def _color_override_from_settings(settings_override: Dict[str, Any]) -> Dict[str, Any]:
+        gradient_stops = _normalize_gradient_stops_with_fallback(settings_override.get("gradient_stops"))
+        min_stop = gradient_stops[0]
+        max_stop = gradient_stops[-1]
         return {
-            "negative_color": _rgb_tuple_to_list(settings_override.get("negative_color", DEFAULT_SETTINGS["negative_color"])),
-            "positive_color": _rgb_tuple_to_list(settings_override.get("positive_color", DEFAULT_SETTINGS["positive_color"])),
-            "max_negative": settings_override.get("max_negative", DEFAULT_SETTINGS["max_negative"]),
-            "max_positive": settings_override.get("max_positive", DEFAULT_SETTINGS["max_positive"]),
+            "negative_color": _rgb_tuple_to_list(settings_override.get("negative_color", tuple(min_stop["color"]))),
+            "positive_color": _rgb_tuple_to_list(settings_override.get("positive_color", tuple(max_stop["color"]))),
+            "max_negative": settings_override.get("max_negative", float(min_stop["value"])),
+            "max_positive": settings_override.get("max_positive", float(max_stop["value"])),
+            "gradient_stops": gradient_stops,
         }
 
     def _apply_color_metadata(payload: Dict[str, Any], color_override: Dict[str, Any]) -> None:
@@ -7639,6 +8287,7 @@ def server(input, output, session):  # type: ignore[override]
         general_settings["positive_color"] = color_override["positive_color"]
         general_settings["max_negative"] = color_override["max_negative"]
         general_settings["max_positive"] = color_override["max_positive"]
+        general_settings["gradient_stops"] = color_override.get("gradient_stops", _default_gradient_stops())
         payload["_color_preview_override"] = color_override
         _apply_color_overrides(payload, color_override)
 
@@ -7677,6 +8326,22 @@ def server(input, output, session):  # type: ignore[override]
         is_ks_bookmark = prefix == "ks"
         ks_sort_col = reactive.Value("gene")
         ks_sort_dir = reactive.Value("asc")
+        ks_last_choice = reactive.Value("")
+        ks_last_choice_cache: Dict[str, str] = {"value": ""}
+
+        def _remember_ks_choice(value: Any) -> None:
+            choice_val = str(value or "")
+            ks_last_choice_cache["value"] = choice_val
+            try:
+                ks_last_choice.set(choice_val)
+            except Exception:
+                pass
+
+        def _last_ks_choice() -> str:
+            try:
+                return str(ks_last_choice.get() or "")
+            except Exception:
+                return str(ks_last_choice_cache.get("value") or "")
 
         def _ks_selected_types() -> set:
             raw = _get_input_value(input, _prefixed_id(prefix, "ks_evidence_types"))
@@ -7800,6 +8465,7 @@ def server(input, output, session):  # type: ignore[override]
             general_settings["show_arrows"] = True
             general_settings["show_text_boxes"] = True
             general_settings["debug_mode"] = bool(settings_override.get("debug_mode", False))
+            general_settings["temporal_mode"] = bool(settings_override.get("temporal_mode", DEFAULT_SETTINGS.get("temporal_mode", False)))
             general_settings["pathway_id"] = settings_override.get("pathway_id")
             general_settings["pathway_source"] = settings_override.get("pathway_source")
             general_settings["ptm_max_display"] = settings_override["ptm_max_display"]
@@ -7822,17 +8488,16 @@ def server(input, output, session):  # type: ignore[override]
             general_settings["protein_tooltip_columns"] = settings_override.get("protein_tooltip_columns", [])
             general_settings["species"] = settings_override.get("species")
             general_settings["species_code"] = settings_override.get("species_code")
-            payload["_kegg_preview"] = {
-                "show": False,
-                "opacity": DEFAULT_BG_OPACITY,
-                "offset_x": DEFAULT_BG_OFFSET_X,
-                "offset_y": DEFAULT_BG_OFFSET_Y,
-                "scale": DEFAULT_BG_SCALE,
-            }
+            general_settings["bg_scale"] = settings_override.get("bg_scale", DEFAULT_WIKIPATHWAYS_BG_SCALE)
+            general_settings["bg_offset_x"] = settings_override.get("bg_offset_x", DEFAULT_WIKIPATHWAYS_BG_OFFSET_X)
+            general_settings["bg_offset_y"] = settings_override.get("bg_offset_y", DEFAULT_WIKIPATHWAYS_BG_OFFSET_Y)
+            payload["_kegg_preview"] = _background_preview_from_settings(settings_override, show=False)
             payload["_box_preview"] = {"y_stretch": DEFAULT_BOX_Y_STRETCH}
             payload["_active_mode"] = settings_override.get("mode", cfg["mode"])
             payload["_full_width_canvas"] = True
             payload["_custom_layout_applied"] = False
+            payload["_bookmark_key"] = cfg.get("key", prefix)
+            payload["_persist_token"] = time.time()
             payload["_global_protein_catalog"] = dict(catalog_info)
             return payload
 
@@ -7880,6 +8545,7 @@ def server(input, output, session):  # type: ignore[override]
             pos = settings_override.get("positive_color", DEFAULT_SETTINGS["positive_color"])
             max_neg = settings_override.get("max_negative", DEFAULT_SETTINGS["max_negative"])
             max_pos = settings_override.get("max_positive", DEFAULT_SETTINGS["max_positive"])
+            gradient_stops = _normalize_gradient_stops_with_fallback(settings_override.get("gradient_stops"))
             outline_cols = ctx.get("protein_outline_columns", [])
             use_black_protein_outlines = bool(settings_override.get("use_black_protein_outlines", DEFAULT_SETTINGS.get("use_black_protein_outlines", False)))
             for idx, col in enumerate(ctx.get("protein_main_columns", []), 1):
@@ -7889,7 +8555,9 @@ def server(input, output, session):  # type: ignore[override]
                 except (TypeError, ValueError):
                     fc_val = None
                 entry[f"fold_change_{idx}"] = fc_val
-                entry[f"fc_color_{idx}"] = _gradient_color_from_fold(fc_val, neg, pos, max_neg, max_pos)
+                entry[f"fc_color_{idx}"] = _gradient_color_from_fold(
+                    fc_val, neg, pos, max_neg, max_pos, gradient_stops=gradient_stops
+                )
                 outline_col = outline_cols[idx - 1] if idx - 1 < len(outline_cols) else None
                 outline_raw = protein_row.get(outline_col, "") if outline_col else ""
                 try:
@@ -7897,7 +8565,22 @@ def server(input, output, session):  # type: ignore[override]
                 except (TypeError, ValueError):
                     outline_val = None
                 entry[f"outline_fold_change_{idx}"] = outline_val
-                entry[f"outline_color_{idx}"] = [0, 0, 0] if use_black_protein_outlines else (_gradient_color_from_fold(outline_val, neg, pos, max_neg, max_pos) if outline_val is not None else [0, 0, 0])
+                entry[f"outline_color_{idx}"] = (
+                    [0, 0, 0]
+                    if use_black_protein_outlines
+                    else (
+                        _gradient_color_from_fold(
+                            outline_val,
+                            neg,
+                            pos,
+                            max_neg,
+                            max_pos,
+                            gradient_stops=gradient_stops,
+                        )
+                        if outline_val is not None
+                        else [0, 0, 0]
+                    )
+                )
             if not ctx.get("protein_main_columns"):
                 entry["fold_change_1"] = None
                 entry["fc_color_1"] = [128, 128, 128]
@@ -7942,6 +8625,7 @@ def server(input, output, session):  # type: ignore[override]
             pos = settings_override.get("positive_color", DEFAULT_SETTINGS["positive_color"])
             max_neg = settings_override.get("max_negative", DEFAULT_SETTINGS["max_negative"])
             max_pos = settings_override.get("max_positive", DEFAULT_SETTINGS["max_positive"])
+            gradient_stops = _normalize_gradient_stops_with_fallback(settings_override.get("gradient_stops"))
             payload: Dict[str, Any] = {
                 "ptm_type": ctx.get("ptm_type", "ptm_0"),
                 "uniprot_id": row_map.get(ctx.get("ptm_headers", [None, None])[0] if ctx.get("ptm_headers") else "", ""),
@@ -7976,7 +8660,9 @@ def server(input, output, session):  # type: ignore[override]
                 except (TypeError, ValueError):
                     fc_val = None
                 payload[f"fold_change_{idx}"] = fc_val
-                payload[f"fc_color_{idx}"] = _gradient_color_from_fold(fc_val, neg, pos, max_neg, max_pos)
+                payload[f"fc_color_{idx}"] = _gradient_color_from_fold(
+                    fc_val, neg, pos, max_neg, max_pos, gradient_stops=gradient_stops
+                )
                 outline_col = outline_cols[idx - 1] if idx - 1 < len(outline_cols) else None
                 outline_raw = row_map.get(outline_col, "") if outline_col else ""
                 try:
@@ -7984,7 +8670,18 @@ def server(input, output, session):  # type: ignore[override]
                 except (TypeError, ValueError):
                     outline_val = None
                 payload[f"outline_fold_change_{idx}"] = outline_val
-                payload[f"outline_color_{idx}"] = _gradient_color_from_fold(outline_val, neg, pos, max_neg, max_pos) if outline_val is not None else [0, 0, 0]
+                payload[f"outline_color_{idx}"] = (
+                    _gradient_color_from_fold(
+                        outline_val,
+                        neg,
+                        pos,
+                        max_neg,
+                        max_pos,
+                        gradient_stops=gradient_stops,
+                    )
+                    if outline_val is not None
+                    else [0, 0, 0]
+                )
             return payload
 
         def _first_fc_value(row_map: Dict[str, Any], columns: List[str]) -> Optional[float]:
@@ -8012,20 +8709,197 @@ def server(input, output, session):  # type: ignore[override]
             max_neg = _to_float(_get_input_value(input, "settings_max_negative"), DEFAULT_SETTINGS["max_negative"])
             return max_pos, max_neg
 
+        def _ks_dataset_kinases_only() -> bool:
+            return bool(_get_input_value(input, _prefixed_id(prefix, "ks_dataset_kinases_only")))
+
+        def _ks_protein_in_dataset(uniprot_id: str, ctx: Dict[str, Any]) -> bool:
+            prot_rows = ctx.get("prot_rows_by_uniprot", {}) or {}
+            return str(uniprot_id or "") in prot_rows
+
+        def _ks_kinase_in_dataset(kinase_id: str, ctx: Dict[str, Any]) -> bool:
+            return _ks_protein_in_dataset(kinase_id, ctx)
+
+        def _ks_layout_config() -> Dict[str, Any]:
+            mode = str(_get_input_value(input, _prefixed_id(prefix, "ks_layout_mode")) or "two_column").strip().lower()
+            gap_x = _to_float(_get_input_value(input, _prefixed_id(prefix, "ks_layout_gap_x")), KS_LAYOUT_GAP_X_DEFAULT)
+            spacing_y = _to_float(_get_input_value(input, _prefixed_id(prefix, "ks_layout_spacing_y")), KS_VERTICAL_SPACING)
+            radius_mode = str(_get_input_value(input, _prefixed_id(prefix, "ks_conc_radius_mode")) or "auto").strip().lower()
+            fixed_radius = _to_float(_get_input_value(input, _prefixed_id(prefix, "ks_conc_radius_fixed")), KS_CONCENTRIC_RADIUS_DEFAULT)
+            auto_space = _to_float(_get_input_value(input, _prefixed_id(prefix, "ks_conc_space")), KS_CONCENTRIC_SPACE_DEFAULT)
+            arrow_stop = _to_float(_get_input_value(input, _prefixed_id(prefix, "ks_conc_arrow_stop")), KS_CONCENTRIC_ARROW_STOP_DEFAULT)
+            two_col_focus_side = str(_get_input_value(input, _prefixed_id(prefix, "ks_two_col_focus_side")) or "left").strip().lower()
+            two_col_columns = int(
+                max(1, _to_float(_get_input_value(input, _prefixed_id(prefix, "ks_two_col_columns")), 1) or 1)
+            )
+            return {
+                "mode": mode if mode in {"two_column", "concentric"} else "two_column",
+                "gap_x": max(80.0, float(gap_x if gap_x is not None else KS_LAYOUT_GAP_X_DEFAULT)),
+                "spacing_y": max(10.0, float(spacing_y if spacing_y is not None else KS_VERTICAL_SPACING)),
+                "center_x": KS_LAYOUT_CENTER_X_DEFAULT,
+                "center_y": KS_LAYOUT_CENTER_Y_DEFAULT,
+                "two_col_focus_side": two_col_focus_side if two_col_focus_side in {"left", "right", "top", "bottom"} else "left",
+                "two_col_columns": min(6, max(1, two_col_columns)),
+                "conc_add_arrows": bool(_get_input_value(input, _prefixed_id(prefix, "ks_conc_arrows"))),
+                "conc_radius_mode": radius_mode if radius_mode in {"auto", "fixed"} else "auto",
+                "conc_radius_fixed": max(20.0, float(fixed_radius if fixed_radius is not None else KS_CONCENTRIC_RADIUS_DEFAULT)),
+                "conc_space": max(10.0, float(auto_space if auto_space is not None else KS_CONCENTRIC_SPACE_DEFAULT)),
+                "conc_arrow_stop": max(0.0, float(arrow_stop if arrow_stop is not None else KS_CONCENTRIC_ARROW_STOP_DEFAULT)),
+            }
+
+        def _ks_two_col_arrow_sides(
+            focus_side: str, direction: str = "single_to_multi"
+        ) -> Tuple[str, str]:
+            side = str(focus_side or "left").strip().lower()
+            single_to_multi = {
+                "left": ("East", "West"),
+                "right": ("West", "East"),
+                "top": ("South", "North"),
+                "bottom": ("North", "South"),
+            }
+            source_side, target_side = single_to_multi.get(side, ("East", "West"))
+            if str(direction or "").strip().lower() == "multi_to_single":
+                return target_side, source_side
+            return source_side, target_side
+
+        def _ks_stable_persist_token(
+            selection_value: str,
+            mode: str,
+            ctx: Dict[str, Any],
+            settings_override: Dict[str, Any],
+        ) -> str:
+            token_payload = {
+                "selection": str(selection_value or ""),
+                "mode": str(mode or ""),
+                "layout": _ks_layout_config(),
+                "dataset_kinases_only": _ks_dataset_kinases_only(),
+                "ptm_max_display": int(settings_override.get("ptm_max_display", DEFAULT_SETTINGS["ptm_max_display"]) or DEFAULT_SETTINGS["ptm_max_display"]),
+                "protein_main_columns": list(ctx.get("protein_main_columns") or []),
+                "ptm_main_columns": list(ctx.get("ptm_main_columns") or []),
+                "protein_outline_columns": list(ctx.get("protein_outline_columns") or []),
+                "ptm_outline_columns": list(ctx.get("ptm_outline_columns") or []),
+                "use_black_protein_outlines": bool(
+                    settings_override.get(
+                        "use_black_protein_outlines",
+                        DEFAULT_SETTINGS.get("use_black_protein_outlines", False),
+                    )
+                ),
+            }
+            digest = hashlib.sha1(
+                json.dumps(token_payload, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
+            ).hexdigest()
+            return f"ks:{digest}"
+
+        def _ks_concentric_radius(node_count: int, layout_cfg: Dict[str, Any]) -> float:
+            if node_count <= 0:
+                return KS_CONCENTRIC_RADIUS_DEFAULT
+            if layout_cfg.get("conc_radius_mode") == "fixed":
+                return float(layout_cfg.get("conc_radius_fixed", KS_CONCENTRIC_RADIUS_DEFAULT))
+            space = float(layout_cfg.get("conc_space", KS_CONCENTRIC_SPACE_DEFAULT))
+            return max(60.0, (node_count * space) / (2 * math.pi) * 2.0)
+
+        def _ks_two_column_positions(
+            node_ids: List[str],
+            layout_cfg: Dict[str, Any],
+            center_x: float,
+            center_y: float,
+            half_w: float,
+            half_h: float,
+            protbox_width: float,
+        ) -> Tuple[float, float, Dict[str, Tuple[float, float]], set]:
+            spacing_y = float(layout_cfg.get("spacing_y", KS_VERTICAL_SPACING))
+            gap_x = float(layout_cfg.get("gap_x", KS_LAYOUT_GAP_X_DEFAULT))
+            focus_side = str(layout_cfg.get("two_col_focus_side", "left"))
+            columns = int(layout_cfg.get("two_col_columns", 1) or 1)
+            columns = max(1, columns)
+            # Keep additional columns much tighter so multi-column KS layouts remain readable.
+            if columns > 1:
+                col_spacing = max(protbox_width + 10.0, min(120.0, gap_x * 0.32))
+            else:
+                col_spacing = max(protbox_width + 16.0, min(220.0, gap_x * 0.75))
+
+            if focus_side == "right":
+                rows = max(1, math.ceil(len(node_ids) / columns)) if node_ids else 1
+                total_span = spacing_y * (rows - 1)
+                start_y = center_y - (total_span / 2.0) - half_h
+                focus_x = center_x + (gap_x * 0.5) - half_w
+                near_x = center_x - (gap_x * 0.5) - half_w
+                col_x = lambda col_idx: near_x - (col_idx * col_spacing)
+                row_y = lambda row_idx: start_y + row_idx * spacing_y
+            else:
+                if focus_side == "top":
+                    depth_rows = columns
+                    cols_across = max(1, math.ceil(len(node_ids) / depth_rows)) if node_ids else 1
+                    across_spacing = max(protbox_width + 8.0, min(160.0, spacing_y))
+                    depth_spacing = max(protbox_width + 10.0, min(120.0, gap_x * 0.32))
+                    focus_y = center_y - (gap_x * 0.5) - half_h
+                    near_y = center_y + (gap_x * 0.5) - half_h
+                    start_x = center_x - (across_spacing * (cols_across - 1) * 0.5) - half_w
+                    col_x = lambda col_idx: start_x + col_idx * across_spacing
+                    row_y = lambda row_idx: near_y + (row_idx * depth_spacing)
+                    focus_x = center_x - half_w
+                elif focus_side == "bottom":
+                    depth_rows = columns
+                    cols_across = max(1, math.ceil(len(node_ids) / depth_rows)) if node_ids else 1
+                    across_spacing = max(protbox_width + 8.0, min(160.0, spacing_y))
+                    depth_spacing = max(protbox_width + 10.0, min(120.0, gap_x * 0.32))
+                    focus_y = center_y + (gap_x * 0.5) - half_h
+                    near_y = center_y - (gap_x * 0.5) - half_h
+                    start_x = center_x - (across_spacing * (cols_across - 1) * 0.5) - half_w
+                    col_x = lambda col_idx: start_x + col_idx * across_spacing
+                    row_y = lambda row_idx: near_y - (row_idx * depth_spacing)
+                    focus_x = center_x - half_w
+                else:
+                    rows = max(1, math.ceil(len(node_ids) / columns)) if node_ids else 1
+                    total_span = spacing_y * (rows - 1)
+                    start_y = center_y - (total_span / 2.0) - half_h
+                    focus_x = center_x - (gap_x * 0.5) - half_w
+                    near_x = center_x + (gap_x * 0.5) - half_w
+                    col_x = lambda col_idx: near_x + (col_idx * col_spacing)
+                    row_y = lambda row_idx: start_y + row_idx * spacing_y
+
+            positions: Dict[str, Tuple[float, float]] = {}
+            arrow_targets: set = set()
+            for idx, node_id in enumerate(node_ids):
+                if focus_side in {"top", "bottom"}:
+                    depth_rows = columns
+                    cols_across = max(1, math.ceil(len(node_ids) / depth_rows)) if node_ids else 1
+                    row_idx = idx // cols_across
+                    col_idx = idx % cols_across
+                else:
+                    rows = max(1, math.ceil(len(node_ids) / columns)) if node_ids else 1
+                    col_idx = idx // rows
+                    row_idx = idx % rows
+                positions[str(node_id)] = (col_x(col_idx), row_y(row_idx))
+                nearest_band = row_idx == 0 if focus_side in {"top", "bottom"} else col_idx == 0
+                if nearest_band:
+                    arrow_targets.add(str(node_id))
+            focus_y_out = center_y - half_h
+            if focus_side == "top":
+                focus_y_out = focus_y
+            elif focus_side == "bottom":
+                focus_y_out = focus_y
+            return focus_x, focus_y_out, positions, arrow_targets
+
         def _build_view_for_kinase(
             kinase_id: str, mode: str, ctx: Dict[str, Any], settings_override: Dict[str, Any]
         ) -> Dict[str, Any]:
             ks_data = ctx.get("ks_data") or _empty_ks_index()
             kin_entry = ks_data.get("kinases", {}).get(kinase_id)
             allowed_types = _ks_allowed_types(mode)
+            if _ks_dataset_kinases_only() and not _ks_kinase_in_dataset(kinase_id, ctx):
+                state["status"].set("Selected kinase is not present in the uploaded protein dataset.")
+                return _prepare_base_payload(settings_override, ctx.get("protein_main_columns", []))
             if not kin_entry:
                 state["status"].set(f"No kinase data found for {kinase_id}.")
                 return _prepare_base_payload(settings_override, ctx.get("protein_main_columns", []))
             sub_keys: List[str] = []
             for sub_key in kin_entry.get("substrates", []):
+                sub_entry = ks_data.get("substrates", {}).get(sub_key, {}) or {}
+                sub_uid = str(sub_entry.get("uniprot") or "").strip()
+                if _ks_dataset_kinases_only() and (not sub_uid or not _ks_protein_in_dataset(sub_uid, ctx)):
+                    continue
                 rel_types = (
-                    ks_data.get("substrates", {})
-                    .get(sub_key, {})
+                    sub_entry
                     .get("kinases", {})
                     .get(kinase_id, {})
                     .get("types", set())
@@ -8046,16 +8920,41 @@ def server(input, output, session):  # type: ignore[override]
             grouped_items = sorted(grouped.items(), key=lambda kv: kv[0])
             protbox_width = 46
             protbox_height = 17
-            spacing_y = KS_VERTICAL_SPACING
-            base_x_left = 140
-            base_x_right = 380
-            total_span = spacing_y * (len(grouped_items) - 1) if grouped_items else 0
-            start_y = 200 - (total_span / 2.0)
-            kinase_y = start_y + (total_span / 2.0)
+            layout_cfg = _ks_layout_config()
+            mode_layout = layout_cfg.get("mode", "two_column")
+            center_x = float(layout_cfg.get("center_x", KS_LAYOUT_CENTER_X_DEFAULT))
+            center_y = float(layout_cfg.get("center_y", KS_LAYOUT_CENTER_Y_DEFAULT))
+            half_w = protbox_width * 0.5
+            half_h = protbox_height * 0.5
             payload = _prepare_base_payload(settings_override, ctx.get("protein_main_columns", []))
             protein_data: Dict[str, Any] = {}
             protboxes: List[Dict[str, Any]] = []
             arrows: List[Dict[str, Any]] = []
+            substrate_positions: Dict[str, Tuple[float, float]] = {}
+            first_column_targets: set = set()
+            kin_pb_id = f"{prefix}_kinase"
+
+            if mode_layout == "concentric":
+                kinase_x = center_x - half_w
+                kinase_y = center_y - half_h
+                radius = _ks_concentric_radius(len(grouped_items), layout_cfg)
+                for idx, (sub_uid, _) in enumerate(grouped_items):
+                    angle = (2.0 * math.pi * idx) / max(1, len(grouped_items))
+                    sub_cx = center_x + radius * math.cos(angle)
+                    sub_cy = center_y + radius * math.sin(angle)
+                    substrate_positions[sub_uid] = (sub_cx - half_w, sub_cy - half_h)
+            else:
+                ordered_sub_uids = [sub_uid for (sub_uid, _) in grouped_items]
+                kinase_x, kinase_y, substrate_positions, first_column_targets = _ks_two_column_positions(
+                    ordered_sub_uids,
+                    layout_cfg,
+                    center_x,
+                    center_y,
+                    half_w,
+                    half_h,
+                    protbox_width,
+                )
+
             kinase_ptms: Dict[str, Any] = {}
             kinase_ptm_rows = ctx.get("ptms_by_uniprot", {}).get(kinase_id, [])
             for idx, row_map in enumerate(kinase_ptm_rows[: len(PTM_POSITION_PRIORITY)]):
@@ -8065,7 +8964,7 @@ def server(input, output, session):  # type: ignore[override]
                     row_map,
                     ptm_key,
                     pos_key,
-                    base_x_left,
+                    kinase_x,
                     kinase_y,
                     protbox_width,
                     protbox_height,
@@ -8075,14 +8974,13 @@ def server(input, output, session):  # type: ignore[override]
             kinase_row = ctx.get("prot_rows_by_uniprot", {}).get(kinase_id, {})
             protein_data[kinase_id] = _make_protein_entry(kinase_id, kinase_row, ctx, settings_override, kinase_ptms)
             kin_label = protein_data[kinase_id].get("label") or kin_entry.get("gene") or kinase_id
-            kin_pb_id = f"{prefix}_kinase"
             kin_tooltip = protein_data[kinase_id].get("tooltip") or ""
             protboxes.append(
                 {
                     "protbox_id": kin_pb_id,
                     "proteins": [kinase_id],
                     "backup_label": kin_label,
-                    "x": base_x_left,
+                    "x": kinase_x,
                     "y": kinase_y,
                     "width": protbox_width,
                     "height": protbox_height,
@@ -8090,7 +8988,7 @@ def server(input, output, session):  # type: ignore[override]
                 }
             )
             for idx, (sub_uid, sub_list) in enumerate(grouped_items):
-                y_pos = start_y + idx * spacing_y
+                sub_x, sub_y = substrate_positions.get(sub_uid, (center_x - half_w, center_y - half_h))
                 ptm_entries: Dict[str, Any] = {}
                 for ptm_idx, sub_key in enumerate(sub_list[: len(PTM_POSITION_PRIORITY)]):
                     row_map = ks_data.get("substrates", {}).get(sub_key, {}).get("row", {}) or {}
@@ -8106,8 +9004,8 @@ def server(input, output, session):  # type: ignore[override]
                         row_map,
                         ptm_key,
                         pos_key,
-                        base_x_right,
-                        y_pos,
+                        sub_x,
+                        sub_y,
                         protbox_width,
                         protbox_height,
                         ctx,
@@ -8123,22 +9021,52 @@ def server(input, output, session):  # type: ignore[override]
                         "protbox_id": pb_id,
                         "proteins": [sub_uid],
                         "backup_label": sub_label,
-                        "x": base_x_right,
-                        "y": y_pos,
+                        "x": sub_x,
+                        "y": sub_y,
                         "width": protbox_width,
                         "height": protbox_height,
                     }
                 )
-                arrows.append(
-                    {
-                        "protbox_id_1": kin_pb_id,
-                        "protbox_id_2": pb_id,
-                        "protbox_id_1_side": "East",
-                        "protbox_id_2_side": "West",
-                        "line": "arrow",
-                        "type": "",
-                    }
-                )
+                if mode_layout == "concentric":
+                    if layout_cfg.get("conc_add_arrows"):
+                        target_x = sub_x + half_w
+                        target_y = sub_y + half_h
+                        center_x_node = kinase_x + half_w
+                        center_y_node = kinase_y + half_h
+                        vx = target_x - center_x_node
+                        vy = target_y - center_y_node
+                        dist = math.hypot(vx, vy) or 1.0
+                        stop_r = float(layout_cfg.get("conc_arrow_stop", KS_CONCENTRIC_ARROW_STOP_DEFAULT))
+                        stop = min(stop_r, dist * 0.45) if stop_r else 0.0
+                        source_x = center_x_node + (vx / dist) * stop if stop else center_x_node
+                        source_y = center_y_node + (vy / dist) * stop if stop else center_y_node
+                        end_x = target_x - (vx / dist) * stop if stop else target_x
+                        end_y = target_y - (vy / dist) * stop if stop else target_y
+                        arrows.append(
+                            {
+                                "x1": source_x,
+                                "y1": source_y,
+                                "x2": end_x,
+                                "y2": end_y,
+                                "line": "arrow",
+                                "type": "",
+                            }
+                        )
+                else:
+                    if str(sub_uid) not in first_column_targets:
+                        continue
+                    focus_side = str(layout_cfg.get("two_col_focus_side", "left"))
+                    kin_side, sub_side = _ks_two_col_arrow_sides(focus_side, "single_to_multi")
+                    arrows.append(
+                        {
+                            "protbox_id_1": kin_pb_id,
+                            "protbox_id_2": pb_id,
+                            "protbox_id_1_side": kin_side,
+                            "protbox_id_2_side": sub_side,
+                            "line": "arrow",
+                            "type": "",
+                        }
+                    )
             payload["protein_data"] = protein_data
             payload["protbox_data"] = protboxes
             payload["arrows"] = arrows
@@ -8161,22 +9089,47 @@ def server(input, output, session):  # type: ignore[override]
                 rel_types = rel.get("types", set())
                 if rel_types and rel_types.intersection(allowed_types):
                     kin_ids.append(kin_id)
+            if _ks_dataset_kinases_only():
+                kin_ids = [kin_id for kin_id in kin_ids if _ks_kinase_in_dataset(kin_id, ctx)]
             if not kin_ids:
                 state["status"].set("No known kinases found for this PTM with the selected evidence filter.")
                 return _prepare_base_payload(settings_override, ctx.get("protein_main_columns", []))
             kin_ids = sorted(set(kin_ids))
             protbox_width = 46
             protbox_height = 17
-            spacing_y = KS_VERTICAL_SPACING
-            base_x_left = 140
-            base_x_right = 380
-            total_span = spacing_y * (len(kin_ids) - 1) if kin_ids else 0
-            start_y = 200 - (total_span / 2.0)
-            ptm_y = start_y + (total_span / 2.0)
+            layout_cfg = _ks_layout_config()
+            mode_layout = layout_cfg.get("mode", "two_column")
+            center_x = float(layout_cfg.get("center_x", KS_LAYOUT_CENTER_X_DEFAULT))
+            center_y = float(layout_cfg.get("center_y", KS_LAYOUT_CENTER_Y_DEFAULT))
+            half_w = protbox_width * 0.5
+            half_h = protbox_height * 0.5
             payload = _prepare_base_payload(settings_override, ctx.get("protein_main_columns", []))
             protein_data: Dict[str, Any] = {}
             protboxes: List[Dict[str, Any]] = []
             arrows: List[Dict[str, Any]] = []
+            kinase_positions: Dict[str, Tuple[float, float]] = {}
+            first_column_targets: set = set()
+            ptm_x = center_x - half_w
+            ptm_y = center_y - half_h
+
+            if mode_layout == "concentric":
+                radius = _ks_concentric_radius(len(kin_ids), layout_cfg)
+                for idx, kin_id in enumerate(kin_ids):
+                    angle = (2.0 * math.pi * idx) / max(1, len(kin_ids))
+                    kin_cx = center_x + radius * math.cos(angle)
+                    kin_cy = center_y + radius * math.sin(angle)
+                    kinase_positions[kin_id] = (kin_cx - half_w, kin_cy - half_h)
+            else:
+                ptm_x, ptm_y, kinase_positions, first_column_targets = _ks_two_column_positions(
+                    kin_ids,
+                    layout_cfg,
+                    center_x,
+                    center_y,
+                    half_w,
+                    half_h,
+                    protbox_width,
+                )
+
             ptm_row = sub_entry.get("row", {}) or {}
             ptm_label = sub_entry.get("site_label") or sub_entry.get("site") or str(
                 ptm_row.get(ctx.get("ptm_headers", [None, None])[1] if ctx.get("ptm_headers") else "", "")
@@ -8187,7 +9140,7 @@ def server(input, output, session):  # type: ignore[override]
                     ptm_row,
                     ptm_key,
                     "W1",
-                    base_x_right,
+                    ptm_x,
                     ptm_y,
                     protbox_width,
                     protbox_height,
@@ -8206,14 +9159,14 @@ def server(input, output, session):  # type: ignore[override]
                     "protbox_id": ptm_pb_id,
                     "proteins": [sub_uid],
                     "backup_label": sub_label,
-                    "x": base_x_right,
+                    "x": ptm_x,
                     "y": ptm_y,
                     "width": protbox_width,
                     "height": protbox_height,
                 }
             )
             for idx, kin_id in enumerate(kin_ids):
-                kin_y = start_y + idx * spacing_y
+                kin_x, kin_y = kinase_positions.get(kin_id, (center_x - half_w, center_y - half_h))
                 kin_ptms: Dict[str, Any] = {}
                 kin_ptm_rows = ctx.get("ptms_by_uniprot", {}).get(kin_id, [])
                 for ptm_idx, row_map in enumerate(kin_ptm_rows[: len(PTM_POSITION_PRIORITY)]):
@@ -8223,7 +9176,7 @@ def server(input, output, session):  # type: ignore[override]
                         row_map,
                         kin_ptm_key,
                         pos_key,
-                        base_x_left,
+                        kin_x,
                         kin_y,
                         protbox_width,
                         protbox_height,
@@ -8239,22 +9192,52 @@ def server(input, output, session):  # type: ignore[override]
                         "protbox_id": kin_pb_id,
                         "proteins": [kin_id],
                         "backup_label": kin_label,
-                        "x": base_x_left,
+                        "x": kin_x,
                         "y": kin_y,
                         "width": protbox_width,
                         "height": protbox_height,
                     }
                 )
-                arrows.append(
-                    {
-                        "protbox_id_1": kin_pb_id,
-                        "protbox_id_2": ptm_pb_id,
-                        "protbox_id_1_side": "East",
-                        "protbox_id_2_side": "West",
-                        "line": "arrow",
-                        "type": "",
-                    }
-                )
+                if mode_layout == "concentric":
+                    if layout_cfg.get("conc_add_arrows"):
+                        source_x = kin_x + half_w
+                        source_y = kin_y + half_h
+                        target_x = ptm_x + half_w
+                        target_y = ptm_y + half_h
+                        vx = target_x - source_x
+                        vy = target_y - source_y
+                        dist = math.hypot(vx, vy) or 1.0
+                        stop_r = float(layout_cfg.get("conc_arrow_stop", KS_CONCENTRIC_ARROW_STOP_DEFAULT))
+                        stop = min(stop_r, dist * 0.45) if stop_r else 0.0
+                        source_x = source_x + (vx / dist) * stop if stop else source_x
+                        source_y = source_y + (vy / dist) * stop if stop else source_y
+                        end_x = target_x - (vx / dist) * stop if stop else target_x
+                        end_y = target_y - (vy / dist) * stop if stop else target_y
+                        arrows.append(
+                            {
+                                "x1": source_x,
+                                "y1": source_y,
+                                "x2": end_x,
+                                "y2": end_y,
+                                "line": "arrow",
+                                "type": "",
+                            }
+                        )
+                else:
+                    if str(kin_id) not in first_column_targets:
+                        continue
+                    focus_side = str(layout_cfg.get("two_col_focus_side", "left"))
+                    kin_side, ptm_side = _ks_two_col_arrow_sides(focus_side, "multi_to_single")
+                    arrows.append(
+                        {
+                            "protbox_id_1": kin_pb_id,
+                            "protbox_id_2": ptm_pb_id,
+                            "protbox_id_1_side": kin_side,
+                            "protbox_id_2_side": ptm_side,
+                            "line": "arrow",
+                            "type": "",
+                        }
+                    )
             payload["protein_data"] = protein_data
             payload["protbox_data"] = protboxes
             payload["arrows"] = arrows
@@ -8265,12 +9248,12 @@ def server(input, output, session):  # type: ignore[override]
 
         def build_json():
             settings_override = collect_settings(input, cfg)
-            web_simple_kegg = (
+            web_simple_pathway = (
                 cfg.get("key") == "web"
-                and str(settings_override.get("pathway_source", "")).lower() == "kegg"
+                and str(settings_override.get("pathway_source", "")).lower() in {"kegg", "wikipathways"}
                 and bool(settings_override.get("simple_kegg_mode"))
             )
-            if web_simple_kegg:
+            if web_simple_pathway:
                 settings_override["mode"] = "analysis"
                 settings_override["show_background_image"] = True
                 settings_override["show_text_boxes"] = False
@@ -8321,9 +9304,11 @@ def server(input, output, session):  # type: ignore[override]
                         positive_color=settings_override.get("positive_color", DEFAULT_SETTINGS["positive_color"]),
                         max_negative=settings_override.get("max_negative", DEFAULT_SETTINGS["max_negative"]),
                         max_positive=settings_override.get("max_positive", DEFAULT_SETTINGS["max_positive"]),
+                        gradient_stops=settings_override.get("gradient_stops"),
                         prot_outline_width=settings_override.get("prot_outline_width", DEFAULT_SETTINGS["prot_outline_width"]),
                         use_black_protein_outlines=bool(settings_override.get("use_black_protein_outlines", DEFAULT_SETTINGS.get("use_black_protein_outlines", False))),
                         simple_kegg_mode=bool(settings_override.get("simple_kegg_mode", True)),
+                        temporal_mode=bool(settings_override.get("temporal_mode", DEFAULT_SETTINGS.get("temporal_mode", False))),
                     )
                     if not cst_payload:
                         state["json"].set(None)
@@ -8357,18 +9342,34 @@ def server(input, output, session):  # type: ignore[override]
                 if ctx.get("protein_tooltips"):
                     settings_override["protein_tooltip_columns"] = list(ctx.get("protein_tooltips", []))
                 mode = _ks_mode_value()
-                selection = _get_input_value(input, _prefixed_id(prefix, "ks_choice"))
+                selection_input = _get_input_value(input, _prefixed_id(prefix, "ks_choice"))
+                if selection_input:
+                    _remember_ks_choice(selection_input)
+                selection = selection_input or _last_ks_choice()
+                selection_str = str(selection or "")
+
+                def _set_ks_payload(next_payload: Dict[str, Any]) -> None:
+                    payload_with_token = dict(next_payload or {})
+                    payload_with_token["_bookmark_key"] = cfg.get("key", prefix)
+                    payload_with_token["_persist_token"] = _ks_stable_persist_token(
+                        selection_str,
+                        mode,
+                        ctx,
+                        settings_override,
+                    )
+                    payload_with_token["_ks_selection"] = selection_str
+                    state["json"].set(payload_with_token)
+
                 if not ctx.get("prot_headers") or not ctx.get("ptm_headers"):
                     payload = _prepare_base_payload(settings_override, ctx.get("protein_main_columns", []))
-                    state["json"].set(payload)
-                    state["status"].set("Upload protein and PTM datasets to use Kinase Substrates.")
+                    _set_ks_payload(payload)
+                    state["status"].set("Upload protein and PTM datasets to use Kinase-Substrate.")
                     return
                 if not selection:
                     payload = _prepare_base_payload(settings_override, ctx.get("protein_main_columns", []))
-                    state["json"].set(payload)
+                    _set_ks_payload(payload)
                     state["status"].set("Select a kinase or substrate, then click Load.")
                     return
-                selection_str = str(selection)
                 if selection_str.startswith("kinase|"):
                     payload = _build_view_for_kinase(selection_str.split("|", 1)[1], mode, ctx, settings_override)
                 elif selection_str.startswith("ptm|"):
@@ -8376,7 +9377,7 @@ def server(input, output, session):  # type: ignore[override]
                 else:
                     payload = _prepare_base_payload(settings_override, ctx.get("protein_main_columns", []))
                     state["status"].set("Choose a kinase or substrate option, then click Load.")
-                state["json"].set(payload)
+                _set_ks_payload(payload)
                 return
             data_override = collect_data_override()
             if data_override:
@@ -8434,11 +9435,12 @@ def server(input, output, session):  # type: ignore[override]
                 merged_settings["pathway_source"] = settings_override.get("pathway_source", DEFAULT_SETTINGS["pathway_source"])
                 merged_settings["mode"] = settings_override.get("mode", cfg["mode"])
                 merged_settings["show_background_image"] = False
+                merged_settings["temporal_mode"] = bool(settings_override.get("temporal_mode", DEFAULT_SETTINGS.get("temporal_mode", False)))
                 merged_settings["show_groups"] = bool(settings_override.get("show_groups", False))
                 merged_settings["show_multi_protein_indicator"] = bool(settings_override.get("show_multi_protein_indicator", False))
                 merged_settings["show_arrows"] = bool(settings_override.get("show_arrows", True))
                 merged_settings["show_text_boxes"] = bool(settings_override.get("show_text_boxes", True))
-                merged_settings["use_original_protbox_size"] = bool(settings_override.get("use_original_protbox_size", DEFAULT_SETTINGS.get("use_original_protbox_size", False)))
+                merged_settings["use_original_protbox_size"] = bool(settings_override.get("use_original_protbox_size", DEFAULT_SETTINGS.get("use_original_protbox_size", True)))
                 merged_settings["ptm_max_display"] = max(
                     1, int(settings_override.get("ptm_max_display", DEFAULT_SETTINGS["ptm_max_display"]) or DEFAULT_SETTINGS["ptm_max_display"])
                 )
@@ -8455,6 +9457,9 @@ def server(input, output, session):  # type: ignore[override]
                 merged_settings["protein_tooltip_columns"] = settings_override.get("protein_tooltip_columns", DEFAULT_SETTINGS.get("protein_tooltip_columns", []))
                 merged_settings["species"] = settings_override.get("species")
                 merged_settings["species_code"] = settings_override.get("species_code")
+                merged_settings["bg_scale"] = settings_override.get("bg_scale", DEFAULT_WIKIPATHWAYS_BG_SCALE)
+                merged_settings["bg_offset_x"] = settings_override.get("bg_offset_x", DEFAULT_WIKIPATHWAYS_BG_OFFSET_X)
+                merged_settings["bg_offset_y"] = settings_override.get("bg_offset_y", DEFAULT_WIKIPATHWAYS_BG_OFFSET_Y)
                 if merged_settings.get("pathway_source", "").lower() == "kegg":
                     merged_settings["hsa_id_column"] = "KEGG_Gene_ID"
                 else:
@@ -8474,13 +9479,7 @@ def server(input, output, session):  # type: ignore[override]
                 payload["_bookmark_key"] = cfg["key"]
                 payload["_persist_token"] = time.time()
                 payload["_global_protein_catalog"] = dict(catalog_info)
-                payload["_kegg_preview"] = {
-                    "show": False,
-                    "opacity": DEFAULT_BG_OPACITY,
-                    "offset_x": DEFAULT_BG_OFFSET_X,
-                    "offset_y": DEFAULT_BG_OFFSET_Y,
-                    "scale": DEFAULT_BG_SCALE,
-                }
+                payload["_kegg_preview"] = _background_preview_from_settings(settings_override, show=False)
                 payload["_box_preview"] = {"y_stretch": DEFAULT_BOX_Y_STRETCH}
                 payload["_active_mode"] = settings_override.get("mode", cfg["mode"])
                 if cfg["key"] in {"figure", "web"}:
@@ -8508,25 +9507,13 @@ def server(input, output, session):  # type: ignore[override]
                     state["status"].set(f"Error generating JSON: {generation_error}")
                     return
                 show_bg_flag = bool(settings_override.get("show_background_image", False))
-                payload, _ = _attach_kegg_background_image(payload, force=show_bg_flag)
+                payload, _ = _attach_pathway_background_image(payload, force=show_bg_flag)
                 payload = dict(payload)
                 payload["_bookmark_key"] = cfg["key"]
                 payload["_persist_token"] = time.time()
                 payload["_global_protein_catalog"] = dict(catalog_info)
                 _apply_color_metadata(payload, color_override)
-                try:
-                    os.makedirs(JSON_PREVIEW_DIR, exist_ok=True)
-                    with open(JSON_PREVIEW_FILE, "w", encoding="utf-8") as preview_fh:
-                        json.dump(payload, preview_fh, indent=2)
-                except OSError as write_err:
-                    print(f"Warning: could not write preview JSON to {JSON_PREVIEW_FILE}: {write_err}")
-                payload["_kegg_preview"] = {
-                    "show": show_bg_flag,
-                    "opacity": DEFAULT_BG_OPACITY,
-                    "offset_x": DEFAULT_BG_OFFSET_X,
-                    "offset_y": DEFAULT_BG_OFFSET_Y,
-                    "scale": DEFAULT_BG_SCALE,
-                }
+                payload["_kegg_preview"] = _background_preview_from_settings(settings_override, show=show_bg_flag)
                 payload["_box_preview"] = {"y_stretch": DEFAULT_BOX_Y_STRETCH}
                 active_mode = settings_override.get("mode", cfg["mode"])
                 payload["_active_mode"] = active_mode
@@ -8538,24 +9525,19 @@ def server(input, output, session):  # type: ignore[override]
                     for group in payload.get("groups", []) or []:
                         if isinstance(group, dict):
                             group["show_box"] = False
-                if web_simple_kegg:
-                    payload = _apply_simple_kegg_payload(payload)
+                if web_simple_pathway:
+                    payload = _apply_simple_pathway_payload(payload)
                     payload["_bookmark_key"] = cfg["key"]
                     payload["_persist_token"] = time.time()
                     payload["_global_protein_catalog"] = dict(catalog_info)
-                    payload["_kegg_preview"] = {
-                        "show": True,
-                        "opacity": DEFAULT_BG_OPACITY,
-                        "offset_x": DEFAULT_BG_OFFSET_X,
-                        "offset_y": DEFAULT_BG_OFFSET_Y,
-                        "scale": DEFAULT_BG_SCALE,
-                    }
+                    payload["_kegg_preview"] = _background_preview_from_settings(settings_override, show=True)
                 layout_override = _get_custom_layout()
                 if layout_override:
                     _apply_custom_layout(payload, layout_override)
                     payload["_custom_layout_applied"] = True
                 else:
                     payload["_custom_layout_applied"] = False
+                _write_preview_json(payload)
                 state["json"].set(payload)
                 if prefix == "web":
                     _set_load_feedback("")
@@ -8571,6 +9553,7 @@ def server(input, output, session):  # type: ignore[override]
                 ks_data = ctx.get("ks_data") or _empty_ks_index()
                 entity_mode = str(_get_input_value(input, _prefixed_id(prefix, "ks_entity_mode")) or "substrate").lower()
                 allowed_types = _ks_allowed_types(_ks_mode_value())
+                dataset_kinase_only = _ks_dataset_kinases_only()
                 if not allowed_types:
                     return []
                 fc_choices_local = _fc_choices()
@@ -8615,6 +9598,8 @@ def server(input, output, session):  # type: ignore[override]
                 rows: List[Dict[str, Any]] = []
                 if entity_mode == "kinase":
                     for kin_id, info in (ks_data.get("kinases") or {}).items():
+                        if dataset_kinase_only and not _ks_kinase_in_dataset(kin_id, ctx):
+                            continue
                         gene = _resolve_gene_label(kin_id, info, ctx)
                         prot_row = ctx.get("prot_rows_by_uniprot", {}).get(kin_id, {})
                         prot_fc_cols = [selected_fc] if selected_fc else ctx.get("protein_main_columns", [])
@@ -8624,6 +9609,9 @@ def server(input, output, session):  # type: ignore[override]
                         visible_types: set = set()
                         for sub_key in info.get("substrates", []):
                             sub_entry = (ks_data.get("substrates") or {}).get(sub_key, {})
+                            sub_uid = str(sub_entry.get("uniprot") or "").strip()
+                            if dataset_kinase_only and (not sub_uid or not _ks_protein_in_dataset(sub_uid, ctx)):
+                                continue
                             rel_types = (sub_entry.get("kinases", {}).get(kin_id, {}) or {}).get("types", set())
                             matched_types = set(rel_types or set()).intersection(allowed_types)
                             if not matched_types:
@@ -8673,7 +9661,9 @@ def server(input, output, session):  # type: ignore[override]
                         ptm_fc_val = _first_fc_value(info.get("row", {}), ptm_fc_cols)
                         kin_count = 0
                         visible_types: set = set()
-                        for _, rel in (info.get("kinases") or {}).items():
+                        for kin_id, rel in (info.get("kinases") or {}).items():
+                            if dataset_kinase_only and not _ks_kinase_in_dataset(kin_id, ctx):
+                                continue
                             matched_types = set((rel or {}).get("types", set()) or set()).intersection(allowed_types)
                             if not matched_types:
                                 continue
@@ -8752,6 +9742,8 @@ def server(input, output, session):  # type: ignore[override]
                     ]
                 body_rows = []
                 selected_id = str(_get_input_value(input, _prefixed_id(prefix, "ks_choice")) or "")
+                if not selected_id:
+                    selected_id = _last_ks_choice()
                 for entry in rows:
                     row_id = entry.get("id", "")
                     row_classes = []
@@ -8814,12 +9806,35 @@ def server(input, output, session):  # type: ignore[override]
             @reactive.Effect
             @reactive.event(getattr(input, _prefixed_id(prefix, "ks_choice")))
             def _build_kinase_substrate_view():
-                build_json()
+                choice = _get_input_value(input, _prefixed_id(prefix, "ks_choice"))
+                if choice:
+                    _remember_ks_choice(choice)
+                    build_json()
 
             @reactive.Effect
             @reactive.event(getattr(input, _prefixed_id(prefix, "ks_evidence_types")))
             def _sync_ks_evidence_types():
-                if _get_input_value(input, _prefixed_id(prefix, "ks_choice")):
+                current_choice = _get_input_value(input, _prefixed_id(prefix, "ks_choice")) or _last_ks_choice()
+                if current_choice:
+                    build_json()
+
+            @reactive.Effect
+            @reactive.event(
+                getattr(input, _prefixed_id(prefix, "ks_layout_mode")),
+                getattr(input, _prefixed_id(prefix, "ks_layout_gap_x")),
+                getattr(input, _prefixed_id(prefix, "ks_layout_spacing_y")),
+                getattr(input, _prefixed_id(prefix, "ks_two_col_focus_side")),
+                getattr(input, _prefixed_id(prefix, "ks_two_col_columns")),
+                getattr(input, _prefixed_id(prefix, "ks_conc_arrows")),
+                getattr(input, _prefixed_id(prefix, "ks_conc_radius_mode")),
+                getattr(input, _prefixed_id(prefix, "ks_conc_radius_fixed")),
+                getattr(input, _prefixed_id(prefix, "ks_conc_space")),
+                getattr(input, _prefixed_id(prefix, "ks_conc_arrow_stop")),
+                getattr(input, _prefixed_id(prefix, "ks_dataset_kinases_only")),
+            )
+            def _sync_ks_layout_and_filters():
+                current_choice = _get_input_value(input, _prefixed_id(prefix, "ks_choice")) or _last_ks_choice()
+                if current_choice:
                     build_json()
 
             @reactive.Effect
@@ -8860,6 +9875,8 @@ def server(input, output, session):  # type: ignore[override]
                     rel_types = rel.get("types", set())
                     if rel_types and rel_types.intersection(allowed_types):
                         kin_ids.append(kin_id)
+                if _ks_dataset_kinases_only():
+                    kin_ids = [kin_id for kin_id in kin_ids if _ks_kinase_in_dataset(kin_id, ctx)]
                 kin_ids = sorted(set(kin_ids))
                 if not kin_ids:
                     state["status"].set("No known kinases for this substrate.")
@@ -9017,13 +10034,14 @@ def server(input, output, session):  # type: ignore[override]
                         msg = f"No pathways matched your search for {species_label or 'selection'}."
                         return ui.div({"class": "pathway-search-empty"}, msg)
                 else:
-                    if not KEGG_PATHWAY_OPTIONS:
-                        return ui.div({"class": "pathway-search-empty"}, "No KEGG catalogue found.")
                     species_key, species_info = _resolve_species(_get_input_value(input, "input_species"))
                     species_code = species_info["code"]
+                    kegg_options = _get_kegg_pathway_options_for_species(species_code)
+                    if not kegg_options:
+                        return ui.div({"class": "pathway-search-empty"}, "No KEGG catalogue found.")
                     if not query:
                         # Show all options when empty; list is scrollable in UI.
-                        for opt in KEGG_PATHWAY_OPTIONS:
+                        for opt in kegg_options:
                             species_id = f"{species_code}{opt['digits']}"
                             matches.append({"value": species_id, "label": f"{species_id} | {opt['name']}"})
                     else:
@@ -9031,7 +10049,7 @@ def server(input, output, session):  # type: ignore[override]
                             pattern = re.compile(query, re.IGNORECASE)
                         except re.error:
                             return ui.div({"class": "pathway-search-error"}, "Invalid regex pattern")
-                        for opt in KEGG_PATHWAY_OPTIONS:
+                        for opt in kegg_options:
                             species_id = f"{species_code}{opt['digits']}"
                             search_target = f"{species_id} | {opt['raw_id']} | {opt['name']}"
                             if pattern.search(search_target):
@@ -9375,8 +10393,9 @@ def server(input, output, session):  # type: ignore[override]
                     options = _load_wikipathways_catalog(species_label, fallback=species_full)
                     cst_options = get_cst_pathway_catalog(Path(BASE_DIR))
                     species_code = species_info.get("code", "")
+                    kegg_options = _get_kegg_pathway_options_for_species(species_code)
                     kegg_rows: List[Dict[str, Any]] = []
-                    for opt in KEGG_PATHWAY_OPTIONS:
+                    for opt in kegg_options:
                         species_id = f"{species_code}{opt['digits']}"
                         kegg_rows.append(
                             {
@@ -9828,19 +10847,12 @@ def server(input, output, session):  # type: ignore[override]
         @output(id=_prefixed_id(prefix, "gradient_preview"))
         @render.ui
         def gradient_preview():
-            neg_hex = str(_get_input_value(input, "settings_negative_color") or _rgb_tuple_to_hex(DEFAULT_SETTINGS["negative_color"]))
-            pos_hex = str(_get_input_value(input, "settings_positive_color") or _rgb_tuple_to_hex(DEFAULT_SETTINGS["positive_color"]))
-            neg_val = _to_float(_get_input_value(input, "settings_max_negative"), DEFAULT_SETTINGS["max_negative"])
-            pos_val = _to_float(_get_input_value(input, "settings_max_positive"), DEFAULT_SETTINGS["max_positive"])
-            style = (
-                "background: linear-gradient(90deg, "
-                f"{neg_hex}, #ffffff 50%, {pos_hex});"
-            )
+            style, labels = _gradient_preview_style_and_labels()
+            if not labels:
+                labels = ["-2", "0", "2"]
             return ui.div(
                 {"class": "gradient-preview", "style": style},
-                ui.tags.span(f"{neg_val}"),
-                ui.tags.span("0"),
-                ui.tags.span(f"{pos_val}"),
+                *[ui.tags.span(label) for label in labels],
             )
 
         @output(id=_prefixed_id(prefix, "fc_selector"))
@@ -9874,13 +10886,19 @@ def server(input, output, session):  # type: ignore[override]
                 idx = 1
             idx = max(1, min(idx, len(choices)))
             state["fc_index"].set(idx)
-            # Update persist token so client can reuse layout but refresh colors for new FC
+            # Keep the existing persist token so client-side edits remain cached.
+            # Only update the active fold-change index when it actually changes.
             current = state["json"].get()
             if current:
-                updated = dict(current)
-                updated["_active_fc_index"] = idx
-                updated["_persist_token"] = time.time()
-                state["json"].set(updated)
+                current_active_idx = current.get("_active_fc_index")
+                try:
+                    current_active_idx = int(current_active_idx)
+                except Exception:
+                    current_active_idx = None
+                if current_active_idx != idx:
+                    updated = dict(current)
+                    updated["_active_fc_index"] = idx
+                    state["json"].set(updated)
             if (
                 cfg.get("key") == "web"
                 and bool(pipeline_ready.get())
@@ -9898,6 +10916,7 @@ def server(input, output, session):  # type: ignore[override]
             input.settings_positive_color,
             input.settings_max_negative,
             input.settings_max_positive,
+            input.settings_gradient_stops_json,
         )
         def _sync_colors_from_settings():
             current = state["json"].get()
@@ -9908,7 +10927,14 @@ def server(input, output, session):  # type: ignore[override]
                 color_override = _color_override_from_settings(settings_override)
                 payload = copy.deepcopy(current)
                 _apply_color_metadata(payload, color_override)
-                payload["_persist_token"] = time.time()
+                if is_ks_bookmark:
+                    ctx = _ks_context()
+                    mode = _ks_mode_value()
+                    selection = str(_get_input_value(input, _prefixed_id(prefix, "ks_choice")) or "")
+                    payload["_bookmark_key"] = cfg.get("key", prefix)
+                    payload["_persist_token"] = _ks_stable_persist_token(selection, mode, ctx, settings_override)
+                else:
+                    payload["_persist_token"] = time.time()
                 state["json"].set(payload)
             except Exception as exc:
                 print(f"Warning: failed to sync colors from settings for bookmark {prefix}: {exc}")
@@ -9924,7 +10950,15 @@ def server(input, output, session):  # type: ignore[override]
                 payload = copy.deepcopy(current)
                 general_settings = payload.setdefault("general_data", {}).setdefault("settings", {})
                 general_settings["debug_mode"] = debug_mode
-                payload["_persist_token"] = time.time()
+                if is_ks_bookmark:
+                    settings_override = collect_settings(input, cfg)
+                    ctx = _ks_context()
+                    mode = _ks_mode_value()
+                    selection = str(_get_input_value(input, _prefixed_id(prefix, "ks_choice")) or "")
+                    payload["_bookmark_key"] = cfg.get("key", prefix)
+                    payload["_persist_token"] = _ks_stable_persist_token(selection, mode, ctx, settings_override)
+                else:
+                    payload["_persist_token"] = time.time()
                 state["json"].set(payload)
             except Exception as exc:
                 print(f"Warning: failed to sync debug mode for bookmark {prefix}: {exc}")
@@ -10235,9 +11269,11 @@ def server(input, output, session):  # type: ignore[override]
                 positive_color=settings_override.get("positive_color", DEFAULT_SETTINGS["positive_color"]),
                 max_negative=settings_override.get("max_negative", DEFAULT_SETTINGS["max_negative"]),
                 max_positive=settings_override.get("max_positive", DEFAULT_SETTINGS["max_positive"]),
+                gradient_stops=settings_override.get("gradient_stops"),
                 prot_outline_width=settings_override.get("prot_outline_width", DEFAULT_SETTINGS["prot_outline_width"]),
                 use_black_protein_outlines=bool(settings_override.get("use_black_protein_outlines", DEFAULT_SETTINGS.get("use_black_protein_outlines", False))),
                 simple_kegg_mode=bool(settings_override.get("simple_kegg_mode", True)),
+                temporal_mode=bool(settings_override.get("temporal_mode", DEFAULT_SETTINGS.get("temporal_mode", False))),
             )
             current_json = dict(state["json"].get() or {})
             if (
@@ -10396,7 +11432,7 @@ def server(input, output, session):  # type: ignore[override]
         _register_bookmark(cfg)
 
 
-app = maybe_wrap_with_login(App(app_ui, server))
+app = App(app_ui, server)
 
 
 def _run_uvicorn_app():
@@ -10436,13 +11472,3 @@ if __name__ == "__main__":
                     pass
     else:
         _run_uvicorn_app()
-
-
-
-
-
-
-
-
-
-
