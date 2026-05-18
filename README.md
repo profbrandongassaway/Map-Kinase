@@ -102,3 +102,32 @@ Environment variables:
 ## Outputs and caches
 - Downloaded pathways are cached under `stored_pathways\`.
 - Exported JSON previews land in `MapKinase_WebApp\JSONfiles\`.
+
+## Banned pathway audit
+To build a manifest of pathways that appear in KEGG or WikiPathways catalogs but fail to download usable content, run:
+
+```powershell
+python MapKinase_WebApp\build_banned_pathways.py --source all --pretty
+```
+
+This writes `MapKinase_WebApp\index_files\pathway_banned_list.json`. The app uses that manifest to hide banned KEGG and WikiPathways entries from the pathway selectors.
+
+## WikiPathways GitHub sync
+To preload WikiPathways from the upstream GitHub repositories instead of downloading pathways one at a time through the API, run:
+
+```powershell
+python MapKinase_WebApp\sync_wikipathways_github_cache.py --pretty
+```
+
+This clones or updates:
+- `wikipathways/wikipathways-database`
+- `wikipathways/wikipathways-assets`
+
+and syncs the pathway files into `stored_pathways\wikipathways\<species>\...`.
+
+Useful options:
+- `--org hsa --org mmu` to limit the sync to selected organisms from `species_ref_list.csv`
+- `--max-pathways 25` for a small test run
+- `--skip-fetch` to reuse an existing local clone without pulling updates first
+
+After the sync, Map-Kinase will use local cached WikiPathways GPML files automatically, and it will use cached PNG files when available.

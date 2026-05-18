@@ -238,7 +238,15 @@ def normalize_pathway_id(raw_id: str) -> str:
 
 
 def default_mapping_table_path(org: str) -> str:
-    return str(Path("MapKinase_WebApp") / "annotation_files" / f"{org}_mapping_table.txt")
+    ann_dir = Path("MapKinase_WebApp") / "annotation_files"
+    candidates = [
+        ann_dir / f"{org}_mapping_table.txt",
+        ann_dir / f"{org}_id_mapping_table.txt",
+    ]
+    for path in candidates:
+        if path.exists():
+            return str(path)
+    return str(candidates[0])
 
 
 def parse_mapping_kegg_tokens(raw_value: str, org: str) -> List[str]:

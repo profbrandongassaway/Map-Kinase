@@ -9,7 +9,6 @@ from pathlib import Path
 import requests
 from PIL import Image
 from MapKinase_WebApp.a1_base_api import BasePathwayAPI
-from pywikipathways import get_pathway, get_pathway_info
 from MapKinase_WebApp.d3_entrez_to_uniprot import entrez_to_uniprot, ensembl_to_uniprot
 
 def _normalize_species_folder(species: str) -> str:
@@ -29,6 +28,7 @@ def _extract_species_from_gpml(gpml_content: str) -> str:
     return ""
 
 _ID_MAPPING_CACHE: dict[str, dict | None] = {}
+_PYWIKIPATHWAYS_CLIENT: tuple | None = None
 
 
 def _resolve_id_mapping_table(species_code: str) -> Path | None:
@@ -179,22 +179,40 @@ def _lookup_uniprot_from_table(mapping: dict, db: str, xid: str) -> str | None:
     return None
 
 
+def _get_pywikipathways_client():
+    global _PYWIKIPATHWAYS_CLIENT
+    if _PYWIKIPATHWAYS_CLIENT is not None:
+        return _PYWIKIPATHWAYS_CLIENT
+    from pywikipathways import get_pathway, get_pathway_info
+    _PYWIKIPATHWAYS_CLIENT = (get_pathway, get_pathway_info)
+    return _PYWIKIPATHWAYS_CLIENT
+
+
+def _find_cached_wikipathways_file(pathway_id: str, suffix: str, species_hint: str | None = None) -> Path | None:
+    base_dir = Path(__file__).resolve().parent.parent / "stored_pathways" / "wikipathways"
+    ext = suffix if str(suffix or "").startswith(".") else f".{suffix}"
+    if species_hint:
+        species_folder = _normalize_species_folder(str(species_hint))
+        candidate = base_dir / species_folder / f"{pathway_id}{ext}"
+        if candidate.exists():
+            return candidate
+    if not base_dir.exists():
+        return None
+    for cached in base_dir.rglob(f"{pathway_id}{ext}"):
+        return cached
+    return None
+
+
 class WikiPathwaysAPI(BasePathwayAPI):
     def __init__(self):
         self.species_code: str | None = None
 
     def download_pathway_data(self, pathway_id, species_hint=None):
         base_dir = Path(__file__).resolve().parent.parent / "stored_pathways" / "wikipathways"
-        if species_hint:
-            species_folder = _normalize_species_folder(str(species_hint))
-            cached = base_dir / species_folder / f"{pathway_id}.gpml"
-            if cached.exists():
-                print(f"Using cached file: {cached}")
-                return str(cached)
-        if base_dir.exists():
-            for cached in base_dir.rglob(f"{pathway_id}.gpml"):
-                print(f"Using cached file: {cached}")
-                return str(cached)
+        cached = _find_cached_wikipathways_file(pathway_id, ".gpml", species_hint=species_hint)
+        if cached is not None:
+            print(f"Using cached file: {cached}")
+            return str(cached)
         candidates = [
             os.path.join(os.getcwd(), f"{pathway_id}.gpml"),
             os.path.join(os.path.dirname(os.getcwd()), f"{pathway_id}.gpml"),
@@ -206,6 +224,7 @@ class WikiPathwaysAPI(BasePathwayAPI):
                 fallback_local = local_file
                 return local_file
         try:
+            get_pathway, get_pathway_info = _get_pywikipathways_client()
             print(f"Fetching pathway {pathway_id} using pywikipathways")
             gpml_content = get_pathway(pathway_id)
             species_label = _extract_species_from_gpml(gpml_content)
@@ -240,6 +259,15 @@ class WikiPathwaysAPI(BasePathwayAPI):
             raise Exception(f"Failed to download pathway {pathway_id} from WikiPathways")
 
     def download_pathway_image(self, pathway_id):
+        cached = _find_cached_wikipathways_file(pathway_id, ".png")
+        if cached is not None:
+            try:
+                image = Image.open(cached)
+                image.load()
+                print(f"Using cached image: {cached}")
+                return image
+            except Exception as exc:
+                print(f"Error loading cached image for {pathway_id}: {exc}")
         try:
             url = f"https://www.wikipathways.org/wpi/wpi.php?action=downloadFile&type=png&pwTitle=Pathway:{pathway_id}"
             response = requests.get(url)

@@ -1,7 +1,6 @@
 import threading
 import time
 
-from MapKinase_WebApp.auth_gate import LoginGateASGI
 from MapKinase_WebApp.m5_main_ui import (
     GUI_POPUP,
     HOST,
@@ -13,12 +12,12 @@ from MapKinase_WebApp.m5_main_ui import (
 )
 
 
-app = LoginGateASGI(mapkinase_app)
+app = mapkinase_app
 
 
 def _run_uvicorn_app():
     if uvicorn is None:  # pragma: no cover - runtime guard
-        raise RuntimeError("uvicorn is required to run the protected Shiny app server")
+        raise RuntimeError("uvicorn is required to run the Shiny app server")
     uvicorn.run(app, host=HOST, port=PORT, log_level="info")
 
 

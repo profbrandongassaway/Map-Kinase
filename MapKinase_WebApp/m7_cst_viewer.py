@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import contextvars
 import hashlib
 import html
 import json
@@ -10,7 +11,7 @@ import zlib
 from datetime import UTC, datetime
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import pandas as pd
 from shiny import ui
@@ -71,6 +72,9 @@ _PDF_TOKEN_RE = re.compile(r"\[[^\]]*\]|-?\d+(?:\.\d+)?|[A-Za-z][A-Za-z*]*")
 _PDF_BOX_RE = re.compile(
     rb"/(?:CropBox|MediaBox)\s*\[\s*([0-9.\-]+)\s+([0-9.\-]+)\s+([0-9.\-]+)\s+([0-9.\-]+)\s*\]"
 )
+_GRADIENT_STOPS_CTX: contextvars.ContextVar[Optional[List[Dict[str, Any]]]] = contextvars.ContextVar(
+    "cst_gradient_stops", default=None
+)
 
 
 def _resolve_base_dir(base_dir: Optional[Path] = None) -> Path:
@@ -127,6 +131,81 @@ def _coerce_rgb(value: Sequence[float] | None, fallback: Sequence[float]) -> Lis
     return output
 
 
+def _normalize_gradient_stops(gradient_stops: Any) -> List[Dict[str, Any]]:
+    if not isinstance(gradient_stops, (list, tuple)):
+        return []
+    parsed: List[Tuple[float, List[int]]] = []
+    for item in gradient_stops:
+        if not isinstance(item, dict):
+            continue
+        raw_value = item.get("value")
+        try:
+            value = float(raw_value)
+        except (TypeError, ValueError):
+            continue
+        if not math.isfinite(value):
+            continue
+        raw_color = item.get("color", item.get("rgb"))
+        if isinstance(raw_color, str):
+            raw_hex = raw_color.strip().lstrip("#")
+            if len(raw_hex) != 6:
+                continue
+            try:
+                color = [int(raw_hex[0:2], 16), int(raw_hex[2:4], 16), int(raw_hex[4:6], 16)]
+            except Exception:
+                continue
+        elif isinstance(raw_color, (list, tuple)) and len(raw_color) >= 3:
+            color = [int(max(0, min(255, round(float(ch))))) for ch in list(raw_color)[:3]]
+        else:
+            continue
+        parsed.append((float(value), color))
+    if not parsed:
+        return []
+    dedup: Dict[float, List[int]] = {}
+    for value, color in parsed:
+        dedup[value] = list(color)
+    return [{"value": float(v), "color": list(c)} for v, c in sorted(dedup.items(), key=lambda kv: kv[0])]
+
+
+def _default_gradient_stops(
+    negative_color: Sequence[float],
+    positive_color: Sequence[float],
+    max_negative: float,
+    max_positive: float,
+) -> List[Dict[str, Any]]:
+    return _normalize_gradient_stops(
+        [
+            {"value": float(max_negative), "color": _coerce_rgb(negative_color, _DEFAULT_NEGATIVE_COLOR)},
+            {"value": 0.0, "color": [255, 255, 255]},
+            {"value": float(max_positive), "color": _coerce_rgb(positive_color, _DEFAULT_POSITIVE_COLOR)},
+        ]
+    )
+
+
+def _gradient_color_from_stops(fold_value: float, gradient_stops: List[Dict[str, Any]]) -> List[int]:
+    if not gradient_stops:
+        return [128, 128, 128]
+    if fold_value <= float(gradient_stops[0]["value"]):
+        return list(gradient_stops[0]["color"])
+    if fold_value >= float(gradient_stops[-1]["value"]):
+        return list(gradient_stops[-1]["color"])
+    for idx in range(len(gradient_stops) - 1):
+        left = gradient_stops[idx]
+        right = gradient_stops[idx + 1]
+        left_v = float(left["value"])
+        right_v = float(right["value"])
+        if fold_value < left_v or fold_value > right_v:
+            continue
+        if right_v == left_v:
+            return list(right["color"])
+        t = (fold_value - left_v) / (right_v - left_v)
+        return [
+            int(max(0, min(255, round((1 - t) * left["color"][c_idx] + t * right["color"][c_idx]))))
+            for c_idx in range(3)
+        ]
+    return list(gradient_stops[-1]["color"])
+
+
 def _gradient_color_from_fold(
     fold_value: Any,
     negative_color: Sequence[float],
@@ -142,6 +221,10 @@ def _gradient_color_from_fold(
         return [128, 128, 128]
     if not math.isfinite(fold):
         return [128, 128, 128]
+    gradient_stops = _GRADIENT_STOPS_CTX.get()
+    normalized_stops = _normalize_gradient_stops(gradient_stops)
+    if len(normalized_stops) >= 2:
+        return _gradient_color_from_stops(float(fold), normalized_stops)
     neg = _coerce_rgb(negative_color, _DEFAULT_NEGATIVE_COLOR)
     pos = _coerce_rgb(positive_color, _DEFAULT_POSITIVE_COLOR)
     neg_limit = abs(float(max_negative) if max_negative else 1.0) or 1.0
@@ -274,6 +357,7 @@ def _build_cst_ptm_index(
     outline_headers = list(ptm_dataset.get("outline_columns") or _resolve_outline_columns(main_headers, headers))
     tooltip_columns = _infer_ptm_tooltip_columns(ptm_dataset)
     uniprot_key = str(dataset_keys.get("match_uniprot_key") or (headers[0] if headers else "")).strip()
+    display_uniprot_key = str(dataset_keys.get("display_uniprot_key") or (headers[0] if headers else "")).strip()
     site_key = headers[1]
     label_font = str(settings.get("ptm_label_font") or "Arial")
     label_color = _coerce_rgb(settings.get("ptm_label_color"), (0, 0, 0))
@@ -291,9 +375,17 @@ def _build_cst_ptm_index(
         outline_width = 1.0
     shape_name = _normalize_ptm_shape_name(settings.get("ptm_shape"))
     items_by_uniprot: Dict[str, List[Dict[str, Any]]] = {}
+    def _normalize_ptm_uniprot(value: Any) -> str:
+        token = str(value or "").strip().upper()
+        if not token:
+            return ""
+        token = re.split(r"[|,;/]+", token, maxsplit=1)[0].strip()
+        return token.split("-", 1)[0].strip() if token else ""
+
     for row_idx, row_map in enumerate(classified_rows):
-        raw_uniprot = str(row_map.get(uniprot_key, "") or "").strip().upper()
-        normalized_uniprot = raw_uniprot.split("-", 1)[0] if raw_uniprot else ""
+        normalized_uniprot = _normalize_ptm_uniprot(row_map.get(uniprot_key, ""))
+        if not normalized_uniprot:
+            normalized_uniprot = _normalize_ptm_uniprot(row_map.get(display_uniprot_key, ""))
         site_label = str(row_map.get(site_key, "") or "").strip()
         if not normalized_uniprot or not site_label:
             continue
@@ -453,7 +545,9 @@ def _extract_pdf_literal(raw: str) -> str:
                     else:
                         break
                 try:
-                    output.append(chr(int(octal, 8)))
+                    byte_value = int(octal, 8) & 0xFF
+                    # PDF literal octal escapes are byte values (often WinAnsi encoded).
+                    output.append(bytes([byte_value]).decode("cp1252", errors="replace"))
                 except ValueError:
                     pass
             else:
@@ -464,8 +558,22 @@ def _extract_pdf_literal(raw: str) -> str:
     return "".join(output)
 
 
-def _clean_text_label(value: str) -> str:
+def _normalize_pdf_text_encoding(value: Any) -> str:
     text = str(value or "")
+    if text:
+        normalized_chars: List[str] = []
+        for ch in text:
+            code = ord(ch)
+            if 0x80 <= code <= 0x9F:
+                normalized_chars.append(bytes([code]).decode("cp1252", errors="replace"))
+            else:
+                normalized_chars.append(ch)
+        text = "".join(normalized_chars)
+    return text.replace("\ufffd", "")
+
+
+def _clean_text_label(value: str) -> str:
+    text = _normalize_pdf_text_encoding(value)
     text = text.replace("\x1d", "-").replace("\x1e", "-").replace("\x1f", "-")
     text = re.sub(r"\s+", " ", text).strip()
     return text
@@ -1629,17 +1737,45 @@ def _build_dataset_index(dataset: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     dataset_keys = _resolve_cst_dataset_keys(headers)
     uniprot_key = str(dataset_keys.get("match_uniprot_key") or "").strip()
     gene_key = str(dataset_keys.get("match_gene_key") or "").strip()
+    display_uniprot_key = str(dataset_keys.get("display_uniprot_key") or "").strip()
+    display_gene_key = str(dataset_keys.get("display_gene_key") or "").strip()
+
+    def _normalize_uniprot_token(value: Any) -> str:
+        token = str(value or "").strip().upper()
+        if not token:
+            return ""
+        primary = re.split(r"[|,;/]+", token, maxsplit=1)[0].strip()
+        return primary.split("-", 1)[0].strip() if primary else ""
+
+    def _collect_gene_tokens(*values: Any) -> List[str]:
+        out: List[str] = []
+        seen: set[str] = set()
+        for value in values:
+            raw = str(value or "").strip().upper()
+            if not raw:
+                continue
+            for token in re.split(r"[|,;/]+", raw):
+                gene = str(token or "").strip().upper()
+                if not gene or gene in seen:
+                    continue
+                seen.add(gene)
+                out.append(gene)
+        return out
+
     for row in rows:
         values = list(row)
         if len(values) < len(headers):
             values.extend([""] * (len(headers) - len(values)))
         row_map = {header: values[idx] if idx < len(values) else "" for idx, header in enumerate(headers)}
-        raw_uniprot = str(row_map.get(uniprot_key, "") or "").strip().upper()
-        raw_gene = str(row_map.get(gene_key, "") or "").strip().upper() if gene_key else ""
-        normalized_uniprot = raw_uniprot.split("-", 1)[0] if raw_uniprot else ""
+        normalized_uniprot = _normalize_uniprot_token(row_map.get(uniprot_key, ""))
+        if not normalized_uniprot:
+            normalized_uniprot = _normalize_uniprot_token(row_map.get(display_uniprot_key, ""))
         if normalized_uniprot and normalized_uniprot not in rows_by_uniprot:
             rows_by_uniprot[normalized_uniprot] = row_map
-        if raw_gene:
+        for raw_gene in _collect_gene_tokens(
+            row_map.get(gene_key, "") if gene_key else "",
+            row_map.get(display_gene_key, "") if display_gene_key else "",
+        ):
             rows_by_gene.setdefault(raw_gene, []).append(row_map)
     return {
         "fc_headers": fc_headers,
@@ -1668,18 +1804,82 @@ def _build_cst_search_catalog(
     if not headers:
         return []
     uniprot_key = str(dataset_index.get("match_uniprot_key") or (headers[0] if headers else "")).strip()
+    display_uniprot_key = str(dataset_index.get("display_uniprot_key") or (headers[0] if headers else "")).strip()
     gene_key = str(dataset_index.get("display_gene_key") or (headers[1] if len(headers) > 1 else "")).strip()
+    match_gene_key = str(dataset_index.get("match_gene_key") or "").strip()
     fc_headers = list(dataset_index.get("fc_headers") or [])
     outline_headers = list(dataset_index.get("outline_headers") or [])
     tooltip_columns = list(dataset_index.get("tooltip_columns") or [])
-    rows_by_uniprot = dict(dataset_index.get("rows_by_uniprot") or {})
     catalog: List[Dict[str, Any]] = []
-    for uniprot, row in rows_by_uniprot.items():
-        row_map = dict(row or {})
+
+    def _collect_search_aliases(row_map: Dict[str, Any], gene_symbol: str, normalized_uniprot: str) -> List[str]:
+        aliases: List[str] = []
+        seen: set[str] = set()
+
+        def _add(value: Any) -> None:
+            raw = str(value or "").strip()
+            if not raw:
+                return
+            for token in re.split(r"[|,;/]+", raw):
+                item = str(token or "").strip()
+                if not item:
+                    continue
+                for candidate in (item, item.split("-", 1)[0]):
+                    normalized = str(candidate or "").strip()
+                    if not normalized:
+                        continue
+                    key = normalized.upper()
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    aliases.append(normalized)
+
+        _add(normalized_uniprot)
+        _add(row_map.get(uniprot_key, ""))
+        _add(row_map.get(display_uniprot_key, ""))
+        _add(gene_symbol)
+        if match_gene_key:
+            _add(row_map.get(match_gene_key, ""))
+        return aliases
+
+    raw_rows = list((protein_dataset or {}).get("rows") or [])
+    row_maps: List[Dict[str, Any]] = []
+    for row in raw_rows:
+        if isinstance(row, dict):
+            row_map = {str(k): ("" if pd.isna(v) else v) for k, v in row.items()}
+        else:
+            values = list(row or [])
+            if len(values) < len(headers):
+                values.extend([""] * (len(headers) - len(values)))
+            row_map = {header: (values[idx] if idx < len(values) else "") for idx, header in enumerate(headers)}
+        row_maps.append(row_map)
+    if not row_maps:
+        row_maps = [dict(row or {}) for row in list((dataset_index.get("rows_by_uniprot") or {}).values())]
+
+    def _normalize_uniprot(value: Any) -> str:
+        text = str(value or "").strip().upper()
+        if not text:
+            return ""
+        token = re.split(r"[|,;/]+", text, maxsplit=1)[0].strip()
+        token = token.split("-", 1)[0].strip()
+        return token
+
+    seen_entry_keys: set[str] = set()
+    for row_map in row_maps:
+        uniprot = _normalize_uniprot(row_map.get(uniprot_key, ""))
+        if not uniprot:
+            uniprot = _normalize_uniprot(row_map.get(display_uniprot_key, ""))
         gene_symbol = str(row_map.get(gene_key, "") or "").strip() if gene_key else ""
+        if not gene_symbol and match_gene_key:
+            gene_symbol = str(row_map.get(match_gene_key, "") or "").strip()
+        dedupe_key = uniprot or f"GENE::{gene_symbol.upper()}"
+        if not dedupe_key or dedupe_key in seen_entry_keys:
+            continue
+        seen_entry_keys.add(dedupe_key)
         entry: Dict[str, Any] = {
             "uniprot": str(uniprot or "").strip(),
             "geneSymbol": gene_symbol,
+            "searchAliases": _collect_search_aliases(row_map, gene_symbol, str(uniprot or "").strip()),
         }
         for idx, header in enumerate(fc_headers, start=1):
             fold_value = row_map.get(header)
@@ -2068,6 +2268,10 @@ def _build_cst_overlay_nodes(
     fc_headers = list(dataset_index.get("fc_headers") or [])
     outline_headers = list(dataset_index.get("outline_headers") or [])
     tooltip_columns = list(dataset_index.get("tooltip_columns") or [])
+    dataset_headers = list(dataset_index.get("headers") or [])
+    match_uniprot_key = str(dataset_index.get("match_uniprot_key") or (dataset_headers[0] if dataset_headers else "")).strip()
+    display_uniprot_key = str(dataset_index.get("display_uniprot_key") or (dataset_headers[0] if dataset_headers else "")).strip()
+    display_gene_key = str(dataset_index.get("display_gene_key") or (dataset_headers[1] if len(dataset_headers) > 1 else "")).strip()
     overlay_nodes: List[Dict[str, Any]] = []
 
     for node in mapped_nodes:
@@ -2077,6 +2281,27 @@ def _build_cst_overlay_nodes(
             continue
         is_complex = mapping_type == "complex_forced"
         matches = [] if is_complex else _match_dataset_rows(mapping, dataset_index)
+        candidate_uniprot_ids: List[str] = []
+        candidate_seen: set[str] = set()
+
+        def _add_candidate_uniprot(value: Any) -> None:
+            raw = str(value or "").strip()
+            if not raw:
+                return
+            normalized = re.split(r"[|,;/]+", raw, maxsplit=1)[0].strip()
+            if not normalized:
+                return
+            upper = normalized.upper()
+            if upper in candidate_seen:
+                return
+            candidate_seen.add(upper)
+            candidate_uniprot_ids.append(normalized)
+
+        for item in list(mapping.get("suggested_uniprot_ids") or []):
+            _add_candidate_uniprot(item)
+        for row in matches:
+            _add_candidate_uniprot(row.get(match_uniprot_key, "") if match_uniprot_key else "")
+            _add_candidate_uniprot(row.get(display_uniprot_key, "") if display_uniprot_key else "")
         protein_options = _build_cst_protein_options(
             mapping,
             dataset_index,
@@ -2117,6 +2342,7 @@ def _build_cst_overlay_nodes(
             "estimated_height": float(est_height),
             "suggested_gene_symbols": list(mapping.get("suggested_gene_symbols") or []),
             "suggested_uniprot_ids": list(mapping.get("suggested_uniprot_ids") or []),
+            "candidate_uniprot_ids": candidate_uniprot_ids,
             "protein_options": protein_options,
             "has_dataset_match": bool(matches),
             "default_color": [229, 231, 235] if is_complex else [166, 166, 166],
@@ -2166,11 +2392,12 @@ def _build_cst_overlay_nodes(
                     else [0, 0, 0]
                 )
             )
-            if dataset_index.get("headers"):
-                uniprot_key = str(dataset_index.get("match_uniprot_key") or (dataset_index["headers"][0] if dataset_index["headers"] else "")).strip()
-                gene_key = str(dataset_index.get("display_gene_key") or (dataset_index["headers"][1] if len(dataset_index["headers"]) > 1 else "")).strip()
-                overlay_node[f"matched_uniprot_{idx}"] = str(chosen_row.get(uniprot_key, "") or "")
-                overlay_node[f"matched_gene_symbol_{idx}"] = str(chosen_row.get(gene_key, "") or "") if gene_key else ""
+            if dataset_headers:
+                matched_uni = str(chosen_row.get(match_uniprot_key, "") or "").strip() if match_uniprot_key else ""
+                if not matched_uni and display_uniprot_key:
+                    matched_uni = str(chosen_row.get(display_uniprot_key, "") or "").strip()
+                overlay_node[f"matched_uniprot_{idx}"] = matched_uni
+                overlay_node[f"matched_gene_symbol_{idx}"] = str(chosen_row.get(display_gene_key, "") or "") if display_gene_key else ""
         overlay_node["stroke_width"] = max(0.6, float(prot_outline_width or 1.0))
 
         overlay_nodes.append(overlay_node)
@@ -2224,7 +2451,10 @@ def _build_editable_node_from_saved_entry(
             "complexDisplayMembers": [],
         }
     if shape_type == "text":
-        text_label = str(entry.get("displayLabel") or entry.get("display_label") or entry.get("label") or "Text").strip() or "Text"
+        text_label = _normalize_pdf_text_encoding(
+            entry.get("displayLabel") or entry.get("display_label") or entry.get("label") or "Text"
+        )
+        text_label = text_label.replace("\x1d", "-").replace("\x1e", "-").replace("\x1f", "-").strip() or "Text"
         return {
             "id": str(entry.get("id") or ""),
             "originalLabel": text_label,
@@ -2261,8 +2491,10 @@ def _build_editable_node_from_saved_entry(
             "fontFamily": str(entry.get("fontFamily") or '"Segoe UI", Arial, sans-serif'),
             "textAlign": str(entry.get("textAlign") or "center"),
         }
-    original_label = str(entry.get("originalLabel") or entry.get("original_label") or entry.get("label") or "").strip()
-    display_label = str(entry.get("displayLabel") or entry.get("display_label") or entry.get("annotation") or original_label).strip()
+    original_label = _clean_text_label(str(entry.get("originalLabel") or entry.get("original_label") or entry.get("label") or ""))
+    display_label = _clean_text_label(
+        str(entry.get("displayLabel") or entry.get("display_label") or entry.get("annotation") or original_label)
+    )
     mapping_label = display_label or original_label
     if not mapping_label and not bool(entry.get("isCustom") or entry.get("is_custom")):
         return None
@@ -2304,6 +2536,7 @@ def _build_editable_node_from_saved_entry(
     tooltip_columns = list(dataset_index.get("tooltip_columns") or [])
     headers = list(dataset_index.get("headers") or [])
     match_uniprot_key = str(dataset_index.get("match_uniprot_key") or (headers[0] if headers else "")).strip()
+    display_uniprot_key = str(dataset_index.get("display_uniprot_key") or (headers[0] if headers else "")).strip()
     display_gene_key = str(dataset_index.get("display_gene_key") or (headers[1] if len(headers) > 1 else "")).strip()
     complex_members = _choose_complex_display_members(
         mapping,
@@ -2328,7 +2561,29 @@ def _build_editable_node_from_saved_entry(
     matched_gene = ""
     matched_uniprot = ""
     fold_text = ""
-    outline_payload: Dict[str, Any] = {}
+    candidate_uniprot_ids: List[str] = []
+    candidate_seen: set[str] = set()
+
+    def _add_candidate_uniprot(value: Any) -> None:
+        raw = str(value or "").strip()
+        if not raw:
+            return
+        normalized = re.split(r"[|,;/]+", raw, maxsplit=1)[0].strip()
+        if not normalized:
+            return
+        upper = normalized.upper()
+        if upper in candidate_seen:
+            return
+        candidate_seen.add(upper)
+        candidate_uniprot_ids.append(normalized)
+
+    for item in list(mapping.get("suggested_uniprot_ids") or []):
+        _add_candidate_uniprot(item)
+    for row in matches:
+        _add_candidate_uniprot(row.get(match_uniprot_key, "") if match_uniprot_key else "")
+        _add_candidate_uniprot(row.get(display_uniprot_key, "") if display_uniprot_key else "")
+
+    temporal_payload: Dict[str, Any] = {}
     for idx, header in enumerate(fc_headers, 1):
         chosen_row, chosen_value = _choose_cst_display_row(
             matches,
@@ -2346,6 +2601,8 @@ def _build_editable_node_from_saved_entry(
             max_negative,
             max_positive,
         )
+        temporal_payload[f"fold_change_{idx}"] = chosen_value
+        temporal_payload[f"fc_color_{idx}"] = list(color)
         outline_header = outline_headers[idx - 1] if idx - 1 < len(outline_headers) else None
         outline_value = _coerce_float_or_none(chosen_row.get(outline_header, "")) if outline_header else None
         outline_color = (
@@ -2363,18 +2620,19 @@ def _build_editable_node_from_saved_entry(
                 else [0, 0, 0]
             )
         )
-        outline_payload[f"outline_fold_change_{idx}"] = outline_value
-        outline_payload[f"outline_color_{idx}"] = outline_color
+        temporal_payload[f"outline_fold_change_{idx}"] = outline_value
+        temporal_payload[f"outline_color_{idx}"] = outline_color
         if idx == 1:
             fill_rgb = list(color)
             stroke_rgb = list(outline_color)
             fold_text = f"{chosen_value:.3f}"
             if headers:
-                matched_uniprot = str(chosen_row.get(match_uniprot_key, "") or "")
+                matched_uniprot = str(chosen_row.get(match_uniprot_key, "") or "").strip() if match_uniprot_key else ""
+                if not matched_uniprot and display_uniprot_key:
+                    matched_uniprot = str(chosen_row.get(display_uniprot_key, "") or "").strip()
                 if display_gene_key:
                     matched_gene = str(chosen_row.get(display_gene_key, "") or "")
-        else:
-            break
+                _add_candidate_uniprot(matched_uniprot)
 
     tooltip_row = _select_dataset_tooltip_row(
         matches,
@@ -2394,7 +2652,7 @@ def _build_editable_node_from_saved_entry(
         "label": mapping_label,
         "matchedGene": matched_gene,
         "matchedUniprot": matched_uniprot,
-        "candidateUniprotIds": list(mapping.get("suggested_uniprot_ids") or []),
+        "candidateUniprotIds": candidate_uniprot_ids,
         "suggestedGeneSymbols": list(mapping.get("suggested_gene_symbols") or []),
         "proteinOptions": protein_options,
         "foldText": fold_text,
@@ -2424,7 +2682,7 @@ def _build_editable_node_from_saved_entry(
     }
     if not is_complex:
         payload[f"outline_color_1"] = list(stroke_rgb)
-    payload.update(outline_payload)
+    payload.update(temporal_payload)
     return payload
 
 
@@ -2726,10 +2984,16 @@ def load_cst_pathway_payload(
     positive_color: Sequence[float] = _DEFAULT_POSITIVE_COLOR,
     max_negative: float = _DEFAULT_MAX_NEGATIVE,
     max_positive: float = _DEFAULT_MAX_POSITIVE,
+    gradient_stops: Optional[List[Dict[str, Any]]] = None,
     prot_outline_width: float = 1.0,
     use_black_protein_outlines: bool = False,
     simple_kegg_mode: bool = True,
+    temporal_mode: bool = False,
 ) -> Optional[Dict[str, Any]]:
+    normalized_stops = _normalize_gradient_stops(gradient_stops)
+    if len(normalized_stops) < 2:
+        normalized_stops = _default_gradient_stops(negative_color, positive_color, max_negative, max_positive)
+    _GRADIENT_STOPS_CTX.set(normalized_stops)
     pathway_key = str(pathway_id or "").strip().lower()
     if not pathway_key:
         return None
@@ -2875,13 +3139,15 @@ def load_cst_pathway_payload(
             "legend_config": {
                 "posColor": _coerce_rgb(positive_color, _DEFAULT_POSITIVE_COLOR),
                 "negColor": _coerce_rgb(negative_color, _DEFAULT_NEGATIVE_COLOR),
-                "maxPos": float(max_positive),
-                "maxNeg": float(max_negative),
+                "maxPos": float(normalized_stops[-1]["value"]) if normalized_stops else float(max_positive),
+                "maxNeg": float(normalized_stops[0]["value"]) if normalized_stops else float(max_negative),
+                "stops": normalized_stops,
             },
             "prot_outline_width": max(0.6, float(prot_outline_width or 1.0)),
             "use_black_protein_outlines": bool(use_black_protein_outlines),
             "disable_pdf_reader": disable_pdf_reader,
             "simple_kegg_mode": simple_kegg_mode,
+            "temporal_mode": bool(temporal_mode),
         }
     return None
 
@@ -2908,6 +3174,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
     metabolite_search_catalog = list(info.get("metabolite_search_catalog") or [])
     legend_config = dict(info.get("legend_config") or {})
     prot_outline_width = max(0.6, float(info.get("prot_outline_width") or 1.0))
+    temporal_mode = bool(info.get("temporal_mode", False))
     mapping_summary = dict(info.get("mapping_summary") or {})
     overlay_nodes_json = json.dumps(overlay_nodes)
     initial_editable_nodes_json = json.dumps(initial_editable_nodes)
@@ -4042,6 +4309,8 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     selectedNodeIds: Array.isArray(local.selectedNodeIds) ? local.selectedNodeIds : [],
                     selectedEdgeId: local.selectedEdgeId || null,
                     selectedEdgeIds: Array.isArray(local.selectedEdgeIds) ? local.selectedEdgeIds : [],
+                    selectedPtmId: local.selectedPtmId || null,
+                    selectedPtmNodeId: local.selectedPtmNodeId || null,
                     globalOpacity: Number(local.globalOpacity || 0.98),
                     proteinOvalMode: !!local.proteinOvalMode,
                     edgeResizeMode: !!local.edgeResizeMode,
@@ -4056,6 +4325,8 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     local.selectedNodeIds = Array.isArray(safe.selectedNodeIds) ? safe.selectedNodeIds : (local.selectedNodeId ? [local.selectedNodeId] : []);
                     local.selectedEdgeId = safe.selectedEdgeId || null;
                     local.selectedEdgeIds = Array.isArray(safe.selectedEdgeIds) ? safe.selectedEdgeIds : (local.selectedEdgeId ? [local.selectedEdgeId] : []);
+                    local.selectedPtmId = safe.selectedPtmId || null;
+                    local.selectedPtmNodeId = safe.selectedPtmNodeId || null;
                     if (local.selectedNodeId && !local.editableNodes.some((node) => node.id === local.selectedNodeId)) {{
                         local.selectedNodeId = null;
                     }}
@@ -4075,6 +4346,16 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     }}
                     if (!local.selectedEdgeId && local.selectedEdgeIds.length) {{
                         local.selectedEdgeId = local.selectedEdgeIds[local.selectedEdgeIds.length - 1];
+                    }}
+                    if (
+                        !local.selectedPtmId ||
+                        !Array.isArray(local.autoPtmPlacements) ||
+                        !local.autoPtmPlacements.some((placement) => String(placement && placement.id || '') === String(local.selectedPtmId || '')) ||
+                        !local.selectedPtmNodeId ||
+                        !local.editableNodes.some((node) => String(node.id || '') === String(local.selectedPtmNodeId || ''))
+                    ) {{
+                        local.selectedPtmId = null;
+                        local.selectedPtmNodeId = null;
                     }}
                     local.globalOpacity = Math.max(0.1, Math.min(1, Number(safe.globalOpacity || 0.98)));
                     local.proteinOvalMode = !!safe.proteinOvalMode;
@@ -4165,6 +4446,8 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     canvas.style.display = 'none';
                 }};
                 const cleanLabel = (value) => String(value || '')
+                    .replace(/[\u0080-\u009f]/g, '')
+                    .replace(/\uFFFD/g, '')
                     .replace(/[\\x1d\\x1e\\x1f]/g, '-')
                     .replace(/\\s+/g, ' ')
                     .trim();
@@ -4847,6 +5130,21 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         const label = String(node.label || '');
                         const matchGene = String(node['matched_gene_symbol_{active_idx}'] || node.matched_gene_symbol_1 || '');
                         const matchUniprot = String(node['matched_uniprot_{active_idx}'] || node.matched_uniprot_1 || '');
+                        const candidateUniprots = [];
+                        const seenCandidateUniprots = new Set();
+                        const pushCandidateUniprot = (value) => {{
+                            const raw = String(value || '').trim();
+                            if (!raw) return;
+                            const normalized = raw.split(/[|,;/]/)[0].trim();
+                            if (!normalized) return;
+                            const key = normalized.toUpperCase();
+                            if (seenCandidateUniprots.has(key)) return;
+                            seenCandidateUniprots.add(key);
+                            candidateUniprots.push(normalized);
+                        }};
+                        pushCandidateUniprot(matchUniprot);
+                        (Array.isArray(node.candidate_uniprot_ids) ? node.candidate_uniprot_ids : []).forEach(pushCandidateUniprot);
+                        (Array.isArray(node.suggested_uniprot_ids) ? node.suggested_uniprot_ids : []).forEach(pushCandidateUniprot);
                         const foldValue = node['fold_change_{active_idx}'];
                         const foldText = Number.isFinite(Number(foldValue)) ? Number(foldValue).toFixed(3) : '';
                         const isComplex = !!node.is_complex;
@@ -4858,7 +5156,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             label,
                             matchedGene: matchGene,
                             matchedUniprot: matchUniprot,
-                            candidateUniprotIds: Array.isArray(node.suggested_uniprot_ids) ? node.suggested_uniprot_ids.slice() : [],
+                            candidateUniprotIds: candidateUniprots,
                             suggestedGeneSymbols: Array.isArray(node.suggested_gene_symbols) ? node.suggested_gene_symbols.slice() : [],
                             proteinOptions: Array.isArray(node.protein_options) ? node.protein_options.slice() : [],
                             foldText,
@@ -4887,13 +5185,45 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             isComplex,
                             complexDisplayMembers: Array.isArray(node.complex_display_members) ? node.complex_display_members : [],
                         }});
+                        for (const key of Object.keys(node || {{}})) {{
+                            if (!/^(?:fc_color|fold_change|outline_color|outline_fold_change)_\\d+$/.test(key)) continue;
+                            editableNodes[editableNodes.length - 1][key] = node[key];
+                        }}
                     }}
                     return normalizeEditableNodeIds(editableNodes);
+                }};
+                const applyActiveFcToEditableNodes = (nodes) => {{
+                    if (!Array.isArray(nodes)) return nodes;
+                    for (const node of nodes) {{
+                        if (!node || typeof node !== 'object') continue;
+                        const shapeType = String(node.shapeType || '').toLowerCase();
+                        if (shapeType === 'text' || node.isDrawingShape) continue;
+                        const fcColor = node['fc_color_{active_idx}'] || node.fc_color_1 || null;
+                        if (Array.isArray(fcColor) && fcColor.length >= 3) {{
+                            node.fillColor = 'rgb(' + fcColor[0] + ', ' + fcColor[1] + ', ' + fcColor[2] + ')';
+                        }}
+                        const outlineColor = node['outline_color_{active_idx}'] || node.outline_color_1 || null;
+                        if (Array.isArray(outlineColor) && outlineColor.length >= 3) {{
+                            node.stroke = 'rgb(' + outlineColor[0] + ', ' + outlineColor[1] + ', ' + outlineColor[2] + ')';
+                        }}
+                        const foldValue = node['fold_change_{active_idx}'];
+                        node.foldText = Number.isFinite(Number(foldValue)) ? Number(foldValue).toFixed(3) : '';
+                        const activeGene = String(node['matched_gene_symbol_{active_idx}'] || '').trim();
+                        const activeUniprot = String(node['matched_uniprot_{active_idx}'] || '').trim();
+                        if (activeGene) {{
+                            node.matchedGene = activeGene;
+                            node.displayLabel = activeGene;
+                        }}
+                        if (activeUniprot) {{
+                            node.matchedUniprot = activeUniprot;
+                        }}
+                    }}
+                    return nodes;
                 }};
                 const setDeleteState = (local) => {{
                     const selectedCount = getSelectedNodeIds(local).length;
                     const selectedEdgeCount = getSelectedEdgeIds(local).length;
-                    const enabled = selectedCount > 0 || selectedEdgeCount > 0;
+                    const enabled = selectedCount > 0 || selectedEdgeCount > 0 || !!local.selectedPtmId;
                     const multiEnabled = selectedCount > 1;
                     if (deleteButton) {{
                         deleteButton.classList.toggle('is-disabled', !enabled);
@@ -5157,13 +5487,27 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     local.selectedEdgeIds = valid;
                     return valid;
                 }};
+                const clearSelectedPtm = (local) => {{
+                    local.selectedPtmId = null;
+                    local.selectedPtmNodeId = null;
+                }};
                 const setSingleSelection = (local, nodeId) => {{
                     local.selectedNodeId = nodeId || null;
                     local.selectedNodeIds = nodeId ? [nodeId] : [];
                     local.selectedEdgeId = null;
                     local.selectedEdgeIds = [];
+                    clearSelectedPtm(local);
+                }};
+                const setSinglePtmSelection = (local, nodeId, ptmId) => {{
+                    local.selectedNodeId = nodeId || null;
+                    local.selectedNodeIds = nodeId ? [nodeId] : [];
+                    local.selectedEdgeId = null;
+                    local.selectedEdgeIds = [];
+                    local.selectedPtmId = ptmId || null;
+                    local.selectedPtmNodeId = nodeId || null;
                 }};
                 const toggleNodeSelection = (local, nodeId) => {{
+                    clearSelectedPtm(local);
                     const selected = getSelectedNodeIds(local).slice();
                     local.selectedEdgeId = null;
                     local.selectedEdgeIds = [];
@@ -5260,6 +5604,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     return expanded;
                 }};
                 const setSelectedEntries = (local, entries, primaryEntry = null) => {{
+                    clearSelectedPtm(local);
                     const normalized = [];
                     const seen = new Set();
                     for (const entry of (Array.isArray(entries) ? entries : [])) {{
@@ -5819,6 +6164,14 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         const rgb = nextColor.slice(0, 3);
                         node.fillColor = 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')';
                     }}
+                    for (const key of Object.keys(node || {{}})) {{
+                        if (!/^(?:fc_color|fold_change|outline_color|outline_fold_change)_\\d+$/.test(key)) continue;
+                        delete node[key];
+                    }}
+                    for (const key of Object.keys(option || {{}})) {{
+                        if (!/^(?:fc_color|fold_change|outline_color|outline_fold_change)_\\d+$/.test(key)) continue;
+                        node[key] = option[key];
+                    }}
                     const nextOutlineColor = option['outline_color_{active_idx}'] || option.outline_color_1 || null;
                     if (Array.isArray(nextOutlineColor) && nextOutlineColor.length >= 3) {{
                         const outlineRgb = nextOutlineColor.slice(0, 3);
@@ -5894,6 +6247,9 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     if (activeUniprotKey && ptmKey) {{
                         removeNodeForcedAutoPtmKey(node, activeUniprotKey, ptmKey);
                         addNodeHiddenAutoPtmKey(node, activeUniprotKey, ptmKey);
+                    }}
+                    if (String(local.selectedPtmId || '') === String(ptmId || '')) {{
+                        clearSelectedPtm(local);
                     }}
                     pushUndoSnapshot(local, snapshot);
                     renderEditableOverlay(local);
@@ -6293,6 +6649,14 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     renderEditableOverlay(local);
                     return true;
                 }};
+                const isShapeUnderlayNode = (node) => {{
+                    if (!node) return false;
+                    const shapeType = String(node.shapeType || 'ellipse');
+                    const mappingType = String(node.mappingType || '').toLowerCase();
+                    if (shapeType === 'text') return false;
+                    if (node.isCompoundNode || mappingType === 'metabolite_dataset') return false;
+                    return !!node.isDrawingShape || mappingType === 'shape' || shapeType === 'legend' || shapeType === 'bracket';
+                }};
                 const renderEditableOverlay = (local) => {{
                     if (!overlaySvg) return;
                     overlaySvg.replaceChildren();
@@ -6304,20 +6668,33 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         gradient.setAttribute('y1', '0%');
                         gradient.setAttribute('x2', isHorizontal ? '100%' : '0%');
                         gradient.setAttribute('y2', isHorizontal ? '0%' : '100%');
-                        const neg = Array.isArray(legendConfig.negColor) ? legendConfig.negColor : [0, 114, 178];
-                        const pos = Array.isArray(legendConfig.posColor) ? legendConfig.posColor : [0, 158, 115];
-                        const stops = isHorizontal
-                            ? [
-                                ['0%', `rgb(${{neg[0]}}, ${{neg[1]}}, ${{neg[2]}})`],
-                                ['50%', 'rgb(255,255,255)'],
-                                ['100%', `rgb(${{pos[0]}}, ${{pos[1]}}, ${{pos[2]}})`],
-                            ]
-                            : [
-                                ['0%', `rgb(${{pos[0]}}, ${{pos[1]}}, ${{pos[2]}})`],
-                                ['50%', 'rgb(255,255,255)'],
-                                ['100%', `rgb(${{neg[0]}}, ${{neg[1]}}, ${{neg[2]}})`],
-                            ];
-                        stops.forEach(([offset, color]) => {{
+                        const rawStops = Array.isArray(legendConfig.stops) ? legendConfig.stops : [];
+                        let stops = rawStops
+                            .map((entry) => {{
+                                const value = Number(entry && entry.value);
+                                const color = Array.isArray(entry && entry.color) ? entry.color.slice(0, 3).map((c) => Number(c)) : null;
+                                if (!Number.isFinite(value) || !color || color.some((c) => !Number.isFinite(c))) return null;
+                                return {{ value, color }};
+                            }})
+                            .filter((entry) => !!entry)
+                            .sort((a, b) => a.value - b.value);
+                        if (stops.length < 2) {{
+                            const neg = Array.isArray(legendConfig.negColor) ? legendConfig.negColor : [0, 114, 178];
+                            const pos = Array.isArray(legendConfig.posColor) ? legendConfig.posColor : [0, 158, 115];
+                            stops = [
+                                {{ value: Number(legendConfig.maxNeg ?? -2), color: neg }},
+                                {{ value: 0, color: [255, 255, 255] }},
+                                {{ value: Number(legendConfig.maxPos ?? 2), color: pos }},
+                            ].sort((a, b) => a.value - b.value);
+                        }}
+                        const minValue = Number(stops[0].value);
+                        const maxValue = Number(stops[stops.length - 1].value);
+                        const span = (maxValue - minValue) || 1;
+                        stops.forEach((entry) => {{
+                            const rawOffset = (Number(entry.value) - minValue) / span;
+                            const normalized = Math.max(0, Math.min(1, isHorizontal ? rawOffset : (1 - rawOffset)));
+                            const offset = `${{(normalized * 100).toFixed(3)}}%`;
+                            const color = `rgb(${{Math.max(0, Math.min(255, Math.round(entry.color[0]))) }}, ${{Math.max(0, Math.min(255, Math.round(entry.color[1]))) }}, ${{Math.max(0, Math.min(255, Math.round(entry.color[2]))) }})`;
                             const stop = createSvg('stop');
                             stop.setAttribute('offset', offset);
                             stop.setAttribute('stop-color', color);
@@ -6328,6 +6705,365 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     addLegendGradient('cst-legend-grad-v-{viewer_key}', false);
                     addLegendGradient('cst-legend-grad-h-{viewer_key}', true);
                     overlaySvg.appendChild(defs);
+                    const temporalModeEnabled = !!local.temporalMode;
+                    const rgbCss = (value, fallback = 'rgb(0, 0, 0)') => {{
+                        return Array.isArray(value) && value.length >= 3
+                            ? ('rgb(' + Number(value[0] || 0) + ', ' + Number(value[1] || 0) + ', ' + Number(value[2] || 0) + ')')
+                            : fallback;
+                    }};
+                    const getNodeTemporalSegmentCount = (node) => {{
+                        let maxIndex = 0;
+                        for (const key of Object.keys(node || {{}})) {{
+                            const match = String(key || '').match(/^(?:fc_color|fold_change)_([0-9]+)$/);
+                            if (!match) continue;
+                            const idx = Number(match[1]);
+                            if (Number.isFinite(idx) && idx > maxIndex) maxIndex = idx;
+                        }}
+                        return Math.max(1, maxIndex);
+                    }};
+                    const hasSegmentedOutlineData = (node, segmentCount) => {{
+                        for (let idx = 1; idx <= segmentCount; idx += 1) {{
+                            const value = node ? node['outline_fold_change_' + idx] : null;
+                            if (value === 0 || Number.isFinite(Number(value))) return true;
+                        }}
+                        return false;
+                    }};
+                    const applyNodeGeometry = (shape, node) => {{
+                        const nodeShapeType = String(node.shapeType || 'ellipse');
+                        const nodeIsRect = nodeShapeType === 'rect' || nodeShapeType === 'square';
+                        const nodeIsRounded = nodeShapeType === 'rounded';
+                        const nodeIsLegend = nodeShapeType === 'legend';
+                        const nodeIsRectLike = nodeIsRect || nodeIsRounded || nodeIsLegend;
+                        const nodeIsBracket = nodeShapeType === 'bracket';
+                        const nodeIsText = nodeShapeType === 'text';
+                        if (nodeIsBracket) {{
+                            shape.setAttribute('d', buildBracketPath(node));
+                        }} else if (nodeIsRectLike || nodeIsText) {{
+                            shape.setAttribute('x', (Number(node.cx || 0) - Number(node.rx || 12)).toFixed(3));
+                            shape.setAttribute('y', (Number(node.cy || 0) - Number(node.ry || 9)).toFixed(3));
+                            shape.setAttribute('width', (Number(node.rx || 12) * 2).toFixed(3));
+                            shape.setAttribute('height', (Number(node.ry || 9) * 2).toFixed(3));
+                            if (nodeIsText) {{
+                                shape.setAttribute('rx', '8');
+                                shape.setAttribute('ry', '8');
+                            }} else if (nodeIsLegend) {{
+                                shape.setAttribute('rx', '0');
+                                shape.setAttribute('ry', '0');
+                            }} else if (nodeIsRounded) {{
+                                shape.setAttribute('rx', '10');
+                                shape.setAttribute('ry', '10');
+                            }}
+                        }} else {{
+                            shape.setAttribute('cx', Number(node.cx || 0).toFixed(3));
+                            shape.setAttribute('cy', Number(node.cy || 0).toFixed(3));
+                            shape.setAttribute('rx', Number(node.rx || 12).toFixed(3));
+                            shape.setAttribute('ry', Number(node.ry || 9).toFixed(3));
+                        }}
+                        if (Number(node.angle || 0)) {{
+                            shape.setAttribute('transform', 'rotate(' + Number(node.angle || 0).toFixed(3) + ' ' + Number(node.cx || 0).toFixed(3) + ' ' + Number(node.cy || 0).toFixed(3) + ')');
+                        }}
+                    }};
+                    const appendTemporalNodeSegments = (node, group, bodyShape) => {{
+                        if (!temporalModeEnabled || !local.proteinOvalMode || local.tabPreviewMode) return false;
+                        if (!node || node.isComplex || node.isDrawingShape) return false;
+                        const nodeShapeType = String(node.shapeType || 'ellipse');
+                        if (nodeShapeType === 'text' || nodeShapeType === 'legend' || nodeShapeType === 'bracket') return false;
+                        const segmentCount = getNodeTemporalSegmentCount(node);
+                        if (segmentCount <= 1) return false;
+                        const strokeWidth = Math.max(0.6, Number(node.strokeWidth || local.proteinOutlineWidth || {prot_outline_width}));
+                        const bboxX = Number(node.cx || 0) - Number(node.rx || 12);
+                        const bboxY = Number(node.cy || 0) - Number(node.ry || 9);
+                        const bboxWidth = Number(node.rx || 12) * 2;
+                        const bboxHeight = Number(node.ry || 9) * 2;
+                        const hasSegmentedOutline = hasSegmentedOutlineData(node, segmentCount);
+                        for (let idx = 1; idx <= segmentCount; idx += 1) {{
+                            const segmentStart = bboxX + (((idx - 1) * bboxWidth) / segmentCount);
+                            const segmentEnd = idx === segmentCount ? (bboxX + bboxWidth) : (bboxX + ((idx * bboxWidth) / segmentCount));
+                            const fillClipId = 'cst_temporal_clip_{viewer_key}_' + String(node.id || '') + '_' + String(idx);
+                            const fillClipPath = createSvg('clipPath');
+                            fillClipPath.setAttribute('id', fillClipId);
+                            fillClipPath.setAttribute('clipPathUnits', 'userSpaceOnUse');
+                            const fillClipRect = createSvg('rect');
+                            fillClipRect.setAttribute('x', segmentStart.toFixed(3));
+                            fillClipRect.setAttribute('y', bboxY.toFixed(3));
+                            fillClipRect.setAttribute('width', Math.max(0.5, (segmentEnd - segmentStart)).toFixed(3));
+                            fillClipRect.setAttribute('height', Math.max(0.5, bboxHeight).toFixed(3));
+                            fillClipPath.appendChild(fillClipRect);
+                            defs.appendChild(fillClipPath);
+                            const fillShape = createSvg(bodyShape.tagName.toLowerCase());
+                            applyNodeGeometry(fillShape, node);
+                            fillShape.setAttribute('fill', rgbCss(node['fc_color_' + idx], String(node.fillColor || 'rgb(166, 166, 166)')));
+                            fillShape.setAttribute('stroke', 'none');
+                            fillShape.setAttribute('pointer-events', 'none');
+                            fillShape.setAttribute('clip-path', 'url(#' + fillClipId + ')');
+                            fillShape.setAttribute('opacity', Number(node.opacity || 0.98).toFixed(2));
+                            group.appendChild(fillShape);
+                            if (hasSegmentedOutline) {{
+                                const outlineClipId = 'cst_temporal_outline_clip_{viewer_key}_' + String(node.id || '') + '_' + String(idx);
+                                const outlineClipPath = createSvg('clipPath');
+                                outlineClipPath.setAttribute('id', outlineClipId);
+                                outlineClipPath.setAttribute('clipPathUnits', 'userSpaceOnUse');
+                                const outlineClipRect = createSvg('rect');
+                                outlineClipRect.setAttribute('x', segmentStart.toFixed(3));
+                                outlineClipRect.setAttribute('y', bboxY.toFixed(3));
+                                outlineClipRect.setAttribute('width', Math.max(0.5, (segmentEnd - segmentStart)).toFixed(3));
+                                outlineClipRect.setAttribute('height', Math.max(0.5, bboxHeight).toFixed(3));
+                                outlineClipPath.appendChild(outlineClipRect);
+                                defs.appendChild(outlineClipPath);
+                                const outlineShape = createSvg(bodyShape.tagName.toLowerCase());
+                                applyNodeGeometry(outlineShape, node);
+                                outlineShape.setAttribute('fill', 'none');
+                                outlineShape.setAttribute('stroke', rgbCss(node['outline_color_' + idx], String(node.stroke || '#000000')));
+                                outlineShape.setAttribute('stroke-width', strokeWidth.toFixed(3));
+                                outlineShape.setAttribute('stroke-linecap', 'round');
+                                outlineShape.setAttribute('stroke-linejoin', 'round');
+                                outlineShape.setAttribute('pointer-events', 'none');
+                                outlineShape.setAttribute('clip-path', 'url(#' + outlineClipId + ')');
+                                outlineShape.setAttribute('opacity', Number(node.opacity || 0.98).toFixed(2));
+                                group.appendChild(outlineShape);
+                            }}
+                        }}
+                        bodyShape.setAttribute('fill', 'transparent');
+                        bodyShape.setAttribute('stroke', hasSegmentedOutline ? 'transparent' : String(node.stroke || '#000000'));
+                        bodyShape.setAttribute('stroke-width', hasSegmentedOutline ? '0' : strokeWidth.toFixed(3));
+                        bodyShape.setAttribute('pointer-events', 'all');
+                        bodyShape.style.pointerEvents = 'all';
+                        return true;
+                    }};
+                    const getPtmTemporalSegmentCount = (ptm) => {{
+                        let maxIndex = 0;
+                        for (const key of Object.keys(ptm || {{}})) {{
+                            const match = String(key || '').match(/^(?:fc_color|fold_change)_([0-9]+)$/);
+                            if (!match) continue;
+                            const idx = Number(match[1]);
+                            if (Number.isFinite(idx) && idx > maxIndex) maxIndex = idx;
+                        }}
+                        return Math.max(1, maxIndex);
+                    }};
+                    const hasPtmSegmentedOutlineData = (ptm, segmentCount) => {{
+                        for (let idx = 1; idx <= segmentCount; idx += 1) {{
+                            const foldValue = ptm ? ptm['outline_fold_change_' + idx] : null;
+                            if (foldValue === 0 || Number.isFinite(Number(foldValue))) return true;
+                            if (idx <= 1) continue;
+                            const colorKey = 'outline_color_' + idx;
+                            const colorValue = ptm ? ptm[colorKey] : null;
+                            if (ptm && Object.prototype.hasOwnProperty.call(ptm, colorKey) && Array.isArray(colorValue) && colorValue.length >= 3) return true;
+                        }}
+                        return false;
+                    }};
+                    const getPtmTemporalRenderSpec = (ptm, ptmPoint, ptmRadius) => {{
+                        const visualRadius = Math.max(2.2, Number(ptmRadius || 0) * 0.78);
+                        const nativeShape = String(ptm && ptm.shape || 'Circle').toLowerCase();
+                        const segmentCount = temporalModeEnabled ? getPtmTemporalSegmentCount(ptm) : 1;
+                        const renderShape = segmentCount >= 3 ? 'pill' : nativeShape;
+                        const width = renderShape === 'pill'
+                            ? Math.max(visualRadius * 3.35, segmentCount * visualRadius * 1.3)
+                            : (visualRadius * 2);
+                        const height = visualRadius * 2;
+                        return {{
+                            nativeShape,
+                            renderShape,
+                            segmentCount,
+                            visualRadius,
+                            width,
+                            height,
+                            left: Number(ptmPoint.x || 0) - (width * 0.5),
+                            top: Number(ptmPoint.y || 0) - visualRadius,
+                            centerX: Number(ptmPoint.x || 0),
+                            centerY: Number(ptmPoint.y || 0),
+                        }};
+                    }};
+                    const applyPtmShapeGeometry = (shape, spec) => {{
+                        if (spec.renderShape === 'circle') {{
+                            shape.setAttribute('cx', spec.centerX.toFixed(3));
+                            shape.setAttribute('cy', spec.centerY.toFixed(3));
+                            shape.setAttribute('r', (spec.height * 0.5).toFixed(3));
+                            shape.removeAttribute('transform');
+                            return;
+                        }}
+                        shape.setAttribute('x', spec.left.toFixed(3));
+                        shape.setAttribute('y', spec.top.toFixed(3));
+                        shape.setAttribute('width', spec.width.toFixed(3));
+                        shape.setAttribute('height', spec.height.toFixed(3));
+                        if (spec.renderShape === 'pill') {{
+                            shape.setAttribute('rx', (spec.height * 0.5).toFixed(3));
+                            shape.setAttribute('ry', (spec.height * 0.5).toFixed(3));
+                            shape.removeAttribute('transform');
+                        }} else {{
+                            shape.removeAttribute('rx');
+                            shape.removeAttribute('ry');
+                            if (spec.renderShape === 'diamond') {{
+                                shape.setAttribute('transform', 'rotate(45 ' + spec.centerX.toFixed(3) + ' ' + spec.centerY.toFixed(3) + ')');
+                            }} else {{
+                                shape.removeAttribute('transform');
+                            }}
+                        }}
+                    }};
+                    const makeCstCirclePtmSegmentPath = (centerX, centerY, radius, side) => {{
+                        const topY = centerY - radius;
+                        const bottomY = centerY + radius;
+                        const sweep = side === 'left' ? 0 : 1;
+                        return 'M ' + centerX.toFixed(3) + ' ' + topY.toFixed(3)
+                            + ' A ' + radius.toFixed(3) + ' ' + radius.toFixed(3) + ' 0 0 ' + sweep + ' ' + centerX.toFixed(3) + ' ' + bottomY.toFixed(3)
+                            + ' L ' + centerX.toFixed(3) + ' ' + topY.toFixed(3) + ' Z';
+                    }};
+                    const makeCstPillEndSegmentPath = (left, top, width, height, side) => {{
+                        const radius = height * 0.5;
+                        const right = left + width;
+                        const bottom = top + height;
+                        const centerLeft = left + radius;
+                        const centerRight = left + width - radius;
+                        if (side === 'left') {{
+                            return 'M ' + right.toFixed(3) + ' ' + top.toFixed(3)
+                                + ' L ' + centerLeft.toFixed(3) + ' ' + top.toFixed(3)
+                                + ' A ' + radius.toFixed(3) + ' ' + radius.toFixed(3) + ' 0 0 0 ' + centerLeft.toFixed(3) + ' ' + bottom.toFixed(3)
+                                + ' L ' + right.toFixed(3) + ' ' + bottom.toFixed(3) + ' Z';
+                        }}
+                        return 'M ' + left.toFixed(3) + ' ' + top.toFixed(3)
+                            + ' L ' + centerRight.toFixed(3) + ' ' + top.toFixed(3)
+                            + ' A ' + radius.toFixed(3) + ' ' + radius.toFixed(3) + ' 0 0 1 ' + centerRight.toFixed(3) + ' ' + bottom.toFixed(3)
+                            + ' L ' + left.toFixed(3) + ' ' + bottom.toFixed(3) + ' Z';
+                    }};
+                    const createPtmSegmentedBody = (local, group, ptm, ptmPoint, ptmRadius, bodyShape) => {{
+                        if (!temporalModeEnabled || !ptm || !bodyShape) return null;
+                        const spec = getPtmTemporalRenderSpec(ptm, ptmPoint, ptmRadius);
+                        const segmentCount = spec.segmentCount;
+                        const strokeWidth = Math.max(0.6, Number(ptm.outlineWidth || 1.0));
+                        const opacity = Number(ptm.opacity || 0.98).toFixed(2);
+                        const fallbackFill = rgbCss(ptm['fc_color_{active_idx}'] || ptm.fc_color_1, 'rgb(209, 213, 219)');
+                        const fallbackOutline = rgbCss(ptm['outline_color_{active_idx}'] || ptm.outline_color_1, 'rgb(0, 0, 0)');
+                        const hasSegmentedOutline = segmentCount > 1 && hasPtmSegmentedOutlineData(ptm, segmentCount);
+                        const makeSegmentClipId = (idx) => 'cst_temporal_ptm_clip_{viewer_key}_' + String(ptm.id || '') + '_' + String(idx);
+                        const segmentBounds = [];
+                        if (segmentCount > 1) {{
+                            for (let idx = 1; idx <= segmentCount; idx += 1) {{
+                                const segmentStart = spec.left + (((idx - 1) * spec.width) / segmentCount);
+                                const segmentEnd = idx === segmentCount ? (spec.left + spec.width) : (spec.left + ((idx * spec.width) / segmentCount));
+                                segmentBounds.push({{ idx, x1: segmentStart, x2: segmentEnd }});
+                                let fillShape = null;
+                                if (spec.renderShape === 'circle' && segmentCount === 2) {{
+                                    fillShape = createSvg('path');
+                                    fillShape.setAttribute('d', makeCstCirclePtmSegmentPath(spec.centerX, spec.centerY, spec.height * 0.5, idx === 1 ? 'left' : 'right'));
+                                }} else if (spec.renderShape === 'pill') {{
+                                    const actualWidth = Math.max(0.5, segmentEnd - segmentStart);
+                                    if (idx === 1) {{
+                                        fillShape = createSvg('path');
+                                        fillShape.setAttribute('d', makeCstPillEndSegmentPath(segmentStart, spec.top, actualWidth, spec.height, 'left'));
+                                    }} else if (idx === segmentCount) {{
+                                        fillShape = createSvg('path');
+                                        fillShape.setAttribute('d', makeCstPillEndSegmentPath(segmentStart, spec.top, actualWidth, spec.height, 'right'));
+                                    }} else {{
+                                        fillShape = createSvg('rect');
+                                        fillShape.setAttribute('x', segmentStart.toFixed(3));
+                                        fillShape.setAttribute('y', spec.top.toFixed(3));
+                                        fillShape.setAttribute('width', actualWidth.toFixed(3));
+                                        fillShape.setAttribute('height', spec.height.toFixed(3));
+                                    }}
+                                }} else {{
+                                    const clipPath = createSvg('clipPath');
+                                    clipPath.setAttribute('id', makeSegmentClipId(idx));
+                                    const clipRect = createSvg('rect');
+                                    clipRect.setAttribute('x', (segmentStart - strokeWidth - 1).toFixed(3));
+                                    clipRect.setAttribute('y', (spec.top - strokeWidth - 1).toFixed(3));
+                                    clipRect.setAttribute('width', Math.max(0.5, (segmentEnd - segmentStart) + (strokeWidth * 2) + 2).toFixed(3));
+                                    clipRect.setAttribute('height', Math.max(0.5, spec.height + (strokeWidth * 2) + 2).toFixed(3));
+                                    clipPath.appendChild(clipRect);
+                                    defs.appendChild(clipPath);
+                                    fillShape = createSvg(bodyShape.tagName.toLowerCase());
+                                    applyPtmShapeGeometry(fillShape, spec);
+                                    fillShape.setAttribute('clip-path', 'url(#' + makeSegmentClipId(idx) + ')');
+                                }}
+                                if (!fillShape) continue;
+                                fillShape.setAttribute('fill', rgbCss(ptm['fc_color_' + idx], fallbackFill));
+                                fillShape.setAttribute('stroke', 'none');
+                                fillShape.setAttribute('pointer-events', 'none');
+                                fillShape.setAttribute('opacity', opacity);
+                                group.appendChild(fillShape);
+                            }}
+                        }}
+                        if (hasSegmentedOutline) {{
+                            if (spec.renderShape === 'pill') {{
+                                const radius = spec.height * 0.5;
+                                const straightLeft = spec.left + radius;
+                                const straightRight = spec.left + spec.width - radius;
+                                segmentBounds.forEach((segment) => {{
+                                    const color = rgbCss(ptm['outline_color_' + segment.idx], fallbackOutline);
+                                    const topStart = Math.max(straightLeft, segment.x1);
+                                    const topEnd = Math.min(straightRight, segment.x2);
+                                    if (topEnd > topStart) {{
+                                        const topLine = createSvg('line');
+                                        topLine.setAttribute('x1', topStart.toFixed(3));
+                                        topLine.setAttribute('y1', spec.top.toFixed(3));
+                                        topLine.setAttribute('x2', topEnd.toFixed(3));
+                                        topLine.setAttribute('y2', spec.top.toFixed(3));
+                                        topLine.setAttribute('stroke', color);
+                                        topLine.setAttribute('stroke-width', strokeWidth.toFixed(3));
+                                        topLine.setAttribute('stroke-linecap', 'butt');
+                                        topLine.setAttribute('stroke-linejoin', 'round');
+                                        topLine.setAttribute('fill', 'none');
+                                        topLine.setAttribute('pointer-events', 'none');
+                                        topLine.setAttribute('opacity', opacity);
+                                        group.appendChild(topLine);
+                                        const bottomLine = createSvg('line');
+                                        bottomLine.setAttribute('x1', topStart.toFixed(3));
+                                        bottomLine.setAttribute('y1', (spec.top + spec.height).toFixed(3));
+                                        bottomLine.setAttribute('x2', topEnd.toFixed(3));
+                                        bottomLine.setAttribute('y2', (spec.top + spec.height).toFixed(3));
+                                        bottomLine.setAttribute('stroke', color);
+                                        bottomLine.setAttribute('stroke-width', strokeWidth.toFixed(3));
+                                        bottomLine.setAttribute('stroke-linecap', 'butt');
+                                        bottomLine.setAttribute('stroke-linejoin', 'round');
+                                        bottomLine.setAttribute('fill', 'none');
+                                        bottomLine.setAttribute('pointer-events', 'none');
+                                        bottomLine.setAttribute('opacity', opacity);
+                                        group.appendChild(bottomLine);
+                                    }}
+                                }});
+                                const leftArc = createSvg('path');
+                                leftArc.setAttribute('d', 'M ' + (spec.left + radius).toFixed(3) + ' ' + spec.top.toFixed(3) + ' A ' + radius.toFixed(3) + ' ' + radius.toFixed(3) + ' 0 0 0 ' + (spec.left + radius).toFixed(3) + ' ' + (spec.top + spec.height).toFixed(3));
+                                leftArc.setAttribute('fill', 'none');
+                                leftArc.setAttribute('stroke', rgbCss(ptm['outline_color_1'], fallbackOutline));
+                                leftArc.setAttribute('stroke-width', strokeWidth.toFixed(3));
+                                leftArc.setAttribute('stroke-linecap', 'butt');
+                                leftArc.setAttribute('stroke-linejoin', 'round');
+                                leftArc.setAttribute('pointer-events', 'none');
+                                leftArc.setAttribute('opacity', opacity);
+                                group.appendChild(leftArc);
+                                const rightArc = createSvg('path');
+                                rightArc.setAttribute('d', 'M ' + (spec.left + spec.width - radius).toFixed(3) + ' ' + spec.top.toFixed(3) + ' A ' + radius.toFixed(3) + ' ' + radius.toFixed(3) + ' 0 0 1 ' + (spec.left + spec.width - radius).toFixed(3) + ' ' + (spec.top + spec.height).toFixed(3));
+                                rightArc.setAttribute('fill', 'none');
+                                rightArc.setAttribute('stroke', rgbCss(ptm['outline_color_' + segmentCount], fallbackOutline));
+                                rightArc.setAttribute('stroke-width', strokeWidth.toFixed(3));
+                                rightArc.setAttribute('stroke-linecap', 'butt');
+                                rightArc.setAttribute('stroke-linejoin', 'round');
+                                rightArc.setAttribute('pointer-events', 'none');
+                                rightArc.setAttribute('opacity', opacity);
+                                group.appendChild(rightArc);
+                            }} else {{
+                                for (let idx = 1; idx <= segmentCount; idx += 1) {{
+                                    const outlineShape = createSvg(bodyShape.tagName.toLowerCase());
+                                    applyPtmShapeGeometry(outlineShape, spec);
+                                    outlineShape.setAttribute('fill', 'none');
+                                    outlineShape.setAttribute('stroke', rgbCss(ptm['outline_color_' + idx], fallbackOutline));
+                                    outlineShape.setAttribute('stroke-width', strokeWidth.toFixed(3));
+                                    outlineShape.setAttribute('stroke-linecap', 'round');
+                                    outlineShape.setAttribute('stroke-linejoin', 'round');
+                                    outlineShape.setAttribute('pointer-events', 'none');
+                                    outlineShape.setAttribute('clip-path', 'url(#' + makeSegmentClipId(idx) + ')');
+                                    outlineShape.setAttribute('opacity', opacity);
+                                    group.appendChild(outlineShape);
+                                }}
+                            }}
+                        }}
+                        bodyShape.setAttribute('fill', segmentCount > 1 ? 'transparent' : fallbackFill);
+                        bodyShape.setAttribute('stroke', hasSegmentedOutline ? 'transparent' : fallbackOutline);
+                        bodyShape.setAttribute('stroke-width', hasSegmentedOutline ? '0' : strokeWidth.toFixed(3));
+                        bodyShape.setAttribute('pointer-events', 'all');
+                        bodyShape.style.pointerEvents = 'all';
+                        bodyShape.setAttribute('opacity', opacity);
+                        return spec;
+                    }};
+                    const underlayFragment = document.createDocumentFragment();
                     const fragment = document.createDocumentFragment();
                     const autoPtmPlacements = (!AUTO_PTM_RENDER_ENABLED || local.tabPreviewMode) ? [] : (Array.isArray(local.autoPtmPlacements) ? local.autoPtmPlacements : []);
                     const autoPtmsByNode = new Map();
@@ -6594,6 +7330,9 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         if (Number(node.angle || 0)) {{
                             bodyShape.setAttribute('transform', 'rotate(' + Number(node.angle || 0).toFixed(3) + ' ' + Number(node.cx || 0).toFixed(3) + ' ' + Number(node.cy || 0).toFixed(3) + ')');
                         }}
+                        if (!isBracket && !isText && !isLegend && !node.isComplex && !isDrawingLike && local.proteinOvalMode) {{
+                            appendTemporalNodeSegments(node, group, bodyShape);
+                        }}
                         applyTooltipAttrs(bodyShape, String(node.tooltip || node.title || ''), String(node.tooltipHtml || node.tooltip_html || ''));
                         group.appendChild(bodyShape);
                         if (isLegend && !local.tabPreviewMode) {{
@@ -6642,14 +7381,15 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         for (const ptm of (local.showPtms === false ? [] : nodePtms)) {{
                             const ptmPoint = resolveAutoPtmPlacementPoint(node, ptm);
                             const ptmRadius = Math.max(3, Number(ptm.radius || AUTO_PTM_RADIUS));
-                            const fillColor = ptm['fc_color_{active_idx}'] || ptm.fc_color_1 || [209, 213, 219];
-                            const outlineColor = ptm['outline_color_{active_idx}'] || ptm.outline_color_1 || [0, 0, 0];
-                            const fillRgb = Array.isArray(fillColor) ? fillColor.slice(0, 3) : [209, 213, 219];
-                            const outlineRgb = Array.isArray(outlineColor) ? outlineColor.slice(0, 3) : [0, 0, 0];
                             const ptmShape = String(ptm.shape || 'Circle').toLowerCase();
-                            const shapeNode = createSvg(ptmShape === 'circle' ? 'circle' : 'rect');
+                            const temporalPtmSpec = temporalModeEnabled ? getPtmTemporalRenderSpec(ptm, ptmPoint, ptmRadius) : null;
+                            const useInternalTemporalPtmText = !!(temporalPtmSpec && Number(temporalPtmSpec.segmentCount || 1) >= 3);
+                            const effectivePtmShape = temporalPtmSpec ? temporalPtmSpec.renderShape : ptmShape;
+                            const shapeNode = createSvg(effectivePtmShape === 'circle' ? 'circle' : 'rect');
                             shapeNode.setAttribute('class', 'cst-auto-ptm-circle' + (ptm.isMissing ? ' cst-missing-node' : ''));
-                            if (ptmShape === 'circle') {{
+                            if (temporalPtmSpec) {{
+                                applyPtmShapeGeometry(shapeNode, temporalPtmSpec);
+                            }} else if (ptmShape === 'circle') {{
                                 shapeNode.setAttribute('cx', Number(ptmPoint.x || 0).toFixed(3));
                                 shapeNode.setAttribute('cy', Number(ptmPoint.y || 0).toFixed(3));
                                 shapeNode.setAttribute('r', ptmRadius.toFixed(3));
@@ -6662,10 +7402,18 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                     shapeNode.setAttribute('transform', 'rotate(45 ' + Number(ptmPoint.x || 0).toFixed(3) + ' ' + Number(ptmPoint.y || 0).toFixed(3) + ')');
                                 }}
                             }}
-                            shapeNode.setAttribute('fill', 'rgb(' + fillRgb[0] + ', ' + fillRgb[1] + ', ' + fillRgb[2] + ')');
-                            shapeNode.setAttribute('stroke', 'rgb(' + outlineRgb[0] + ', ' + outlineRgb[1] + ', ' + outlineRgb[2] + ')');
-                            shapeNode.setAttribute('stroke-width', Math.max(0.6, Number(ptm.outlineWidth || 1.0)).toFixed(2));
-                            shapeNode.setAttribute('opacity', Number(ptm.opacity || 0.98).toFixed(2));
+                            if (!temporalPtmSpec) {{
+                                const fillColor = ptm['fc_color_{active_idx}'] || ptm.fc_color_1 || [209, 213, 219];
+                                const outlineColor = ptm['outline_color_{active_idx}'] || ptm.outline_color_1 || [0, 0, 0];
+                                const fillRgb = Array.isArray(fillColor) ? fillColor.slice(0, 3) : [209, 213, 219];
+                                const outlineRgb = Array.isArray(outlineColor) ? outlineColor.slice(0, 3) : [0, 0, 0];
+                                shapeNode.setAttribute('fill', 'rgb(' + fillRgb[0] + ', ' + fillRgb[1] + ', ' + fillRgb[2] + ')');
+                                shapeNode.setAttribute('stroke', 'rgb(' + outlineRgb[0] + ', ' + outlineRgb[1] + ', ' + outlineRgb[2] + ')');
+                                shapeNode.setAttribute('stroke-width', Math.max(0.6, Number(ptm.outlineWidth || 1.0)).toFixed(2));
+                                shapeNode.setAttribute('opacity', Number(ptm.opacity || 0.98).toFixed(2));
+                            }} else {{
+                                createPtmSegmentedBody(local, group, ptm, ptmPoint, ptmRadius, shapeNode);
+                            }}
                             shapeNode.setAttribute('data-role', 'ptm-body');
                             shapeNode.setAttribute('data-ptm-id', String(ptm.id || ''));
                             shapeNode.setAttribute('data-node-id', String(node.id || ''));
@@ -6673,7 +7421,60 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             group.appendChild(shapeNode);
                             const symbolIcon = String(ptm.symbolIcon || '').trim();
                             const symbolText = String(ptm.symbol || '').trim();
-                            if (local.showPtmSymbols !== false && symbolIcon) {{
+                            const siteLabel = String(ptm.siteLabel || ptm.label || '').trim();
+                            if (useInternalTemporalPtmText) {{
+                                const hasSymbol = local.showPtmSymbols !== false && (!!symbolIcon || !!symbolText);
+                                const hasLabel = local.showPtmLabels !== false && !!siteLabel;
+                                const slotLeftX = Number(temporalPtmSpec.left || 0) + (Number(temporalPtmSpec.width || 0) * 0.25);
+                                const slotRightX = Number(temporalPtmSpec.left || 0) + (Number(temporalPtmSpec.width || 0) * 0.75);
+                                const centerX = Number(temporalPtmSpec.centerX || 0);
+                                const centerY = Number(temporalPtmSpec.centerY || 0);
+                                if (hasSymbol && symbolIcon) {{
+                                    const iconSize = Math.max(5.6, Math.min(Number(temporalPtmSpec.height || (ptmRadius * 2)) * 0.78, Number(temporalPtmSpec.width || (ptmRadius * 2)) * (hasLabel ? 0.36 : 0.58)));
+                                    const imageX = hasLabel ? slotLeftX : centerX;
+                                    const ptmSymbolImage = createSvg('image');
+                                    ptmSymbolImage.setAttribute('class', 'cst-auto-ptm-symbol' + (ptm.isMissing ? ' cst-missing-node' : ''));
+                                    ptmSymbolImage.setAttribute('href', symbolIcon);
+                                    ptmSymbolImage.setAttribute('x', (imageX - (iconSize * 0.5)).toFixed(3));
+                                    ptmSymbolImage.setAttribute('y', (centerY - (iconSize * 0.5)).toFixed(3));
+                                    ptmSymbolImage.setAttribute('width', iconSize.toFixed(2));
+                                    ptmSymbolImage.setAttribute('height', iconSize.toFixed(2));
+                                    ptmSymbolImage.setAttribute('opacity', Number(ptm.opacity || 0.98).toFixed(2));
+                                    ptmSymbolImage.setAttribute('pointer-events', 'none');
+                                    group.appendChild(ptmSymbolImage);
+                                }} else if (hasSymbol && symbolText) {{
+                                    const symbolColor = Array.isArray(ptm.symbolColor) ? ptm.symbolColor.slice(0, 3) : [0, 0, 0];
+                                    const ptmSymbol = createSvg('text');
+                                    ptmSymbol.setAttribute('class', 'cst-auto-ptm-symbol' + (ptm.isMissing ? ' cst-missing-node' : ''));
+                                    ptmSymbol.setAttribute('x', (hasLabel ? slotLeftX : centerX).toFixed(3));
+                                    ptmSymbol.setAttribute('y', centerY.toFixed(3));
+                                    ptmSymbol.setAttribute('font-size', Math.max(5.4, Math.min(Number(temporalPtmSpec.height || (ptmRadius * 2)) * 0.7, hasLabel ? (Number(temporalPtmSpec.width || (ptmRadius * 2)) * 0.2) : (Number(temporalPtmSpec.width || (ptmRadius * 2)) * 0.38), Number(ptm.symbolSize || (ptmRadius * 1.55)) * 0.82)).toFixed(2));
+                                    ptmSymbol.setAttribute('font-family', String(ptm.symbolFont || 'Arial'));
+                                    ptmSymbol.setAttribute('fill', 'rgb(' + symbolColor[0] + ', ' + symbolColor[1] + ', ' + symbolColor[2] + ')');
+                                    ptmSymbol.setAttribute('text-anchor', 'middle');
+                                    ptmSymbol.setAttribute('dominant-baseline', 'middle');
+                                    ptmSymbol.setAttribute('opacity', Number(ptm.opacity || 0.98).toFixed(2));
+                                    ptmSymbol.setAttribute('pointer-events', 'none');
+                                    ptmSymbol.textContent = symbolText;
+                                    group.appendChild(ptmSymbol);
+                                }}
+                                if (hasLabel) {{
+                                    const labelColor = Array.isArray(ptm.labelColor) ? ptm.labelColor.slice(0, 3) : [0, 0, 0];
+                                    const siteText = createSvg('text');
+                                    siteText.setAttribute('class', 'cst-auto-ptm-site-label' + (ptm.isMissing ? ' cst-missing-node' : ''));
+                                    siteText.setAttribute('x', ((hasSymbol ? slotRightX : centerX)).toFixed(3));
+                                    siteText.setAttribute('y', centerY.toFixed(3));
+                                    siteText.setAttribute('font-size', Math.max(4.9, Math.min(Number(temporalPtmSpec.height || (ptmRadius * 2)) * 0.64, hasSymbol ? (Number(temporalPtmSpec.width || (ptmRadius * 2)) * 0.18) : (Number(temporalPtmSpec.width || (ptmRadius * 2)) * 0.34), Number(ptm.labelSize || 7) * 0.82)).toFixed(2));
+                                    siteText.setAttribute('font-family', String(ptm.labelFont || 'Arial'));
+                                    siteText.setAttribute('fill', 'rgb(' + labelColor[0] + ', ' + labelColor[1] + ', ' + labelColor[2] + ')');
+                                    siteText.setAttribute('text-anchor', 'middle');
+                                    siteText.setAttribute('dominant-baseline', 'middle');
+                                    siteText.setAttribute('opacity', Number(ptm.opacity || 0.98).toFixed(2));
+                                    siteText.setAttribute('pointer-events', 'none');
+                                    siteText.textContent = siteLabel;
+                                    group.appendChild(siteText);
+                                }}
+                            }} else if (local.showPtmSymbols !== false && symbolIcon) {{
                                 const ptmSymbolImage = createSvg('image');
                                 const iconSize = Math.max(8.8, Number(ptm.symbolSize || (ptmRadius * 1.55)));
                                 ptmSymbolImage.setAttribute('href', symbolIcon);
@@ -6704,8 +7505,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                 ptmSymbol.textContent = symbolText;
                                 group.appendChild(ptmSymbol);
                             }}
-                            const siteLabel = String(ptm.siteLabel || ptm.label || '').trim();
-                            if (local.showPtmLabels !== false && siteLabel) {{
+                            if (!useInternalTemporalPtmText && local.showPtmLabels !== false && siteLabel) {{
                                 const dx = Number(ptmPoint.x || 0) - Number(node.cx || 0);
                                 const dy = Number(ptmPoint.y || 0) - Number(node.cy || 0);
                                 const distance = Math.max(0.001, Math.hypot(dx, dy));
@@ -6879,7 +7679,11 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             }}
                             group.appendChild(makeHandle('rotate', rotateHandlePos, 5.2));
                         }}
-                        fragment.appendChild(group);
+                        if (isShapeUnderlayNode(node)) {{
+                            underlayFragment.appendChild(group);
+                        }} else {{
+                            fragment.appendChild(group);
+                        }}
                     }}
                     for (const panel of (Array.isArray(local.complexPanels) ? local.complexPanels : [])) {{
                         const node = findNodeById(local, panel.nodeId);
@@ -6996,6 +7800,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         marquee.setAttribute('pointer-events', 'none');
                         fragment.appendChild(marquee);
                     }}
+                    overlaySvg.appendChild(underlayFragment);
                     overlaySvg.appendChild(fragment);
                     setDeleteState(local);
                     updateUndoState(local);
@@ -7006,6 +7811,11 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     emitExternalControlState(local);
                 }};
                 const deleteSelectedNode = (local) => {{
+                    if (local.selectedPtmId && local.selectedPtmNodeId) {{
+                        if (removeNodeAutoPtmPlacement(local, local.selectedPtmNodeId, local.selectedPtmId)) {{
+                            return;
+                        }}
+                    }}
                     const selectedEdgeIds = getSelectedEdgeIds(local);
                     if (selectedEdgeIds.length && Array.isArray(local.editableEdges)) {{
                         const beforeCount = local.editableEdges.length;
@@ -7145,7 +7955,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     const isHorizontal = String(orientation || 'vertical').toLowerCase() === 'horizontal';
                     const width = isHorizontal ? 160 : 26;
                     const height = isHorizontal ? 26 : 160;
-                    return {{
+                    const node = {{
                         id: addNodeId(),
                         originalLabel: '',
                         displayLabel: '',
@@ -7178,14 +7988,18 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         complexDisplayMembers: [],
                     }};
                 }};
-                const createProteinModuleNode = (entry, x = 0, y = 0) => {{
+                const createProteinModuleNode = (entry, x = 0, y = 0, localCtx = null) => {{
                     const uniprot = String(entry && entry.uniprot || '').trim();
                     const geneSymbol = String(entry && entry.geneSymbol || '').trim() || uniprot || 'Protein';
                     const fcColor = (entry && (entry['fc_color_{active_idx}'] || entry.fc_color_1)) || [166, 166, 166];
                     const rgb = Array.isArray(fcColor) && fcColor.length >= 3 ? fcColor.slice(0, 3) : [166, 166, 166];
                     const outlineColor = (entry && (entry['outline_color_{active_idx}'] || entry.outline_color_1)) || [0, 0, 0];
                     const outlineRgb = Array.isArray(outlineColor) && outlineColor.length >= 3 ? outlineColor.slice(0, 3) : [0, 0, 0];
-                    return {{
+                    const outlineWidth = Math.max(
+                        0.6,
+                        Number((localCtx && localCtx.proteinOutlineWidth) || {prot_outline_width})
+                    );
+                    const node = {{
                         id: addNodeId(),
                         originalLabel: geneSymbol,
                         displayLabel: geneSymbol,
@@ -7203,7 +8017,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         ry: 11,
                         shapeType: 'ellipse',
                         angle: 0,
-                        strokeWidth: Math.max(0.6, Number(local.proteinOutlineWidth || {prot_outline_width})),
+                        strokeWidth: outlineWidth,
                         stroke: `rgb(${{outlineRgb[0]}}, ${{outlineRgb[1]}}, ${{outlineRgb[2]}})`,
                         fillColor: `rgb(${{rgb[0]}}, ${{rgb[1]}}, ${{rgb[2]}})`,
                         ['outline_color_{active_idx}']: outlineRgb,
@@ -7223,6 +8037,11 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         isComplex: false,
                         complexDisplayMembers: [],
                     }};
+                    for (const key of Object.keys(entry || {{}})) {{
+                        if (!/^(?:fc_color|fold_change|outline_color|outline_fold_change)_\\d+$/.test(key)) continue;
+                        node[key] = entry[key];
+                    }}
+                    return node;
                 }};
                 const createMetaboliteNode = (entry, x = 0, y = 0) => {{
                     const hmdbId = String(entry && entry.hmdbId || '').trim();
@@ -7465,6 +8284,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     local.selectedEdgeIds = edgeId ? [edgeId] : [];
                     local.selectedNodeId = null;
                     local.selectedNodeIds = [];
+                    clearSelectedPtm(local);
                 }};
                 const getQuadraticPoint = (edge, t) => {{
                     if (!isEdgeBent(edge)) {{
@@ -7764,7 +8584,8 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     }}
                     const results = [];
                     for (const entry of (Array.isArray(proteinSearchCatalog) ? proteinSearchCatalog : [])) {{
-                        const searchText = `${{String(entry.uniprot || '')}} ${{String(entry.geneSymbol || '')}}`;
+                        const aliasText = Array.isArray(entry.searchAliases) ? entry.searchAliases.join(' ') : '';
+                        const searchText = `${{String(entry.uniprot || '')}} ${{String(entry.geneSymbol || '')}} ${{aliasText}}`;
                         if (!regex.test(searchText)) continue;
                         results.push(entry);
                         if (results.length >= Math.max(1, Number(limit || 40))) break;
@@ -7783,7 +8604,8 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     const maxResults = Math.max(1, Number(limit || 40));
                     const proteinResults = [];
                     for (const entry of (Array.isArray(proteinSearchCatalog) ? proteinSearchCatalog : [])) {{
-                        const searchText = `${{String(entry.uniprot || '')}} ${{String(entry.geneSymbol || '')}}`;
+                        const aliasText = Array.isArray(entry.searchAliases) ? entry.searchAliases.join(' ') : '';
+                        const searchText = `${{String(entry.uniprot || '')}} ${{String(entry.geneSymbol || '')}} ${{aliasText}}`;
                         if (!regex.test(searchText)) continue;
                         proteinResults.push(Object.assign({{ kind: 'protein', label: `${{String(entry.uniprot || '')}} - ${{String(entry.geneSymbol || '')}}` }}, entry));
                     }}
@@ -7805,7 +8627,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         }}, entry));
                     }}
                     const results = [];
-                    const primary = /hmdb|^c\d{{5}}$|wikipedia|wiki/i.test(rawQuery) ? metaboliteResults : proteinResults;
+                    const primary = /hmdb|^c\\d{{5}}$|wikipedia|wiki/i.test(rawQuery) ? metaboliteResults : proteinResults;
                     const secondary = primary === metaboliteResults ? proteinResults : metaboliteResults;
                     let idx = 0;
                     while (results.length < maxResults && (idx < primary.length || idx < secondary.length)) {{
@@ -7832,12 +8654,9 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         candidateKeys.push(key);
                     }};
                     const matchedKey = normalizeAutoPtmUniprotKey(node && node.matchedUniprot);
-                    if (matchedKey) {{
-                        candidateKeys.push(matchedKey);
-                    }} else {{
-                        for (const item of (Array.isArray(node && node.candidateUniprotIds) ? node.candidateUniprotIds : [])) {{
-                            pushKey(item);
-                        }}
+                    if (matchedKey) pushKey(matchedKey);
+                    for (const item of (Array.isArray(node && node.candidateUniprotIds) ? node.candidateUniprotIds : [])) {{
+                        pushKey(item);
                     }}
                     for (const key of candidateKeys) {{
                         const matched = autoPtmItemsByUniprot[key];
@@ -8074,7 +8893,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             fold_change_1: (ptmEntry && ptmEntry.fold_change_1),
                         }};
                         for (const key of Object.keys(ptmEntry || {{}})) {{
-                            if (!/^fc_color_\d+$/.test(key) && !/^outline_color_\d+$/.test(key) && !/^fold_change_\d+$/.test(key)) continue;
+                            if (!/^fc_color_\\d+$/.test(key) && !/^outline_color_\\d+$/.test(key) && !/^fold_change_\\d+$/.test(key) && !/^outline_fold_change_\\d+$/.test(key)) continue;
                             placement[key] = ptmEntry[key];
                         }}
                         return {{
@@ -8114,7 +8933,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             fold_change_1: (ptmEntry && ptmEntry.fold_change_1),
                         }};
                         for (const key of Object.keys(ptmEntry || {{}})) {{
-                            if (!/^fc_color_\d+$/.test(key) && !/^outline_color_\d+$/.test(key) && !/^fold_change_\d+$/.test(key)) continue;
+                            if (!/^fc_color_\\d+$/.test(key) && !/^outline_color_\\d+$/.test(key) && !/^fold_change_\\d+$/.test(key) && !/^outline_fold_change_\\d+$/.test(key)) continue;
                             placement[key] = ptmEntry[key];
                         }}
                         return {{
@@ -8767,6 +9586,8 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             selectedNodeIds: [],
                             selectedEdgeId: null,
                             selectedEdgeIds: [],
+                            selectedPtmId: null,
+                            selectedPtmNodeId: null,
                             disablePdfReader: {str(disable_pdf_reader).lower()},
                             simpleKeggMode: {str(simple_kegg_mode).lower()},
                             showPdfBackground: {str(simple_kegg_mode).lower()},
@@ -8779,6 +9600,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             batchSizePanelOpen: false,
                             proteinOvalMode: true,
                             proteinOutlineWidth: {prot_outline_width},
+                            temporalMode: {str(temporal_mode).lower()},
                             edgeResizeMode: false,
                             dragState: null,
                             globalOpacity: 0.98,
@@ -8812,6 +9634,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     }}
                     const local = state['{viewer_key}'];
                     local.proteinOutlineWidth = {prot_outline_width};
+                    local.temporalMode = {str(temporal_mode).lower()};
                     local.disablePdfReader = {str(disable_pdf_reader).lower()};
                     local.simpleKeggMode = {str(simple_kegg_mode).lower()};
                     local.showPdfBackground = {str(simple_kegg_mode).lower()};
@@ -8941,6 +9764,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                         node.opacity = local.globalOpacity;
                                     }}
                                 }}
+                                local.editableNodes = applyActiveFcToEditableNodes(local.editableNodes || []);
                                 if (AUTO_PTM_RENDER_ENABLED && !Array.isArray(local.autoPtmPlacements)) {{
                                     local.autoPtmPlacements = buildAutoPtmPlacements(local);
                                 }}
@@ -9626,10 +10450,12 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         return;
                     }}
                     if (role === 'ptm-body' && ptmId && nodeId) {{
+                        setSinglePtmSelection(local, nodeId, ptmId);
                         beginAutoPtmDrag(evt, local, ptmId, nodeId);
                         return;
                     }}
                     if (role === 'ptm-label' && ptmId && nodeId) {{
+                        setSinglePtmSelection(local, nodeId, ptmId);
                         beginAutoPtmLabelDrag(evt, local, ptmId, nodeId);
                         return;
                     }}
@@ -10026,7 +10852,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     if ((role === 'ptm-body' || role === 'ptm-label') && ptmId && nodeId) {{
                         evt.preventDefault();
                         evt.stopPropagation();
-                        setSingleSelection(local, nodeId);
+                        setSinglePtmSelection(local, nodeId, ptmId);
                         showAutoPtmContextMenu(local, evt, nodeId, ptmId);
                         renderEditableOverlay(local);
                         return;
@@ -10299,10 +11125,24 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     addProtbox: (uniprot) => {{
                         const local = window[renderStateKey] && window[renderStateKey]['{viewer_key}'];
                         if (!local) return false;
-                        const entry = (Array.isArray(proteinSearchCatalog) ? proteinSearchCatalog : []).find((item) => String(item.uniprot || '') === String(uniprot || ''));
+                        const token = String(uniprot || '').trim();
+                        if (!token) return false;
+                        const catalog = Array.isArray(proteinSearchCatalog) ? proteinSearchCatalog : [];
+                        const normalizeUni = (value) => String(value || '').trim().toUpperCase().split('-')[0];
+                        const tokenUpper = token.toUpperCase();
+                        const tokenUni = normalizeUni(token);
+                        let entry = catalog.find((item) => normalizeUni(item && item.uniprot) === tokenUni);
+                        if (!entry) {{
+                            entry = catalog.find((item) => String(item && item.geneSymbol || '').trim().toUpperCase() === tokenUpper);
+                        }}
+                        if (!entry) {{
+                            const payload = searchProteinCatalog(token, 1) || {{}};
+                            const results = Array.isArray(payload.results) ? payload.results : [];
+                            entry = results.length ? results[0] : null;
+                        }}
                         if (!entry) return false;
                         const center = getViewportCenter();
-                        const node = createProteinModuleNode(entry, center.overlayX, center.overlayY);
+                        const node = createProteinModuleNode(entry, center.overlayX, center.overlayY, local);
                         pushUndoSnapshot(local, buildSnapshot(local));
                         local.editableNodes = Array.isArray(local.editableNodes) ? local.editableNodes.concat([node]) : [node];
                         setSingleSelection(local, node.id);
@@ -10605,7 +11445,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         if (applyBatchSize(local)) evt.preventDefault();
                         return;
                     }}
-                    if (!local.selectedNodeId && !local.selectedEdgeId) return;
+                    if (!local.selectedNodeId && !local.selectedEdgeId && !local.selectedPtmId) return;
                     if ((evt.key === 'Delete' || evt.key === 'Backspace') && !evt.metaKey && !evt.ctrlKey && !evt.altKey) {{
                         if (isTyping) return;
                         deleteSelectedNode(local);

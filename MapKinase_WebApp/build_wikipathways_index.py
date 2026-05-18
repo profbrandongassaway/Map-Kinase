@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Build a WikiPathways index for an organism using WikiPathways web services + GPML.
+Build a WikiPathways index for an organism from the local species-organized cache.
 
 This script mirrors build_kegg_index.py behavior:
-- fetches pathway list and GPML with caching/retry
+- loads pathway GPML from stored_pathways/wikipathways/<species>
 - parses nodes and interactions
 - precomputes 1-hop / 2-hop candidate pairs
 - resolves native IDs to UniProt using organism id-mapping table
@@ -25,16 +25,13 @@ from datetime import datetime, timezone
 from itertools import combinations
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Set, Tuple
-from urllib.parse import quote
 import xml.etree.ElementTree as ET
-
-import requests
 
 
 SCHEMA_VERSION = 1
 PARSER_VERSION = 1
-WIKIPATHWAYS_API_BASE = "https://webservice.wikipathways.org"
 DEFAULT_RATE_LIMIT = 0.25
+DEFAULT_LOCAL_WIKIPATHWAYS_DIR = Path("stored_pathways") / "wikipathways"
 
 LOGGER = logging.getLogger("build_wikipathways_index")
 
@@ -46,7 +43,7 @@ CONFIG_MAX_PATHWAYS = None
 CONFIG_RATE_LIMIT = DEFAULT_RATE_LIMIT
 CONFIG_PRETTY = False
 CONFIG_LOG_LEVEL = "INFO"
-# Optional species-name override for listPathways endpoint.
+# Optional species-name override for local species folder resolution.
 CONFIG_SPECIES_NAME = None
 # If None, default is MapKinase_WebApp/annotation_files/{org}_mapping_table.txt.
 CONFIG_ID_MAPPING_TABLE = None
@@ -59,14 +56,6 @@ ORG_TO_SPECIES_DEFAULTS: Dict[str, str] = {
     "dme": "Drosophila melanogaster",
     "sce": "Saccharomyces cerevisiae",
 }
-
-
-class WikiPathwaysFetchError(RuntimeError):
-    """Raised when WikiPathways content cannot be fetched after retries."""
-
-
-class WikiPathwaysNotFoundError(WikiPathwaysFetchError):
-    """Raised when WikiPathways returns a missing payload for pathway."""
 
 
 class RateLimiter:
@@ -98,7 +87,15 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument(
         "--species-name",
         default=None,
-        help="Optional species name override used by listPathways (e.g. 'Homo sapiens').",
+        help="Optional species name override used for local species folder resolution (e.g. 'Homo sapiens').",
+    )
+    parser.add_argument(
+        "--local-cache-dir",
+        default=str(DEFAULT_LOCAL_WIKIPATHWAYS_DIR),
+        help=(
+            "Local WikiPathways cache root containing species folders "
+            f"(default: {DEFAULT_LOCAL_WIKIPATHWAYS_DIR})."
+        ),
     )
     parser.add_argument(
         "--id-mapping-table",
@@ -142,6 +139,7 @@ def get_runtime_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
             out=CONFIG_OUT,
             cache=CONFIG_CACHE,
             species_name=CONFIG_SPECIES_NAME,
+            local_cache_dir=str(DEFAULT_LOCAL_WIKIPATHWAYS_DIR),
             id_mapping_table=CONFIG_ID_MAPPING_TABLE,
             max_pathways=CONFIG_MAX_PATHWAYS,
             rate_limit=CONFIG_RATE_LIMIT,
@@ -185,48 +183,6 @@ def sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def fetch_json(
-    session: requests.Session,
-    url: str,
-    rate_limiter: RateLimiter,
-    timeout: int = 30,
-    max_retries: int = 5,
-) -> Dict[str, object]:
-    last_error: Optional[Exception] = None
-    for attempt in range(1, max_retries + 1):
-        try:
-            rate_limiter.wait()
-            response = session.get(url, timeout=timeout)
-            response.raise_for_status()
-            return response.json()
-        except (requests.RequestException, json.JSONDecodeError) as exc:
-            last_error = exc
-            wait_s = min(2 ** (attempt - 1), 10)
-            LOGGER.warning(
-                "Request failed (%s/%s) for %s: %s. Retrying in %.1fs",
-                attempt,
-                max_retries,
-                url,
-                exc,
-                wait_s,
-            )
-            time.sleep(wait_s)
-    raise WikiPathwaysFetchError(f"Failed to fetch JSON: {url}") from last_error
-
-
-def load_or_fetch_json(
-    session: requests.Session,
-    url: str,
-    cache_path: Path,
-    rate_limiter: RateLimiter,
-) -> Dict[str, object]:
-    if cache_path.exists() and cache_path.stat().st_size > 0:
-        return json.loads(read_text(cache_path))
-    payload = fetch_json(session=session, url=url, rate_limiter=rate_limiter)
-    write_json_atomic(cache_path, payload, pretty=True)
-    return payload
-
-
 def normalize_pathway_id(raw_id: str) -> str:
     value = str(raw_id or "").strip()
     if not value:
@@ -237,7 +193,15 @@ def normalize_pathway_id(raw_id: str) -> str:
 
 
 def default_mapping_table_path(org: str) -> str:
-    return str(Path("MapKinase_WebApp") / "annotation_files" / f"{org}_mapping_table.txt")
+    ann_dir = Path("MapKinase_WebApp") / "annotation_files"
+    candidates = [
+        ann_dir / f"{org}_mapping_table.txt",
+        ann_dir / f"{org}_id_mapping_table.txt",
+    ]
+    for path in candidates:
+        if path.exists():
+            return str(path)
+    return str(candidates[0])
 
 
 def _normalize_col_key(name: str) -> str:
@@ -285,27 +249,60 @@ def resolve_species_name(org: str, override: Optional[str]) -> str:
     return ORG_TO_SPECIES_DEFAULTS.get(org, org)
 
 
-def parse_pathway_list(payload: Dict[str, object]) -> List[Dict[str, str]]:
+def _normalize_species_name(value: str) -> str:
+    return str(value or "").strip().lower().replace("_", " ")
+
+
+def normalize_species_folder(value: str) -> str:
+    text = "".join(ch.lower() if ch.isalnum() else "_" for ch in str(value or "").strip())
+    while "__" in text:
+        text = text.replace("__", "_")
+    return text.strip("_") or "unknown"
+
+
+def read_json_file(path: Path) -> Dict[str, object]:
+    try:
+        payload = json.loads(read_text(path))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def extract_gpml_metadata(gpml_path: Path) -> Dict[str, str]:
+    try:
+        root = ET.fromstring(gpml_path.read_text(encoding="utf-8", errors="replace"))
+    except Exception:
+        return {}
+    return {
+        "name": str(root.attrib.get("Name") or "").strip(),
+        "species": str(root.attrib.get("Organism") or "").strip(),
+        "revision": str(root.attrib.get("Version") or "").strip(),
+    }
+
+
+def load_local_pathway_list(local_cache_dir: Path, species_name: str) -> List[Dict[str, str]]:
     out: List[Dict[str, str]] = []
-    seen: Set[str] = set()
-    rows = payload.get("pathways")
-    if not isinstance(rows, list):
+    species_folder = normalize_species_folder(species_name)
+    species_dir = local_cache_dir / species_folder
+    if not species_dir.exists():
         return out
-    for row in rows:
-        if not isinstance(row, dict):
-            continue
-        pathway_id = normalize_pathway_id(str(row.get("id") or ""))
+    for gpml_path in sorted(species_dir.glob("WP*.gpml"), key=lambda p: p.name.lower()):
+        pathway_id = normalize_pathway_id(gpml_path.stem)
         if not pathway_id:
             continue
-        if pathway_id in seen:
-            continue
-        seen.add(pathway_id)
+        info = read_json_file(species_dir / f"{pathway_id}-info.json")
+        organisms = info.get("organisms")
+        organism_name = ""
+        if isinstance(organisms, list):
+            organism_name = next((str(item or "").strip() for item in organisms if str(item or "").strip()), "")
+        gpml_meta = extract_gpml_metadata(gpml_path)
         out.append(
             {
                 "pathway_id": pathway_id,
-                "name": str(row.get("name") or pathway_id).strip(),
-                "species": str(row.get("species") or "").strip(),
-                "revision": str(row.get("revision") or "").strip(),
+                "name": str(info.get("title") or gpml_meta.get("name") or pathway_id).strip(),
+                "species": str(organism_name or gpml_meta.get("species") or species_name).strip(),
+                "revision": str(info.get("revision") or gpml_meta.get("revision") or "").strip(),
+                "gpml_path": str(gpml_path),
             }
         )
     return out
@@ -736,32 +733,6 @@ def compute_stats(
     }
 
 
-def extract_gpml_from_get_pathway_payload(payload: Dict[str, object], pathway_id: str) -> str:
-    pathway = payload.get("pathway")
-    if not isinstance(pathway, dict):
-        raise WikiPathwaysNotFoundError(f"{pathway_id}: invalid getPathway payload (missing pathway object)")
-    gpml = pathway.get("gpml")
-    if not isinstance(gpml, str) or not gpml.strip():
-        raise WikiPathwaysNotFoundError(f"{pathway_id}: missing gpml text in payload")
-    return gpml
-
-
-def fetch_gpml_text(
-    session: requests.Session,
-    pathway_id: str,
-    gpml_cache_path: Path,
-    rate_limiter: RateLimiter,
-) -> str:
-    if gpml_cache_path.exists() and gpml_cache_path.stat().st_size > 0:
-        return read_text(gpml_cache_path)
-
-    url = f"{WIKIPATHWAYS_API_BASE}/getPathway?pwId={quote(pathway_id)}&format=json"
-    payload = fetch_json(session=session, url=url, rate_limiter=rate_limiter)
-    gpml = extract_gpml_from_get_pathway_payload(payload=payload, pathway_id=pathway_id)
-    write_text_atomic(gpml_cache_path, gpml)
-    return gpml
-
-
 def main(argv: Optional[List[str]] = None) -> int:
     try:
         args = get_runtime_args(argv)
@@ -777,37 +748,26 @@ def main(argv: Optional[List[str]] = None) -> int:
     org = str(args.org or "").strip().lower()
     out_path = Path(args.out)
     cache_dir = Path(args.cache)
+    local_cache_dir = Path(args.local_cache_dir)
     species_name = resolve_species_name(org=org, override=args.species_name)
     mapping_table_path = Path(args.id_mapping_table) if args.id_mapping_table else Path(default_mapping_table_path(org))
 
-    list_cache_dir = cache_dir / "list"
-    gpml_cache_dir = cache_dir / "gpml" / org
     parsed_cache_dir = cache_dir / "parsed" / org
-    ensure_dir(list_cache_dir)
-    ensure_dir(gpml_cache_dir)
     ensure_dir(parsed_cache_dir)
 
-    rate_limiter = RateLimiter(args.rate_limit)
-    session = requests.Session()
-    session.headers.update({"User-Agent": "build_wikipathways_index.py/1.0"})
-
-    list_cache_path = list_cache_dir / f"pathways_{org}.json"
-    list_url = f"{WIKIPATHWAYS_API_BASE}/listPathways?organism={quote(species_name)}&format=json"
-    LOGGER.info("Loading WikiPathways list for org=%s species=%s", org, species_name)
-    try:
-        list_payload = load_or_fetch_json(
-            session=session,
-            url=list_url,
-            cache_path=list_cache_path,
-            rate_limiter=rate_limiter,
-        )
-    except Exception as exc:  # noqa: BLE001
-        LOGGER.error("Failed to load pathway list for %s: %s", org, exc)
-        return 2
-
-    pathway_list = parse_pathway_list(list_payload)
+    LOGGER.info(
+        "Loading local WikiPathways list for org=%s species=%s from %s",
+        org,
+        species_name,
+        local_cache_dir,
+    )
+    pathway_list = load_local_pathway_list(local_cache_dir=local_cache_dir, species_name=species_name)
     if not pathway_list:
-        LOGGER.error("No WikiPathways found for species=%s", species_name)
+        LOGGER.error(
+            "No local WikiPathways found for species=%s under %s",
+            species_name,
+            local_cache_dir / normalize_species_folder(species_name),
+        )
         return 2
 
     if args.max_pathways is not None:
@@ -830,23 +790,17 @@ def main(argv: Optional[List[str]] = None) -> int:
         pathway_id = meta["pathway_id"]
         pathway_name = meta.get("name", pathway_id)
         LOGGER.info("[%s/%s] Processing %s", idx, total, pathway_id)
-        gpml_cache_path = gpml_cache_dir / f"{pathway_id}.gpml"
         parsed_cache_path = parsed_cache_dir / f"{pathway_id}.parsed.json"
+        gpml_path = Path(str(meta.get("gpml_path") or ""))
 
         try:
-            gpml_text = fetch_gpml_text(
-                session=session,
-                pathway_id=pathway_id,
-                gpml_cache_path=gpml_cache_path,
-                rate_limiter=rate_limiter,
-            )
-        except WikiPathwaysNotFoundError as exc:
-            msg = f"{pathway_id}: no GPML payload: {exc}"
-            LOGGER.warning(msg)
-            failures.append(msg)
-            continue
+            if not gpml_path.exists():
+                raise FileNotFoundError(gpml_path)
+            gpml_text = read_text(gpml_path)
+            if not gpml_text.strip():
+                raise ValueError("empty GPML file")
         except Exception as exc:  # noqa: BLE001
-            msg = f"{pathway_id}: failed to download GPML: {exc}"
+            msg = f"{pathway_id}: failed to load local GPML: {exc}"
             LOGGER.warning(msg)
             failures.append(msg)
             continue
@@ -920,7 +874,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             "org": org,
             "species": species_name,
             "created_utc": datetime.now(timezone.utc).isoformat(),
-            "wikipathways_api_base": WIKIPATHWAYS_API_BASE,
+            "local_cache_dir": str(local_cache_dir),
             "id_mapping_table": str(mapping_table_path),
             "notes": notes,
             "stats": stats,

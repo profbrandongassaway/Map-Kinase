@@ -292,7 +292,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             shiftKeyDown = false;
             activeDragProtboxId = null;
             currentSelected = {{}};
-            // If a KEGG background image exists in the JSON and preview is enabled, embed it into the SVG
+            // If a pathway background image exists in the JSON and preview is enabled, embed it into the SVG
             try {{
                 const showBg = {str(show_kegg_bg).lower()};
                 const dataPreview = null;
@@ -356,28 +356,68 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             const ksPtmPositionPriority = ['W1','W2','E1','E2','N1','S1','N2','S2','N3','S3'];
             let ptmPositionPriority = defaultPtmPositionPriority;
             let prioritizedPtmPositions = ptmPositionPriority.slice(0, 4);
-            const pickFreeSnap = (protboxId, radius = ptmSnapRadius) => {{
+            let blockedTemporalPtmPositions = new Set();
+            const isBlockedPtmPosition = (key) => blockedTemporalPtmPositions.has(String(key || '').toUpperCase());
+            const filterBlockedPtmPositions = (order) => Array.isArray(order) ? order.filter((key) => !isBlockedPtmPosition(key)) : [];
+            const buildProtboxSnapMap = (pbX, pbY, width, height, spacing) => {{
+              return {{
+                'N1': {{ x: pbX + width * 0.2, y: pbY - spacing }},
+                'N2': {{ x: pbX + width * 0.5, y: pbY - spacing }},
+                'N3': {{ x: pbX + width * 0.8, y: pbY - spacing }},
+                'S1': {{ x: pbX + width * 0.2, y: pbY + height + spacing }},
+                'S2': {{ x: pbX + width * 0.5, y: pbY + height + spacing }},
+                'S3': {{ x: pbX + width * 0.8, y: pbY + height + spacing }},
+                'W1': {{ x: pbX - spacing, y: pbY + height * 0.33 - 2 }},
+                'W2': {{ x: pbX - spacing, y: pbY + height * 0.66 + 2 }},
+                'E1': {{ x: pbX + width + spacing, y: pbY + height * 0.33 - 2 }},
+                'E2': {{ x: pbX + width + spacing, y: pbY + height * 0.66 + 2 }},
+              }};
+            }};
+            const getBlockedPtmReplacementOrder = (blockedKey) => {{
+              const key = String(blockedKey || '').toUpperCase();
+              if (key === 'N2') return ['N1', 'N3'];
+              if (key === 'S2') return ['S1', 'S3'];
+              return [];
+            }};
+            const collectOccupiedSnapKeys = (protboxId, extraOccupied = null) => {{
+              const occupied = new Set();
+              const ptms = draw.find(`[data-type="ptm-shape"][data-protbox-id="${{protboxId}}"]`);
+              for (let i = 0; i < ptms.length; i++) {{
+                const key = String(ptms[i].attr && ptms[i].attr('data-pos-key') || '').toUpperCase();
+                if (key) occupied.add(key);
+              }}
+              if (extraOccupied) {{
+                for (const key of extraOccupied) {{
+                  const normalized = String(key || '').toUpperCase();
+                  if (normalized) occupied.add(normalized);
+                }}
+              }}
+              return occupied;
+            }};
+            const pickFreeSnap = (protboxId, radius = ptmSnapRadius, preferredOrder = [], extraOccupied = null) => {{
               const snaps = protboxSnapPoints[protboxId];
               if (!snaps) return null;
 
               // All PTM shapes already attached to this protbox
               const ptms = draw.find(`[data-type="ptm-shape"][data-protbox-id="${{protboxId}}"]`);
             
-              const occupied = new Set();
+              const occupied = collectOccupiedSnapKeys(protboxId, extraOccupied);
               for (const key in snaps) {{
                 const sp = snaps[key];
                 for (let i = 0; i < ptms.length; i++) {{
                   const el = ptms[i];
                   const isCircle = el.type === 'circle';
-                  const x = parseFloat(isCircle ? el.cx() : (el.x() || 0));
-                  const y = parseFloat(isCircle ? el.cy() : (el.y() || 0));
+                  const width = parseFloat(el.width ? el.width() : 0) || 0;
+                  const height = parseFloat(el.height ? el.height() : 0) || 0;
+                  const x = parseFloat(isCircle ? el.cx() : ((el.x() || 0) + (width / 2)));
+                  const y = parseFloat(isCircle ? el.cy() : ((el.y() || 0) + (height / 2)));
                   const d = Math.hypot(x - sp.x, y - sp.y);
                   if (d <= radius) {{ occupied.add(key); break; }}
                 }}
               }}
 
               // Preferred order (tweak if you like)
-              const order = ptmPositionPriority;
+              const order = [...preferredOrder, ...ptmPositionPriority].map((key) => String(key || '').toUpperCase()).filter((key, idx, arr) => key && arr.indexOf(key) === idx);
               for (const key of order) {{
                 if (snaps[key] && !occupied.has(key)) return {{ key, x: snaps[key].x, y: snaps[key].y }};
               }}
@@ -392,14 +432,46 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 if (dbg) dbg.textContent = 'Client init error: failed to parse pathway JSON (' + (parseErr?.message || parseErr) + ')';
                 return;
             }}
+            let __mkPersistKey = '';
+            let __mkPersistToken = '__no_token__';
             try {{
                 const persistKey = data && data._bookmark_key;
                 if (persistKey) {{
+                    __mkPersistKey = String(persistKey);
                     window.__mkPersisted = window.__mkPersisted || {{}};
-                    const cached = window.__mkPersisted[persistKey];
-                    const incomingToken = data && data._persist_token;
-                    const cachedToken = cached && cached._persist_token;
-                    if (cached && typeof cached === 'object' && cachedToken && incomingToken && cachedToken === incomingToken) {{
+                    const incomingTokenRaw = data && data._persist_token;
+                    const incomingToken = (incomingTokenRaw === undefined || incomingTokenRaw === null || incomingTokenRaw === '')
+                        ? '__no_token__'
+                        : String(incomingTokenRaw);
+                    __mkPersistToken = incomingToken;
+                    let bucket = window.__mkPersisted[persistKey];
+                    if (bucket && typeof bucket === 'object' && !bucket.__mkTokenBucket) {{
+                        const legacyTokenRaw = bucket && bucket._persist_token;
+                        const legacyToken = (legacyTokenRaw === undefined || legacyTokenRaw === null || legacyTokenRaw === '')
+                            ? '__no_token__'
+                            : String(legacyTokenRaw);
+                        const legacyVariants = {{}};
+                        legacyVariants[legacyToken] = bucket;
+                        bucket = {{
+                            __mkTokenBucket: true,
+                            variants: legacyVariants,
+                            activeToken: legacyToken
+                        }};
+                        window.__mkPersisted[persistKey] = bucket;
+                    }}
+                    if (!bucket || typeof bucket !== 'object') {{
+                        bucket = {{
+                            __mkTokenBucket: true,
+                            variants: {{}},
+                            activeToken: null
+                        }};
+                        window.__mkPersisted[persistKey] = bucket;
+                    }}
+                    if (!bucket.variants || typeof bucket.variants !== 'object') {{
+                        bucket.variants = {{}};
+                    }}
+                    const cached = bucket.variants[incomingToken];
+                    if (cached && typeof cached === 'object') {{
                         const incomingSettings = (data.general_data && data.general_data.settings) || {{}};
                         const cachedSettings = (cached.general_data && cached.general_data.settings) || {{}};
                         cached.general_data = cached.general_data || {{}};
@@ -409,82 +481,99 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                             cached._color_preview_override = data._color_preview_override;
                         }}
                         data = cached;
-                    }} else if (cached && typeof cached === 'object' && !incomingToken) {{
-                        data = cached;
                     }} else {{
-                        window.__mkPersisted[persistKey] = data;
+                        bucket.variants[incomingToken] = data;
+                    }}
+                    if (incomingToken !== '__no_token__') {{
+                        bucket.activeToken = incomingToken;
+                    }} else if (!bucket.activeToken) {{
+                        bucket.activeToken = '__no_token__';
                     }}
                 }}
             }} catch (persistErr) {{
                 console.log('m3: persistence merge failed', persistErr);
             }}
             const bookmarkKey = (data && data._bookmark_key ? String(data._bookmark_key).toLowerCase() : '');
-            ptmPositionPriority = bookmarkKey === 'ks' ? ksPtmPositionPriority : defaultPtmPositionPriority;
+            const viewerSettings = (data && data.general_data && data.general_data.settings) ? data.general_data.settings : {{}};
+            blockedTemporalPtmPositions = Boolean(viewerSettings.temporal_mode) ? new Set(['N2', 'S2']) : new Set();
+            ptmPositionPriority = filterBlockedPtmPositions(bookmarkKey === 'ks' ? ksPtmPositionPriority : defaultPtmPositionPriority);
             prioritizedPtmPositions = ptmPositionPriority.slice(0, 4);
-            const preview = data._kegg_preview || {{}};
-            const offxVal = Number(preview.offset_x);
-            const offyVal = Number(preview.offset_y);
-            const offx = Number.isFinite(offxVal) ? offxVal : 0;
-            const offy = Number.isFinite(offyVal) ? offyVal : 0;
+            const preview = Object.assign({{}}, data._kegg_preview || {{}});
+            const settingsBgScale = Number(viewerSettings.bg_scale);
+            const settingsBgOffsetX = Number(viewerSettings.bg_offset_x);
+            const settingsBgOffsetY = Number(viewerSettings.bg_offset_y);
+            if (Number.isFinite(settingsBgScale)) preview.scale = settingsBgScale;
+            if (Number.isFinite(settingsBgOffsetX)) preview.offset_x = settingsBgOffsetX;
+            if (Number.isFinite(settingsBgOffsetY)) preview.offset_y = settingsBgOffsetY;
             // Keep background offsets configurable; foreground layers stay unshifted so all elements align.
             const fgOffsetX = 0;
             const fgOffsetY = 0;
-            // Embed KEGG image into the SVG using SVG.js so it shares the same transforms (pan/zoom)
-            try {{
-                const existingBg = draw.findOne('image[data-kegg-bg="1"]');
-                if (data && data.kegg_bg_image && data._kegg_preview && data._kegg_preview.show) {{
-                    const opacity = typeof preview.opacity === 'number' ? preview.opacity : 0.9;
-                    const size = data.kegg_bg_size || {{}};
-                    const fw = Number(size.width);
-                    const fh = Number(size.height);
-                    const hasFallbackSize = Number.isFinite(fw) && fw > 0 && Number.isFinite(fh) && fh > 0;
-                    const fallbackSize = hasFallbackSize ? {{ width: fw, height: fh }} : null;
-                    try {{
-                        const scale = typeof preview.scale === 'number' ? preview.scale : 1.0;
-                        console.log('m3: embedding/updating kegg bg image (canvas)', {max_x}, {max_y}, 'scale', scale, 'offsets', offx, offy, 'opacity', opacity);
-                        // Size the image using the provided scale so users can zoom the background separately
-                        const targetScale = Number.isFinite(scale) ? scale : 1;
-                        let imgEl = existingBg;
-                        const applySizing = (element, naturalWidth, naturalHeight) => {{
-                            const baseWidth = Number(naturalWidth) || (fallbackSize ? fallbackSize.width : null) || Number(element.width()) || {max_x};
-                            const baseHeight = Number(naturalHeight) || (fallbackSize ? fallbackSize.height : null) || Number(element.height()) || {max_y};
-                            const width = baseWidth * targetScale;
-                            const height = baseHeight * targetScale;
-                            const offsetX = offx;
-                            const offsetY = offy;
-                            console.log('m3: applySizing offsets', offsetX, offsetY, 'width/height', width, height);
-                            try {{ element.size(width, height); element.move(offsetX, offsetY).opacity(opacity); }} catch (uerr) {{ console.log('update bg sizing failed', uerr); }}
-                            try {{ element.node.style.pointerEvents = 'none'; }} catch (pe) {{ /* ignore */ }}
-                            try {{ element.attr({{ preserveAspectRatio: 'xMidYMid meet', 'data-natural-width': baseWidth, 'data-natural-height': baseHeight }}); }} catch (pa) {{ /* ignore */ }}
-                            element.back();
-                        }};
-                        if (imgEl) {{
-                            const existingWidth = parseFloat(imgEl.attr('data-natural-width'));
-                            const existingHeight = parseFloat(imgEl.attr('data-natural-height'));
-                            const naturalWidth = Number.isFinite(existingWidth) ? existingWidth : (fallbackSize ? fallbackSize.width : Number(imgEl.width()));
-                            const naturalHeight = Number.isFinite(existingHeight) ? existingHeight : (fallbackSize ? fallbackSize.height : Number(imgEl.height()));
-                            applySizing(imgEl, naturalWidth, naturalHeight);
-                            console.log('m3: updated existing kegg bg image');
-                        }} else {{
-                            imgEl = draw.image(data.kegg_bg_image);
-                            try {{ imgEl.attr({{ 'data-kegg-bg': '1' }}); }} catch (aerr) {{ /* ignore */ }}
-                            imgEl.loaded(function(loader) {{
-                                const candidateWidth = Number(loader && loader.width);
-                                const candidateHeight = Number(loader && loader.height);
-                                const naturalWidth = Number.isFinite(candidateWidth) && candidateWidth > 0 ? candidateWidth : (fallbackSize ? fallbackSize.width : Number(imgEl.width()) || {max_x});
-                                const naturalHeight = Number.isFinite(candidateHeight) && candidateHeight > 0 ? candidateHeight : (fallbackSize ? fallbackSize.height : Number(imgEl.height()) || {max_y});
+            const applyBackgroundPreview = (previewOverride = null) => {{
+                const activePreview = Object.assign({{}}, previewOverride || preview);
+                const activeOffxVal = Number(activePreview.offset_x);
+                const activeOffyVal = Number(activePreview.offset_y);
+                const activeOffx = Number.isFinite(activeOffxVal) ? activeOffxVal : 0;
+                const activeOffy = Number.isFinite(activeOffyVal) ? activeOffyVal : 0;
+                try {{
+                    const existingBg = draw.findOne('image[data-kegg-bg="1"]');
+                    if (data && data.kegg_bg_image && activePreview && activePreview.show) {{
+                        const opacity = typeof activePreview.opacity === 'number' ? activePreview.opacity : 0.9;
+                        const size = data.kegg_bg_size || {{}};
+                        const fw = Number(size.width);
+                        const fh = Number(size.height);
+                        const hasFallbackSize = Number.isFinite(fw) && fw > 0 && Number.isFinite(fh) && fh > 0;
+                        const fallbackSize = hasFallbackSize ? {{ width: fw, height: fh }} : null;
+                        try {{
+                            const scale = typeof activePreview.scale === 'number' ? activePreview.scale : 1.0;
+                            console.log('m3: embedding/updating kegg bg image (canvas)', {max_x}, {max_y}, 'scale', scale, 'offsets', activeOffx, activeOffy, 'opacity', opacity);
+                            const targetScale = Number.isFinite(scale) ? scale : 1;
+                            let imgEl = existingBg;
+                            const applySizing = (element, naturalWidth, naturalHeight) => {{
+                                const baseWidth = Number(naturalWidth) || (fallbackSize ? fallbackSize.width : null) || Number(element.width()) || {max_x};
+                                const baseHeight = Number(naturalHeight) || (fallbackSize ? fallbackSize.height : null) || Number(element.height()) || {max_y};
+                                const width = baseWidth * targetScale;
+                                const height = baseHeight * targetScale;
+                                console.log('m3: applySizing offsets', activeOffx, activeOffy, 'width/height', width, height);
+                                try {{ element.size(width, height); element.move(activeOffx, activeOffy).opacity(opacity); }} catch (uerr) {{ console.log('update bg sizing failed', uerr); }}
+                                try {{ element.node.style.pointerEvents = 'none'; }} catch (pe) {{ /* ignore */ }}
+                                try {{ element.attr({{ preserveAspectRatio: 'xMidYMid meet', 'data-natural-width': baseWidth, 'data-natural-height': baseHeight }}); }} catch (pa) {{ /* ignore */ }}
+                                element.back();
+                            }};
+                            if (imgEl) {{
+                                const existingWidth = parseFloat(imgEl.attr('data-natural-width'));
+                                const existingHeight = parseFloat(imgEl.attr('data-natural-height'));
+                                const naturalWidth = Number.isFinite(existingWidth) ? existingWidth : (fallbackSize ? fallbackSize.width : Number(imgEl.width()));
+                                const naturalHeight = Number.isFinite(existingHeight) ? existingHeight : (fallbackSize ? fallbackSize.height : Number(imgEl.height()));
                                 applySizing(imgEl, naturalWidth, naturalHeight);
-                                console.log('m3: kegg bg image embedded');
-                            }});
+                                console.log('m3: updated existing kegg bg image');
+                            }} else {{
+                                imgEl = draw.image(data.kegg_bg_image);
+                                try {{ imgEl.attr({{ 'data-kegg-bg': '1' }}); }} catch (aerr) {{ /* ignore */ }}
+                                imgEl.loaded(function(loader) {{
+                                    const candidateWidth = Number(loader && loader.width);
+                                    const candidateHeight = Number(loader && loader.height);
+                                    const naturalWidth = Number.isFinite(candidateWidth) && candidateWidth > 0 ? candidateWidth : (fallbackSize ? fallbackSize.width : Number(imgEl.width()) || {max_x});
+                                    const naturalHeight = Number.isFinite(candidateHeight) && candidateHeight > 0 ? candidateHeight : (fallbackSize ? fallbackSize.height : Number(imgEl.height()) || {max_y});
+                                    applySizing(imgEl, naturalWidth, naturalHeight);
+                                    console.log('m3: kegg bg image embedded');
+                                }});
+                            }}
+                        }} catch (eimg) {{
+                            console.log('embedding/updating bg image failed', eimg);
                         }}
-                    }} catch (eimg) {{ console.log('embedding/updating bg image failed', eimg); }}
-                }} else {{
-                    // preview disabled or no image in data: remove existing background if present
-                    if (existingBg) {{
-                        try {{ existingBg.remove(); console.log('m3: removed existing kegg bg image because preview is off'); }} catch (rerr) {{ console.log('failed to remove existing bg', rerr); }}
+                    }} else if (existingBg) {{
+                        try {{
+                            existingBg.remove();
+                            console.log('m3: removed existing kegg bg image because preview is off');
+                        }} catch (rerr) {{
+                            console.log('failed to remove existing bg', rerr);
+                        }}
                     }}
+                }} catch (e) {{
+                    console.log('bg embed check failed', e);
                 }}
-            }} catch (e) {{ console.log('bg embed check failed', e); }}
+            }};
+            applyBackgroundPreview();
             // Client-side diagnostic: write protbox count into the debug area and console
             try {{
                 const dbgEl = document.getElementById('debug_json');
@@ -542,6 +631,55 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             const exportKey = bookmarkKey || 'default';
             window.__mkExportSnapshotMap = window.__mkExportSnapshotMap || {{}};
             window.__mkExportSnapshotMap[exportKey] = buildExportSnapshot;
+            const persistSnapshotToCache = () => {{
+                try {{
+                    if (!__mkPersistKey) return;
+                    window.__mkPersisted = window.__mkPersisted || {{}};
+                    let bucket = window.__mkPersisted[__mkPersistKey];
+                    if (bucket && typeof bucket === 'object' && !bucket.__mkTokenBucket) {{
+                        const legacyTokenRaw = bucket && bucket._persist_token;
+                        const legacyToken = (legacyTokenRaw === undefined || legacyTokenRaw === null || legacyTokenRaw === '')
+                            ? '__no_token__'
+                            : String(legacyTokenRaw);
+                        const legacyVariants = {{}};
+                        legacyVariants[legacyToken] = bucket;
+                        bucket = {{
+                            __mkTokenBucket: true,
+                            variants: legacyVariants,
+                            activeToken: legacyToken
+                        }};
+                        window.__mkPersisted[__mkPersistKey] = bucket;
+                    }}
+                    if (!bucket || typeof bucket !== 'object') {{
+                        bucket = {{
+                            __mkTokenBucket: true,
+                            variants: {{}},
+                            activeToken: null
+                        }};
+                        window.__mkPersisted[__mkPersistKey] = bucket;
+                    }}
+                    if (!bucket.variants || typeof bucket.variants !== 'object') {{
+                        bucket.variants = {{}};
+                    }}
+                    const snapshot = buildExportSnapshot();
+                    if (!snapshot || typeof snapshot !== 'object') return;
+                    const merged = Object.assign({{}}, snapshot, {{
+                        _bookmark_key: __mkPersistKey,
+                        _persist_token: (__mkPersistToken === '__no_token__' ? '' : __mkPersistToken)
+                    }});
+                    bucket.variants[__mkPersistToken] = merged;
+                    bucket.activeToken = __mkPersistToken;
+                }} catch (persistSyncErr) {{
+                    console.log('m3: persist snapshot sync failed', persistSyncErr);
+                }}
+            }};
+            persistSnapshotToCache();
+            document.addEventListener('mk-viewer-history-state', (evt) => {{
+                const key = (evt && evt.detail && evt.detail.key) ? String(evt.detail.key).toLowerCase() : '';
+                if (key === exportKey) {{
+                    persistSnapshotToCache();
+                }}
+            }});
             if (window.Shiny && Shiny.addCustomMessageHandler && !window.__mkExportHandlerInstalled) {{
                 window.__mkExportHandlerInstalled = true;
                 Shiny.addCustomMessageHandler('request_export_snapshot', function(msg) {{
@@ -1158,13 +1296,41 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     const num = Number(value);
                     return Number.isFinite(num) ? num : fallback;
                 }};
+                const normalizeStops = (rawStops) => {{
+                    if (!Array.isArray(rawStops)) return [];
+                    const rows = [];
+                    rawStops.forEach((entry) => {{
+                        if (!entry || typeof entry !== 'object') return;
+                        const value = Number(entry.value);
+                        const color = normalizeColor(entry.color || entry.rgb, null);
+                        if (!Number.isFinite(value) || !color) return;
+                        rows.push({{ value, color }});
+                    }});
+                    if (!rows.length) return [];
+                    const dedup = new Map();
+                    rows.forEach((row) => dedup.set(Number(row.value), row.color));
+                    return Array.from(dedup.entries())
+                        .map(([value, color]) => ({{ value: Number(value), color }}))
+                        .sort((a, b) => a.value - b.value);
+                }};
                 const negLimit = toNumberOr(pickSettingValue('max_negative', -2), -2) || -2;
                 const posLimit = toNumberOr(pickSettingValue('max_positive', 2), 2) || 2;
+                const negColor = normalizeColor(pickSettingValue('negative_color', [255, 0, 0]), [255, 0, 0]);
+                const posColor = normalizeColor(pickSettingValue('positive_color', [0, 0, 255]), [0, 0, 255]);
+                const rawStops = normalizeStops(pickSettingValue('gradient_stops', []));
+                const stops = rawStops.length >= 2
+                    ? rawStops
+                    : [
+                        {{ value: negLimit === 0 ? -2 : negLimit, color: negColor }},
+                        {{ value: 0, color: [255, 255, 255] }},
+                        {{ value: posLimit === 0 ? 2 : posLimit, color: posColor }},
+                    ].sort((a, b) => a.value - b.value);
                 return {{
-                    negColor: normalizeColor(pickSettingValue('negative_color', [255, 0, 0]), [255, 0, 0]),
-                    posColor: normalizeColor(pickSettingValue('positive_color', [0, 0, 255]), [0, 0, 255]),
-                    maxNeg: negLimit === 0 ? -2 : negLimit,
-                    maxPos: posLimit === 0 ? 2 : posLimit,
+                    negColor,
+                    posColor,
+                    maxNeg: Number(stops[0].value),
+                    maxPos: Number(stops[stops.length - 1].value),
+                    stops,
                 }};
             }})();
             const protOutlineWidth = (() => {{
@@ -1177,17 +1343,25 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             }})();
             const gradientColorFromFold = (foldValue) => {{
                 if (!Number.isFinite(foldValue)) return defaultGray;
-                const white = [255, 255, 255];
-                if (foldValue < 0) {{
-                    const denom = Math.abs(gradientConfig.maxNeg) > 0 ? Math.abs(gradientConfig.maxNeg) : 1;
-                    const t = Math.min(Math.abs(foldValue) / denom, 1);
-                    const blended = white.map((w, idx) => clampChannel((1 - t) * w + t * gradientConfig.negColor[idx]));
+                const stops = Array.isArray(gradientConfig.stops) ? gradientConfig.stops : [];
+                if (stops.length < 2) return defaultGray;
+                if (foldValue <= Number(stops[0].value)) {{
+                    return `rgb(${{stops[0].color.map(clampChannel).join(',')}})`;
+                }}
+                if (foldValue >= Number(stops[stops.length - 1].value)) {{
+                    return `rgb(${{stops[stops.length - 1].color.map(clampChannel).join(',')}})`;
+                }}
+                for (let idx = 0; idx < stops.length - 1; idx += 1) {{
+                    const left = stops[idx];
+                    const right = stops[idx + 1];
+                    const leftV = Number(left.value);
+                    const rightV = Number(right.value);
+                    if (foldValue < leftV || foldValue > rightV) continue;
+                    const t = rightV === leftV ? 1 : ((foldValue - leftV) / (rightV - leftV));
+                    const blended = [0, 1, 2].map((cIdx) => clampChannel(((1 - t) * Number(left.color[cIdx])) + (t * Number(right.color[cIdx]))));
                     return `rgb(${{blended.join(',')}})`;
                 }}
-                const denom = gradientConfig.maxPos > 0 ? gradientConfig.maxPos : (Math.abs(gradientConfig.maxPos) || 1);
-                const t = Math.min(foldValue / denom, 1);
-                const blended = white.map((w, idx) => clampChannel((1 - t) * w + t * gradientConfig.posColor[idx]));
-                return `rgb(${{blended.join(',')}})`;
+                return `rgb(${{stops[stops.length - 1].color.map(clampChannel).join(',')}})`;
             }};
             const entityColor = (entity, idx = activeFcIndex) => {{
                 const foldVal = parseFoldChange(entity, idx);
@@ -1208,6 +1382,502 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     return 'black';
                 }}
                 return entityOutlineColor(entity, idx);
+            }};
+            const temporalModeEnabled = () => Boolean(pickSettingValue('temporal_mode', Boolean(viewerSettings.temporal_mode)));
+            const getProtboxTemporalSegmentCount = (protein) => {{
+                const configuredColumns = pickSettingValue('main_columns', []);
+                if (Array.isArray(configuredColumns) && configuredColumns.length) {{
+                    return configuredColumns.length;
+                }}
+                if (!protein || typeof protein !== 'object') {{
+                    return 1;
+                }}
+                let maxIndex = 0;
+                Object.keys(protein).forEach((key) => {{
+                    const match = key.match(/^(?:fold_change|fc_color)_(\d+)$/);
+                    if (!match) return;
+                    const idx = Number(match[1]);
+                    if (Number.isFinite(idx) && idx > maxIndex) {{
+                        maxIndex = idx;
+                    }}
+                }});
+                return Math.max(1, maxIndex);
+            }};
+            const hasProtboxTemporalOutlineData = (protein, segmentCount) => {{
+                if (!protein || typeof protein !== 'object') {{
+                    return false;
+                }}
+                for (let idx = 1; idx <= segmentCount; idx += 1) {{
+                    if (parseOutlineFoldChange(protein, idx) !== null) {{
+                        return true;
+                    }}
+                }}
+                return false;
+            }};
+            const syncProtboxSegments = (protboxId, protein, rect, x, y, width, height) => {{
+                if (!protboxId || !rect) return;
+                const entries = elementGroups[protboxId] || (elementGroups[protboxId] = []);
+                elementGroups[protboxId] = entries.filter((entry) => {{
+                    const dtype = entry?.element?.attr ? entry.element.attr('data-type') : null;
+                    if (dtype !== 'prot-box-segment' && dtype !== 'prot-box-outline') {{
+                        return true;
+                    }}
+                    try {{
+                        entry.element.remove();
+                    }} catch (segmentErr) {{}}
+                    return false;
+                }});
+                const shouldSegment = temporalModeEnabled();
+                const segmentCount = shouldSegment ? getProtboxTemporalSegmentCount(protein) : 1;
+                if (!shouldSegment || segmentCount <= 1) {{
+                    rect.fill(entityColor(protein));
+                    rect.stroke({{ color: proteinOutlineColor(protein), width: protOutlineWidth }});
+                    return;
+                }}
+                rect.fill('none');
+                const hasSegmentedOutline = hasProtboxTemporalOutlineData(protein, segmentCount);
+                rect.stroke(hasSegmentedOutline ? {{ color: 'none', width: 0 }} : {{ color: proteinOutlineColor(protein), width: protOutlineWidth }});
+                const baseSegmentWidth = width / segmentCount;
+                let segmentX = x;
+                const segmentBounds = [];
+                for (let idx = 1; idx <= segmentCount; idx += 1) {{
+                    const nextX = idx === segmentCount ? (x + width) : (x + (baseSegmentWidth * idx));
+                    const segmentWidth = Math.max(0, nextX - segmentX);
+                    segmentBounds.push({{ idx, x1: segmentX, x2: nextX, width: segmentWidth }});
+                    const segment = protboxGroup
+                        .rect(segmentWidth, height)
+                        .move(segmentX, y)
+                        .fill(entityColor(protein, idx))
+                        .stroke({{ color: 'none', width: 0 }})
+                        .attr({{
+                            'data-id': `${{protboxId}}_segment_${{idx}}`,
+                            'data-type': 'prot-box-segment',
+                            'data-protbox-id': protboxId,
+                            'pointer-events': 'none'
+                        }});
+                    try {{
+                        if (rect.node?.parentNode && segment.node) {{
+                            rect.node.parentNode.insertBefore(segment.node, rect.node);
+                        }}
+                    }} catch (segmentOrderErr) {{}}
+                    elementGroups[protboxId].push({{
+                        element: segment,
+                        offsetX: segmentX - x,
+                        offsetY: 0,
+                        jsonX: segmentX,
+                        jsonY: y
+                    }});
+                    segmentX = nextX;
+                }}
+                if (!hasSegmentedOutline || protOutlineWidth <= 0) {{
+                    return;
+                }}
+                const makeOutline = (nodeId, x1, y1, x2, y2, color) => {{
+                    const line = protboxGroup
+                        .line(x1, y1, x2, y2)
+                        .stroke({{ color, width: protOutlineWidth, linecap: 'butt', linejoin: 'miter' }})
+                        .attr({{
+                            'data-id': nodeId,
+                            'data-type': 'prot-box-outline',
+                            'data-protbox-id': protboxId,
+                            'pointer-events': 'none'
+                        }});
+                    try {{
+                        if (rect.node?.parentNode && line.node) {{
+                            rect.node.parentNode.insertBefore(line.node, rect.node);
+                        }}
+                    }} catch (outlineOrderErr) {{}}
+                    elementGroups[protboxId].push({{ element: line, offsetX: 0, offsetY: 0, jsonX: x1, jsonY: y1 }});
+                }};
+                segmentBounds.forEach((segment) => {{
+                    const color = proteinOutlineColor(protein, segment.idx);
+                    makeOutline(`${{protboxId}}_outline_top_${{segment.idx}}`, segment.x1, y, segment.x2, y, color);
+                    makeOutline(`${{protboxId}}_outline_bottom_${{segment.idx}}`, segment.x1, y + height, segment.x2, y + height, color);
+                }});
+                const leftColor = proteinOutlineColor(protein, 1);
+                const rightColor = proteinOutlineColor(protein, segmentCount);
+                makeOutline(`${{protboxId}}_outline_left`, x, y, x, y + height, leftColor);
+                makeOutline(`${{protboxId}}_outline_right`, x + width, y, x + width, y + height, rightColor);
+            }};
+            const getPtmTemporalSegmentCount = (ptm) => {{
+                if (!ptm || typeof ptm !== 'object') {{
+                    return 1;
+                }}
+                let maxIndex = 0;
+                Object.keys(ptm).forEach((key) => {{
+                    const match = key.match(/^(?:fold_change|fc_color)_(\d+)$/);
+                    if (!match) return;
+                    const idx = Number(match[1]);
+                    if (Number.isFinite(idx) && idx > maxIndex) {{
+                        maxIndex = idx;
+                    }}
+                }});
+                return Math.max(1, maxIndex);
+            }};
+            const hasPtmTemporalOutlineData = (ptm, segmentCount) => {{
+                if (!ptm || typeof ptm !== 'object') {{
+                    return false;
+                }}
+                for (let idx = 1; idx <= segmentCount; idx += 1) {{
+                    if (parseOutlineFoldChange(ptm, idx) !== null) {{
+                        return true;
+                    }}
+                    const outlineColorKey = `outline_color_${{idx}}`;
+                    if (Object.prototype.hasOwnProperty.call(ptm, outlineColorKey) && ptm[outlineColorKey] !== null && ptm[outlineColorKey] !== undefined) {{
+                        return true;
+                    }}
+                }}
+                return false;
+            }};
+            const getPtmShapeCenter = (shapeObj) => {{
+                if (!shapeObj) return {{ x: 0, y: 0 }};
+                if (shapeObj.type === 'circle') {{
+                    return {{ x: toCoordinateNumber(shapeObj.cx && shapeObj.cx()), y: toCoordinateNumber(shapeObj.cy && shapeObj.cy()) }};
+                }}
+                const width = toCoordinateNumber(shapeObj.width && shapeObj.width(), 0);
+                const height = toCoordinateNumber(shapeObj.height && shapeObj.height(), 0);
+                return {{
+                    x: toCoordinateNumber(shapeObj.x && shapeObj.x(), 0) + (width / 2),
+                    y: toCoordinateNumber(shapeObj.y && shapeObj.y(), 0) + (height / 2)
+                }};
+            }};
+            const getPtmRenderSpec = (ptm, centerX, centerY) => {{
+                const radius = settings.ptm_circle_radius || 5;
+                const nativeShape = (ptm?.shape || 'circle').toLowerCase();
+                const segmentCount = temporalModeEnabled() ? getPtmTemporalSegmentCount(ptm) : 1;
+                const renderShape = segmentCount >= 3 ? 'pill' : nativeShape;
+                const width = renderShape === 'pill'
+                    ? Math.max(radius * 4, segmentCount * radius * 1.5)
+                    : (radius * 2);
+                const height = radius * 2;
+                return {{
+                    radius,
+                    nativeShape,
+                    renderShape,
+                    segmentCount,
+                    width,
+                    height,
+                    left: centerX - (width / 2),
+                    top: centerY - radius,
+                    centerX,
+                    centerY
+                }};
+            }};
+            const shouldUseInternalTemporalPtmText = (ptm) => {{
+                if (!temporalModeEnabled()) {{
+                    return false;
+                }}
+                return getPtmTemporalSegmentCount(ptm) >= 3;
+            }};
+            const createPtmShapeObject = (ptm, centerX, centerY, outlineColor) => {{
+                const spec = getPtmRenderSpec(ptm, centerX, centerY);
+                const fillColor = entityColor(ptm);
+                let shapeObj;
+                if (spec.renderShape === 'circle') {{
+                    shapeObj = protboxGroup.circle(spec.radius * 2).cx(centerX).cy(centerY).fill(fillColor).stroke({{ color: outlineColor, width: ptmOutlineWidth }});
+                }} else {{
+                    shapeObj = protboxGroup.rect(spec.width, spec.height).move(spec.left, spec.top).fill(fillColor).stroke({{ color: outlineColor, width: ptmOutlineWidth }});
+                    if (spec.renderShape === 'pill') {{
+                        shapeObj.attr({{ rx: spec.height / 2, ry: spec.height / 2 }});
+                    }}
+                }}
+                shapeObj.attr({{ 'pointer-events': 'all' }});
+                return {{ shapeObj, spec }};
+            }};
+            const clearPtmSegmentEntries = (protboxId, shapeId) => {{
+                const entries = elementGroups[protboxId] || (elementGroups[protboxId] = []);
+                elementGroups[protboxId] = entries.filter((entry) => {{
+                    const entryShapeId = entry?.element?.attr ? entry.element.attr('data-ptm-shape-id') : null;
+                    if (entryShapeId !== shapeId) {{
+                        return true;
+                    }}
+                    try {{
+                        entry.element.remove();
+                    }} catch (ptmSegErr) {{}}
+                    return false;
+                }});
+            }};
+            const makeCirclePtmSegmentPath = (centerX, centerY, radius, side) => {{
+                const topY = centerY - radius;
+                const bottomY = centerY + radius;
+                const sweep = side === 'left' ? 0 : 1;
+                return `M ${{centerX}} ${{topY}} A ${{radius}} ${{radius}} 0 0 ${{sweep}} ${{centerX}} ${{bottomY}} L ${{centerX}} ${{topY}} Z`;
+            }};
+            const makePillEndSegmentPath = (left, top, width, height, side) => {{
+                const radius = height / 2;
+                const right = left + width;
+                const bottom = top + height;
+                const centerLeft = left + radius;
+                const centerRight = left + width - radius;
+                if (side === 'left') {{
+                    return `M ${{right}} ${{top}} L ${{centerLeft}} ${{top}} A ${{radius}} ${{radius}} 0 0 0 ${{centerLeft}} ${{bottom}} L ${{right}} ${{bottom}} Z`;
+                }}
+                return `M ${{left}} ${{top}} L ${{centerRight}} ${{top}} A ${{radius}} ${{radius}} 0 0 1 ${{centerRight}} ${{bottom}} L ${{left}} ${{bottom}} Z`;
+            }};
+            const makeCircleHalfOutlinePath = (centerX, centerY, radius, side) => {{
+                const topY = centerY - radius;
+                const bottomY = centerY + radius;
+                const sweep = side === 'left' ? 0 : 1;
+                return `M ${{centerX}} ${{topY}} A ${{radius}} ${{radius}} 0 0 ${{sweep}} ${{centerX}} ${{bottomY}}`;
+            }};
+            const makePillSideOutlinePath = (left, top, width, height, side) => {{
+                const radius = height / 2;
+                const bottom = top + height;
+                if (side === 'left') {{
+                    const centerLeft = left + radius;
+                    return `M ${{centerLeft}} ${{top}} A ${{radius}} ${{radius}} 0 0 0 ${{centerLeft}} ${{bottom}}`;
+                }}
+                const centerRight = left + width - radius;
+                return `M ${{centerRight}} ${{top}} A ${{radius}} ${{radius}} 0 0 1 ${{centerRight}} ${{bottom}}`;
+            }};
+            const syncPtmShapeSegments = (protboxId, shapeId, ptm, shapeObj) => {{
+                if (!protboxId || !shapeId || !shapeObj) return;
+                clearPtmSegmentEntries(protboxId, shapeId);
+                const segmentCount = temporalModeEnabled() ? getPtmTemporalSegmentCount(ptm) : 1;
+                if (segmentCount <= 1) {{
+                    shapeObj.fill(entityColor(ptm));
+                    shapeObj.stroke({{ color: entityOutlineColor(ptm), width: ptmOutlineWidth }});
+                    return;
+                }}
+                const center = getPtmShapeCenter(shapeObj);
+                const spec = getPtmRenderSpec(ptm, center.x, center.y);
+                const segmentWidth = spec.width / segmentCount;
+                const protboxRect = draw.findOne(`[data-id="${{protboxId}}"]`);
+                const pbX = protboxRect ? protboxRect.x() : 0;
+                const pbY = protboxRect ? protboxRect.y() : 0;
+                shapeObj.fill('none');
+                const hasSegmentedOutline = hasPtmTemporalOutlineData(ptm, segmentCount);
+                shapeObj.stroke(hasSegmentedOutline ? {{ color: 'none', width: 0 }} : {{ color: entityOutlineColor(ptm), width: ptmOutlineWidth }});
+                const segmentBounds = [];
+                for (let idx = 1; idx <= segmentCount; idx += 1) {{
+                    const color = entityColor(ptm, idx);
+                    let segmentObj = null;
+                    const segLeft = spec.left + ((idx - 1) * segmentWidth);
+                    const segRight = idx === segmentCount ? (spec.left + spec.width) : (spec.left + (idx * segmentWidth));
+                    segmentBounds.push({{ idx, x1: segLeft, x2: segRight }});
+                    if (spec.renderShape === 'circle' && segmentCount === 2) {{
+                        segmentObj = protboxGroup.path(makeCirclePtmSegmentPath(center.x, center.y, spec.radius, idx === 1 ? 'left' : 'right'))
+                            .fill(color)
+                            .stroke({{ color: 'none', width: 0 }});
+                    }} else if (spec.renderShape === 'pill') {{
+                        const actualWidth = Math.max(0.5, segRight - segLeft);
+                        if (idx === 1) {{
+                            segmentObj = protboxGroup.path(makePillEndSegmentPath(segLeft, spec.top, actualWidth, spec.height, 'left'))
+                                .fill(color)
+                                .stroke({{ color: 'none', width: 0 }});
+                        }} else if (idx === segmentCount) {{
+                            segmentObj = protboxGroup.path(makePillEndSegmentPath(segLeft, spec.top, actualWidth, spec.height, 'right'))
+                                .fill(color)
+                                .stroke({{ color: 'none', width: 0 }});
+                        }} else {{
+                            segmentObj = protboxGroup.rect(actualWidth, spec.height).move(segLeft, spec.top)
+                                .fill(color)
+                                .stroke({{ color: 'none', width: 0 }});
+                        }}
+                    }} else {{
+                        segmentObj = protboxGroup.rect(Math.max(0.5, segRight - segLeft), spec.height).move(segLeft, spec.top)
+                            .fill(color)
+                            .stroke({{ color: 'none', width: 0 }});
+                    }}
+                    if (!segmentObj) continue;
+                    segmentObj.attr({{
+                        'data-id': `${{shapeId}}_segment_${{idx}}`,
+                        'data-type': 'ptm-shape-segment',
+                        'data-ptm-shape-id': shapeId,
+                        'pointer-events': 'none'
+                    }});
+                    try {{
+                        if (shapeObj.node?.parentNode && segmentObj.node) {{
+                            shapeObj.node.parentNode.insertBefore(segmentObj.node, shapeObj.node);
+                        }}
+                    }} catch (ptmSegmentOrderErr) {{}}
+                    elementGroups[protboxId].push({{
+                        element: segmentObj,
+                        offsetX: toCoordinateNumber(segmentObj.x && segmentObj.x(), center.x) - pbX,
+                        offsetY: toCoordinateNumber(segmentObj.y && segmentObj.y(), center.y) - pbY,
+                        jsonX: center.x,
+                        jsonY: center.y
+                    }});
+                }}
+                if (hasSegmentedOutline && ptmOutlineWidth > 0) {{
+                    const pushOutline = (outlineObj, nodeId) => {{
+                        if (!outlineObj) return;
+                        outlineObj.attr({{
+                            'data-id': nodeId,
+                            'data-type': 'ptm-shape-outline',
+                            'data-ptm-shape-id': shapeId,
+                            'pointer-events': 'none'
+                        }});
+                        try {{
+                            if (shapeObj.node?.parentNode && outlineObj.node) {{
+                                shapeObj.node.parentNode.appendChild(outlineObj.node);
+                            }}
+                        }} catch (ptmOutlineOrderErr) {{}}
+                        elementGroups[protboxId].push({{
+                            element: outlineObj,
+                            offsetX: center.x - pbX,
+                            offsetY: center.y - pbY,
+                            jsonX: center.x,
+                            jsonY: center.y
+                        }});
+                    }};
+                    if (spec.renderShape === 'circle' && segmentCount === 2) {{
+                        for (let idx = 1; idx <= 2; idx += 1) {{
+                            pushOutline(
+                                protboxGroup.path(makeCircleHalfOutlinePath(center.x, center.y, spec.radius, idx === 1 ? 'left' : 'right'))
+                                    .fill('none')
+                                    .stroke({{ color: entityOutlineColor(ptm, idx), width: ptmOutlineWidth, linecap: 'butt', linejoin: 'round' }}),
+                                `${{shapeId}}_outline_${{idx}}`
+                            );
+                        }}
+                    }} else if (spec.renderShape === 'pill') {{
+                        const radius = spec.height / 2;
+                        const straightLeft = spec.left + radius;
+                        const straightRight = spec.left + spec.width - radius;
+                        segmentBounds.forEach((segment) => {{
+                            const color = entityOutlineColor(ptm, segment.idx);
+                            const topStart = Math.max(straightLeft, segment.x1);
+                            const topEnd = Math.min(straightRight, segment.x2);
+                            if (topEnd > topStart) {{
+                                pushOutline(
+                                    protboxGroup.line(topStart, spec.top, topEnd, spec.top)
+                                        .stroke({{ color, width: ptmOutlineWidth, linecap: 'butt', linejoin: 'round' }}),
+                                    `${{shapeId}}_outline_top_${{segment.idx}}`
+                                );
+                                pushOutline(
+                                    protboxGroup.line(topStart, spec.top + spec.height, topEnd, spec.top + spec.height)
+                                        .stroke({{ color, width: ptmOutlineWidth, linecap: 'butt', linejoin: 'round' }}),
+                                    `${{shapeId}}_outline_bottom_${{segment.idx}}`
+                                );
+                            }}
+                        }});
+                        pushOutline(
+                            protboxGroup.path(makePillSideOutlinePath(spec.left, spec.top, spec.width, spec.height, 'left'))
+                                .fill('none')
+                                .stroke({{ color: entityOutlineColor(ptm, 1), width: ptmOutlineWidth, linecap: 'butt', linejoin: 'round' }}),
+                            `${{shapeId}}_outline_left`
+                        );
+                        pushOutline(
+                            protboxGroup.path(makePillSideOutlinePath(spec.left, spec.top, spec.width, spec.height, 'right'))
+                                .fill('none')
+                                .stroke({{ color: entityOutlineColor(ptm, segmentCount), width: ptmOutlineWidth, linecap: 'butt', linejoin: 'round' }}),
+                            `${{shapeId}}_outline_right`
+                        );
+                    }} else {{
+                        segmentBounds.forEach((segment) => {{
+                            const color = entityOutlineColor(ptm, segment.idx);
+                            pushOutline(
+                                protboxGroup.line(segment.x1, spec.top, segment.x2, spec.top)
+                                    .stroke({{ color, width: ptmOutlineWidth, linecap: 'butt', linejoin: 'miter' }}),
+                                `${{shapeId}}_outline_top_${{segment.idx}}`
+                            );
+                            pushOutline(
+                                protboxGroup.line(segment.x1, spec.top + spec.height, segment.x2, spec.top + spec.height)
+                                    .stroke({{ color, width: ptmOutlineWidth, linecap: 'butt', linejoin: 'miter' }}),
+                                `${{shapeId}}_outline_bottom_${{segment.idx}}`
+                            );
+                        }});
+                        pushOutline(
+                            protboxGroup.line(spec.left, spec.top, spec.left, spec.top + spec.height)
+                                .stroke({{ color: entityOutlineColor(ptm, 1), width: ptmOutlineWidth, linecap: 'butt', linejoin: 'miter' }}),
+                            `${{shapeId}}_outline_left`
+                        );
+                        pushOutline(
+                            protboxGroup.line(spec.left + spec.width, spec.top, spec.left + spec.width, spec.top + spec.height)
+                                .stroke({{ color: entityOutlineColor(ptm, segmentCount), width: ptmOutlineWidth, linecap: 'butt', linejoin: 'miter' }}),
+                            `${{shapeId}}_outline_right`
+                        );
+                    }}
+                }}
+                if (!shouldUseInternalTemporalPtmText(ptm)) {{
+                    return;
+                }}
+                const showLabel = overlayState.ptms !== false && overlayState.ptmLabels !== false;
+                const showSymbol = overlayState.ptms !== false && overlayState.ptmSymbols !== false;
+                const residueText = String(ptm?.label || '').trim();
+                const symbolText = String(ptm?.symbol || '').trim();
+                const symbolIcon = String(ptm?.symbol_icon || '').trim();
+                const slotLeftX = spec.left + (spec.width * 0.25);
+                const slotRightX = spec.left + (spec.width * 0.75);
+                const centerX = spec.centerX;
+                const centerY = spec.centerY;
+                const makeInternalText = (nodeId, dtype, textValue, xPos, yPos, fontSize, fillColor) => {{
+                    const textNode = protboxGroup.text(textValue)
+                        .font({{
+                            size: fontSize,
+                            family: dtype === 'ptm-internal-symbol' ? (ptm.symbol_font || settings.ptm_label_font || 'Arial') : (settings.ptm_label_font || 'Arial'),
+                            anchor: 'middle',
+                            leading: '1.2em'
+                        }})
+                        .fill(fillColor)
+                        .attr({{
+                            'data-id': nodeId,
+                            'data-type': dtype,
+                            'data-ptm-shape-id': shapeId,
+                            'pointer-events': 'none'
+                        }});
+                    textNode.attr({{ x: xPos, y: yPos + (fontSize * 0.35) }});
+                    try {{
+                        if (shapeObj.node?.parentNode && textNode.node) {{
+                            shapeObj.node.parentNode.appendChild(textNode.node);
+                        }}
+                    }} catch (internalTextOrderErr) {{}}
+                    elementGroups[protboxId].push({{
+                        element: textNode,
+                        offsetX: xPos - pbX,
+                        offsetY: yPos - pbY,
+                        jsonX: xPos,
+                        jsonY: yPos
+                    }});
+                }};
+                if (showSymbol && symbolIcon) {{
+                    const iconSize = Math.max(7, Math.min(spec.height * 0.8, (spec.width * (residueText ? 0.38 : 0.62))));
+                    const imageX = residueText ? slotLeftX : centerX;
+                    const symbolImage = protboxGroup.image(symbolIcon)
+                        .size(iconSize, iconSize)
+                        .move(imageX - (iconSize / 2), centerY - (iconSize / 2))
+                        .attr({{
+                            'data-id': `${{shapeId}}_internal_symbol`,
+                            'data-type': 'ptm-internal-symbol',
+                            'data-ptm-shape-id': shapeId,
+                            'pointer-events': 'none'
+                        }});
+                    try {{
+                        if (shapeObj.node?.parentNode && symbolImage.node) {{
+                            shapeObj.node.parentNode.appendChild(symbolImage.node);
+                        }}
+                    }} catch (internalImageOrderErr) {{}}
+                    elementGroups[protboxId].push({{
+                        element: symbolImage,
+                        offsetX: imageX - pbX,
+                        offsetY: centerY - pbY,
+                        jsonX: imageX,
+                        jsonY: centerY
+                    }});
+                }} else if (showSymbol && symbolText) {{
+                    const symbolFontSize = Math.max(6, Math.min(spec.height * 0.72, residueText ? (spec.width * 0.22) : (spec.width * 0.42), Number(ptm.symbol_size || settings.ptm_label_size || 10)));
+                    makeInternalText(
+                        `${{shapeId}}_internal_symbol`,
+                        'ptm-internal-symbol',
+                        symbolText,
+                        residueText ? slotLeftX : centerX,
+                        centerY,
+                        symbolFontSize,
+                        Array.isArray(ptm.symbol_color) && ptm.symbol_color.length === 3 ? `rgb(${{ptm.symbol_color.join(',')}})` : 'black'
+                    );
+                }}
+                if (showLabel && residueText) {{
+                    const residueFontSize = Math.max(5, Math.min(spec.height * 0.68, symbolText || symbolIcon ? (spec.width * 0.2) : (spec.width * 0.4), Number(settings.ptm_label_size || 10)));
+                    makeInternalText(
+                        `${{shapeId}}_internal_label`,
+                        'ptm-internal-label',
+                        residueText,
+                        symbolText || symbolIcon ? slotRightX : centerX,
+                        centerY,
+                        residueFontSize,
+                        Array.isArray(ptm.label_color) && ptm.label_color.length === 3 ? `rgb(${{ptm.label_color.join(',')}})` : 'black'
+                    );
+                }}
             }};
             const trackableMoveTypes = new Set(['prot-box','group','ptm-shape','ptm-label','ptm-symbol','compound','text-box','figure-key','arrow','arrow-start','arrow-end','arrow-mid']);
             const toCoordinateNumber = (value, fallback = 0) => {{
@@ -1343,10 +2013,10 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     }}
                 }}
                 if (type === 'ptm-shape') {{
-                    const isCircle = element.type === 'circle';
+                    const center = getPtmShapeCenter(element);
                     return {{
-                        x: toCoordinateNumber(isCircle ? element.cx() : element.x()),
-                        y: toCoordinateNumber(isCircle ? element.cy() : element.y()),
+                        x: center.x,
+                        y: center.y,
                         posKey: element.attr ? element.attr('data-pos-key') || null : null
                     }};
                 }}
@@ -2204,9 +2874,9 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             const applyViewerOverlayState = () => {{
                 setSelectorVisibility('[data-kegg-bg="1"]', overlayState.background !== false);
                 setSelectorVisibility('[data-type="prot-box"], [data-type="prot-label"]', overlayState.protboxes !== false);
-                setSelectorVisibility('[data-type="ptm-shape"]', overlayState.ptms !== false);
-                setSelectorVisibility('[data-type="ptm-label"]', overlayState.ptms !== false && overlayState.ptmLabels !== false);
-                setSelectorVisibility('[data-type="ptm-symbol"]', overlayState.ptms !== false && overlayState.ptmSymbols !== false);
+                setSelectorVisibility('[data-type="ptm-shape"], [data-type="ptm-shape-segment"], [data-type="ptm-shape-outline"]', overlayState.ptms !== false);
+                setSelectorVisibility('[data-type="ptm-label"], [data-type="ptm-internal-label"]', overlayState.ptms !== false && overlayState.ptmLabels !== false);
+                setSelectorVisibility('[data-type="ptm-symbol"], [data-type="ptm-internal-symbol"]', overlayState.ptms !== false && overlayState.ptmSymbols !== false);
                 if (overlayState.arrows === false) {{
                     arrowGroup.hide();
                 }} else {{
@@ -2255,7 +2925,9 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             let mouseMode = 'drag';
             const canDeleteSelection = () => {{
                 if (resolveSelectedArrowActionId()) return true;
-                if (!selectedElement || !selectedType || !selectedId) return false;
+                if (!selectedType) return false;
+                const hasSelectedId = !(selectedId === null || selectedId === undefined || String(selectedId).trim() === '');
+                if (!hasSelectedId) return false;
                 return new Set(['prot-box', 'group', 'arrow', 'arrow-hitbox', 'arrow-head', 'arrow-start', 'arrow-end', 'arrow-mid', 'compound', 'figure-key', 'text-box', 'ptm-shape', 'ptm-label', 'ptm-symbol']).has(selectedType);
             }};
             function resolveSelectedArrowActionId() {{
@@ -3510,7 +4182,11 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     const pb = protBoxes.find(p => p.protbox_id === id);
                     const selected = currentSelected[id] || pb?.selected_uniprot || pb?.proteins?.[0] || '';
                     const prot = (selected && proteinData[selected]) ? proteinData[selected] : {{}};
-                    element.stroke({{ color: proteinOutlineColor(prot), width: protOutlineWidth }});
+                    if (temporalModeEnabled()) {{
+                        syncProtboxSegments(id, prot, element, element.x(), element.y(), element.width(), element.height());
+                    }} else {{
+                        element.stroke({{ color: proteinOutlineColor(prot), width: protOutlineWidth }});
+                    }}
                 }} else if (type === 'ptm-shape') {{
                     const parsed = parsePtmElementId(id);
                     let ptm = null;
@@ -3518,7 +4194,11 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                         const prot = proteinData[parsed.uniprot] || {{}};
                         ptm = (prot.PTMs && prot.PTMs[parsed.ptmKey]) ? prot.PTMs[parsed.ptmKey] : null;
                     }}
-                    element.stroke({{ color: entityOutlineColor(ptm), width: ptmOutlineWidth }});
+                    if (temporalModeEnabled()) {{
+                        syncPtmShapeSegments(selectedProtboxId, id, ptm, element);
+                    }} else {{
+                        element.stroke({{ color: entityOutlineColor(ptm), width: ptmOutlineWidth }});
+                    }}
                 }} else {{
                     element.stroke({{ color: 'black', width: 1 }});
                 }}
@@ -5630,6 +6310,8 @@ function rebuildGroupIndexes() {{
                             );
                         }} else {{
                             assocElement.element.dmove(actualDX, actualDY);
+                            if (Number.isFinite(assocElement.jsonX)) assocElement.jsonX += actualDX;
+                            if (Number.isFinite(assocElement.jsonY)) assocElement.jsonY += actualDY;
                         }}
                     }});
                 }}
@@ -5646,6 +6328,40 @@ function rebuildGroupIndexes() {{
                     group.filter(el => el.element.attr('data-type') === 'ptm-snap-circle').forEach(snapC => {{
                         const key = snapC.element.attr('data-pos-key');
                         snapC.element.cx(protboxSnapPoints[protboxId][key].x).cy(protboxSnapPoints[protboxId][key].y);
+                    }});
+                    // Persist attached PTM coordinates when protboxes move so PTMs stay with the protbox on reload.
+                    group.forEach(assocEntry => {{
+                        const el = assocEntry?.element;
+                        if (!el || !el.attr) return;
+                        const assocType = String(el.attr('data-type') || '');
+                        if (assocType !== 'ptm-shape' && assocType !== 'ptm-label' && assocType !== 'ptm-symbol') return;
+                        const elementId = String(el.attr('data-id') || '');
+                        const meta = parsePtmElementId(elementId);
+                        if (!meta) return;
+                        const trackedX = Number.isFinite(assocEntry?.jsonX) ? Number(assocEntry.jsonX) : null;
+                        const trackedY = Number.isFinite(assocEntry?.jsonY) ? Number(assocEntry.jsonY) : null;
+                        if (assocType === 'ptm-shape') {{
+                            const center = getPtmShapeCenter(el);
+                            const posKey = el.attr('data-pos-key');
+                            recordPtmOverride(protboxId, meta.uniprot, meta.ptmKey, {{
+                                shape_x: trackedX !== null ? trackedX : Number(center.x),
+                                shape_y: trackedY !== null ? trackedY : Number(center.y),
+                                ptm_position: posKey || null
+                            }});
+                            return;
+                        }}
+                        if (assocType === 'ptm-label') {{
+                            recordPtmOverride(protboxId, meta.uniprot, meta.ptmKey, {{
+                                label_x: trackedX !== null ? trackedX : Number(el.x && el.x()),
+                                label_y: trackedY !== null ? trackedY : (Number(el.y && el.y()) - textOffsetY),
+                                label_centering: resolveLabelCenteringFromElement(el)
+                            }});
+                            return;
+                        }}
+                        recordPtmOverride(protboxId, meta.uniprot, meta.ptmKey, {{
+                            symbol_x: trackedX !== null ? trackedX : Number(el.x && el.x()),
+                            symbol_y: trackedY !== null ? trackedY : (Number(el.y && el.y()) - textOffsetY)
+                        }});
                     }});
                 }}
                 if (protboxMap[protboxId]) {{
@@ -6044,10 +6760,21 @@ function rebuildGroupIndexes() {{
                 }}
                 if (selectedType === 'ptm-shape') {{
                     const baseId = selectedId.replace('_shape', '');
+                    const segmentElements = draw.find(`[data-ptm-shape-id="${{selectedId}}"]`) || [];
                     const labelElement = draw.find(`[data-id="${{baseId}}_label"]`)[0];
                     const symbolElement = draw.find(`[data-id="${{baseId}}_symbol"]`)[0];
+                    segmentElements.forEach((segmentEl) => {{
+                        if (segmentEl === selectedElement) return;
+                        try {{ segmentEl.dmove(deltaX, deltaY); }} catch (segmentMoveErr) {{}}
+                    }});
                     if (labelElement) labelElement.move(parseFloat(labelElement.x() || 0) + deltaX, parseFloat(labelElement.y() || 0) + deltaY);
                     if (symbolElement) symbolElement.move(parseFloat(symbolElement.x() || 0) + deltaX, parseFloat(symbolElement.y() || 0) + deltaY);
+                    const meta = parsePtmElementId(selectedId);
+                    const prot = meta ? (proteinData[meta.uniprot] || {{}}) : null;
+                    const ptm = meta && prot.PTMs ? prot.PTMs[meta.ptmKey] : null;
+                    if (meta && ptm && selectedProtboxId) {{
+                        syncPtmShapeSegments(selectedProtboxId, selectedId, ptm, selectedElement);
+                    }}
                 }}
                 if (selectedType === 'arrow-start' || selectedType === 'arrow-end') {{
                     const context = arrowHandleContext;
@@ -6368,6 +7095,9 @@ function rebuildGroupIndexes() {{
                         eventPayload.protbox_id = selectedProtboxId;
                     }}
                     if (selectedType === 'ptm-shape') {{
+                        const ptmCenter = getPtmShapeCenter(selectedElement);
+                        eventPayload.x = ptmCenter.x;
+                        eventPayload.y = ptmCenter.y;
                         const posKeyAttr = selectedElement?.attr ? selectedElement.attr('data-pos-key') : null;
                         if (posKeyAttr) {{
                             eventPayload.ptm_position = posKeyAttr;
@@ -6388,8 +7118,8 @@ function rebuildGroupIndexes() {{
                         if (meta && selectedProtboxId) {{
                             const overridePayload = {{}};
                             if (selectedType === 'ptm-shape') {{
-                                overridePayload.shape_x = currentX;
-                                overridePayload.shape_y = currentY;
+                                overridePayload.shape_x = eventPayload.x;
+                                overridePayload.shape_y = eventPayload.y;
                                 overridePayload.ptm_position = eventPayload.ptm_position || null;
                             }} else if (selectedType === 'ptm-label') {{
                                 overridePayload.label_x = currentX;
@@ -6830,14 +7560,15 @@ function rebuildGroupIndexes() {{
                 const entries = elementGroups[targetId];
                 if (!entries) return false;
                 const snapshot = capturePtmSnapshot(targetId, meta);
-                const shapeId = `${{meta.uniprot}}_${{meta.ptmKey}}_shape`;
-                const labelId = `${{meta.uniprot}}_${{meta.ptmKey}}_label`;
-                const symbolId = `${{meta.uniprot}}_${{meta.ptmKey}}_symbol`;
+                const shapeId = ptmElementId(targetId, meta.uniprot, meta.ptmKey, 'shape');
+                const labelId = ptmElementId(targetId, meta.uniprot, meta.ptmKey, 'label');
+                const symbolId = ptmElementId(targetId, meta.uniprot, meta.ptmKey, 'symbol');
                 [shapeId, labelId, symbolId].forEach(id => removeElementByDataId(id));
                 elementGroups[targetId] = entries.filter(entry => {{
                     if (!entry?.element?.attr) return true;
                     const entryId = entry.element.attr('data-id');
-                    return entryId !== shapeId && entryId !== labelId && entryId !== symbolId;
+                    const entryShapeId = entry.element.attr('data-ptm-shape-id');
+                    return entryId !== shapeId && entryId !== labelId && entryId !== symbolId && entryShapeId !== shapeId;
                 }});
                 recordPtmOverride(targetId, meta.uniprot, meta.ptmKey, {{ hidden: true }});
                 updateHandleDists(targetId);
@@ -6958,9 +7689,11 @@ function rebuildGroupIndexes() {{
             }};
             const deleteSelectedElement = () => {{
                 const resolvedArrowId = resolveSelectedArrowActionId();
-                if (!selectedElement && !resolvedArrowId) return;
-                if (!selectedType && !resolvedArrowId) return;
-                if (!selectedId && !resolvedArrowId) return;
+                if (!resolvedArrowId) {{
+                    if (!selectedType) return;
+                    const hasSelectedId = !(selectedId === null || selectedId === undefined || String(selectedId).trim() === '');
+                    if (!hasSelectedId) return;
+                }}
                 const selectedEntries = Array.from(selectionMap.values()).filter(Boolean);
                 if (selectedEntries.length > 1) {{
                     const deletions = [];
@@ -7820,13 +8553,15 @@ function rebuildGroupIndexes() {{
             const textOffsetY = -14.5;
             function capturePtmSnapshot(protboxId, meta) {{
                 if (!protboxId || !meta) return null;
-                const baseId = `${{meta.uniprot}}_${{meta.ptmKey}}`;
-                const shapeEl = ensureElementForId(`${{baseId}}_shape`);
+                const shapeId = ptmElementId(protboxId, meta.uniprot, meta.ptmKey, 'shape');
+                const labelId = ptmElementId(protboxId, meta.uniprot, meta.ptmKey, 'label');
+                const symbolId = ptmElementId(protboxId, meta.uniprot, meta.ptmKey, 'symbol');
+                const shapeEl = ensureElementForId(shapeId);
                 if (!shapeEl) return null;
                 const shapePos = captureElementPosition(shapeEl, 'ptm-shape');
                 if (!shapePos) return null;
-                const labelEl = ensureElementForId(`${{baseId}}_label`);
-                const symbolEl = ensureElementForId(`${{baseId}}_symbol`);
+                const labelEl = ensureElementForId(labelId);
+                const symbolEl = ensureElementForId(symbolId);
                 const snapshot = {{
                     protbox_id: protboxId,
                     uniprot: meta.uniprot,
@@ -7887,7 +8622,8 @@ function rebuildGroupIndexes() {{
                 if (entries.length) {{
                     elementGroups[protboxId] = entries.filter(entry => {{
                         const entryId = entry?.element?.attr ? entry.element.attr('data-id') : null;
-                        if (entryId && idsToRemove.includes(entryId)) {{
+                        const entryShapeId = entry?.element?.attr ? entry.element.attr('data-ptm-shape-id') : null;
+                        if ((entryId && idsToRemove.includes(entryId)) || entryShapeId === shapeIdToRemove) {{
                             try {{ entry.element.remove(); }} catch (remErr) {{}}
                             return false;
                         }}
@@ -7900,32 +8636,36 @@ function rebuildGroupIndexes() {{
                 const pbWidth = rect.width();
                 const pbHeight = rect.height();
                 const spacing = settings.ptm_circle_spacing || 4;
+                protboxSnapPoints[protboxId] = buildProtboxSnapMap(pbX, pbY, pbWidth, pbHeight, spacing);
                 const snapPoints = protboxSnapPoints[protboxId];
-                const preferredSnapKey = options?.preferredSnapKey || null;
+                const preferredSnapKeyRaw = options?.preferredSnapKey || null;
+                const preferredSnapKey = isBlockedPtmPosition(preferredSnapKeyRaw) ? null : preferredSnapKeyRaw;
                 const fixedPosition = options?.fixedPosition || null;
                 const forceCenterSpawn = options?.spawnInCenter === true;
                 const snapshotSeed = options?.snapshot || null;
                 const recordHistory = options?.recordHistory !== false;
                 const existingOverride = getPtmOverride(protboxId, uniprot, ptmKey);
+                const existingOverridePosKey = isBlockedPtmPosition(existingOverride?.ptm_position) ? null : (existingOverride?.ptm_position || null);
+                const occupiedSnapKeys = collectOccupiedSnapKeys(protboxId);
                 const ptmMeta = {{ uniprot, ptmKey }};
                 let snapChoice = null;
                 if (!snapshotSeed?.shape) {{
                     if (fixedPosition && fixedPosition.x !== undefined && fixedPosition.y !== undefined) {{
-                        snapChoice = {{ x: fixedPosition.x, y: fixedPosition.y, key: fixedPosition.key || null }};
-                    }} else if (!preferredSnapKey && existingOverride) {{
+                        snapChoice = {{ x: fixedPosition.x, y: fixedPosition.y, key: isBlockedPtmPosition(fixedPosition.key) ? null : (fixedPosition.key || null) }};
+                    }} else if (!preferredSnapKey && existingOverride && !isBlockedPtmPosition(existingOverride?.ptm_position)) {{
                         const overrideX = toFiniteNumber(existingOverride.shape_x);
                         const overrideY = toFiniteNumber(existingOverride.shape_y);
                         if (overrideX !== null && overrideY !== null) {{
                             snapChoice = {{
                                 x: overrideX,
                                 y: overrideY,
-                                key: existingOverride.ptm_position || null
+                                key: existingOverridePosKey
                             }};
                         }}
-                    }} else if (!forceCenterSpawn && preferredSnapKey && snapPoints?.[preferredSnapKey]) {{
+                    }} else if (!forceCenterSpawn && preferredSnapKey && snapPoints?.[preferredSnapKey] && !occupiedSnapKeys.has(String(preferredSnapKey).toUpperCase())) {{
                         snapChoice = {{ ...snapPoints[preferredSnapKey], key: preferredSnapKey }};
                     }} else if (!forceCenterSpawn && snapPoints) {{
-                        const free = pickFreeSnap(protboxId);
+                        const free = pickFreeSnap(protboxId, ptmSnapRadius, existingOverride && isBlockedPtmPosition(existingOverride?.ptm_position) ? getBlockedPtmReplacementOrder(existingOverride.ptm_position) : [], occupiedSnapKeys);
                         if (free) snapChoice = free;
                     }}
                 }}
@@ -7939,7 +8679,7 @@ function rebuildGroupIndexes() {{
                 }} else if (snapChoice) {{
                     newX = snapChoice.x;
                     newY = snapChoice.y;
-                    posKey = snapChoice.key || preferredSnapKey || existingOverride?.ptm_position || null;
+                    posKey = snapChoice.key || preferredSnapKey || existingOverridePosKey || null;
                 }} else if (forceCenterSpawn) {{
                     newX = centerX;
                     newY = centerY;
@@ -7948,15 +8688,8 @@ function rebuildGroupIndexes() {{
                     newY = pbY - spacing;
                 }}
                 const radius = settings.ptm_circle_radius || 5;
-                const shape = (ptm.shape || 'circle').toLowerCase();
-                const ptmFill = entityColor(ptm);
                 const ptmOutline = entityOutlineColor(ptm);
-                let shapeObj;
-                if (shape === 'circle') {{
-                    shapeObj = protboxGroup.circle(radius * 2).cx(newX).cy(newY).fill(ptmFill).stroke({{ color: ptmOutline, width: ptmOutlineWidth }});
-                }} else {{
-                    shapeObj = protboxGroup.rect(radius * 2, radius * 2).move(newX - radius, newY - radius).fill(ptmFill).stroke({{ color: ptmOutline, width: ptmOutlineWidth }});
-                }}
+                const {{ shapeObj }} = createPtmShapeObject(ptm, newX, newY, ptmOutline);
                 const shapeId = ptmElementId(protboxId, uniprot, ptmKey, 'shape');
                 shapeObj.attr({{
                     'data-id': shapeId,
@@ -7980,6 +8713,7 @@ function rebuildGroupIndexes() {{
                     hideTooltipNow();
                 }});
                 workingEntries.push({{ element: shapeObj, offsetX: newX - pbX, offsetY: newY - pbY, jsonX: newX, jsonY: newY }});
+                syncPtmShapeSegments(protboxId, shapeId, ptm, shapeObj);
                 makeDraggable(shapeObj, 'ptm-shape', shapeId, protboxId);
                 bindPtmContextMenu(shapeObj, protboxId, ptmMeta);
                 const resetLabel = options?.resetLabelPosition || false;
@@ -8000,7 +8734,7 @@ function rebuildGroupIndexes() {{
                 const labelY = (labelSnapshot && labelSnapshot.y !== undefined)
                     ? labelSnapshot.y
                     : resolveCoord(existingOverride?.label_y ?? ptm.label_y, labelFallbackY, resetLabel || forceCenterPlacement);
-                if (ptm.label) {{
+                if (!shouldUseInternalTemporalPtmText(ptm) && ptm.label) {{
                     const labelColor = Array.isArray(ptm.label_color) && ptm.label_color.length === 3 ? `rgb(${{ptm.label_color.join(',')}})` : 'black';
                     const labelCenter = labelCenteringValue.toLowerCase();
                     const textAnchor = anchorMap[labelCenter] || 'middle';
@@ -8024,7 +8758,7 @@ function rebuildGroupIndexes() {{
                 const symbolY = (symbolSnapshot && symbolSnapshot.y !== undefined)
                     ? symbolSnapshot.y
                     : resolveCoord(existingOverride?.symbol_y ?? ptm.symbol_y, newY, resetSymbol);
-                if (ptm.symbol || ptm.symbol_icon) {{
+                if (!shouldUseInternalTemporalPtmText(ptm) && (ptm.symbol || ptm.symbol_icon)) {{
                     const symbolId = ptmElementId(protboxId, uniprot, ptmKey, 'symbol');
                     const symbolSizeRaw = Number(ptm.symbol_size || settings.ptm_label_size || 10);
                     const symbolSize = Number.isFinite(symbolSizeRaw) && symbolSizeRaw > 0 ? symbolSizeRaw : 10;
@@ -8146,10 +8880,9 @@ function rebuildGroupIndexes() {{
                     let label = debugMode ? String(id) : (protein.label || pb.backup_label || 'Unknown');
                     let labelColor = protein.label_color || [0, 0, 0];
                     elementGroups[id] = [];
-                    const fillRgb = entityColor(protein);
                     const outlineRgb = proteinOutlineColor(protein);
                     const labelRgb = Array.isArray(labelColor) && labelColor.length === 3 && labelColor.every(c => typeof c === 'number' && c >= 0 && c <= 255) ? `rgb(${{labelColor.join(',')}})` : 'black';
-                    const rect = protboxGroup.rect(width, height).move(x, yPos).fill(fillRgb).stroke({{ color: outlineRgb, width: protOutlineWidth }}).attr({{ 'data-id': id, 'data-type': 'prot-box', 'data-tooltip': (pb && pb.tooltip) || (protein && protein.tooltip) || '' }});
+                    const rect = protboxGroup.rect(width, height).move(x, yPos).fill(entityColor(protein)).stroke({{ color: outlineRgb, width: protOutlineWidth }}).attr({{ 'data-id': id, 'data-type': 'prot-box', 'data-tooltip': (pb && pb.tooltip) || (protein && protein.tooltip) || '', 'pointer-events': 'all' }});
                     // Tooltip handlers for prot-box
                     rect.node.addEventListener('mouseenter', e => {{
                         const tip = rect.attr('data-tooltip') || '';
@@ -8163,7 +8896,11 @@ function rebuildGroupIndexes() {{
                     rect.node.addEventListener('mouseleave', () => {{ hideTooltipNow(); }});
                     const text = protboxGroup.text(label).move(x + width / 2, yPos + height / 2 + textOffsetY).font({{ size: settings.prot_label_size || 12, family: settings.prot_label_font || 'Arial', anchor: 'middle', leading: '1.2em' }}).fill(labelRgb).attr({{ 'data-id': id + '_label', 'data-type': 'prot-label', 'pointer-events': 'none' }});
                     elementGroups[id].push({{ element: text, offsetX: width / 2, offsetY: height / 2, jsonX: x + width / 2, jsonY: y + height / 2 }});
+                    syncProtboxSegments(id, protein, rect, x, yPos, width, height);
                     makeDraggable(rect, 'prot-box', id, id);
+                    const spacing = settings.ptm_circle_spacing || 4;
+                    protboxSnapPoints[id] = buildProtboxSnapMap(x, yPos, width, height, spacing);
+                    const claimedSnapKeys = new Set();
                     let northHas = false, southHas = false, westHas = false, eastHas = false;
                     if (selectedUniprot && selectedUniprot in proteinData) {{
                         const proteinPtms = proteinData[selectedUniprot].PTMs || {{}};
@@ -8178,31 +8915,47 @@ function rebuildGroupIndexes() {{
                                 continue;
                             }}
                             const ptmMeta = {{ uniprot: selectedUniprot, ptmKey: ptm_key }};
-                            const effectiveShapeX = resolveCoordinate(override?.shape_x, ptm.shape_x);
-                            const effectiveShapeY = resolveCoordinate(override?.shape_y, ptm.shape_y);
+                            const rawPosKey = override?.ptm_position || ptm.ptm_position || '';
+                            const blockedPosKey = isBlockedPtmPosition(rawPosKey) ? rawPosKey : null;
+                            const normalizedRawPosKey = String(rawPosKey || '').toUpperCase();
+                            let effectiveShapeX = resolveCoordinate(override?.shape_x, ptm.shape_x);
+                            let effectiveShapeY = resolveCoordinate(override?.shape_y, ptm.shape_y);
+                            let effectivePosKey = blockedPosKey ? '' : rawPosKey;
+                            if (blockedPosKey) {{
+                                const replacementSnap = pickFreeSnap(id, ptmSnapRadius, getBlockedPtmReplacementOrder(blockedPosKey), claimedSnapKeys);
+                                if (replacementSnap) {{
+                                    effectiveShapeX = replacementSnap.x;
+                                    effectiveShapeY = replacementSnap.y;
+                                    effectivePosKey = replacementSnap.key || '';
+                                }}
+                            }} else if (normalizedRawPosKey && claimedSnapKeys.has(normalizedRawPosKey)) {{
+                                const replacementSnap = pickFreeSnap(id, ptmSnapRadius, [normalizedRawPosKey], claimedSnapKeys);
+                                if (replacementSnap) {{
+                                    effectiveShapeX = replacementSnap.x;
+                                    effectiveShapeY = replacementSnap.y;
+                                    effectivePosKey = replacementSnap.key || '';
+                                }} else {{
+                                    effectivePosKey = '';
+                                }}
+                            }}
                             if (effectiveShapeX === null || effectiveShapeY === null) {{
                                 // Leave PTMs with no stored coordinates hidden until the user spawns them.
                                 continue;
                             }}
                             const ptmX = effectiveShapeX;
                             const ptmY = effectiveShapeY;
-                            const shape = (ptm.shape || 'circle').toLowerCase();
                             // Apply same Y-stretch transformation to PTM positions so they align with their protbox
                             const adjPtmY = Math.round(ptmY * boxYStretch);
-                            const radius = settings.ptm_circle_radius || 5;
-                            const ptmFill = entityColor(ptm);
                             const ptmOutline = entityOutlineColor(ptm);
-                            const shapeObj = shape === 'circle'
-                                ? protboxGroup.circle(radius * 2).cx(ptmX).cy(adjPtmY).fill(ptmFill).stroke({{ color: ptmOutline, width: ptmOutlineWidth }})
-                                : protboxGroup.rect(radius * 2, radius * 2).move(ptmX - radius, adjPtmY - radius).fill(ptmFill).stroke({{ color: ptmOutline, width: ptmOutlineWidth }});
+                            const {{ shapeObj }} = createPtmShapeObject(ptm, ptmX, adjPtmY, ptmOutline);
+                            const ptmShapeId = ptmElementId(id, selectedUniprot, ptm_key, 'shape');
                             shapeObj.attr({{
-                                'data-id': ptmElementId(id, selectedUniprot, ptm_key, 'shape'),
+                                'data-id': ptmShapeId,
                                 'data-type': 'ptm-shape',
                                 'data-protbox-id': id,
                                 'data-tooltip': (ptm && ptm.tooltip) || '',
                                 'data-tooltip-html': (ptm && ptm.tooltip_html) || ''
                             }});
-                            const effectivePosKey = override?.ptm_position || ptm.ptm_position || '';
                             if (effectivePosKey) {{
                                 shapeObj.attr({{ 'data-pos-key': effectivePosKey }});
                             }}
@@ -8219,14 +8972,18 @@ function rebuildGroupIndexes() {{
                             }});
                             shapeObj.node.addEventListener('mouseleave', () => {{ hideTooltipNow(); }});
                             elementGroups[id].push({{ element: shapeObj, offsetX: ptmX - x, offsetY: ptmY - y, jsonX: ptmX, jsonY: ptmY }});
-                            makeDraggable(shapeObj, 'ptm-shape', ptmElementId(id, selectedUniprot, ptm_key, 'shape'), id);
+                            syncPtmShapeSegments(id, ptmShapeId, ptm, shapeObj);
+                            makeDraggable(shapeObj, 'ptm-shape', ptmShapeId, id);
                             bindPtmContextMenu(shapeObj, id, ptmMeta);
                             const ptm_pos = effectivePosKey || '';
+                            if (ptm_pos) {{
+                                claimedSnapKeys.add(String(ptm_pos).toUpperCase());
+                            }}
                             if (ptm_pos.startsWith('N')) northHas = true;
                             if (ptm_pos.startsWith('S')) southHas = true;
                             if (ptm_pos.startsWith('W')) westHas = true;
                             if (ptm_pos.startsWith('E')) eastHas = true;
-                            if (ptm.label) {{
+                            if (!shouldUseInternalTemporalPtmText(ptm) && ptm.label) {{
                                 const labelColor = Array.isArray(ptm.label_color) && ptm.label_color.length === 3 && ptm.label_color.every(c => typeof c === 'number' && c >= 0 && c <= 255) ? `rgb(${{ptm.label_color.join(',')}})` : 'black';
                                 const ld = labelDefaults[ptm_pos] || [];
                                 const fallbackLabelX = toFiniteNumber(ptm.label_x);
@@ -8244,7 +9001,7 @@ function rebuildGroupIndexes() {{
                                 makeDraggable(labelText, 'ptm-label', ptmElementId(id, selectedUniprot, ptm_key, 'label'), id);
                                 bindPtmContextMenu(labelText, id, ptmMeta);
                             }}
-                            if (ptm.symbol || ptm.symbol_icon) {{
+                            if (!shouldUseInternalTemporalPtmText(ptm) && (ptm.symbol || ptm.symbol_icon)) {{
                                 const fallbackSymbolX = toFiniteNumber(ptm.symbol_x);
                                 const fallbackSymbolY = toFiniteNumber(ptm.symbol_y);
                                 const baseSymbolX = fallbackSymbolX !== null ? fallbackSymbolX : ptmX;
@@ -8282,9 +9039,8 @@ function rebuildGroupIndexes() {{
                     elementGroups[id].push(...[ {{ element: handleGroup.line(x, yPos - handleDistNorth, x + width, yPos - handleDistNorth).stroke({{ color: 'red', width: 1 }}).attr({{ 'data-type': 'handle-line', 'data-id': id + '_north_line' }}) }}, {{ element: handleGroup.line(x, yPos + height + handleDistSouth, x + width, yPos + height + handleDistSouth).stroke({{ color: 'red', width: 1 }}).attr({{ 'data-type': 'handle-line', 'data-id': id + '_south_line' }}) }}, {{ element: handleGroup.line(x - handleDistWest, yPos, x - handleDistWest, yPos + height).stroke({{ color: 'red', width: 1 }}).attr({{ 'data-type': 'handle-line', 'data-id': id + '_west_line' }}) }}, {{ element: handleGroup.line(x + width + handleDistEast, yPos, x + width + handleDistEast, yPos + height).stroke({{ color: 'red', width: 1 }}).attr({{ 'data-type': 'handle-line', 'data-id': id + '_east_line' }}) }} ]);
                                         elementGroups[id].forEach(el => el.element.attr('data-type').startsWith('handle-') && el.element.hide());
                                         protboxHandleDists[id] = {{North: handleDistNorth,South: handleDistSouth,West: handleDistWest,East: handleDistEast}};
-                                        const spacing = settings.ptm_circle_spacing || 4;
                                         // Use the stretched y-position when computing snap points / handle lines
-                                        protboxSnapPoints[id] = {{'N1': {{x: x + width * 0.2, y: yPos - spacing}},'N2': {{x: x + width * 0.5, y: yPos - spacing}},'N3': {{x: x + width * 0.8, y: yPos - spacing}},'S1': {{x: x + width * 0.2, y: yPos + height + spacing}},'S2': {{x: x + width * 0.5, y: yPos + height + spacing}},'S3': {{x: x + width * 0.8, y: yPos + height + spacing}},'W1': {{x: x - spacing, y: yPos + height * 0.33 - 2}},'W2': {{x: x - spacing, y: yPos + height * 0.66 + 2}},'E1': {{x: x + width + spacing, y: yPos + height * 0.33 - 2}},'E2': {{x: x + width + spacing, y: yPos + height * 0.66 + 2}}}};
+                                        protboxSnapPoints[id] = buildProtboxSnapMap(x, yPos, width, height, spacing);
                                         for (const key in protboxSnapPoints[id]) {{
                                             const snapC = handleGroup.circle(4).cx(protboxSnapPoints[id][key].x).cy(protboxSnapPoints[id][key].y).fill('red').opacity(0.5).attr({{'data-type': 'ptm-snap-circle', 'data-pos-key': key, 'pointer-events': 'none'}});
                       elementGroups[id].push({{element: snapC}});
@@ -8967,21 +9723,24 @@ function rebuildGroupIndexes() {{
                 const isHorizontal = orientation === 'horizontal';
                 const width = isHorizontal ? 160 : 26;
                 const height = isHorizontal ? 26 : 160;
-                const posColor = toRgbString(gradientConfig.posColor);
-                const negColor = toRgbString(gradientConfig.negColor);
-                const white = 'rgb(255,255,255)';
+                const stops = Array.isArray(gradientConfig.stops) && gradientConfig.stops.length >= 2
+                    ? gradientConfig.stops
+                    : [
+                        {{ value: gradientConfig.maxNeg, color: gradientConfig.negColor }},
+                        {{ value: 0, color: [255, 255, 255] }},
+                        {{ value: gradientConfig.maxPos, color: gradientConfig.posColor }},
+                    ];
+                const minStopValue = Number(stops[0].value);
+                const maxStopValue = Number(stops[stops.length - 1].value);
+                const stopSpan = (maxStopValue - minStopValue) || 1;
                 const grad = draw.gradient('linear', add => {{
-                    if (isHorizontal) {{
-                        add.stop(0, negColor);
-                        add.stop(0.5, white);
-                        add.stop(1, posColor);
-                        add.from(0, 0).to(1, 0);
-                    }} else {{
-                        add.stop(0, posColor);
-                        add.stop(0.5, white);
-                        add.stop(1, negColor);
-                        add.from(0, 0).to(0, 1);
-                    }}
+                    stops.forEach((stop) => {{
+                        const value = Number(stop.value);
+                        const offsetRaw = (value - minStopValue) / stopSpan;
+                        const offset = Math.max(0, Math.min(1, isHorizontal ? offsetRaw : (1 - offsetRaw)));
+                        add.stop(offset, toRgbString(stop.color));
+                    }});
+                    add.from(0, 0).to(isHorizontal ? 1 : 0, isHorizontal ? 0 : 1);
                 }});
                 const g = figureKeyGroup.group().attr({{ 'data-id': id, 'data-type': 'figure-key' }});
                 const rect = g.rect(width, height).move(svgX, svgY).fill(grad).stroke({{ color: 'black', width: 1 }});
@@ -8993,26 +9752,27 @@ function rebuildGroupIndexes() {{
                 const fontSize = 11;
                 if (isHorizontal) {{
                     const labelY = svgY + height + fontSize + 2;
-                    const negLabel = g.text(String(gradientConfig.maxNeg)).font({{ size: fontSize, family: 'Arial', anchor: 'start' }}).fill('#000');
-                    negLabel.attr({{ 'data-type': 'compound-label', 'data-original-fill': '#000' }});
-                    negLabel.move(svgX, labelY);
-                    const zeroLabel = g.text('0').font({{ size: fontSize, family: 'Arial', anchor: 'middle' }}).fill('#000');
-                    zeroLabel.attr({{ 'data-type': 'compound-label', 'data-original-fill': '#000' }});
-                    zeroLabel.center(svgX + width / 2, labelY + fontSize / 2);
-                    const posLabel = g.text(String(gradientConfig.maxPos)).font({{ size: fontSize, family: 'Arial', anchor: 'end' }}).fill('#000');
-                    posLabel.attr({{ 'data-type': 'compound-label', 'data-original-fill': '#000' }});
-                    posLabel.move(svgX + width - 2, labelY);
+                    stops.forEach((stop, idx) => {{
+                        const value = Number(stop.value);
+                        const offsetRaw = (value - minStopValue) / stopSpan;
+                        const offset = Math.max(0, Math.min(1, offsetRaw));
+                        const xPos = svgX + (offset * width);
+                        const anchor = idx === 0 ? 'start' : (idx === (stops.length - 1) ? 'end' : 'middle');
+                        const label = g.text(String(value)).font({{ size: fontSize, family: 'Arial', anchor }}).fill('#000');
+                        label.attr({{ 'data-type': 'compound-label', 'data-original-fill': '#000' }});
+                        label.move(anchor === 'middle' ? xPos : (anchor === 'start' ? xPos : xPos - 2), labelY);
+                    }});
                 }} else {{
                     const labelX = svgX + width + 6;
-                    const posLabel = g.text(String(gradientConfig.maxPos)).font({{ size: fontSize, family: 'Arial', anchor: 'start' }}).fill('#000');
-                    posLabel.attr({{ 'data-type': 'compound-label', 'data-original-fill': '#000' }});
-                    posLabel.move(labelX, svgY - 2);
-                    const zeroLabel = g.text('0').font({{ size: fontSize, family: 'Arial', anchor: 'start' }}).fill('#000');
-                    zeroLabel.attr({{ 'data-type': 'compound-label', 'data-original-fill': '#000' }});
-                    zeroLabel.move(labelX, svgY + height / 2 - fontSize);
-                    const negLabel = g.text(String(gradientConfig.maxNeg)).font({{ size: fontSize, family: 'Arial', anchor: 'start' }}).fill('#000');
-                    negLabel.attr({{ 'data-type': 'compound-label', 'data-original-fill': '#000' }});
-                    negLabel.move(labelX, svgY + height - fontSize - 2);
+                    stops.forEach((stop) => {{
+                        const value = Number(stop.value);
+                        const offsetRaw = (value - minStopValue) / stopSpan;
+                        const offset = Math.max(0, Math.min(1, 1 - offsetRaw));
+                        const yPos = svgY + (offset * height) - (fontSize * 0.5);
+                        const label = g.text(String(value)).font({{ size: fontSize, family: 'Arial', anchor: 'start' }}).fill('#000');
+                        label.attr({{ 'data-type': 'compound-label', 'data-original-fill': '#000' }});
+                        label.move(labelX, yPos);
+                    }});
                 }}
                 makeDraggable(g, 'figure-key', id);
                 elementGroups[id] = [{{ element: g, offsetX: 0, offsetY: 0 }}];
@@ -9130,13 +9890,11 @@ function rebuildGroupIndexes() {{
                 const newProtein = ensureProteinRecord(newUniprot) || {{}};
                 const newLabel = debugMode ? String(protboxId) : (newProtein.label || pb.backup_label || 'Unknown');
                 const newLabelColor = newProtein.label_color || [0, 0, 0];
-                const fillRgb = entityColor(newProtein);
                 const outlineRgb = proteinOutlineColor(newProtein);
                 const labelRgb = Array.isArray(newLabelColor) && newLabelColor.length === 3 ? `rgb(${{newLabelColor.join(',')}})` : 'black';
-                rect.fill(fillRgb);
                 rect.stroke({{ color: outlineRgb, width: protOutlineWidth }});
                 text.text(newLabel).fill(labelRgb);
-                const ptmTypes = ['ptm-shape', 'ptm-label', 'ptm-symbol'];
+                const ptmTypes = ['ptm-shape', 'ptm-label', 'ptm-symbol', 'ptm-shape-segment', 'ptm-shape-outline', 'ptm-internal-label', 'ptm-internal-symbol'];
                 const toRemove = elementGroups[protboxId].filter(el => ptmTypes.includes(el.element.attr('data-type')));
                 toRemove.forEach(({{element}}) => element.remove());
                 elementGroups[protboxId] = elementGroups[protboxId].filter(el => !ptmTypes.includes(el.element.attr('data-type')));
@@ -9145,6 +9903,10 @@ function rebuildGroupIndexes() {{
                 const originalY = pb.y || 0;
                 const currentX = rect.x();
                 const currentY = rect.y();
+                syncProtboxSegments(protboxId, newProtein, rect, currentX, currentY, rect.width(), rect.height());
+                const spacing = settings.ptm_circle_spacing || 4;
+                protboxSnapPoints[protboxId] = buildProtboxSnapMap(currentX, currentY, rect.width(), rect.height(), spacing);
+                const claimedSnapKeys = new Set();
                 const deltaX = currentX - originalX;
                 const deltaY = currentY - originalY;
                 const overrideMapForProt = pb?.ptm_overrides?.[newUniprot] || null;
@@ -9155,43 +9917,61 @@ function rebuildGroupIndexes() {{
                         continue;
                     }}
                     const ptmMeta = {{ uniprot: newUniprot, ptmKey: ptm_key }};
-                    const resolvedShapeX = resolveCoordinate(override?.shape_x, ptm.shape_x);
-                    const resolvedShapeY = resolveCoordinate(override?.shape_y, ptm.shape_y);
+                    const rawPtmPos = override?.ptm_position || ptm.ptm_position || '';
+                    const blockedPtmPos = isBlockedPtmPosition(rawPtmPos) ? rawPtmPos : null;
+                    const normalizedRawPtmPos = String(rawPtmPos || '').toUpperCase();
+                    let resolvedShapeX = resolveCoordinate(override?.shape_x, ptm.shape_x);
+                    let resolvedShapeY = resolveCoordinate(override?.shape_y, ptm.shape_y);
+                    let ptm_pos = blockedPtmPos ? '' : rawPtmPos;
+                    if (blockedPtmPos) {{
+                        const replacementSnap = pickFreeSnap(protboxId, ptmSnapRadius, getBlockedPtmReplacementOrder(blockedPtmPos), claimedSnapKeys);
+                        if (replacementSnap) {{
+                            resolvedShapeX = replacementSnap.x - deltaX;
+                            resolvedShapeY = replacementSnap.y - deltaY;
+                            ptm_pos = replacementSnap.key || '';
+                        }}
+                    }} else if (normalizedRawPtmPos && claimedSnapKeys.has(normalizedRawPtmPos)) {{
+                        const replacementSnap = pickFreeSnap(protboxId, ptmSnapRadius, [normalizedRawPtmPos], claimedSnapKeys);
+                        if (replacementSnap) {{
+                            resolvedShapeX = replacementSnap.x - deltaX;
+                            resolvedShapeY = replacementSnap.y - deltaY;
+                            ptm_pos = replacementSnap.key || '';
+                        }} else {{
+                            ptm_pos = '';
+                        }}
+                    }}
                     if (resolvedShapeX === null || resolvedShapeY === null) {{
                         continue;
                     }}
                     const adjusted_ptmX = resolvedShapeX + deltaX;
                     const adjusted_ptmY = resolvedShapeY + deltaY;
-                    const shape = (ptm.shape || 'circle').toLowerCase();
-                    const radius = settings.ptm_circle_radius || 5;
-                    const ptmFill = entityColor(ptm);
                     const ptmOutline = entityOutlineColor(ptm);
-                    const shapeObj = shape === 'circle'
-                        ? protboxGroup.circle(radius * 2).cx(adjusted_ptmX).cy(adjusted_ptmY).fill(ptmFill).stroke({{ color: ptmOutline, width: ptmOutlineWidth }})
-                        : protboxGroup.rect(radius * 2, radius * 2).move(adjusted_ptmX - radius, adjusted_ptmY - radius).fill(ptmFill).stroke({{ color: ptmOutline, width: ptmOutlineWidth }});
-                    const ptm_pos = override?.ptm_position || ptm.ptm_position || '';
+                    const {{ shapeObj }} = createPtmShapeObject(ptm, adjusted_ptmX, adjusted_ptmY, ptmOutline);
                     if (ptm_pos) {{
                         shapeObj.attr({{ 'data-pos-key': ptm_pos }});
                     }}
                     const shapeId = ptmElementId(protboxId, newUniprot, ptm_key, 'shape');
-                    shapeObj.attr({{ 'data-id': shapeId, 'data-type': 'ptm-shape' }});
+                    shapeObj.attr({{
+                        'data-id': shapeId,
+                        'data-type': 'ptm-shape',
+                        'data-protbox-id': protboxId
+                    }});
                     elementGroups[protboxId].push({{ element: shapeObj, offsetX: adjusted_ptmX - currentX, offsetY: adjusted_ptmY - currentY, jsonX: adjusted_ptmX, jsonY: adjusted_ptmY }});
+                    syncPtmShapeSegments(protboxId, shapeId, ptm, shapeObj);
                     makeDraggable(shapeObj, 'ptm-shape', shapeId, protboxId);
                     bindPtmContextMenu(shapeObj, protboxId, ptmMeta);
+                    if (ptm_pos) {{
+                        claimedSnapKeys.add(String(ptm_pos).toUpperCase());
+                    }}
                     if (ptm_pos.startsWith('N')) northHas = true;
                     else if (ptm_pos.startsWith('S')) southHas = true;
                     else if (ptm_pos.startsWith('W')) westHas = true;
                     else if (ptm_pos.startsWith('E')) eastHas = true;
-                    let shape_center_x, shape_center_y;
-                    if (shape === 'circle') {{
-                        shape_center_x = shapeObj.cx();
-                        shape_center_y = shapeObj.cy();
-                    }} else {{
-                        shape_center_x = shapeObj.x() + radius;
-                        shape_center_y = shapeObj.y() + radius;
-                    }}
+                    const shapeCenter = getPtmShapeCenter(shapeObj);
+                    const shape_center_x = shapeCenter.x;
+                    const shape_center_y = shapeCenter.y;
                     Shiny?.setInputValue('element_moved', {{ type: 'ptm-shape', id: shapeId, x: shape_center_x, y: shape_center_y, protbox_id: protboxId, ptm_position: ptm_pos || null }}, {{ priority: 'event' }});
-                    if (ptm.label) {{
+                    if (!shouldUseInternalTemporalPtmText(ptm) && ptm.label) {{
                         const ld = labelDefaults[ptm_pos] || [];
                         const fallbackLabelX = toFiniteNumber(ptm.label_x);
                         const fallbackLabelY = toFiniteNumber(ptm.label_y);
@@ -9211,7 +9991,7 @@ function rebuildGroupIndexes() {{
                         bindPtmContextMenu(labelText, protboxId, ptmMeta);
                         Shiny?.setInputValue('element_moved', {{ type: 'ptm-label', id: labelId, x: adjusted_labelX, y: adjusted_labelY, protbox_id: protboxId }}, {{ priority: 'event' }});
                     }}
-                    if (ptm.symbol || ptm.symbol_icon) {{
+                    if (!shouldUseInternalTemporalPtmText(ptm) && (ptm.symbol || ptm.symbol_icon)) {{
                         const fallbackSymbolX = toFiniteNumber(ptm.symbol_x);
                         const fallbackSymbolY = toFiniteNumber(ptm.symbol_y);
                         const baseSymbolX = fallbackSymbolX !== null ? fallbackSymbolX : resolvedShapeX;

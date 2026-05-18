@@ -46,13 +46,13 @@ def validate_protein_file(file_path: str) -> ProteinValidationResult:
     Validate a protein data file according to the expected schema.
     Rules:
       - Col0: Uniprot ID (required values)
-      - Col1: Gene Symbol (required values)
+      - Col1: Gene Symbol (blank values are auto-filled from Uniprot ID)
       - Col2+: Comparison columns must start with "C:" (at least one required)
       - Optional outline comparison columns start with "O:" and must match a "C:" header
       - Optional tooltip columns start with "T:"
       - Comparison cells must be numeric (float/int) and non-empty
       - Outline comparison cells must be numeric (float/int) or "NA"
-      - Uniprot/GeneSymbol/Comparison cells required on every row
+      - Uniprot/Comparison cells required on every row
       - Only .txt (tab-delimited) or .csv files are allowed
     Returns a ProteinValidationResult with validity, errors, and summary counts.
     """
@@ -118,8 +118,9 @@ def validate_protein_file(file_path: str) -> ProteinValidationResult:
                 gene_symbol = (row[1] or "").strip()
                 if not uniprot:
                     errors.append(f"Row {row_idx}, Column 1 (Uniprot ID) is empty.")
-                if not gene_symbol:
-                    errors.append(f"Row {row_idx}, Column 2 (Gene Symbol) is empty.")
+                if not gene_symbol and uniprot:
+                    # Allow blank gene symbols by falling back to UniProt ID.
+                    row[1] = uniprot
                 for c_idx in comparison_col_indexes:
                     cell = (row[c_idx] or "").strip()
                     if not cell:

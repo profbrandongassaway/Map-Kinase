@@ -579,6 +579,20 @@ class PathwayProcessor:
         self.positive_color = settings.get('positive_color', (0, 0, 255))
         self.max_negative = settings.get('max_negative', -2)
         self.max_positive = settings.get('max_positive', 2)
+        self.gradient_stops = self._normalize_gradient_stops(settings.get('gradient_stops'))
+        if len(self.gradient_stops) < 2:
+            self.gradient_stops = self._normalize_gradient_stops(
+                [
+                    {'value': float(self.max_negative), 'color': list(self.negative_color)},
+                    {'value': 0.0, 'color': [255, 255, 255]},
+                    {'value': float(self.max_positive), 'color': list(self.positive_color)},
+                ]
+            )
+        if len(self.gradient_stops) >= 2:
+            self.max_negative = float(self.gradient_stops[0]['value'])
+            self.max_positive = float(self.gradient_stops[-1]['value'])
+            self.negative_color = tuple(int(v) for v in self.gradient_stops[0]['color'])
+            self.positive_color = tuple(int(v) for v in self.gradient_stops[-1]['color'])
         self.ptm_label_color = settings.get('ptm_label_color', (0, 0, 0))
         self.ptm_circle_radius = settings.get('ptm_circle_radius', 5)
         self.ptm_circle_spacing = settings.get('ptm_circle_spacing', 4)
@@ -598,6 +612,75 @@ class PathwayProcessor:
         self._protein_id_index = self._build_protein_match_index(self.hsa_id_column)
         self._protein_gene_index = self._build_protein_match_index(self.gene_name_column)
         self._protein_uniprot_index = self._build_protein_match_index(self.prot_uniprot_column, normalize_uniprot_values=True)
+
+    def _normalize_gradient_stops(self, gradient_stops):
+        if not isinstance(gradient_stops, (list, tuple)):
+            return []
+        parsed = []
+        for item in gradient_stops:
+            if not isinstance(item, dict):
+                continue
+            raw_value = item.get('value')
+            try:
+                value = float(raw_value)
+            except (TypeError, ValueError):
+                continue
+            if not math.isfinite(value):
+                continue
+            raw_color = item.get('color', item.get('rgb'))
+            if isinstance(raw_color, str):
+                color_text = raw_color.strip().lstrip('#')
+                if len(color_text) != 6:
+                    continue
+                try:
+                    color = [int(color_text[0:2], 16), int(color_text[2:4], 16), int(color_text[4:6], 16)]
+                except Exception:
+                    continue
+            elif isinstance(raw_color, (list, tuple)) and len(raw_color) >= 3:
+                try:
+                    color = [int(max(0, min(255, round(float(c))))) for c in list(raw_color)[:3]]
+                except Exception:
+                    continue
+            else:
+                continue
+            parsed.append((value, color))
+        if not parsed:
+            return []
+        dedup = {}
+        for value, color in parsed:
+            dedup[float(value)] = list(color)
+        return [{'value': float(v), 'color': list(c)} for v, c in sorted(dedup.items(), key=lambda kv: kv[0])]
+
+    def _color_from_gradient_stops(self, fold_change):
+        if pd.isna(fold_change):
+            return [128, 128, 128]
+        if not self.gradient_stops or len(self.gradient_stops) < 2:
+            return None
+        try:
+            fold = float(fold_change)
+        except (TypeError, ValueError):
+            return [128, 128, 128]
+        if not math.isfinite(fold):
+            return [128, 128, 128]
+        if fold <= float(self.gradient_stops[0]['value']):
+            return list(self.gradient_stops[0]['color'])
+        if fold >= float(self.gradient_stops[-1]['value']):
+            return list(self.gradient_stops[-1]['color'])
+        for idx in range(len(self.gradient_stops) - 1):
+            left = self.gradient_stops[idx]
+            right = self.gradient_stops[idx + 1]
+            left_v = float(left['value'])
+            right_v = float(right['value'])
+            if fold < left_v or fold > right_v:
+                continue
+            if right_v == left_v:
+                return list(right['color'])
+            t = (fold - left_v) / (right_v - left_v)
+            return [
+                int(max(0, min(255, round((1 - t) * left['color'][c_idx] + t * right['color'][c_idx]))))
+                for c_idx in range(3)
+            ]
+        return list(self.gradient_stops[-1]['color'])
 
     def _build_protein_match_index(self, column_name, normalize_uniprot_values=False):
         index = {}
@@ -805,6 +888,9 @@ class PathwayProcessor:
         return "\n".join(tooltip_plain), "<br/>".join(tooltip_html)
 
     def get_color(self, fold_change):
+        stop_color = self._color_from_gradient_stops(fold_change)
+        if isinstance(stop_color, list):
+            return stop_color
         if pd.isna(fold_change):
             return [128, 128, 128]
         white = (255, 255, 255)
@@ -961,10 +1047,12 @@ class PathwayProcessor:
                         'show_arrows': self.settings.get('show_arrows', True),
                         'show_text_boxes': self.settings.get('show_text_boxes', True),
                         'debug_mode': self.settings.get('debug_mode', False),
+                        'temporal_mode': self.settings.get('temporal_mode', False),
                         'negative_color': self.settings.get('negative_color', (255, 0, 0)),
                         'positive_color': self.settings.get('positive_color', (0, 0, 255)),
                         'max_negative': self.settings.get('max_negative', -2),
                         'max_positive': self.settings.get('max_positive', 2),
+                        'gradient_stops': self.settings.get('gradient_stops', self.gradient_stops),
                         'prot_label_font': self.settings.get('prot_label_font', 'Arial'),
                         'prot_label_size': self.settings.get('prot_label_size', 12),
                         'ptm_label_font': self.settings.get('ptm_label_font', 'Arial'),
@@ -1422,7 +1510,7 @@ class PathwayProcessor:
                 protbox_ptm_overrides = {}
                 valid_protein_dicts = list(cache_payload.get('valid_protein_dicts', []))
                 uniprot_ids = list(cache_payload.get('uniprot_ids', []))
-                use_original_size = bool(self.settings.get("use_original_protbox_size", False))
+                use_original_size = bool(self.settings.get("use_original_protbox_size", True))
                 if valid_protein_dicts:
                     # Determine the chosen (highest priority) protein
                     chosen_protein = self.choose_protein(proteins)
@@ -1597,7 +1685,7 @@ class PathwayProcessor:
     def process_protein_box(self, entry_id, protein_dict, proximities, protein_to_entry_ids, exceptions):
         try:
             entry_data = self.protein_data_map[entry_id]
-            use_original_size = bool(self.settings.get("use_original_protbox_size", False))
+            use_original_size = bool(self.settings.get("use_original_protbox_size", True))
             is_kegg = str(self.settings.get("pathway_source", "kegg")).lower() == "kegg"
             center_x = entry_data['x'] if is_kegg else entry_data['x'] + entry_data['width'] / 2
             center_y = entry_data['y'] if is_kegg else entry_data['y'] + entry_data['height'] / 2
@@ -2314,6 +2402,11 @@ DEFAULT_SETTINGS = {
     'positive_color': (16, 101, 171),
     'max_negative': -2,
     'max_positive': 2,
+    'gradient_stops': [
+        {'value': -2.0, 'color': [179, 21, 41]},
+        {'value': 0.0, 'color': [255, 255, 255]},
+        {'value': 2.0, 'color': [16, 101, 171]},
+    ],
     'prot_label_font': 'Arial',
     'prot_label_size': 9,
     'ptm_label_font': 'Arial',
@@ -2324,8 +2417,9 @@ DEFAULT_SETTINGS = {
     'prot_outline_width': 1,
     'ptm_outline_width': 1,
     'use_black_protein_outlines': False,
+    'temporal_mode': False,
     'protein_tooltip_columns': ['Gene Symbol', 'Uniprot_ID', 'ER+_Est-_x-y_TNBC'],
-    'use_original_protbox_size': False
+    'use_original_protbox_size': True
 }
 
 DEFAULT_DATA = {
