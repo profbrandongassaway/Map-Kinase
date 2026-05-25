@@ -25,33 +25,6 @@ MapKinase is a Python Shiny web app for visualizing proteomics, PTM modification
 
 `requirements.txt` is deployment-focused and pins runtime package versions for reproducible security review.
 
-## Temporary password protection
-The default launcher (`m5_main_ui.py`) does not enable an app-level login gate.
-If you need a shared username/password gate for a private deployment, use the protected launcher and explicitly provide credentials through environment variables.
-
-Run the app normally:
-
-```powershell
-python MapKinase_WebApp\m5_main_ui.py
-```
-
-The separate protected launcher also still works:
-
-```powershell
-$env:MAPKINASE_ENABLE_LOGIN = "1"
-$env:MAPKINASE_LOGIN_USERNAME = "<set-a-strong-username>"
-$env:MAPKINASE_LOGIN_PASSWORD = "<set-a-strong-password>"
-python MapKinase_WebApp\m5_secure_ui.py
-```
-
-Optional environment variables:
-- `MAPKINASE_AUTH_SECRET`: overrides the cookie-signing secret. If omitted, a random secret is generated each time the app starts.
-- `MAPKINASE_AUTH_MAX_AGE_SECONDS`: login duration in seconds before re-authentication is required. Default is `43200` (12 hours).
-- `MAPKINASE_AUTH_COOKIE_SECURE`: set to `1` when serving over HTTPS so the auth cookie is marked `Secure`.
-- `MAPKINASE_ENABLE_LOGIN`: defaults to disabled; set to `1` to enable the login gate in `m5_secure_ui.py`.
-
-The protected launcher blocks both normal page requests and the Shiny websocket until the login succeeds.
-
 ## Deployment mode and debug-feature gating
 - Runtime mode defaults to production (`MAPKINASE_ENV=production`).
 - Optional override: `MAPKINASE_PRODUCTION=1` (production) or `MAPKINASE_PRODUCTION=0` (non-production).
@@ -66,13 +39,6 @@ To run the PTM annotation features properly, download the PhosphoSitePlus datase
 - `Phosphorylation_site_dataset.gz`
 - `Regulatory_sites.gz`
 - `Kinase_Substrate_Dataset.gz`
-
-### Optional desktop window
-If you want the app to open in a native window (pywebview):
-```
-$env:M5_DESKTOP_GUI = "1"
-python MapKinase_WebApp\m5_main_ui.py
-```
 
 ## Input file formats
 Protein data (CSV/TSV):
