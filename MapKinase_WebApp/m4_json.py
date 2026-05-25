@@ -27,6 +27,30 @@ def _safe_debug_print(*parts):
 
 
 _SYMBOL_ICON_CACHE = {}
+_DEBUG_TRUE_VALUES = {"1", "true", "yes", "on"}
+
+
+def _debug_file_output_enabled() -> bool:
+    return str(os.getenv("MAPKINASE_DEBUG_FILE_OUTPUT", "false") or "").strip().lower() in _DEBUG_TRUE_VALUES
+
+
+def _resolve_debug_output_dir(settings: dict | None = None) -> Path | None:
+    cfg = settings or {}
+    candidates = [
+        str(cfg.get("session_workspace_dir") or "").strip(),
+        str(cfg.get("debug_output_dir") or "").strip(),
+        str(os.getenv("MAPKINASE_DEBUG_OUTPUT_DIR", "") or "").strip(),
+    ]
+    for raw in candidates:
+        if not raw:
+            continue
+        path = Path(raw).expanduser()
+        try:
+            path.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            continue
+        return path
+    return None
 
 
 def _resolve_icons_dir() -> Path:
@@ -416,7 +440,7 @@ def savefile(input_file, directory, suffix, extension=".json", include_timestamp
         base_name = os.path.splitext(os.path.basename(input_file))[0]
         script_dir = os.path.dirname(os.path.abspath(__file__))
         phosmap_dir = os.path.dirname(script_dir)
-        output_dir = os.path.join(phosmap_dir, directory)
+        output_dir = directory if os.path.isabs(str(directory or "")) else os.path.join(phosmap_dir, directory)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         if include_timestamp:
@@ -1660,21 +1684,35 @@ class PathwayProcessor:
                     json_data['text_data'].append(text_item)
 
             if not skip_disk_write:
-                temp_file = savefile(self.settings.get('pathway_id', 'hsa04010'),
-                                     self.settings.get('output_subdir', 'output/testing_file_001'),
-                                     '_visprots', extension='.txt', include_timestamp=False)
-                try:
-                    with open(temp_file, 'w') as f:
-                        for protein in chosen_proteins:
-                            f.write(f"{protein}\n")
-                except (IOError, PermissionError) as e:
-                    print(f"Error writing to temporary file {temp_file}: {e}")
-                output_file = savefile(self.settings.get('pathway_id', 'hsa04010'),
-                                       self.settings.get('output_subdir', 'output/testing_file_001'),
-                                       '_pathway_data', extension='.json')
-                with open(output_file, 'w') as f:
-                    json.dump(json_data, f, indent=4)
-                print(f"Pathway data saved to {output_file}")
+                if not _debug_file_output_enabled():
+                    print("Skipping pathway data save to disk (MAPKINASE_DEBUG_FILE_OUTPUT is disabled).")
+                else:
+                    debug_output_dir = _resolve_debug_output_dir(self.settings)
+                    if debug_output_dir is None:
+                        print("Skipping pathway data save to disk (no debug output directory configured).")
+                    else:
+                        temp_file = savefile(
+                            self.settings.get('pathway_id', 'hsa04010'),
+                            str(debug_output_dir),
+                            '_visprots',
+                            extension='.txt',
+                            include_timestamp=False,
+                        )
+                        try:
+                            with open(temp_file, 'w', encoding='utf-8') as f:
+                                for protein in chosen_proteins:
+                                    f.write(f"{protein}\n")
+                        except (IOError, PermissionError) as e:
+                            print(f"Error writing to temporary file {temp_file}: {e}")
+                        output_file = savefile(
+                            self.settings.get('pathway_id', 'hsa04010'),
+                            str(debug_output_dir),
+                            '_pathway_data',
+                            extension='.json',
+                        )
+                        with open(output_file, 'w', encoding='utf-8') as f:
+                            json.dump(json_data, f, indent=4)
+                        print(f"Pathway data saved to {output_file}")
             else:
                 print("Skipping pathway data save to disk (skip_disk_write=True)")
             return json_data
@@ -2269,11 +2307,11 @@ class PathwayProcessor:
 
 def generate_pathway_json(pathway_id, data, settings, skip_disk_write=False, debug_write=False):
     try:
+        debug_output_dir = _resolve_debug_output_dir(settings) if (debug_write and _debug_file_output_enabled()) else None
         # Debug logging: capture what enters m4
-        if debug_write:
+        if debug_output_dir is not None:
             try:
-                base_dir = Path(__file__).resolve().parent
-                debug_in_path = base_dir / "loaded_pathway_m4.txt"
+                debug_in_path = debug_output_dir / "loaded_pathway_m4.txt"
                 with debug_in_path.open("w", encoding="utf-8") as fh:
                     json.dump(
                         {
@@ -2327,10 +2365,9 @@ def generate_pathway_json(pathway_id, data, settings, skip_disk_write=False, deb
         entries, groups, arrows = pathway_api.parse_pathway(pathway_file)
         print(f"Parsed {len(entries)} entries, {len(groups)} groups, and {len(arrows)} arrows")
         # Debug: capture what we got from the pathway API (a1_factory output)
-        if debug_write:
+        if debug_output_dir is not None:
             try:
-                base_dir = Path(__file__).resolve().parent
-                debug_in_path = base_dir / "loaded_pathway_m4.txt"
+                debug_in_path = debug_output_dir / "loaded_pathway_m4.txt"
                 with debug_in_path.open("w", encoding="utf-8") as fh:
                     json.dump(
                         {
@@ -2371,10 +2408,9 @@ def generate_pathway_json(pathway_id, data, settings, skip_disk_write=False, deb
         print("Pathway JSON generated")
 
         # Debug logging: capture what m4 returns (consumed by m5/m3)
-        if debug_write:
+        if debug_output_dir is not None:
             try:
-                base_dir = Path(__file__).resolve().parent
-                debug_out_path = base_dir / "loaded_pathway_m3.txt"
+                debug_out_path = debug_output_dir / "loaded_pathway_m3.txt"
                 with debug_out_path.open("w", encoding="utf-8") as fh:
                     json.dump(json_data, fh, indent=2, default=str)
             except Exception as log_exc:  # pragma: no cover - debug helper

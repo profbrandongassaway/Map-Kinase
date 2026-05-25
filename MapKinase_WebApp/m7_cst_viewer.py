@@ -77,6 +77,44 @@ _GRADIENT_STOPS_CTX: contextvars.ContextVar[Optional[List[Dict[str, Any]]]] = co
 )
 
 
+def _json_for_inline_script(value: Any) -> str:
+    # Prevent script-tag breakouts when embedding JSON inside inline JS.
+    def _sanitize_json_payload(payload: Any) -> Any:
+        if payload is None:
+            return None
+        if isinstance(payload, float):
+            return payload if math.isfinite(payload) else None
+        if isinstance(payload, (str, int, bool)):
+            return payload
+        if isinstance(payload, dict):
+            return {k: _sanitize_json_payload(v) for k, v in payload.items()}
+        if isinstance(payload, (list, tuple, set)):
+            return [_sanitize_json_payload(v) for v in payload]
+        if isinstance(payload, Path):
+            return str(payload)
+        # Handle numpy scalar values without introducing a hard runtime dependency here.
+        if hasattr(payload, "item"):
+            try:
+                return _sanitize_json_payload(payload.item())
+            except Exception:
+                pass
+        return payload
+
+    try:
+        raw = json.dumps(value, ensure_ascii=True, allow_nan=False, default=str)
+    except (TypeError, ValueError):
+        cleaned = _sanitize_json_payload(value)
+        raw = json.dumps(cleaned, ensure_ascii=True, allow_nan=False, default=str)
+    return (
+        raw
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+        .replace("\u2028", "\\u2028")
+        .replace("\u2029", "\\u2029")
+    )
+
+
 def _resolve_base_dir(base_dir: Optional[Path] = None) -> Path:
     return Path(base_dir) if base_dir is not None else Path(__file__).resolve().parent
 
@@ -2437,7 +2475,7 @@ def _build_editable_node_from_saved_entry(
             "strokeWidth": max(1.0, float(entry.get("strokeWidth") or 1.0)),
             "stroke": str(entry.get("stroke") or "#000000"),
             "fillColor": str(entry.get("fillColor") or ("transparent" if shape_type == "bracket" else "#f5f5f5")),
-            "opacity": max(0.1, min(1.0, float(entry.get("opacity") or 0.98))),
+            "opacity": max(0.1, min(1.0, float(entry.get("opacity") or 1.0))),
             "annotation": "",
             "annotationCommitted": True,
             "pendingAnnotation": "",
@@ -2474,7 +2512,7 @@ def _build_editable_node_from_saved_entry(
             "stroke": str(entry.get("stroke") or "rgb(71, 85, 105)"),
             "fillColor": str(entry.get("fillColor") or "transparent"),
             "textColor": str(entry.get("textColor") or "#0f172a"),
-            "opacity": max(0.1, min(1.0, float(entry.get("opacity") or 0.98))),
+            "opacity": max(0.1, min(1.0, float(entry.get("opacity") or 1.0))),
             "annotation": "",
             "annotationCommitted": True,
             "pendingAnnotation": "",
@@ -2666,7 +2704,7 @@ def _build_editable_node_from_saved_entry(
         "strokeWidth": max(0.6, float(prot_outline_width or 1.0)),
         "stroke": f"rgb({stroke_rgb[0]}, {stroke_rgb[1]}, {stroke_rgb[2]})",
         "fillColor": f"rgb({fill_rgb[0]}, {fill_rgb[1]}, {fill_rgb[2]})",
-        "opacity": max(0.1, min(1.0, float(entry.get("opacity") or 0.98))),
+        "opacity": max(0.1, min(1.0, float(entry.get("opacity") or 1.0))),
         "annotation": "",
         "annotationCommitted": True,
         "pendingAnnotation": "",
@@ -2709,8 +2747,8 @@ def _summarize_saved_editable_nodes(nodes: Sequence[Dict[str, Any]]) -> Dict[str
     return summary
 
 
-def load_cst_overlay_state(file_path: Path) -> Dict[str, Any]:
-    sidecar = _cst_overlay_state_path(file_path)
+def load_cst_overlay_state(file_path: Path, overlay_state_path: Optional[Path] = None) -> Dict[str, Any]:
+    sidecar = Path(overlay_state_path) if overlay_state_path is not None else _cst_overlay_state_path(file_path)
     if not sidecar.exists():
         return {}
     try:
@@ -2727,7 +2765,10 @@ def save_cst_overlay_state(
     edges: Sequence[Dict[str, Any]] | None = None,
     groups: Sequence[Dict[str, Any]] | None = None,
     disable_pdf_reader: bool = False,
+    state_file_path: Optional[Path] = None,
 ) -> Dict[str, Any]:
+    if state_file_path is None:
+        raise ValueError("state_file_path is required for CST overlay persistence.")
     sanitized_nodes: List[Dict[str, Any]] = []
     for raw in list(nodes or []):
         if not isinstance(raw, dict):
@@ -2754,7 +2795,7 @@ def save_cst_overlay_state(
                     "shapeType": shape_type,
                     "legendOrientation": str(raw.get("legendOrientation") or raw.get("legend_orientation") or "vertical"),
                     "angle": float(raw.get("angle") or 0.0),
-                    "opacity": max(0.1, min(1.0, float(raw.get("opacity") or 0.98))),
+                    "opacity": max(0.1, min(1.0, float(raw.get("opacity") or 1.0))),
                     "strokeWidth": max(1.0, float(raw.get("strokeWidth") or 1.0)),
                     "stroke": str(raw.get("stroke") or "#000000"),
                     "fillColor": str(raw.get("fillColor") or ("transparent" if shape_type == "bracket" else "#f5f5f5")),
@@ -2783,7 +2824,7 @@ def save_cst_overlay_state(
                     "ry": max(8.0, float(raw.get("ry") or 13.0)),
                     "shapeType": "text",
                     "angle": float(raw.get("angle") or 0.0),
-                    "opacity": max(0.1, min(1.0, float(raw.get("opacity") or 0.98))),
+                    "opacity": max(0.1, min(1.0, float(raw.get("opacity") or 1.0))),
                     "strokeWidth": max(1.0, float(raw.get("strokeWidth") or 1.5)),
                     "stroke": str(raw.get("stroke") or "rgb(71, 85, 105)"),
                     "fillColor": str(raw.get("fillColor") or "transparent"),
@@ -2835,7 +2876,7 @@ def save_cst_overlay_state(
                 "ry": max(4.0, float(raw.get("ry") or 9.0)),
                 "shapeType": str(raw.get("shapeType") or "ellipse").strip().lower() or "ellipse",
                 "angle": float(raw.get("angle") or 0.0),
-                "opacity": max(0.1, min(1.0, float(raw.get("opacity") or 0.98))),
+                "opacity": max(0.1, min(1.0, float(raw.get("opacity") or 1.0))),
                 "strokeWidth": max(1.0, float(raw.get("strokeWidth") or 4.5)),
             }
         )
@@ -2907,7 +2948,8 @@ def save_cst_overlay_state(
         "groups": sanitized_groups,
         "disable_pdf_reader": bool(disable_pdf_reader),
     }
-    sidecar = _cst_overlay_state_path(file_path)
+    sidecar = Path(state_file_path)
+    sidecar.parent.mkdir(parents=True, exist_ok=True)
     sidecar.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     return payload
 
@@ -2989,6 +3031,7 @@ def load_cst_pathway_payload(
     use_black_protein_outlines: bool = False,
     simple_kegg_mode: bool = True,
     temporal_mode: bool = False,
+    overlay_state_path: Optional[Path] = None,
 ) -> Optional[Dict[str, Any]]:
     normalized_stops = _normalize_gradient_stops(gradient_stops)
     if len(normalized_stops) < 2:
@@ -3003,7 +3046,7 @@ def load_cst_pathway_payload(
         file_path = Path(entry["file_path"])
         pdf_bytes = file_path.read_bytes()
         page_size = _extract_cst_page_size(str(file_path))
-        saved_state = load_cst_overlay_state(file_path)
+        saved_state = load_cst_overlay_state(file_path, overlay_state_path=overlay_state_path)
         disable_pdf_reader = bool(saved_state.get("disable_pdf_reader")) if isinstance(saved_state, dict) else False
         auto_ptm_payload = _build_cst_ptm_index(
             ptm_dataset,
@@ -3119,7 +3162,6 @@ def load_cst_pathway_payload(
             "id": entry["id"],
             "name": entry["name"],
             "filename": entry["filename"],
-            "file_path": str(file_path),
             "mime_type": "application/pdf",
             "data_uri": data_uri,
             "pdf_base64": base64.b64encode(pdf_bytes).decode("ascii"),
@@ -3176,20 +3218,20 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
     prot_outline_width = max(0.6, float(info.get("prot_outline_width") or 1.0))
     temporal_mode = bool(info.get("temporal_mode", False))
     mapping_summary = dict(info.get("mapping_summary") or {})
-    overlay_nodes_json = json.dumps(overlay_nodes)
-    initial_editable_nodes_json = json.dumps(initial_editable_nodes)
-    initial_editable_edges_json = json.dumps(initial_editable_edges)
-    initial_groups_json = json.dumps(initial_groups)
-    ptm_obstacle_edges_json = json.dumps(ptm_obstacle_edges)
+    overlay_nodes_json = _json_for_inline_script(overlay_nodes)
+    initial_editable_nodes_json = _json_for_inline_script(initial_editable_nodes)
+    initial_editable_edges_json = _json_for_inline_script(initial_editable_edges)
+    initial_groups_json = _json_for_inline_script(initial_groups)
+    ptm_obstacle_edges_json = _json_for_inline_script(ptm_obstacle_edges)
     overlay_signature = hashlib.md5(
         (overlay_nodes_json + "||" + initial_editable_nodes_json + "||" + initial_editable_edges_json + "||" + initial_groups_json).encode("utf-8")
     ).hexdigest()[:12]
-    ellipse_groups_json = json.dumps(ellipse_groups)
-    rect_groups_json = json.dumps(rect_groups)
-    auto_ptm_payload_json = json.dumps(auto_ptm_payload)
-    search_catalog_json = json.dumps(search_catalog)
-    metabolite_search_catalog_json = json.dumps(metabolite_search_catalog)
-    legend_config_json = json.dumps(legend_config)
+    ellipse_groups_json = _json_for_inline_script(ellipse_groups)
+    rect_groups_json = _json_for_inline_script(rect_groups)
+    auto_ptm_payload_json = _json_for_inline_script(auto_ptm_payload)
+    search_catalog_json = _json_for_inline_script(search_catalog)
+    metabolite_search_catalog_json = _json_for_inline_script(metabolite_search_catalog)
+    legend_config_json = _json_for_inline_script(legend_config)
     viewer_key = re.sub(r"[^A-Za-z0-9_-]+", "_", str(info.get("id") or "cst_viewer"))
     export_key = str(export_key or info.get("_bookmark_key") or viewer_key).strip().lower() or viewer_key
     stage_id = f"cst-stage-{viewer_key}"
@@ -3796,7 +3838,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                 "min": "0.10",
                                 "max": "1.00",
                                 "step": "0.05",
-                                "value": "0.98",
+                                "value": "1.00",
                             }
                         ),
                     ),
@@ -4150,7 +4192,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                 const initialGroups = {initial_groups_json};
                 const ellipseGroups = {ellipse_groups_json};
                 const rectGroups = {rect_groups_json};
-                const saveInputId = {json.dumps(save_input_id)};
+                const saveInputId = {_json_for_inline_script(save_input_id)};
                 const svgNs = 'http://www.w3.org/2000/svg';
                 const createSvg = (name) => document.createElementNS(svgNs, name);
                 const pointerToViewer = (evt) => {{
@@ -4311,7 +4353,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     selectedEdgeIds: Array.isArray(local.selectedEdgeIds) ? local.selectedEdgeIds : [],
                     selectedPtmId: local.selectedPtmId || null,
                     selectedPtmNodeId: local.selectedPtmNodeId || null,
-                    globalOpacity: Number(local.globalOpacity || 0.98),
+                    globalOpacity: Number(local.globalOpacity || 1.0),
                     proteinOvalMode: !!local.proteinOvalMode,
                     edgeResizeMode: !!local.edgeResizeMode,
                 }});
@@ -4357,7 +4399,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         local.selectedPtmId = null;
                         local.selectedPtmNodeId = null;
                     }}
-                    local.globalOpacity = Math.max(0.1, Math.min(1, Number(safe.globalOpacity || 0.98)));
+                    local.globalOpacity = Math.max(0.1, Math.min(1, Number(safe.globalOpacity || 1.0)));
                     local.proteinOvalMode = !!safe.proteinOvalMode;
                     local.edgeResizeMode = !!safe.edgeResizeMode;
                     if (opacityInput) opacityInput.value = local.globalOpacity.toFixed(2);
@@ -5172,7 +5214,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             fillColor: 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')',
                             ['outline_color_{active_idx}']: outlineRgb,
                             outline_color_1: outlineRgb,
-                            opacity: 0.98,
+                            opacity: 1.0,
                             annotation: '',
                             annotationCommitted: true,
                             pendingAnnotation: '',
@@ -6796,7 +6838,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             fillShape.setAttribute('stroke', 'none');
                             fillShape.setAttribute('pointer-events', 'none');
                             fillShape.setAttribute('clip-path', 'url(#' + fillClipId + ')');
-                            fillShape.setAttribute('opacity', Number(node.opacity || 0.98).toFixed(2));
+                            fillShape.setAttribute('opacity', Number(node.opacity || 1.0).toFixed(2));
                             group.appendChild(fillShape);
                             if (hasSegmentedOutline) {{
                                 const outlineClipId = 'cst_temporal_outline_clip_{viewer_key}_' + String(node.id || '') + '_' + String(idx);
@@ -6819,7 +6861,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                 outlineShape.setAttribute('stroke-linejoin', 'round');
                                 outlineShape.setAttribute('pointer-events', 'none');
                                 outlineShape.setAttribute('clip-path', 'url(#' + outlineClipId + ')');
-                                outlineShape.setAttribute('opacity', Number(node.opacity || 0.98).toFixed(2));
+                                outlineShape.setAttribute('opacity', Number(node.opacity || 1.0).toFixed(2));
                                 group.appendChild(outlineShape);
                             }}
                         }}
@@ -6929,7 +6971,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         const spec = getPtmTemporalRenderSpec(ptm, ptmPoint, ptmRadius);
                         const segmentCount = spec.segmentCount;
                         const strokeWidth = Math.max(0.6, Number(ptm.outlineWidth || 1.0));
-                        const opacity = Number(ptm.opacity || 0.98).toFixed(2);
+                        const opacity = Number(ptm.opacity || 1.0).toFixed(2);
                         const fallbackFill = rgbCss(ptm['fc_color_{active_idx}'] || ptm.fc_color_1, 'rgb(209, 213, 219)');
                         const fallbackOutline = rgbCss(ptm['outline_color_{active_idx}'] || ptm.outline_color_1, 'rgb(0, 0, 0)');
                         const hasSegmentedOutline = segmentCount > 1 && hasPtmSegmentedOutlineData(ptm, segmentCount);
@@ -7324,7 +7366,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         }}
                         bodyShape.setAttribute('stroke-linecap', 'round');
                         bodyShape.setAttribute('stroke-linejoin', 'round');
-                        bodyShape.setAttribute('opacity', Number(node.opacity || 0.98).toFixed(2));
+                        bodyShape.setAttribute('opacity', Number(node.opacity || 1.0).toFixed(2));
                         bodyShape.setAttribute('data-node-id', node.id);
                         bodyShape.setAttribute('data-role', 'body');
                         if (Number(node.angle || 0)) {{
@@ -7410,7 +7452,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                 shapeNode.setAttribute('fill', 'rgb(' + fillRgb[0] + ', ' + fillRgb[1] + ', ' + fillRgb[2] + ')');
                                 shapeNode.setAttribute('stroke', 'rgb(' + outlineRgb[0] + ', ' + outlineRgb[1] + ', ' + outlineRgb[2] + ')');
                                 shapeNode.setAttribute('stroke-width', Math.max(0.6, Number(ptm.outlineWidth || 1.0)).toFixed(2));
-                                shapeNode.setAttribute('opacity', Number(ptm.opacity || 0.98).toFixed(2));
+                                shapeNode.setAttribute('opacity', Number(ptm.opacity || 1.0).toFixed(2));
                             }} else {{
                                 createPtmSegmentedBody(local, group, ptm, ptmPoint, ptmRadius, shapeNode);
                             }}
@@ -7439,7 +7481,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                     ptmSymbolImage.setAttribute('y', (centerY - (iconSize * 0.5)).toFixed(3));
                                     ptmSymbolImage.setAttribute('width', iconSize.toFixed(2));
                                     ptmSymbolImage.setAttribute('height', iconSize.toFixed(2));
-                                    ptmSymbolImage.setAttribute('opacity', Number(ptm.opacity || 0.98).toFixed(2));
+                                    ptmSymbolImage.setAttribute('opacity', Number(ptm.opacity || 1.0).toFixed(2));
                                     ptmSymbolImage.setAttribute('pointer-events', 'none');
                                     group.appendChild(ptmSymbolImage);
                                 }} else if (hasSymbol && symbolText) {{
@@ -7453,7 +7495,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                     ptmSymbol.setAttribute('fill', 'rgb(' + symbolColor[0] + ', ' + symbolColor[1] + ', ' + symbolColor[2] + ')');
                                     ptmSymbol.setAttribute('text-anchor', 'middle');
                                     ptmSymbol.setAttribute('dominant-baseline', 'middle');
-                                    ptmSymbol.setAttribute('opacity', Number(ptm.opacity || 0.98).toFixed(2));
+                                    ptmSymbol.setAttribute('opacity', Number(ptm.opacity || 1.0).toFixed(2));
                                     ptmSymbol.setAttribute('pointer-events', 'none');
                                     ptmSymbol.textContent = symbolText;
                                     group.appendChild(ptmSymbol);
@@ -7469,7 +7511,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                     siteText.setAttribute('fill', 'rgb(' + labelColor[0] + ', ' + labelColor[1] + ', ' + labelColor[2] + ')');
                                     siteText.setAttribute('text-anchor', 'middle');
                                     siteText.setAttribute('dominant-baseline', 'middle');
-                                    siteText.setAttribute('opacity', Number(ptm.opacity || 0.98).toFixed(2));
+                                    siteText.setAttribute('opacity', Number(ptm.opacity || 1.0).toFixed(2));
                                     siteText.setAttribute('pointer-events', 'none');
                                     siteText.textContent = siteLabel;
                                     group.appendChild(siteText);
@@ -7482,7 +7524,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                 ptmSymbolImage.setAttribute('y', (Number(ptmPoint.y || 0) - (iconSize * 0.5)).toFixed(3));
                                 ptmSymbolImage.setAttribute('width', iconSize.toFixed(2));
                                 ptmSymbolImage.setAttribute('height', iconSize.toFixed(2));
-                                ptmSymbolImage.setAttribute('opacity', Number(ptm.opacity || 0.98).toFixed(2));
+                                ptmSymbolImage.setAttribute('opacity', Number(ptm.opacity || 1.0).toFixed(2));
                                 ptmSymbolImage.setAttribute('data-role', 'ptm-body');
                                 ptmSymbolImage.setAttribute('data-ptm-id', String(ptm.id || ''));
                                 ptmSymbolImage.setAttribute('data-node-id', String(node.id || ''));
@@ -7497,7 +7539,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                 ptmSymbol.setAttribute('font-size', Math.max(8.4, Number(ptm.symbolSize || (ptmRadius * 1.55))).toFixed(2));
                                 ptmSymbol.setAttribute('font-family', String(ptm.symbolFont || 'Arial'));
                                 ptmSymbol.setAttribute('fill', 'rgb(' + symbolColor[0] + ', ' + symbolColor[1] + ', ' + symbolColor[2] + ')');
-                                ptmSymbol.setAttribute('opacity', Number(ptm.opacity || 0.98).toFixed(2));
+                                ptmSymbol.setAttribute('opacity', Number(ptm.opacity || 1.0).toFixed(2));
                                 ptmSymbol.setAttribute('data-role', 'ptm-body');
                                 ptmSymbol.setAttribute('data-ptm-id', String(ptm.id || ''));
                                 ptmSymbol.setAttribute('data-node-id', String(node.id || ''));
@@ -7526,7 +7568,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                 siteText.setAttribute('fill', 'rgb(' + labelColor[0] + ', ' + labelColor[1] + ', ' + labelColor[2] + ')');
                                 siteText.setAttribute('text-anchor', Math.abs(ux) < 0.24 ? 'middle' : (ux > 0 ? 'start' : 'end'));
                                 siteText.setAttribute('dominant-baseline', Math.abs(uy) > 0.58 ? (uy > 0 ? 'hanging' : 'ideographic') : 'middle');
-                                siteText.setAttribute('opacity', Number(ptm.opacity || 0.98).toFixed(2));
+                                siteText.setAttribute('opacity', Number(ptm.opacity || 1.0).toFixed(2));
                                 siteText.setAttribute('data-role', 'ptm-label');
                                 siteText.setAttribute('data-ptm-id', String(ptm.id || ''));
                                 siteText.setAttribute('data-node-id', String(node.id || ''));
@@ -7594,7 +7636,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                     text.appendChild(tspan);
                                 }});
                             }}
-                            text.setAttribute('opacity', Number(node.opacity || 0.98).toFixed(2));
+                            text.setAttribute('opacity', Number(node.opacity || 1.0).toFixed(2));
                             const labelAngle = isText ? Number(node.angle || 0) : (Number(node.angle || 0) + (Number(node.ry || 0) > Number(node.rx || 0) ? 90 : 0));
                             if (labelAngle) {{
                                 text.setAttribute('transform', 'rotate(' + labelAngle.toFixed(3) + ' ' + Number(node.cx || 0).toFixed(3) + ' ' + Number(node.cy || 0).toFixed(3) + ')');
@@ -7613,7 +7655,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             labelText.setAttribute('font-size', '8.00');
                             labelText.setAttribute('fill', '#0f172a');
                             labelText.setAttribute('text-anchor', 'middle');
-                            labelText.setAttribute('opacity', Number(node.opacity || 0.98).toFixed(2));
+                            labelText.setAttribute('opacity', Number(node.opacity || 1.0).toFixed(2));
                             labelText.textContent = compoundLabel;
                             group.appendChild(labelText);
                         }}
@@ -7804,7 +7846,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     overlaySvg.appendChild(fragment);
                     setDeleteState(local);
                     updateUndoState(local);
-                    if (opacityInput) opacityInput.value = Number(local.globalOpacity || 0.98).toFixed(2);
+                    if (opacityInput) opacityInput.value = Number(local.globalOpacity || 1.0).toFixed(2);
                     if (proteinOvalButton) proteinOvalButton.classList.toggle('is-active', !!local.proteinOvalMode);
                     if (edgeResizeButton) edgeResizeButton.classList.toggle('is-active', !!local.edgeResizeMode);
                     updateInlineTextEditorLayout(local);
@@ -7974,7 +8016,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         strokeWidth: 1.0,
                         stroke: '#000000',
                         fillColor: 'transparent',
-                        opacity: 0.98,
+                        opacity: 1.0,
                         annotation: '',
                         annotationCommitted: true,
                         pendingAnnotation: '',
@@ -8022,7 +8064,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         fillColor: `rgb(${{rgb[0]}}, ${{rgb[1]}}, ${{rgb[2]}})`,
                         ['outline_color_{active_idx}']: outlineRgb,
                         outline_color_1: outlineRgb,
-                        opacity: 0.98,
+                        opacity: 1.0,
                         annotation: '',
                         annotationCommitted: true,
                         pendingAnnotation: '',
@@ -8066,7 +8108,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         strokeWidth: 1.0,
                         stroke: '#000000',
                         fillColor: `rgb(${{rgb[0]}}, ${{rgb[1]}}, ${{rgb[2]}})`,
-                        opacity: 0.98,
+                        opacity: 1.0,
                         annotation: '',
                         annotationCommitted: true,
                         pendingAnnotation: '',
@@ -8874,7 +8916,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             angleDeg: Number(angleDeg || 0),
                             outwardFactor: Number(accepted.outwardFactor || 0),
                             isMissing: String(node.className || '').includes('cst-missing-node'),
-                            opacity: Math.max(0.18, Math.min(0.98, Number(node.opacity || local.globalOpacity || 0.98))),
+                            opacity: Math.max(0.18, Math.min(1.0, Number(node.opacity || local.globalOpacity || 1.0))),
                             siteLabel: String((ptmEntry && (ptmEntry.site_label || ptmEntry.label)) || order),
                             symbol: String((ptmEntry && ptmEntry.symbol) || ''),
                             shape: String((ptmEntry && ptmEntry.shape) || 'Circle'),
@@ -8914,7 +8956,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             angleDeg: Number(fallbackAccepted.angleDeg || 0),
                             outwardFactor: Number(fallbackAccepted.outwardFactor || 0),
                             isMissing: String(node.className || '').includes('cst-missing-node'),
-                            opacity: Math.max(0.18, Math.min(0.98, Number(node.opacity || local.globalOpacity || 0.98))),
+                            opacity: Math.max(0.18, Math.min(1.0, Number(node.opacity || local.globalOpacity || 1.0))),
                             siteLabel: String((ptmEntry && (ptmEntry.site_label || ptmEntry.label)) || order),
                             symbol: String((ptmEntry && ptmEntry.symbol) || ''),
                             shape: String((ptmEntry && ptmEntry.shape) || 'Circle'),
@@ -9033,8 +9075,8 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         + ' ' + bottomY.toFixed(3);
                 }};
                 const applyGlobalOpacity = (local, value) => {{
-                    const opacity = Math.max(0.1, Math.min(1, Number(value || 0.98)));
-                    if (Math.abs(opacity - Number(local.globalOpacity || 0.98)) < 0.001) return;
+                    const opacity = Math.max(0.1, Math.min(1, Number(value || 1.0)));
+                    if (Math.abs(opacity - Number(local.globalOpacity || 1.0)) < 0.001) return;
                     pushUndoSnapshot(local, buildSnapshot(local));
                     local.globalOpacity = opacity;
                     for (const node of (local.editableNodes || [])) {{
@@ -9265,9 +9307,9 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                 }};
                 const buildCustomExportSnapshot = (local) => {{
                     const settings = {{
-                        pathway_id: {json.dumps(str(info.get("id") or ""))},
+                        pathway_id: {_json_for_inline_script(str(info.get("id") or ""))},
                         pathway_source: 'cst',
-                        pathway_name: {json.dumps(str(info.get("name") or ""))},
+                        pathway_name: {_json_for_inline_script(str(info.get("name") or ""))},
                     }};
                     const snapshot = {{
                         general_data: {{ settings }},
@@ -9301,7 +9343,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                 fgcolor: String(node.textColor || '#0f172a'),
                                 border_color: String(node.stroke || '#475569'),
                                 angle: Number(node.angle || 0),
-                                opacity: Number(node.opacity || 0.98),
+                                opacity: Number(node.opacity || 1.0),
                             }});
                             exportableNodes.push(node);
                             continue;
@@ -9326,7 +9368,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                 angle: Number(node.angle || 0),
                                 stroke: String(node.stroke || ''),
                                 fillColor: String(node.fillColor || ''),
-                                opacity: Number(node.opacity || 0.98),
+                                opacity: Number(node.opacity || 1.0),
                                 mapping_type: String(node.mappingType || ''),
                                 is_complex: !!node.isComplex,
                             }});
@@ -9345,7 +9387,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             stroke: String(node.stroke || ''),
                             fillColor: String(node.fillColor || ''),
                             strokeWidth: Number(node.strokeWidth || 1),
-                            opacity: Number(node.opacity || 0.98),
+                            opacity: Number(node.opacity || 1.0),
                         }});
                         exportableNodes.push(node);
                     }}
@@ -9444,6 +9486,35 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     hoverTooltip.style.display = 'none';
                     hoverTooltip.innerHTML = '';
                 }};
+                const sanitizeTooltipHtml = (rawHtml) => {{
+                    const raw = String(rawHtml || '');
+                    if (!raw) return '';
+                    const template = document.createElement('template');
+                    template.innerHTML = raw;
+                    const allowed = new Set(['STRONG', 'EM', 'I', 'B', 'U', 'BR', 'SPAN', 'DIV']);
+                    const walk = (node) => {{
+                        const children = Array.from(node.childNodes || []);
+                        for (const child of children) {{
+                            if (child.nodeType === Node.ELEMENT_NODE) {{
+                                const tag = String(child.tagName || '').toUpperCase();
+                                if (!allowed.has(tag)) {{
+                                    const replacement = document.createTextNode(child.textContent || '');
+                                    child.replaceWith(replacement);
+                                    continue;
+                                }}
+                                const attrs = Array.from(child.attributes || []);
+                                for (const attr of attrs) {{
+                                    child.removeAttribute(attr.name);
+                                }}
+                                walk(child);
+                            }} else if (child.nodeType === Node.COMMENT_NODE) {{
+                                child.remove();
+                            }}
+                        }}
+                    }};
+                    walk(template.content);
+                    return template.innerHTML;
+                }};
                 const tooltipInfoFromElement = (element) => {{
                     if (!element || !element.getAttribute) return null;
                     const htmlTip = element.getAttribute('data-tooltip-html');
@@ -9475,7 +9546,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                 const showHoverTooltipNow = (pending) => {{
                     if (!hoverTooltip || !pending || !pending.tip) return;
                     if (pending.useHtml) {{
-                        hoverTooltip.innerHTML = pending.tip;
+                        hoverTooltip.innerHTML = sanitizeTooltipHtml(pending.tip);
                     }} else {{
                         hoverTooltip.textContent = pending.tip;
                     }}
@@ -9603,7 +9674,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             temporalMode: {str(temporal_mode).lower()},
                             edgeResizeMode: false,
                             dragState: null,
-                            globalOpacity: 0.98,
+                            globalOpacity: 1.0,
                             zoom: 1,
                             undoStack: [],
                             redoStack: [],
@@ -9752,6 +9823,17 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                                     local.pendingArrowPreview = null;
                                     local.autoPtmPlacements = null;
                                     local.undoStack = [];
+                                    if (Math.abs(Number(local.globalOpacity || 1.0) - 0.98) < 0.001) {{
+                                        local.globalOpacity = 1.0;
+                                    }}
+                                    if (Array.isArray(local.editableNodes)) {{
+                                        for (const node of local.editableNodes) {{
+                                            const nodeOpacity = Number(node && node.opacity);
+                                            if (Math.abs(nodeOpacity - 0.98) < 0.001) {{
+                                                node.opacity = Number(local.globalOpacity || 1.0);
+                                            }}
+                                        }}
+                                    }}
                                 }}
                                 if (textContent) {{
                                     local.mergedTextItems = buildMergedTextItems((textContent && textContent.items) || []);
@@ -10429,7 +10511,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             Number(point.overlayY || 0),
                         );
                         applyEdgePreset(newEdge, String(local.addArrowPreset || 'arrow'));
-                        newEdge.opacity = Number(local.globalOpacity || 0.98);
+                        newEdge.opacity = Number(local.globalOpacity || 1.0);
                         local.editableEdges = Array.isArray(local.editableEdges) ? local.editableEdges.concat([newEdge]) : [newEdge];
                         setSingleEdgeSelection(local, newEdge.id);
                         local.pendingArrowStart = null;
@@ -10544,7 +10626,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                             strokeWidth: isText ? 1.0 : 1.0,
                             stroke: isText ? 'rgb(71, 85, 105)' : '#000000',
                             fillColor: isText ? 'transparent' : (isBracket ? 'transparent' : '#f5f5f5'),
-                            opacity: local.globalOpacity || 0.98,
+                            opacity: local.globalOpacity || 1.0,
                             annotation: '',
                             annotationCommitted: false,
                             isCustom: true,
@@ -10772,9 +10854,8 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         if (!local || !saveInputId) return;
                         if (!(window.Shiny && typeof window.Shiny.setInputValue === 'function')) return;
                         window.Shiny.setInputValue(saveInputId, {{
-                            pathway_id: {json.dumps(str(info.get("id") or ""))},
-                            pathway_name: {json.dumps(str(info.get("name") or ""))},
-                            file_path: {json.dumps(str(info.get("file_path") or ""))},
+                            pathway_id: {_json_for_inline_script(str(info.get("id") or ""))},
+                            pathway_name: {_json_for_inline_script(str(info.get("name") or ""))},
                             nodes: cloneStateSnapshot(local.editableNodes || []),
                             edges: cloneStateSnapshot(local.editableEdges || []),
                             groups: cloneStateSnapshot(local.groups || []),
@@ -10982,7 +11063,7 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                 const buildCurrentExportSnapshot = () => {{
                     const local = window[renderStateKey] && window[renderStateKey]['{viewer_key}'];
                     return local ? buildCustomExportSnapshot(local) : {{
-                        general_data: {{ settings: {{ pathway_id: {json.dumps(str(info.get("id") or ""))}, pathway_source: 'cst' }} }},
+                        general_data: {{ settings: {{ pathway_id: {_json_for_inline_script(str(info.get("id") or ""))}, pathway_source: 'cst' }} }},
                         protbox_data: [],
                         compound_data: [],
                         text_data: [],
@@ -11091,6 +11172,27 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                         }}
                     }}
                     try {{
+                        const debugSelector = 'text.cst-protein-oval-label, text.cst-auto-ptm-site-label, text.cst-auto-ptm-symbol';
+                        const sourceLabels = Array.from(sourceOverlay.querySelectorAll(debugSelector));
+                        const exportLabels = Array.from(exportSvg.querySelectorAll(debugSelector));
+                        const n = Math.min(sourceLabels.length, exportLabels.length);
+                        for (let i = 0; i < n; i += 1) {{
+                            const src = sourceLabels[i];
+                            const dst = exportLabels[i];
+                            if (!src || !dst || typeof src.getBBox !== 'function') continue;
+                            try {{
+                                const b = src.getBBox();
+                                if (!b) continue;
+                                const bx = Number(b.x || 0);
+                                const by = Number(b.y || 0);
+                                const bw = Number(b.width || 0);
+                                const bh = Number(b.height || 0);
+                                if (![bx, by, bw, bh].every((v) => Number.isFinite(v))) continue;
+                                dst.setAttribute('data-mk-bbox', `${{bx.toFixed(3)}},${{by.toFixed(3)}},${{bw.toFixed(3)}},${{bh.toFixed(3)}}`);
+                            }} catch (_bboxErr) {{}}
+                        }}
+                    }} catch (_bboxAnnotateErr) {{}}
+                    try {{
                         const serializer = new XMLSerializer();
                         return {{
                             text: serializer.serializeToString(exportSvg),
@@ -11103,11 +11205,11 @@ def create_cst_pathway_viewer(payload: Optional[Dict[str, Any]], save_input_id: 
                     }}
                 }};
                 window.__mkExportSnapshotMap = window.__mkExportSnapshotMap || {{}};
-                window.__mkExportSnapshotMap[{json.dumps(export_key)}] = buildCurrentExportSnapshot;
+                window.__mkExportSnapshotMap[{_json_for_inline_script(export_key)}] = buildCurrentExportSnapshot;
                 window.__mkExportSvgMap = window.__mkExportSvgMap || {{}};
-                window.__mkExportSvgMap[{json.dumps(export_key)}] = buildCurrentExportSvg;
-                window.__mkExportSvgMap[{json.dumps(viewer_key.lower())}] = buildCurrentExportSvg;
-                window.__mkExportSvgMap[{json.dumps(str(info.get("id") or "").strip().lower())}] = buildCurrentExportSvg;
+                window.__mkExportSvgMap[{_json_for_inline_script(export_key)}] = buildCurrentExportSvg;
+                window.__mkExportSvgMap[{_json_for_inline_script(viewer_key.lower())}] = buildCurrentExportSvg;
+                window.__mkExportSvgMap[{_json_for_inline_script(str(info.get("id") or "").strip().lower())}] = buildCurrentExportSvg;
                 if (window.Shiny && Shiny.addCustomMessageHandler && !window.__mkExportHandlerInstalled) {{
                     window.__mkExportHandlerInstalled = true;
                     Shiny.addCustomMessageHandler('request_export_snapshot', function(msg) {{

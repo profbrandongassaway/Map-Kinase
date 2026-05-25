@@ -39,6 +39,15 @@ def _load_dataframe(entry: Any) -> Optional[pd.DataFrame]:
     return None
 
 
+def _entry_file_hint(entry: Any) -> str:
+    if not isinstance(entry, dict):
+        return ""
+    raw = str(entry.get("file_path") or "").strip()
+    if not raw:
+        return ""
+    return os.path.basename(raw)
+
+
 def _deep_merge(base: Dict[str, Any], override: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     if not override:
         return base
@@ -79,8 +88,8 @@ def build_global_protein_catalog(
     metadata = {
         "generated_at": datetime.utcnow().isoformat() + "Z",
         "protein_count": len(catalog),
-        "protein_file": protein_cfg["file_path"],
-        "ptm_files": [dataset["file_path"] for dataset in data_cfg["ptm"]],
+        "protein_file": _entry_file_hint(protein_cfg),
+        "ptm_files": [_entry_file_hint(dataset) for dataset in data_cfg["ptm"]],
     }
     return {"metadata": metadata, "protein_catalog": catalog}
 

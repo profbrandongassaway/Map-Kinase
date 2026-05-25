@@ -6,6 +6,7 @@ import json
 import os
 import re
 import threading
+import tempfile
 import time
 import sys
 import csv
@@ -30,8 +31,26 @@ from shiny import App, reactive, render, ui
 
 from MapKinase_WebApp.m4_json import DEFAULT_DATA, DEFAULT_SETTINGS, get_default_json
 from MapKinase_WebApp.a1_factory import get_pathway_api
-from MapKinase_WebApp.m2_protein_catalog import ensure_global_protein_catalog
-from MapKinase_WebApp.m1_file_processor import validate_protein_file, validate_ptm_file
+from MapKinase_WebApp.m2_protein_catalog import build_global_protein_catalog, ensure_global_protein_catalog
+from MapKinase_WebApp.m1_file_processor import validate_protein_file, validate_ptm_file, validate_uploaded_file
+from MapKinase_WebApp.mk_security_limits import (
+    MAX_RUNS_PER_MINUTE,
+    MAX_TOTAL_UPLOAD_SIZE_MB,
+    MAX_UPLOAD_SIZE_MB,
+    MIN_SECONDS_BETWEEN_RUNS,
+    evaluate_run_throttle,
+    log_run_guard_event,
+    validate_total_upload_size_from_sizes,
+)
+from MapKinase_WebApp.mk_session_workspace import (
+    SESSION_TMP_TTL_HOURS,
+    cleanup_old_session_workspaces,
+    cleanup_session_workspace,
+    get_session_workspace,
+    safe_session_path,
+    safely_delete_temp_file,
+)
+from MapKinase_WebApp.mk_runtime_env import env_truthy, is_production_mode, runtime_environment
 from MapKinase_WebApp.d2_psp_regulatorysites import load_regulatory_sites, annotate_ptm_dataset
 from MapKinase_WebApp.d2_psp_kinasesubstrates import load_kinase_substrate_map, annotate_ptm_dataset_with_kinases
 from MapKinase_WebApp.d1_transfer_kegg_annotations import load_kegg_map, annotate_protein_with_kegg
@@ -225,6 +244,46 @@ def _resolve_icons_dir() -> str:
 ICONS_DIR = _resolve_icons_dir()
 
 
+def _resolve_outline_font_file(filename: str) -> Optional[Path]:
+    candidates: List[Path] = [
+        Path(BASE_DIR) / "fonts" / filename,
+        Path(BASE_DIR) / "icons" / "fonts" / filename,
+    ]
+    windir = Path(os.environ.get("WINDIR", r"C:\Windows"))
+    candidates.append(windir / "Fonts" / filename)
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        candidates.extend([
+            Path(sys._MEIPASS) / "MapKinase_WebApp" / "fonts" / filename,
+            Path(sys._MEIPASS) / "fonts" / filename,
+            Path(sys._MEIPASS) / "MapKinase_WebApp" / "icons" / "fonts" / filename,
+            Path(sys._MEIPASS) / "icons" / "fonts" / filename,
+        ])
+    for path in candidates:
+        try:
+            if path.exists() and path.is_file():
+                return path
+        except Exception:
+            continue
+    return None
+
+
+def _load_outline_font_base64(filename: str) -> str:
+    font_path = _resolve_outline_font_file(filename)
+    if font_path is None:
+        print(f"Warning: outline font '{filename}' not found.")
+        return ""
+    try:
+        raw = font_path.read_bytes()
+    except Exception as exc:
+        print(f"Warning: failed to read outline font '{font_path}': {exc}")
+        return ""
+    return base64.b64encode(raw).decode("ascii")
+
+
+OUTLINE_FONT_REGULAR_B64 = _load_outline_font_base64("segoeui.ttf")
+OUTLINE_FONT_BOLD_B64 = _load_outline_font_base64("segoeuib.ttf")
+
+
 def _resolve_kegg_pathways_file() -> str:
     candidates = [os.path.join(BASE_DIR, "kegg_pathways.txt")]
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
@@ -320,9 +379,7 @@ DEFAULT_WIKIPATHWAYS_BG_SCALE = 1.0
 DEFAULT_WIKIPATHWAYS_BG_OFFSET_X = 0.0
 DEFAULT_WIKIPATHWAYS_BG_OFFSET_Y = 0.0
 DEFAULT_BOX_Y_STRETCH = 1.0
-JSON_PREVIEW_DIR = os.path.join(BASE_DIR, "JSONfiles")
-JSON_PREVIEW_FILE = os.path.join(JSON_PREVIEW_DIR, "latest_preview.json")
-CUSTOM_LAYOUT_EXPORT_FILE = os.path.join(JSON_PREVIEW_DIR, "custom_pathway_export.json")
+SESSION_PREVIEW_FILENAME = "latest_preview.json"
 RESOURCE_ROOT = getattr(sys, "_MEIPASS", PARENT_DIR)
 
 
@@ -342,32 +399,30 @@ SAMPLE_PROTEIN_FILE = os.path.join(SAMPLE_DATA_DIR, "TCA_protein_for_mapk.txt")
 SAMPLE_PTM_FILE = os.path.join(SAMPLE_DATA_DIR, "TCA_phospho_for_mapk_singlesite.csv")
 
 
-def _write_preview_json(payload: Dict[str, Any]) -> None:
-    try:
-        os.makedirs(JSON_PREVIEW_DIR, exist_ok=True)
-        with open(JSON_PREVIEW_FILE, "w", encoding="utf-8") as preview_fh:
-            json.dump(payload, preview_fh, indent=2)
-    except OSError as write_err:
-        print(f"Warning: could not write preview JSON to {JSON_PREVIEW_FILE}: {write_err}")
 SAMPLE_METABOLITE_FILE = os.path.join(SAMPLE_DATA_DIR, "example_metabolite_file.txt")
 SPECIES_REF_PATH = _resolve_species_ref_file()
 UPLOAD_ACCEPT_TYPES = [
-    ".txt",
-    ".tsv",
     ".csv",
+    ".tsv",
+    ".txt",
     "text/plain",
     "text/csv",
-    "application/csv",
-    "application/vnd.ms-excel",
 ]
+UPLOAD_LIMIT_GUIDANCE_TEXT = (
+    f"Accepted formats: .csv, .tsv, and tab-delimited .txt. "
+    f"Maximum upload size: {MAX_UPLOAD_SIZE_MB} MB per file; {MAX_TOTAL_UPLOAD_SIZE_MB} MB total per run."
+)
 # Flip to True to mirror terminal stdout/stderr into TERMINAL_LOG_FILE by default.
 TERMINAL_LOG_DEFAULT = False
+TERMINAL_LOG_DIR_DEFAULT = os.path.join(tempfile.gettempdir(), "mapkinase_logs")
 TERMINAL_LOG_FILE = os.environ.get(
-    "M5_TERMINAL_LOG_FILE", os.path.join(BASE_DIR, "m5_terminal_output.txt")
+    "M5_TERMINAL_LOG_FILE",
+    os.path.join(TERMINAL_LOG_DIR_DEFAULT, "m5_terminal_output.txt"),
 )
+TERMINAL_LOG_MAX_BYTES = max(1, int(os.environ.get("M5_TERMINAL_LOG_MAX_BYTES", str(5 * 1024 * 1024))))
+TERMINAL_LOG_BACKUPS = max(1, int(os.environ.get("M5_TERMINAL_LOG_BACKUPS", "5")))
 MANUAL_BUILD_ONLY = True
 GUI_POPUP = False
-debug_var = False
 
 def _load_species_choices() -> Dict[str, Dict[str, str]]:
     choices: Dict[str, Dict[str, str]] = {}
@@ -477,6 +532,15 @@ def _env_var_truthy(name: str, default: bool = False) -> bool:
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+RUNTIME_ENVIRONMENT = runtime_environment()
+IS_PRODUCTION_MODE = is_production_mode()
+DEBUG_UI_ENABLED = env_truthy("MAPKINASE_ENABLE_DEBUG_UI", default=not IS_PRODUCTION_MODE)
+DEBUG_EXPORT_ENABLED = env_truthy(
+    "MAPKINASE_ENABLE_DEBUG_EXPORT",
+    default=(not IS_PRODUCTION_MODE and DEBUG_UI_ENABLED),
+)
 
 BUILD_GLOBAL_CATALOG_ON_STARTUP = _env_var_truthy(
     "M5_BUILD_GLOBAL_CATALOG_ON_STARTUP",
@@ -718,7 +782,19 @@ def _load_wikipathways_catalog(organism: str, fallback: Optional[str] = None) ->
     return options
 
 TERMINAL_LOG_ENABLED = _env_var_truthy("M5_TERMINAL_LOG", TERMINAL_LOG_DEFAULT)
+DEBUG_FILE_OUTPUT_ENABLED = _env_var_truthy("MAPKINASE_DEBUG_FILE_OUTPUT", False)
+PERSISTENT_CST_SAVE_ENABLED = _env_var_truthy("MAPKINASE_ENABLE_PERSISTENT_CST_SAVE", False)
 CUSTOM_LAYOUT_SCHEMA_VERSION = 1
+
+try:
+    _removed_workspace_count = cleanup_old_session_workspaces(SESSION_TMP_TTL_HOURS)
+    if _removed_workspace_count:
+        print(
+            f"Removed {_removed_workspace_count} stale session workspace(s) "
+            f"(TTL={SESSION_TMP_TTL_HOURS}h)."
+        )
+except Exception as _workspace_cleanup_exc:
+    print(f"Warning: failed to run session workspace TTL cleanup: {_workspace_cleanup_exc}")
 
 
 def _coerce_float(value: Any) -> Optional[float]:
@@ -756,11 +832,55 @@ def _background_preview_from_settings(
     }
 
 
+_SPREADSHEET_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+_HTML_BR_RE = re.compile(r"(?is)<br\s*/?>")
+_HTML_TAG_RE = re.compile(r"(?is)<[^>]*>")
+
+
+def _sanitize_layout_text_plain(value: Any, max_chars: int = 4000) -> str:
+    raw = str(value or "")
+    raw = raw.replace("\r\n", "\n").replace("\r", "\n").replace("\x00", "")
+    if len(raw) > max_chars:
+        raw = raw[:max_chars]
+    return raw
+
+
+def _sanitize_layout_text_html(value: Any, max_chars: int = 4000) -> str:
+    # Treat imported/exported text-box content as inert text, not executable markup.
+    raw = _sanitize_layout_text_plain(value, max_chars=max_chars)
+    raw = _HTML_BR_RE.sub("\n", raw)
+    raw = _HTML_TAG_RE.sub("", raw)
+    raw = html.unescape(raw)
+    raw = _sanitize_layout_text_plain(raw, max_chars=max_chars)
+    return "<br/>".join(html.escape(line) for line in raw.split("\n"))
+
+
+def _sanitize_layout_scalar(value: Any, *, max_chars: int = 256) -> Any:
+    if isinstance(value, (int, float, bool)) or value is None:
+        return value
+    return _sanitize_layout_text_plain(value, max_chars=max_chars)
+
+
+def _neutralize_spreadsheet_formula_cell(value: Any) -> Any:
+    if not isinstance(value, str):
+        return value
+    if not value:
+        return value
+    check = value.lstrip("\ufeff")
+    if not check:
+        return value
+    if check.startswith("'"):
+        return value
+    if check[:1] in _SPREADSHEET_FORMULA_PREFIXES:
+        return f"'{value}"
+    return value
+
+
 def _build_custom_layout_export(payload: Dict[str, Any]) -> Dict[str, Any]:
     settings = payload.get("general_data", {}).get("settings", {})
     export_data: Dict[str, Any] = {
         "schema_version": CUSTOM_LAYOUT_SCHEMA_VERSION,
-        "pathway_id": settings.get("pathway_id"),
+        "pathway_id": _sanitize_layout_text_plain(settings.get("pathway_id"), max_chars=128),
         "pathway_source": "custom",
         "protbox_data": [],
         "compound_data": [],
@@ -787,13 +907,23 @@ def _build_custom_layout_export(payload: Dict[str, Any]) -> Dict[str, Any]:
                 entry["height"] = height
             for extra in extra_keys or []:
                 if extra in item and item[extra] not in (None, ""):
-                    entry[extra] = item[extra]
+                    if id_key == "text_id" and extra == "html":
+                        entry[extra] = _sanitize_layout_text_html(item[extra], max_chars=12000)
+                    elif extra == "label":
+                        entry[extra] = _sanitize_layout_text_plain(item[extra], max_chars=800)
+                    elif extra in {"text_style", "bgcolor", "fgcolor", "border_color"}:
+                        entry[extra] = _sanitize_layout_scalar(item[extra], max_chars=400)
+                    else:
+                        entry[extra] = _sanitize_layout_scalar(item[extra], max_chars=800)
             # Preserve simple metadata for export
             for key, val in item.items():
                 if key in entry or (extra_keys and key in extra_keys):
                     continue
                 if isinstance(val, (str, int, float, list, dict)):
-                    entry[key] = val
+                    if isinstance(val, str):
+                        entry[key] = _sanitize_layout_text_plain(val, max_chars=1200)
+                    else:
+                        entry[key] = val
             target.append(entry)
 
     _append_shape_section(
@@ -825,7 +955,7 @@ def _build_custom_layout_export(payload: Dict[str, Any]) -> Dict[str, Any]:
             if val in (None, ""):
                 continue
             if isinstance(val, (str, int, float, bool, list, dict)):
-                arrow_entry[key] = val
+                arrow_entry[key] = _sanitize_layout_scalar(val, max_chars=400) if isinstance(val, str) else val
         export_data["arrows"].append(arrow_entry)
     for group in payload.get("groups", []) or []:
         if not isinstance(group, dict):
@@ -835,7 +965,7 @@ def _build_custom_layout_export(payload: Dict[str, Any]) -> Dict[str, Any]:
             if val in (None, ""):
                 continue
             if isinstance(val, (str, int, float, bool, list, dict)):
-                entry[key] = val
+                entry[key] = _sanitize_layout_scalar(val, max_chars=1200) if isinstance(val, str) else val
         if entry:
             export_data["groups"].append(entry)
     return export_data
@@ -844,10 +974,14 @@ def _build_custom_layout_export(payload: Dict[str, Any]) -> Dict[str, Any]:
 def _sanitize_custom_layout(raw_data: Dict[str, Any]) -> Dict[str, Any]:
     if not isinstance(raw_data, dict):
         raise ValueError("Custom pathway file must be a JSON object.")
+    try:
+        schema_version = int(raw_data.get("schema_version") or CUSTOM_LAYOUT_SCHEMA_VERSION)
+    except (TypeError, ValueError):
+        schema_version = CUSTOM_LAYOUT_SCHEMA_VERSION
     sanitized: Dict[str, Any] = {
-        "schema_version": int(raw_data.get("schema_version") or CUSTOM_LAYOUT_SCHEMA_VERSION),
-        "pathway_id": str(raw_data.get("pathway_id") or ""),
-        "pathway_source": str(raw_data.get("pathway_source") or ""),
+        "schema_version": schema_version,
+        "pathway_id": _sanitize_layout_text_plain(raw_data.get("pathway_id"), max_chars=128),
+        "pathway_source": _sanitize_layout_text_plain(raw_data.get("pathway_source"), max_chars=64),
         "protbox_data": [],
         "compound_data": [],
         "text_data": [],
@@ -875,7 +1009,19 @@ def _sanitize_custom_layout(raw_data: Dict[str, Any]) -> Dict[str, Any]:
                 entry["height"] = height
             for extra in extra_keys or []:
                 if extra in item and item[extra] not in (None, ""):
-                    entry[extra] = item[extra]
+                    if section_name == "text_data" and extra == "html":
+                        entry[extra] = _sanitize_layout_text_html(item[extra], max_chars=12000)
+                    elif extra == "label":
+                        entry[extra] = _sanitize_layout_text_plain(item[extra], max_chars=800)
+                    elif extra in {"text_style", "bgcolor", "fgcolor", "border_color"}:
+                        entry[extra] = _sanitize_layout_scalar(item[extra], max_chars=400)
+                    else:
+                        entry[extra] = _sanitize_layout_scalar(item[extra], max_chars=800)
+            if section_name == "text_data":
+                if "html" not in entry:
+                    entry["html"] = _sanitize_layout_text_html(item.get("label", ""), max_chars=12000)
+                if "label" not in entry:
+                    entry["label"] = _sanitize_layout_text_plain(item.get("label", ""), max_chars=800)
             sanitized[section_name].append(entry)
 
     _ingest_shape_section("protbox_data", "protbox_id", extra_keys=("proteins", "uniprot_ids", "uniprot", "protein_ids", "label"))
@@ -897,7 +1043,7 @@ def _sanitize_custom_layout(raw_data: Dict[str, Any]) -> Dict[str, Any]:
             value = arrow.get(key)
             if value is None:
                 continue
-            arrow_entry[key] = str(value)
+            arrow_entry[key] = _sanitize_layout_text_plain(value, max_chars=120)
         sanitized["arrows"].append(arrow_entry)
     for group in raw_data.get("groups", []) or []:
         if not isinstance(group, dict):
@@ -907,7 +1053,7 @@ def _sanitize_custom_layout(raw_data: Dict[str, Any]) -> Dict[str, Any]:
             if val in (None, ""):
                 continue
             if isinstance(val, (str, int, float, bool, list, dict)):
-                entry[key] = val
+                entry[key] = _sanitize_layout_text_plain(val, max_chars=1200) if isinstance(val, str) else val
         if entry:
             sanitized["groups"].append(entry)
     return sanitized
@@ -931,7 +1077,14 @@ def _apply_custom_layout(payload: Dict[str, Any], layout: Optional[Dict[str, Any
                     item[key] = override[key]
             for extra in extra_keys or []:
                 if extra in override:
-                    item[extra] = override[extra]
+                    if section_name == "text_data" and extra == "html":
+                        item[extra] = _sanitize_layout_text_html(override[extra], max_chars=12000)
+                    elif extra == "label":
+                        item[extra] = _sanitize_layout_text_plain(override[extra], max_chars=800)
+                    elif extra in {"text_style", "bgcolor", "fgcolor", "border_color"}:
+                        item[extra] = _sanitize_layout_scalar(override[extra], max_chars=400)
+                    else:
+                        item[extra] = _sanitize_layout_scalar(override[extra], max_chars=800)
 
     _apply_section("protbox_data", "protbox_id", extra_keys=("proteins", "uniprot_ids", "uniprot", "protein_ids", "label"))
     _apply_section("compound_data", "compound_id")
@@ -944,15 +1097,33 @@ def _apply_custom_layout(payload: Dict[str, Any], layout: Optional[Dict[str, Any
 def _enable_terminal_logging(path: str) -> None:
     if not path:
         return
-    log_dir = os.path.dirname(path)
+    target = Path(str(path)).expanduser()
+    forbidden_tokens = {"www", "static", "public", "jsonfiles", "cache", "stored_pathways", "output"}
+    if {part.lower() for part in target.parts} & forbidden_tokens:
+        print("Warning: refusing to enable terminal file logging inside public/static/cache paths.")
+        return
+    log_dir = os.path.dirname(str(target))
     if log_dir:
         try:
             os.makedirs(log_dir, exist_ok=True)
         except OSError:
             # Directory might be read-only; skip enabling logging in that case.
             return
+    if target.exists():
+        try:
+            if target.stat().st_size >= TERMINAL_LOG_MAX_BYTES:
+                for idx in range(TERMINAL_LOG_BACKUPS, 0, -1):
+                    src = target.with_name(f"{target.name}.{idx}")
+                    dst = target.with_name(f"{target.name}.{idx + 1}")
+                    if idx == TERMINAL_LOG_BACKUPS and src.exists():
+                        src.unlink(missing_ok=True)
+                    elif src.exists():
+                        src.replace(dst)
+                target.replace(target.with_name(f"{target.name}.1"))
+        except OSError:
+            pass
     try:
-        log_handle = open(path, "w", encoding="utf-8")
+        log_handle = open(target, "a", encoding="utf-8")
     except OSError:
         return
 
@@ -1436,10 +1607,13 @@ def collect_settings(input, cfg: Dict[str, Any]) -> Dict[str, Any]:  # type: ign
         _get_input_value(input, "settings_show_groups"),
         _bool_default(cfg, "show_groups"),
     )
-    overrides["debug_mode"] = _to_bool(
-        _get_input_value(input, "settings_debug_mode"),
-        False,
-    )
+    if DEBUG_UI_ENABLED:
+        overrides["debug_mode"] = _to_bool(
+            _get_input_value(input, "settings_debug_mode"),
+            False,
+        )
+    else:
+        overrides["debug_mode"] = False
     overrides["show_multi_protein_indicator"] = _to_bool(
         _get_input_value(input, "settings_show_multi_protein_indicator"),
         _bool_default(cfg, "show_multi_protein_indicator"),
@@ -2453,6 +2627,16 @@ GRADIENT_TABLE_SCRIPT = ui.tags.script(
     """
 )
 
+SVG_OUTLINE_FONT_BOOTSTRAP_SCRIPT = ui.tags.script(
+    f"""
+    window.__mkOutlineFontData = {{
+        regularB64: {json.dumps(OUTLINE_FONT_REGULAR_B64)},
+        boldB64: {json.dumps(OUTLINE_FONT_BOLD_B64)},
+        source: "local-segoe"
+    }};
+    """
+)
+
 SVG_DOWNLOAD_SCRIPT = ui.tags.script(
     """
     (function(){
@@ -2666,6 +2850,28 @@ SVG_DOWNLOAD_SCRIPT = ui.tags.script(
                 foreign.remove();
             });
         }
+        function annotatePublicationLabelMetrics(sourceSvg, cloneSvg){
+            if (!sourceSvg || !cloneSvg || !sourceSvg.querySelectorAll || !cloneSvg.querySelectorAll) return;
+            var selector = "text.cst-protein-oval-label, text.cst-auto-ptm-site-label, text.cst-auto-ptm-symbol";
+            var sourceNodes = Array.prototype.slice.call(sourceSvg.querySelectorAll(selector));
+            var cloneNodes = Array.prototype.slice.call(cloneSvg.querySelectorAll(selector));
+            var count = Math.min(sourceNodes.length, cloneNodes.length);
+            for (var i = 0; i < count; i += 1){
+                var src = sourceNodes[i];
+                var dst = cloneNodes[i];
+                if (!src || !dst || typeof src.getBBox !== "function") continue;
+                try {
+                    var box = src.getBBox();
+                    if (!box) continue;
+                    var x = Number(box.x || 0);
+                    var y = Number(box.y || 0);
+                    var w = Number(box.width || 0);
+                    var h = Number(box.height || 0);
+                    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(w) || !Number.isFinite(h)) continue;
+                    dst.setAttribute("data-mk-bbox", x.toFixed(3) + "," + y.toFixed(3) + "," + w.toFixed(3) + "," + h.toFixed(3));
+                } catch (_bboxErr) {}
+            }
+        }
         function serializeSvg(svg){
             if (!svg) return null;
             var clone = svg.cloneNode(true);
@@ -2673,6 +2879,7 @@ SVG_DOWNLOAD_SCRIPT = ui.tags.script(
                 clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
             }
             replaceForeignObjectsForExport(clone);
+            annotatePublicationLabelMetrics(svg, clone);
             var vb = clone.viewBox && clone.viewBox.baseVal;
             var rect = svg.getBoundingClientRect();
             var width = (vb && vb.width) ? vb.width : (rect.width || 1200);
@@ -2733,6 +2940,464 @@ SVG_DOWNLOAD_SCRIPT = ui.tags.script(
                 } catch (_err){
                     resolve(text);
                 }
+            });
+        }
+        function decodeDataSvgMarkup(uri){
+            var raw = String(uri || "").trim();
+            if (!raw) return null;
+            var prefix = "data:image/svg+xml";
+            if (raw.slice(0, prefix.length).toLowerCase() !== prefix){
+                return null;
+            }
+            var commaIndex = raw.indexOf(",");
+            if (commaIndex < 0){
+                return null;
+            }
+            var meta = String(raw.slice(prefix.length, commaIndex) || "");
+            var payload = String(raw.slice(commaIndex + 1) || "");
+            var isBase64 = /;base64/i.test(meta);
+            try {
+                if (isBase64){
+                    var binary = atob(payload.replace(/\\s+/g, ""));
+                    try {
+                        if (window.TextDecoder){
+                            var bytes = new Uint8Array(binary.length);
+                            for (var i = 0; i < binary.length; i += 1){
+                                bytes[i] = binary.charCodeAt(i);
+                            }
+                            return new TextDecoder("utf-8").decode(bytes);
+                        }
+                    } catch (_decodeErr) {}
+                    return decodeURIComponent(escape(binary));
+                }
+                return decodeURIComponent(payload);
+            } catch (_err){
+                return null;
+            }
+        }
+        function coerceSvgLength(value, fallback){
+            if (value == null) return fallback;
+            var num = Number(String(value).replace(/px$/i, "").trim());
+            return Number.isFinite(num) ? num : fallback;
+        }
+        function parseSvgViewBox(value){
+            var raw = String(value || "").trim();
+            if (!raw){
+                return { minX: 0, minY: 0, width: 24, height: 24 };
+            }
+            var parts = raw.split(/[\\s,]+/).filter(function(token){ return token.length > 0; });
+            if (parts.length !== 4){
+                return { minX: 0, minY: 0, width: 24, height: 24 };
+            }
+            var nums = parts.map(function(token){ return Number(token); });
+            if (!nums.every(function(n){ return Number.isFinite(n); })){
+                return { minX: 0, minY: 0, width: 24, height: 24 };
+            }
+            return { minX: nums[0], minY: nums[1], width: nums[2], height: nums[3] };
+        }
+        function vectorizeEmbeddedSvgImages(text){
+            try {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(text, "image/svg+xml");
+                var svgEl = doc.documentElement;
+                if (!svgEl || String(svgEl.nodeName || "").toLowerCase() !== "svg"){
+                    return text;
+                }
+                var SVG_NS = "http://www.w3.org/2000/svg";
+                var XLINK_NS = "http://www.w3.org/1999/xlink";
+                var images = Array.prototype.slice.call(svgEl.querySelectorAll("image"));
+                images.forEach(function(imageNode){
+                    var href = imageNode.getAttribute("href") || imageNode.getAttributeNS(XLINK_NS, "href") || imageNode.getAttribute("xlink:href") || "";
+                    href = String(href || "").trim();
+                    if (href.slice(0, 18).toLowerCase() !== "data:image/svg+xml"){
+                        return;
+                    }
+                    var embeddedMarkup = decodeDataSvgMarkup(href);
+                    if (!embeddedMarkup) return;
+                    var embeddedDoc = parser.parseFromString(embeddedMarkup, "image/svg+xml");
+                    var embeddedSvg = embeddedDoc && embeddedDoc.documentElement;
+                    if (!embeddedSvg || String(embeddedSvg.nodeName || "").toLowerCase() !== "svg"){
+                        return;
+                    }
+                    var imageX = coerceSvgLength(imageNode.getAttribute("x"), 0);
+                    var imageY = coerceSvgLength(imageNode.getAttribute("y"), 0);
+                    var imageWidth = coerceSvgLength(imageNode.getAttribute("width"), 0);
+                    var imageHeight = coerceSvgLength(imageNode.getAttribute("height"), 0);
+                    if (!(imageWidth > 0) || !(imageHeight > 0)){
+                        return;
+                    }
+                    var vb = parseSvgViewBox(embeddedSvg.getAttribute("viewBox"));
+                    if (!(vb.width > 0) || !(vb.height > 0)){
+                        vb.width = 24;
+                        vb.height = 24;
+                    }
+                    var scaleX = imageWidth / vb.width;
+                    var scaleY = imageHeight / vb.height;
+                    var groupNode = doc.createElementNS(SVG_NS, "g");
+                    Array.prototype.slice.call(imageNode.attributes || []).forEach(function(attr){
+                        var name = String(attr && attr.name || "");
+                        if (!name) return;
+                        if (name === "href" || name === "xlink:href" || name === "x" || name === "y" || name === "width" || name === "height"){
+                            return;
+                        }
+                        groupNode.setAttribute(name, attr.value);
+                    });
+                    groupNode.setAttribute(
+                        "transform",
+                        "translate(" + imageX + " " + imageY + ") scale(" + scaleX + " " + scaleY + ") translate(" + (-vb.minX) + " " + (-vb.minY) + ")"
+                    );
+                    Array.prototype.slice.call(embeddedSvg.childNodes || []).forEach(function(child){
+                        try {
+                            groupNode.appendChild(doc.importNode(child, true));
+                        } catch (_childErr) {}
+                    });
+                    if (groupNode.childNodes.length < 1){
+                        return;
+                    }
+                    if (imageNode.parentNode){
+                        imageNode.parentNode.replaceChild(groupNode, imageNode);
+                    }
+                });
+                var serializer = new XMLSerializer();
+                return serializer.serializeToString(svgEl);
+            } catch (_err){
+                return text;
+            }
+        }
+        function makeOfficeSafeSvgText(text){
+            return inlineSvgImageResources(text).then(function(inlinedText){
+                return vectorizeEmbeddedSvgImages(inlinedText);
+            }).catch(function(){
+                return text;
+            });
+        }
+        function parseInlineStyleValue(styleText, prop){
+            var source = String(styleText || "");
+            if (!source) return "";
+            var rx = new RegExp("(?:^|;)\\s*" + prop.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&") + "\\s*:\\s*([^;]+)", "i");
+            var match = source.match(rx);
+            return match && match[1] ? String(match[1]).trim() : "";
+        }
+        function ensureOpenTypeJs(){
+            return new Promise(function(resolve, reject){
+                if (window.opentype && typeof window.opentype.parse === "function"){
+                    resolve(window.opentype);
+                    return;
+                }
+                var existing = document.querySelector("script[data-mk-opentype]");
+                if (existing && existing.dataset.loading === "1"){
+                    existing.addEventListener("load", function(){
+                        if (window.opentype && typeof window.opentype.parse === "function"){
+                            resolve(window.opentype);
+                        } else {
+                            reject(new Error("opentype.js unavailable after load"));
+                        }
+                    });
+                    existing.addEventListener("error", function(){ reject(new Error("Failed to load opentype.js")); });
+                    return;
+                }
+                var script = document.createElement("script");
+                script.src = "https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js";
+                script.async = true;
+                script.dataset.mkOpentype = "1";
+                script.dataset.loading = "1";
+                script.onload = function(){
+                    if (window.opentype && typeof window.opentype.parse === "function"){
+                        resolve(window.opentype);
+                    } else {
+                        reject(new Error("opentype.js loaded but parse API missing"));
+                    }
+                };
+                script.onerror = function(){ reject(new Error("Failed to load opentype.js")); };
+                document.head.appendChild(script);
+            });
+        }
+        function loadMkOutlineFonts(){
+            if (window.__mkOutlineFontsPromise) return window.__mkOutlineFontsPromise;
+            window.__mkOutlineFontsPromise = ensureOpenTypeJs().then(function(opentypeLib){
+                var sourceData = window.__mkOutlineFontData || {};
+                var regularB64 = String(sourceData.regularB64 || "").trim();
+                var boldB64 = String(sourceData.boldB64 || "").trim();
+                if (!regularB64 || !boldB64){
+                    throw new Error("Local Segoe outline fonts were not found. Expected segoeui.ttf and segoeuib.ttf.");
+                }
+                var parseOne = function(b64){
+                    var clean = String(b64 || "").replace(/\\s+/g, "");
+                    if (!clean) throw new Error("Outline font payload was empty.");
+                    var binary = atob(clean);
+                    var bytes = new Uint8Array(binary.length);
+                    for (var i = 0; i < binary.length; i += 1){
+                        bytes[i] = binary.charCodeAt(i);
+                    }
+                    return opentypeLib.parse(bytes.buffer);
+                };
+                return { regular: parseOne(regularB64), bold: parseOne(boldB64) };
+            });
+            return window.__mkOutlineFontsPromise;
+        }
+        function fontWeightToNumber(value){
+            var token = String(value || "").trim().toLowerCase();
+            var numeric = Number(token);
+            if (Number.isFinite(numeric)) return numeric;
+            if (token === "bold") return 700;
+            if (token === "bolder") return 800;
+            if (token === "normal") return 400;
+            if (token === "lighter") return 300;
+            return 400;
+        }
+        function svgPathCommandsToD(commands){
+            if (!Array.isArray(commands) || !commands.length) return "";
+            var parts = [];
+            commands.forEach(function(cmd){
+                if (!cmd || !cmd.type) return;
+                var t = String(cmd.type || "").toUpperCase();
+                if (t === "M" || t === "L"){
+                    parts.push(t + " " + Number(cmd.x || 0).toFixed(3) + " " + Number(cmd.y || 0).toFixed(3));
+                    return;
+                }
+                if (t === "C"){
+                    parts.push(
+                        t + " "
+                        + Number(cmd.x1 || 0).toFixed(3) + " " + Number(cmd.y1 || 0).toFixed(3) + " "
+                        + Number(cmd.x2 || 0).toFixed(3) + " " + Number(cmd.y2 || 0).toFixed(3) + " "
+                        + Number(cmd.x || 0).toFixed(3) + " " + Number(cmd.y || 0).toFixed(3)
+                    );
+                    return;
+                }
+                if (t === "Q"){
+                    parts.push(
+                        t + " "
+                        + Number(cmd.x1 || 0).toFixed(3) + " " + Number(cmd.y1 || 0).toFixed(3) + " "
+                        + Number(cmd.x || 0).toFixed(3) + " " + Number(cmd.y || 0).toFixed(3)
+                    );
+                    return;
+                }
+                if (t === "Z"){
+                    parts.push("Z");
+                }
+            });
+            return parts.join(" ");
+        }
+        function parseExportBBoxAttr(node){
+            if (!node || !node.getAttribute) return null;
+            var raw = String(node.getAttribute("data-mk-bbox") || "").trim();
+            if (!raw) return null;
+            var parts = raw.split(",");
+            if (parts.length !== 4) return null;
+            var nums = parts.map(function(v){ return Number(v); });
+            if (!nums.every(function(v){ return Number.isFinite(v); })) return null;
+            return { x: nums[0], y: nums[1], width: nums[2], height: nums[3] };
+        }
+        function outlinePublicationLabelsToPaths(text, fontPair, options){
+            try {
+                if (!fontPair || !fontPair.regular){
+                    throw new Error("Publication outline fonts were not available.");
+                }
+                var debugOverlay = !!(options && options.debugOverlay);
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(text, "image/svg+xml");
+                var svgEl = doc.documentElement;
+                if (!svgEl || String(svgEl.nodeName || "").toLowerCase() !== "svg"){
+                    throw new Error("Invalid SVG payload for publication outlining.");
+                }
+                var SVG_NS = "http://www.w3.org/2000/svg";
+                var selector = "text.cst-protein-oval-label, text.cst-auto-ptm-site-label, text.cst-auto-ptm-symbol";
+                var nodes = Array.prototype.slice.call(svgEl.querySelectorAll(selector));
+                if (!nodes.length) return text;
+                var unsupportedFamilies = [];
+                var convertedCount = 0;
+                nodes.forEach(function(node){
+                    var value = String(node.textContent || "").replace(/\\s+/g, " ").trim();
+                    if (!value) return;
+                    var className = String(node.getAttribute("class") || "");
+                    var isProteinLabel = className.indexOf("cst-protein-oval-label") >= 0;
+                    var isPtmSiteLabel = className.indexOf("cst-auto-ptm-site-label") >= 0;
+                    var styleText = String(node.getAttribute("style") || "");
+                    var fontSize = coerceSvgLength(node.getAttribute("font-size"), NaN);
+                    if (!Number.isFinite(fontSize) || fontSize <= 0){
+                        fontSize = coerceSvgLength(parseInlineStyleValue(styleText, "font-size"), 0);
+                    }
+                    if (!(fontSize > 0)) fontSize = 12;
+                    var sourceFamily = String(
+                        node.getAttribute("font-family")
+                        || parseInlineStyleValue(styleText, "font-family")
+                        || ""
+                    );
+                    var sourceFamilyNormalized = sourceFamily.toLowerCase();
+                    if (
+                        sourceFamilyNormalized
+                        && sourceFamilyNormalized.indexOf("noto sans") < 0
+                        && sourceFamilyNormalized.indexOf("arial") < 0
+                        && sourceFamilyNormalized.indexOf("sans-serif") < 0
+                    ){
+                        unsupportedFamilies.push(sourceFamily || "(unknown)");
+                        return;
+                    }
+                    var fontWeightValue = String(
+                        node.getAttribute("font-weight")
+                        || parseInlineStyleValue(styleText, "font-weight")
+                        || "400"
+                    );
+                    var weight = fontWeightToNumber(fontWeightValue);
+                    // CST protein/PTM labels are intended to render bold in publication exports.
+                    var font = fontPair.bold || ((weight >= 600 && fontPair.bold) ? fontPair.bold : fontPair.regular);
+                    var fill = String(
+                        node.getAttribute("fill")
+                        || parseInlineStyleValue(styleText, "fill")
+                        || "#0f172a"
+                    );
+                    var x = coerceSvgLength(node.getAttribute("x"), 0);
+                    var y = coerceSvgLength(node.getAttribute("y"), 0);
+                    var anchor = String(
+                        node.getAttribute("text-anchor")
+                        || parseInlineStyleValue(styleText, "text-anchor")
+                        || "start"
+                    ).toLowerCase();
+                    var dominant = String(
+                        node.getAttribute("dominant-baseline")
+                        || parseInlineStyleValue(styleText, "dominant-baseline")
+                        || "alphabetic"
+                    ).toLowerCase();
+                    var bboxHint = parseExportBBoxAttr(node);
+                    var startX = x;
+                    var baselineY = y;
+                    var transformPrefix = "";
+                    var glyphPath;
+                    if (bboxHint){
+                        startX = 0;
+                        glyphPath = font.getPath(value, startX, 0, fontSize, { kerning: true });
+                        var hintedBox = glyphPath && typeof glyphPath.getBoundingBox === "function" ? glyphPath.getBoundingBox() : null;
+                        if (hintedBox){
+                            var hbX1 = Number(hintedBox.x1 || 0);
+                            var hbY1 = Number(hintedBox.y1 || 0);
+                            var hbW = Number(hintedBox.x2 || 0) - hbX1;
+                            var hbH = Number(hintedBox.y2 || 0) - hbY1;
+                            if (isPtmSiteLabel && hbW > 0.001 && hbH > 0.001 && Number(bboxHint.width || 0) > 0.001 && Number(bboxHint.height || 0) > 0.001){
+                                var fitW = Number(bboxHint.width || 0);
+                                var fitH = Number(bboxHint.height || 0);
+                                var uniformScale = Math.min(fitW / hbW, fitH / hbH);
+                                if (!Number.isFinite(uniformScale) || uniformScale <= 0){
+                                    uniformScale = fitW / hbW;
+                                }
+                                // PTM labels look visually larger after bold outlining; trim slightly.
+                                uniformScale = uniformScale * 0.94;
+                                var scaledW = hbW * uniformScale;
+                                var scaledH = hbH * uniformScale;
+                                var txBox = Number(bboxHint.x || 0) + ((fitW - scaledW) * 0.5);
+                                var tyBox = Number(bboxHint.y || 0) + ((fitH - scaledH) * 0.5);
+                                transformPrefix =
+                                    "translate(" + txBox.toFixed(3) + " " + tyBox.toFixed(3) + ") "
+                                    + "scale(" + uniformScale.toFixed(6) + " " + uniformScale.toFixed(6) + ") "
+                                    + "translate(" + (-hbX1).toFixed(3) + " " + (-hbY1).toFixed(3) + ")";
+                            } else {
+                                var dx = Number(bboxHint.x || 0) - hbX1;
+                                var dy = Number(bboxHint.y || 0) - hbY1;
+                                if (Number.isFinite(dx) && Number.isFinite(dy)){
+                                    transformPrefix = "translate(" + dx.toFixed(3) + " " + dy.toFixed(3) + ")";
+                                }
+                            }
+                        }
+                    } else {
+                        if (anchor === "middle"){
+                            startX = x;
+                        } else if (anchor === "end"){
+                            startX = x;
+                        }
+                        var probePath = font.getPath(value, 0, 0, fontSize, { kerning: true });
+                        var probeBbox = (probePath && typeof probePath.getBoundingBox === "function") ? probePath.getBoundingBox() : null;
+                        if (probeBbox){
+                            var centerX = (Number(probeBbox.x1 || 0) + Number(probeBbox.x2 || 0)) * 0.5;
+                            if (anchor === "middle"){
+                                startX = x - centerX;
+                            } else if (anchor === "end"){
+                                startX = x - Number(probeBbox.x2 || 0);
+                            } else {
+                                startX = x - Number(probeBbox.x1 || 0);
+                            }
+                            var topY = Number(probeBbox.y1 || 0);
+                            var bottomY = Number(probeBbox.y2 || 0);
+                            var centerY = (topY + bottomY) * 0.5;
+                            if (dominant === "middle" || dominant === "central"){
+                                baselineY = y - centerY;
+                            } else if (dominant === "hanging" || dominant === "text-before-edge"){
+                                baselineY = y - topY;
+                            } else if (dominant === "ideographic" || dominant === "text-after-edge"){
+                                baselineY = y - bottomY;
+                            }
+                        }
+                        glyphPath = font.getPath(value, startX, baselineY, fontSize, { kerning: true });
+                    }
+                    if (!glyphPath || !Array.isArray(glyphPath.commands) || !glyphPath.commands.length){
+                        return;
+                    }
+                    var d = svgPathCommandsToD(glyphPath.commands);
+                    if (!d) return;
+                    var proteinShiftY = isProteinLabel ? (fontSize * 0.36) : 0;
+                    var opacity = Number(node.getAttribute("opacity"));
+                    if (!Number.isFinite(opacity)){
+                        opacity = Number(parseInlineStyleValue(styleText, "opacity"));
+                    }
+                    if (!Number.isFinite(opacity)) opacity = 1;
+                    var pathNode = doc.createElementNS(SVG_NS, "path");
+                    pathNode.setAttribute("d", d);
+                    if (debugOverlay){
+                        pathNode.setAttribute("fill", "#ef4444");
+                        pathNode.setAttribute("opacity", "0.70");
+                    } else {
+                        pathNode.setAttribute("fill", fill || "#0f172a");
+                        pathNode.setAttribute("opacity", Math.max(0, Math.min(1, opacity)).toFixed(3));
+                    }
+                    pathNode.setAttribute("stroke", "none");
+                    pathNode.setAttribute("pointer-events", "none");
+                    pathNode.setAttribute("data-mk-label-outlined", "1");
+                    pathNode.setAttribute("data-role", String(node.getAttribute("data-role") || ""));
+                    pathNode.setAttribute("data-node-id", String(node.getAttribute("data-node-id") || ""));
+                    var ptmId = String(node.getAttribute("data-ptm-id") || "");
+                    if (ptmId) pathNode.setAttribute("data-ptm-id", ptmId);
+                    var nodeTransform = String(node.getAttribute("transform") || "").trim();
+                    var shiftTransform = proteinShiftY ? ("translate(0 " + proteinShiftY.toFixed(3) + ")") : "";
+                    var joinedTransform = [transformPrefix, shiftTransform, nodeTransform].filter(function(v){ return !!String(v || "").trim(); }).join(" ").trim();
+                    if (joinedTransform){
+                        pathNode.setAttribute("transform", joinedTransform);
+                    }
+                    if (node.parentNode){
+                        if (debugOverlay){
+                            node.setAttribute("fill", "#2563eb");
+                            node.setAttribute("opacity", "1.000");
+                            node.parentNode.insertBefore(pathNode, node.nextSibling);
+                        } else {
+                            node.parentNode.replaceChild(pathNode, node);
+                        }
+                        convertedCount += 1;
+                    }
+                });
+                if (unsupportedFamilies.length){
+                    var familyList = Array.from(new Set(unsupportedFamilies)).slice(0, 6).join(", ");
+                    throw new Error("Unsupported label font family for outline conversion: " + familyList + ". Use a supported family or keep standard SVG.");
+                }
+                if (convertedCount < 1){
+                    throw new Error("No publication labels were converted to outlines.");
+                }
+                var serializer = new XMLSerializer();
+                return serializer.serializeToString(svgEl);
+            } catch (_err){
+                throw _err;
+            }
+        }
+        function makePublicationSafeSvgText(text){
+            return makeOfficeSafeSvgText(text).then(function(nextText){
+                return loadMkOutlineFonts().then(function(fontPair){
+                    return outlinePublicationLabelsToPaths(nextText, fontPair, { debugOverlay: false });
+                });
+            });
+        }
+        function makePublicationDebugSvgText(text){
+            return makeOfficeSafeSvgText(text).then(function(nextText){
+                return loadMkOutlineFonts().then(function(fontPair){
+                    return outlinePublicationLabelsToPaths(nextText, fontPair, { debugOverlay: true });
+                });
+            }).catch(function(){
+                return text;
             });
         }
         function ensureJsPdf(){
@@ -2796,10 +3461,50 @@ SVG_DOWNLOAD_SCRIPT = ui.tags.script(
             var rasterScale = 4;
             var maxRasterPixels = format === "pdf" ? 24000000 : 48000000;
             if (format === "svg"){
-                var blob = new Blob([text], { type: "image/svg+xml" });
-                var href = URL.createObjectURL(blob);
-                downloadHref(href, name + ".svg");
-                setTimeout(function(){ URL.revokeObjectURL(href); }, 1500);
+                makeOfficeSafeSvgText(text).then(function(svgText){
+                    var blob = new Blob([svgText], { type: "image/svg+xml" });
+                    var href = URL.createObjectURL(blob);
+                    downloadHref(href, name + ".svg");
+                    setTimeout(function(){ URL.revokeObjectURL(href); }, 1500);
+                }).catch(function(err){
+                    console.warn("Office-safe SVG export fallback", err);
+                    var blob = new Blob([text], { type: "image/svg+xml" });
+                    var href = URL.createObjectURL(blob);
+                    downloadHref(href, name + ".svg");
+                    setTimeout(function(){ URL.revokeObjectURL(href); }, 1500);
+                });
+                return;
+            }
+            if (format === "svgprint"){
+                makePublicationSafeSvgText(text).then(function(svgText){
+                    var blob = new Blob([svgText], { type: "image/svg+xml" });
+                    var href = URL.createObjectURL(blob);
+                    downloadHref(href, name + "_print.svg");
+                    setTimeout(function(){ URL.revokeObjectURL(href); }, 1500);
+                }).catch(function(err){
+                    console.error("Publication-safe SVG export failed", err);
+                    try {
+                        window.alert("SVG Print export failed: " + (err && err.message ? err.message : "outline conversion failed"));
+                    } catch (_alertErr) {}
+                });
+                return;
+            }
+            if (format === "svgdebug"){
+                if (window.MAPKINASE_DEBUG_EXPORTS !== true){
+                    console.warn("SVG debug export is disabled in this deployment.");
+                    return;
+                }
+                makePublicationDebugSvgText(text).then(function(svgText){
+                    var blob = new Blob([svgText], { type: "image/svg+xml" });
+                    var href = URL.createObjectURL(blob);
+                    downloadHref(href, name + "_debug.svg");
+                    setTimeout(function(){ URL.revokeObjectURL(href); }, 1500);
+                }).catch(function(err){
+                    console.error("Publication-debug SVG export failed", err);
+                    try {
+                        window.alert("SVG Debug export failed: " + (err && err.message ? err.message : "debug outline conversion failed"));
+                    } catch (_alertErr) {}
+                });
                 return;
             }
             inlineSvgImageResources(text).then(function(inlinedText){
@@ -4558,6 +5263,17 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
         ui.tags.button(
             {
                 "class": "btn btn-outline-primary btn-sm",
+                "data-mk-download": "svgprint",
+                "data-mk-prefix": prefix,
+                "data-mk-name": download_name,
+                "type": "button",
+                "title": "Print-ready SVG with outlined label paths for consistent publisher rendering",
+            },
+            "SVG Print",
+        ),
+        ui.tags.button(
+            {
+                "class": "btn btn-outline-primary btn-sm",
                 "data-mk-download": "pdf",
                 "data-mk-prefix": prefix,
                 "data-mk-name": download_name,
@@ -5389,6 +6105,9 @@ input_tab = ui.nav_panel(
 
 app_ui = ui.page_fluid(
     CUSTOM_STYLES,
+    ui.tags.script(
+        f"window.MAPKINASE_DEBUG_EXPORTS = {'true' if DEBUG_EXPORT_ENABLED else 'false'};"
+    ),
     ui.tags.style(
         """
         .input-bg { background: #0b4f9c; min-height: 100vh; padding: 32px 24px; }
@@ -5486,6 +6205,7 @@ app_ui = ui.page_fluid(
     INPUT_BUSY_SCRIPT,
     INLINE_HELP_TOOLTIP_SCRIPT,
     GRADIENT_TABLE_SCRIPT,
+    SVG_OUTLINE_FONT_BOOTSTRAP_SCRIPT,
     SVG_DOWNLOAD_SCRIPT,
     ui.navset_tab(
         _home_tab(),
@@ -5573,10 +6293,16 @@ app_ui = ui.page_fluid(
                         "Show groups (all bookmarks)",
                         value=_bool_default({"mode": "analysis"}, "show_groups"),
                     ),
-                    ui.input_checkbox(
-                        "settings_debug_mode",
-                        "Debug Mode",
-                        value=DEFAULT_SETTINGS.get("debug_mode", False),
+                    *(
+                        [
+                            ui.input_checkbox(
+                                "settings_debug_mode",
+                                "Debug Mode",
+                                value=DEFAULT_SETTINGS.get("debug_mode", False),
+                            ),
+                        ]
+                        if DEBUG_UI_ENABLED
+                        else []
                     ),
                     ),
                 ),
@@ -5643,6 +6369,13 @@ app_ui = ui.page_fluid(
 
 
 def server(input, output, session):  # type: ignore[override]
+    session_workspace = get_session_workspace(session)
+    print(f"Session workspace initialized: {session_workspace}")
+    try:
+        session.on_ended(lambda: cleanup_session_workspace(session))
+    except Exception as exc:
+        print(f"Warning: failed to register session cleanup hook: {exc}")
+
     bookmark_state: Dict[str, Dict[str, reactive.Value]] = {}
     for cfg in BOOKMARK_CONFIGS:
         bookmark_state[cfg["key"]] = {
@@ -5676,9 +6409,13 @@ def server(input, output, session):  # type: ignore[override]
     ptm_preview_dataset = reactive.Value(None)
     metabolite_preview_dataset = reactive.Value(None)
     global_catalog_info = reactive.Value(dict(GLOBAL_CATALOG_INFO))
+    session_workspace_path = str(session_workspace)
     protein_dataset_path = reactive.Value(None)
     ptm_dataset_path = reactive.Value(None)
     metabolite_dataset_path = reactive.Value(None)
+    protein_upload_size_bytes = reactive.Value(0)
+    ptm_upload_size_bytes = reactive.Value(0)
+    metabolite_upload_size_bytes = reactive.Value(0)
     psp_cache: Dict[str, Any] = {}
     kegg_cache: Dict[str, Dict[str, str]] = {}
     protein_kegg_warning = reactive.Value("")
@@ -5703,6 +6440,79 @@ def server(input, output, session):  # type: ignore[override]
     pipeline_running = reactive.Value(False)
     mode_sync_in_progress = reactive.Value(False)
     last_applied_input_mode = reactive.Value(None)
+    run_guard_message = reactive.Value("")
+    last_accepted_run_monotonic = reactive.Value(None)
+    run_attempt_times_monotonic = reactive.Value([])
+    cst_session_state_paths: Dict[str, str] = {}
+
+    def _safe_session_id() -> str:
+        raw_id = str(getattr(session, "id", "") or getattr(session, "_session_id", "") or "").strip()
+        if not raw_id:
+            return "unknown"
+        return hashlib.sha256(raw_id.encode("utf-8")).hexdigest()[:12]
+
+    def _current_session_workspace() -> Path:
+        nonlocal session_workspace_path
+        raw = str(session_workspace_path or "").strip()
+        if raw:
+            return Path(raw)
+        workspace = get_session_workspace(session)
+        session_workspace_path = str(workspace)
+        return workspace
+
+    def _get_cst_session_state_path(pathway_id: Any) -> Optional[Path]:
+        key = str(pathway_id or "").strip().lower()
+        if not key:
+            return None
+        raw = str(cst_session_state_paths.get(key) or "").strip()
+        return Path(raw) if raw else None
+
+    def _set_cst_session_state_path(pathway_id: Any, path: Path) -> None:
+        key = str(pathway_id or "").strip().lower()
+        if not key:
+            return
+        cst_session_state_paths[key] = str(path)
+
+    def _resolve_cst_catalog_entry(pathway_id: Any) -> Optional[Dict[str, Any]]:
+        key = str(pathway_id or "").strip().lower()
+        if not key:
+            return None
+        try:
+            for row in get_cst_pathway_catalog(Path(BASE_DIR)):
+                row_id = str(row.get("id") or "").strip().lower()
+                if row_id == key:
+                    return dict(row)
+        except Exception as exc:
+            print(f"Warning: failed to resolve CST pathway catalog entry: {exc}")
+        return None
+
+    def _safe_source_label(path_or_name: Any) -> str:
+        raw = str(path_or_name or "").strip()
+        if not raw:
+            return ""
+        return Path(raw).name
+
+    def _upload_file_size_bytes(path: str) -> int:
+        try:
+            return int(Path(path).stat().st_size)
+        except OSError:
+            return 0
+
+    def _extract_upload_datapath(file_info: Any) -> str:
+        if isinstance(file_info, dict):
+            return str(file_info.get("datapath") or "")
+        return str(getattr(file_info, "datapath", "") or "")
+
+    def _cleanup_upload_temp_file(path: str, reason: str) -> None:
+        safely_delete_temp_file(path, reason=reason)
+
+    def _write_session_preview_json(payload: Dict[str, Any]) -> None:
+        try:
+            preview_path = safe_session_path(session, SESSION_PREVIEW_FILENAME)
+            with open(preview_path, "w", encoding="utf-8") as preview_fh:
+                json.dump(payload, preview_fh, indent=2)
+        except OSError as write_err:
+            print(f"Warning: could not write session preview JSON: {write_err}")
 
     def _clear_pathway_scores(status: str = "Pathway scoring pending.") -> None:
         pathway_score_cache.set(
@@ -5745,6 +6555,19 @@ def server(input, output, session):  # type: ignore[override]
             return False
         return not bool(payload.get("valid"))
 
+    def _current_run_upload_sizes() -> List[Tuple[str, int]]:
+        sizes: List[Tuple[str, int]] = []
+        protein_size = int(protein_upload_size_bytes.get() or 0)
+        ptm_size = int(ptm_upload_size_bytes.get() or 0)
+        metabolite_size = int(metabolite_upload_size_bytes.get() or 0)
+        if protein_size > 0:
+            sizes.append(("protein", protein_size))
+        if ptm_size > 0:
+            sizes.append(("ptm", ptm_size))
+        if metabolite_size > 0:
+            sizes.append(("metabolite", metabolite_size))
+        return sizes
+
     def _clear_live_user_datasets(score_status: str = "Validation complete. Click Run to process datasets.") -> None:
         protein_dataset.set(None)
         ptm_dataset.set(None)
@@ -5761,6 +6584,7 @@ def server(input, output, session):  # type: ignore[override]
             return
         pipeline_ready.set(False)
         pipeline_running.set(False)
+        run_guard_message.set("")
         _clear_live_user_datasets(score_status)
 
     def _dataset_to_df(dataset: Optional[Dict[str, Any]]) -> pd.DataFrame:
@@ -6338,7 +7162,7 @@ def server(input, output, session):  # type: ignore[override]
             )
         except Exception as exc:
             print(f"Warning: pathway scoring failed: {exc}")
-            _clear_pathway_scores(f"Pathway scoring failed: {exc}")
+            _clear_pathway_scores("Pathway scoring failed.")
 
     def _active_bookmark() -> str:
         active = _get_input_value(input, "bookmark_selector")
@@ -6368,7 +7192,7 @@ def server(input, output, session):  # type: ignore[override]
                 },
             )
         except Exception as exc:
-            state["status"].set(f"Failed to export custom pathway: {exc}")
+            state["status"].set("Failed to export custom pathway.")
             print(f"_finalize_custom_export error: {exc}")
             _send_custom_message(
                 session,
@@ -6403,7 +7227,8 @@ def server(input, output, session):  # type: ignore[override]
             rows = parsed[1:]
             return {"headers": headers, "rows": rows}
         except Exception as exc:
-            return {"error": f"Debug load failed: {exc}"}
+            print(f"Warning: dataset preview load failed: {exc}")
+            return {"error": "File could not be parsed as tabular text."}
 
     def _fill_blank_gene_with_uniprot(dataset: Dict[str, Any]) -> Dict[str, Any]:
         """For protein datasets, fill blank gene symbol cells with UniProt IDs."""
@@ -6658,10 +7483,10 @@ def server(input, output, session):  # type: ignore[override]
         )
 
     def _write_debug_dump(filename: str, payload: Dict[str, Any]) -> None:
-        if not debug_var:
+        if not DEBUG_FILE_OUTPUT_ENABLED:
             return
         try:
-            debug_path = os.path.join(BASE_DIR, filename)
+            debug_path = safe_session_path(session, f"debug/{Path(filename).name}")
             with open(debug_path, "w", encoding="utf-8") as fh:
                 json.dump(payload, fh, indent=2)
         except Exception as exc:
@@ -6702,25 +7527,19 @@ def server(input, output, session):  # type: ignore[override]
             "hsa_id_column": protein_cfg.get("kegg_column", protein_cfg.get("uniprot_column", "Uniprot_ID")),
         }
         try:
-            info = ensure_global_protein_catalog(
-                force=True,
+            payload = build_global_protein_catalog(
                 data_override=data_override,
                 settings_override=settings_override,
             )
+            info = {
+                "path": "",
+                "metadata": payload.get("metadata", {}),
+                "protein_catalog": payload.get("protein_catalog", {}),
+                "scope": "session",
+            }
         except Exception as exc:
             print(f"Warning: failed to refresh global protein catalog: {exc}")
             return
-        path = info.get("path")
-        if path and os.path.exists(path):
-            try:
-                with open(path, "r", encoding="utf-8") as fh:
-                    payload = json.load(fh)
-                protein_catalog = payload.get("protein_catalog")
-                if isinstance(protein_catalog, dict):
-                    info = dict(info)
-                    info["protein_catalog"] = protein_catalog
-            except Exception as exc:
-                print(f"Warning: failed to hydrate refreshed global protein catalog: {exc}")
         global_catalog_info.set(dict(info))
         _sync_catalog_into_open_payloads(dict(info))
 
@@ -7006,7 +7825,8 @@ def server(input, output, session):  # type: ignore[override]
             except Exception as exc:
                 print(f"Warning: demo protein human ortholog annotation failed: {exc}")
             protein_dataset.set(demo_prot_payload)
-            protein_dataset_path.set(SAMPLE_PROTEIN_FILE)
+            protein_dataset_path.set(os.path.basename(SAMPLE_PROTEIN_FILE))
+            protein_upload_size_bytes.set(_upload_file_size_bytes(SAMPLE_PROTEIN_FILE))
             protein_validation.set({
                 "status": (
                     f"Demo protein loaded. Rows: {prot_result.summary.get('rows', 0)}, "
@@ -7030,6 +7850,7 @@ def server(input, output, session):  # type: ignore[override]
                 metabolite_dataset.set(None)
                 metabolite_preview_dataset.set(None)
                 metabolite_dataset_path.set(None)
+                metabolite_upload_size_bytes.set(0)
                 metabolite_validation.set({"status": "Metabolite upload optional. Sample metabolite file available below.", "errors": [], "valid": False, "comparisons": []})
                 pipeline_running.set(False)
                 pipeline_ready.set(False)
@@ -7050,7 +7871,8 @@ def server(input, output, session):  # type: ignore[override]
             except Exception as exc:
                 print(f"Warning: demo PTM human ortholog annotation failed: {exc}")
             ptm_dataset.set(demo_ptm_payload)
-            ptm_dataset_path.set(SAMPLE_PTM_FILE)
+            ptm_dataset_path.set(os.path.basename(SAMPLE_PTM_FILE))
+            ptm_upload_size_bytes.set(_upload_file_size_bytes(SAMPLE_PTM_FILE))
             ptm_validation.set({
                 "status": (
                     f"Demo PTM loaded. Rows: {ptm_result.summary.get('rows', 0)}, "
@@ -7064,6 +7886,7 @@ def server(input, output, session):  # type: ignore[override]
             metabolite_dataset.set(None)
             metabolite_preview_dataset.set(None)
             metabolite_dataset_path.set(None)
+            metabolite_upload_size_bytes.set(0)
             metabolite_validation.set({
                 "status": "Metabolite upload optional. Sample metabolite file available below.",
                 "errors": [],
@@ -7207,7 +8030,7 @@ def server(input, output, session):  # type: ignore[override]
             "protein": {
                 "data_headers": prot_headers,
                 "data_rows": protein_data.get("rows") or [],
-                "file_path": protein_dataset_path.get() or "",
+                "file_path": _safe_source_label(protein_dataset_path.get() or ""),
                 "uniprot_column": prot_uniprot,
                 "kegg_column": prot_kegg,
                 "gene_column": prot_gene,
@@ -7224,14 +8047,14 @@ def server(input, output, session):  # type: ignore[override]
                 data_override["metabolite"] = {
                     "data_headers": metabolite_headers,
                     "data_rows": metabolite_data.get("rows") or [],
-                    "file_path": metabolite_dataset_path.get() or "",
+                    "file_path": _safe_source_label(metabolite_dataset_path.get() or ""),
                     "hmdb_column": metabolite_hmdb,
                     "main_columns": [h for h in metabolite_headers if h.startswith("C:")],
                     "tooltip_columns": [h for h in metabolite_headers if h.startswith("T:")],
                 }
         # Attach file_path to each PTM entry so downstream processors/catalog use the correct dataset
         for entry in data_override["ptm"]:
-            entry["file_path"] = ptm_dataset_path.get() or ""
+            entry["file_path"] = _safe_source_label(ptm_dataset_path.get() or "")
         return data_override
 
     @reactive.Effect
@@ -7257,6 +8080,9 @@ def server(input, output, session):  # type: ignore[override]
             protein_dataset_path.set(None)
             ptm_dataset_path.set(None)
             metabolite_dataset_path.set(None)
+            protein_upload_size_bytes.set(0)
+            ptm_upload_size_bytes.set(0)
+            metabolite_upload_size_bytes.set(0)
             _refresh_global_catalog_from_current(reset=True)
             _write_debug_dump("user_protein_dataset_debug.txt", {"info": "No dataset loaded"})
             protein_kegg_warning.set("")
@@ -7266,12 +8092,14 @@ def server(input, output, session):  # type: ignore[override]
             _clear_pathway_scores("Pathway scoring waiting for validated inputs and Run.")
             return
         file_info = upload[0]
+        upload_temp_path = _extract_upload_datapath(file_info)
         protein_validation.set({"status": "Validating protein upload...", "errors": [], "valid": False, "comparisons": []})
-        datapath = getattr(file_info, "datapath", None)
-        if datapath is None and isinstance(file_info, dict):
-            datapath = file_info.get("datapath")
-        if not datapath:
-            protein_validation.set({"status": "Could not locate the uploaded protein file.", "errors": [], "valid": False, "comparisons": []})
+        try:
+            upload_validation = validate_uploaded_file(file_info, expected_role="protein", session_id=_safe_session_id())
+        except Exception:
+            _cleanup_upload_temp_file(upload_temp_path, "protein upload validation exception")
+            msg = "Invalid analysis dataset upload: file could not be validated."
+            protein_validation.set({"status": msg, "errors": [msg], "valid": False, "comparisons": []})
             ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
             metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
             validated_protein_dataset.set(None)
@@ -7283,6 +8111,9 @@ def server(input, output, session):  # type: ignore[override]
             protein_dataset_path.set(None)
             ptm_dataset_path.set(None)
             metabolite_dataset_path.set(None)
+            protein_upload_size_bytes.set(0)
+            ptm_upload_size_bytes.set(0)
+            metabolite_upload_size_bytes.set(0)
             _refresh_global_catalog_from_current(reset=True)
             _write_debug_dump("user_protein_dataset_debug.txt", {"info": "No dataset loaded"})
             protein_kegg_warning.set("")
@@ -7291,50 +8122,86 @@ def server(input, output, session):  # type: ignore[override]
             pipeline_running.set(False)
             _clear_pathway_scores("Pathway scoring waiting for validated inputs and Run.")
             return
-        result = validate_protein_file(datapath)
-        if not result.valid:
-            protein_preview_dataset.set(_fill_blank_gene_with_uniprot(_load_dataset(datapath)))
-            protein_validation.set({"status": "Protein file failed validation. See errors below.", "errors": result.errors, "valid": False, "comparisons": []})
+        if not upload_validation.valid:
+            _cleanup_upload_temp_file(upload_validation.datapath, "invalid protein upload validation")
+            protein_validation.set({"status": upload_validation.user_message, "errors": [upload_validation.user_message], "valid": False, "comparisons": []})
             ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
             metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
             validated_protein_dataset.set(None)
             validated_ptm_dataset.set(None)
             validated_metabolite_dataset.set(None)
+            protein_preview_dataset.set(None)
+            ptm_preview_dataset.set(None)
+            metabolite_preview_dataset.set(None)
             protein_dataset_path.set(None)
             ptm_dataset_path.set(None)
             metabolite_dataset_path.set(None)
-            ptm_preview_dataset.set(None)
-            metabolite_preview_dataset.set(None)
+            protein_upload_size_bytes.set(0)
+            ptm_upload_size_bytes.set(0)
+            metabolite_upload_size_bytes.set(0)
             _refresh_global_catalog_from_current(reset=True)
-            _write_debug_dump("user_protein_dataset_debug.txt", {"errors": result.errors})
+            _write_debug_dump("user_protein_dataset_debug.txt", {"info": "No dataset loaded"})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
             pipeline_ready.set(False)
             pipeline_running.set(False)
             _clear_pathway_scores("Pathway scoring waiting for validated inputs and Run.")
             return
+        datapath = upload_validation.datapath
+        upload_size_bytes = _upload_file_size_bytes(datapath)
+        try:
+            result = validate_protein_file(datapath)
+            if not result.valid:
+                protein_preview_dataset.set(_fill_blank_gene_with_uniprot(_load_dataset(datapath)))
+                protein_validation.set({"status": "Protein file failed validation. See errors below.", "errors": result.errors, "valid": False, "comparisons": []})
+                ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
+                metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
+                validated_protein_dataset.set(None)
+                validated_ptm_dataset.set(None)
+                validated_metabolite_dataset.set(None)
+                protein_dataset_path.set(None)
+                ptm_dataset_path.set(None)
+                metabolite_dataset_path.set(None)
+                protein_upload_size_bytes.set(0)
+                ptm_upload_size_bytes.set(0)
+                metabolite_upload_size_bytes.set(0)
+                ptm_preview_dataset.set(None)
+                metabolite_preview_dataset.set(None)
+                _refresh_global_catalog_from_current(reset=True)
+                _write_debug_dump("user_protein_dataset_debug.txt", {"errors": result.errors})
+                protein_kegg_warning.set("")
+                _update_ks_index(reset=True)
+                pipeline_ready.set(False)
+                pipeline_running.set(False)
+                _clear_pathway_scores("Pathway scoring waiting for validated inputs and Run.")
+                return
 
-        status = (
-            f"Protein file valid. Rows: {result.summary.get('rows', 0)}, "
-            f"Comparison columns: {result.summary.get('comparisons', 0)}, "
-            f"Tooltip columns: {result.summary.get('tooltips', 0)}."
-        )
-        protein_validation.set({"status": status, "errors": [], "valid": True, "comparisons": result.comparisons})
-        dataset_payload = _fill_blank_gene_with_uniprot(_load_dataset(datapath))
-        protein_preview_dataset.set(dataset_payload)
-        _apply_outline_width_defaults(protein_headers=dataset_payload.get("headers") or [])
-        validated_protein_dataset.set(dataset_payload)
-        protein_kegg_warning.set("")
-        protein_dataset_path.set(datapath)
-        ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
-        metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
-        validated_ptm_dataset.set(None)
-        validated_metabolite_dataset.set(None)
-        ptm_dataset_path.set(None)
-        metabolite_dataset_path.set(None)
-        ptm_preview_dataset.set(None)
-        metabolite_preview_dataset.set(None)
-        _invalidate_user_run("Protein validated. Upload optional PTM/Metabolite files, then press Run.")
+            status = (
+                f"Protein file valid. Rows: {result.summary.get('rows', 0)}, "
+                f"Comparison columns: {result.summary.get('comparisons', 0)}, "
+                f"Tooltip columns: {result.summary.get('tooltips', 0)}."
+            )
+            protein_validation.set({"status": status, "errors": [], "valid": True, "comparisons": result.comparisons})
+            dataset_payload = _fill_blank_gene_with_uniprot(_load_dataset(datapath))
+            protein_preview_dataset.set(dataset_payload)
+            _apply_outline_width_defaults(protein_headers=dataset_payload.get("headers") or [])
+            validated_protein_dataset.set(dataset_payload)
+            protein_kegg_warning.set("")
+            protein_dataset_path.set(upload_validation.sanitized_filename)
+            protein_upload_size_bytes.set(upload_size_bytes)
+            ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
+            metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
+            validated_ptm_dataset.set(None)
+            validated_metabolite_dataset.set(None)
+            ptm_dataset_path.set(None)
+            metabolite_dataset_path.set(None)
+            ptm_upload_size_bytes.set(0)
+            metabolite_upload_size_bytes.set(0)
+            ptm_preview_dataset.set(None)
+            metabolite_preview_dataset.set(None)
+            _invalidate_user_run("Protein validated. Upload optional PTM/Metabolite files, then press Run.")
+        finally:
+            _cleanup_upload_temp_file(datapath, "protein upload parsed")
 
     @output
     @render.text
@@ -7515,6 +8382,7 @@ def server(input, output, session):  # type: ignore[override]
             validated_metabolite_dataset.set(None)
             metabolite_preview_dataset.set(None)
             metabolite_dataset_path.set(None)
+            metabolite_upload_size_bytes.set(0)
             _invalidate_user_run("Upload and validate a Protein dataset before running.")
             return
         if str((_get_input_value(input, "input_mode") or "user")).lower() == "demo":
@@ -7527,47 +8395,67 @@ def server(input, output, session):  # type: ignore[override]
             validated_metabolite_dataset.set(None)
             metabolite_preview_dataset.set(None)
             metabolite_dataset_path.set(None)
+            metabolite_upload_size_bytes.set(0)
             _invalidate_user_run("Validation updated. Press Run to process datasets.")
             return
         file_info = upload[0]
-        datapath = getattr(file_info, "datapath", None)
-        if datapath is None and isinstance(file_info, dict):
-            datapath = file_info.get("datapath")
-        if not datapath:
-            metabolite_validation.set({"status": "Could not locate the uploaded metabolite file.", "errors": [], "valid": False, "comparisons": []})
+        upload_temp_path = _extract_upload_datapath(file_info)
+        try:
+            upload_validation = validate_uploaded_file(file_info, expected_role="metabolite", session_id=_safe_session_id())
+        except Exception:
+            _cleanup_upload_temp_file(upload_temp_path, "metabolite upload validation exception")
+            msg = "Invalid analysis dataset upload: file could not be validated."
+            metabolite_validation.set({"status": msg, "errors": [msg], "valid": False, "comparisons": []})
             validated_metabolite_dataset.set(None)
             metabolite_preview_dataset.set(None)
             metabolite_dataset_path.set(None)
+            metabolite_upload_size_bytes.set(0)
             _invalidate_user_run("Fix the Metabolite dataset issue, then press Run.")
             return
-        protein_comparisons = protein_validation.get().get("comparisons") or []
-        result = _validate_metabolite_file(datapath, protein_comparisons)
-        preview_payload = _load_dataset(datapath)
-        metabolite_preview_dataset.set(preview_payload)
-        if result.valid:
-            validated_metabolite_dataset.set(preview_payload)
-            metabolite_dataset_path.set(datapath)
-            metabolite_validation.set({
-                "status": (
-                    f"Metabolite file valid. Rows: {result.summary.get('rows', 0)}, "
-                    f"Comparison columns: {result.summary.get('comparisons', 0)}, "
-                    f"Tooltip columns: {result.summary.get('tooltips', 0)}."
-                ),
-                "errors": [],
-                "valid": True,
-                "comparisons": result.comparisons,
-            })
-            _invalidate_user_run("Metabolite validated. Press Run to process datasets.")
-        else:
+        if not upload_validation.valid:
+            _cleanup_upload_temp_file(upload_validation.datapath, "invalid metabolite upload validation")
+            metabolite_validation.set({"status": upload_validation.user_message, "errors": [upload_validation.user_message], "valid": False, "comparisons": []})
             validated_metabolite_dataset.set(None)
+            metabolite_preview_dataset.set(None)
             metabolite_dataset_path.set(None)
-            metabolite_validation.set({
-                "status": "Metabolite file failed validation. See errors below.",
-                "errors": result.errors,
-                "valid": False,
-                "comparisons": [],
-            })
-            _invalidate_user_run("Fix the Metabolite dataset errors before running.")
+            metabolite_upload_size_bytes.set(0)
+            _invalidate_user_run("Fix the Metabolite dataset issue, then press Run.")
+            return
+        datapath = upload_validation.datapath
+        upload_size_bytes = _upload_file_size_bytes(datapath)
+        try:
+            protein_comparisons = protein_validation.get().get("comparisons") or []
+            result = _validate_metabolite_file(datapath, protein_comparisons)
+            preview_payload = _load_dataset(datapath)
+            metabolite_preview_dataset.set(preview_payload)
+            if result.valid:
+                validated_metabolite_dataset.set(preview_payload)
+                metabolite_dataset_path.set(upload_validation.sanitized_filename)
+                metabolite_upload_size_bytes.set(upload_size_bytes)
+                metabolite_validation.set({
+                    "status": (
+                        f"Metabolite file valid. Rows: {result.summary.get('rows', 0)}, "
+                        f"Comparison columns: {result.summary.get('comparisons', 0)}, "
+                        f"Tooltip columns: {result.summary.get('tooltips', 0)}."
+                    ),
+                    "errors": [],
+                    "valid": True,
+                    "comparisons": result.comparisons,
+                })
+                _invalidate_user_run("Metabolite validated. Press Run to process datasets.")
+            else:
+                validated_metabolite_dataset.set(None)
+                metabolite_dataset_path.set(None)
+                metabolite_upload_size_bytes.set(0)
+                metabolite_validation.set({
+                    "status": "Metabolite file failed validation. See errors below.",
+                    "errors": result.errors,
+                    "valid": False,
+                    "comparisons": [],
+                })
+                _invalidate_user_run("Fix the Metabolite dataset errors before running.")
+        finally:
+            _cleanup_upload_temp_file(datapath, "metabolite upload parsed")
 
     @output
     @render.text
@@ -7601,6 +8489,7 @@ def server(input, output, session):  # type: ignore[override]
             return
         if pipeline_running.get():
             return
+        run_guard_message.set("")
         if not bool(protein_validation.get().get("valid")):
             _invalidate_user_run("Upload and validate a Protein dataset before running.")
             return
@@ -7619,6 +8508,47 @@ def server(input, output, session):  # type: ignore[override]
         if not raw_protein or not raw_protein.get("headers"):
             _invalidate_user_run("Upload and validate a Protein dataset before running.")
             return
+
+        # H) Apply per-session analysis-run throttling before expensive processing.
+        # This guard tracks attempted runs (not only accepted runs) so repeated rapid clicks are limited.
+        now_monotonic = time.monotonic()
+        allow_run, throttle_message, updated_attempts = evaluate_run_throttle(
+            now_monotonic=now_monotonic,
+            last_accepted_run_monotonic=last_accepted_run_monotonic.get(),
+            prior_attempt_times_monotonic=run_attempt_times_monotonic.get() or [],
+            min_seconds_between_runs=MIN_SECONDS_BETWEEN_RUNS,
+            max_runs_per_minute=MAX_RUNS_PER_MINUTE,
+        )
+        run_attempt_times_monotonic.set(updated_attempts)
+        if not allow_run:
+            run_guard_message.set(throttle_message)
+            log_run_guard_event(
+                session_id=_safe_session_id(),
+                reason=throttle_message,
+                run_attempt_count=len(updated_attempts),
+            )
+            return
+        run_guard_message.set("")
+
+        # G) Validate combined upload size before expensive processing.
+        upload_sizes = _current_run_upload_sizes()
+        _size_ok, total_upload_size = validate_total_upload_size_from_sizes([size for _role, size in upload_sizes])
+        if total_upload_size is None:
+            msg = "Upload rejected: one or more uploaded files could not be read."
+            run_guard_message.set(msg)
+            log_run_guard_event(session_id=_safe_session_id(), reason="uploaded file size missing during run-size validation")
+            return
+        if not _size_ok:
+            msg = f"Upload rejected: combined upload size cannot exceed {MAX_TOTAL_UPLOAD_SIZE_MB} MB per analysis run."
+            run_guard_message.set(msg)
+            log_run_guard_event(
+                session_id=_safe_session_id(),
+                reason="combined upload size exceeded",
+                total_size_bytes=total_upload_size,
+                run_attempt_count=len(updated_attempts),
+            )
+            return
+        last_accepted_run_monotonic.set(now_monotonic)
 
         pipeline_running.set(True)
         pipeline_ready.set(False)
@@ -7684,7 +8614,7 @@ def server(input, output, session):  # type: ignore[override]
             pipeline_ready.set(True)
         except Exception as exc:
             print(f"Warning: input processing run failed: {exc}")
-            _invalidate_user_run(f"Run failed: {exc}")
+            _invalidate_user_run("Run failed during dataset processing.")
         finally:
             pipeline_running.set(False)
             _send_custom_message_safe(
@@ -7702,6 +8632,7 @@ def server(input, output, session):  # type: ignore[override]
         if not protein_validation.get().get("valid"):
             ptm_validation.set({"status": "Upload a valid protein file first.", "errors": ["Protein file not validated yet."], "valid": False})
             validated_ptm_dataset.set(None)
+            ptm_upload_size_bytes.set(0)
             _invalidate_user_run("Upload and validate a Protein dataset before running.")
             return
         upload = input.input_ptm_upload()
@@ -7710,43 +8641,64 @@ def server(input, output, session):  # type: ignore[override]
             validated_ptm_dataset.set(None)
             ptm_preview_dataset.set(None)
             ptm_dataset_path.set(None)
+            ptm_upload_size_bytes.set(0)
             _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "No dataset loaded"})
             _invalidate_user_run("Validation updated. Press Run to process datasets.")
             return
         file_info = upload[0]
-        datapath = getattr(file_info, "datapath", None)
-        if datapath is None and isinstance(file_info, dict):
-            datapath = file_info.get("datapath")
-        if not datapath:
-            ptm_validation.set({"status": "Could not locate the uploaded PTM file.", "errors": [], "valid": False})
+        upload_temp_path = _extract_upload_datapath(file_info)
+        try:
+            upload_validation = validate_uploaded_file(file_info, expected_role="ptm", session_id=_safe_session_id())
+        except Exception:
+            _cleanup_upload_temp_file(upload_temp_path, "PTM upload validation exception")
+            msg = "Invalid analysis dataset upload: file could not be validated."
+            ptm_validation.set({"status": msg, "errors": [msg], "valid": False})
             validated_ptm_dataset.set(None)
             ptm_preview_dataset.set(None)
             ptm_dataset_path.set(None)
+            ptm_upload_size_bytes.set(0)
             _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "No dataset loaded"})
             _invalidate_user_run("Fix the PTM dataset issue, then press Run.")
             return
-        protein_comparisons = protein_validation.get().get("comparisons") or []
-        result = validate_ptm_file(datapath, protein_comparisons)
-        if result.valid:
-            status = (
-                f"PTM file valid. Rows: {result.summary.get('rows', 0)}, "
-                f"Comparison columns: {result.summary.get('comparisons', 0)}, "
-                f"Tooltip columns: {result.summary.get('tooltips', 0)}."
-            )
-            ptm_validation.set({"status": status, "errors": [], "valid": True})
-            dataset_payload = _load_dataset(datapath)
-            ptm_preview_dataset.set(dataset_payload)
-            _apply_outline_width_defaults(ptm_headers=dataset_payload.get("headers") or [])
-            validated_ptm_dataset.set(dataset_payload)
-            ptm_dataset_path.set(datapath)
-            _invalidate_user_run("PTM validated. Press Run to process datasets.")
-        else:
-            ptm_preview_dataset.set(_load_dataset(datapath))
-            ptm_validation.set({"status": "PTM file failed validation. See errors below.", "errors": result.errors, "valid": False})
+        if not upload_validation.valid:
+            _cleanup_upload_temp_file(upload_validation.datapath, "invalid PTM upload validation")
+            ptm_validation.set({"status": upload_validation.user_message, "errors": [upload_validation.user_message], "valid": False})
             validated_ptm_dataset.set(None)
+            ptm_preview_dataset.set(None)
             ptm_dataset_path.set(None)
-            _write_debug_dump("user_ptm_dataset_debug.txt", {"errors": result.errors})
-            _invalidate_user_run("Fix the PTM dataset errors before running.")
+            ptm_upload_size_bytes.set(0)
+            _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "No dataset loaded"})
+            _invalidate_user_run("Fix the PTM dataset issue, then press Run.")
+            return
+        datapath = upload_validation.datapath
+        upload_size_bytes = _upload_file_size_bytes(datapath)
+        try:
+            protein_comparisons = protein_validation.get().get("comparisons") or []
+            result = validate_ptm_file(datapath, protein_comparisons)
+            if result.valid:
+                status = (
+                    f"PTM file valid. Rows: {result.summary.get('rows', 0)}, "
+                    f"Comparison columns: {result.summary.get('comparisons', 0)}, "
+                    f"Tooltip columns: {result.summary.get('tooltips', 0)}."
+                )
+                ptm_validation.set({"status": status, "errors": [], "valid": True})
+                dataset_payload = _load_dataset(datapath)
+                ptm_preview_dataset.set(dataset_payload)
+                _apply_outline_width_defaults(ptm_headers=dataset_payload.get("headers") or [])
+                validated_ptm_dataset.set(dataset_payload)
+                ptm_dataset_path.set(upload_validation.sanitized_filename)
+                ptm_upload_size_bytes.set(upload_size_bytes)
+                _invalidate_user_run("PTM validated. Press Run to process datasets.")
+            else:
+                ptm_preview_dataset.set(_load_dataset(datapath))
+                ptm_validation.set({"status": "PTM file failed validation. See errors below.", "errors": result.errors, "valid": False})
+                validated_ptm_dataset.set(None)
+                ptm_dataset_path.set(None)
+                ptm_upload_size_bytes.set(0)
+                _write_debug_dump("user_ptm_dataset_debug.txt", {"errors": result.errors})
+                _invalidate_user_run("Fix the PTM dataset errors before running.")
+        finally:
+            _cleanup_upload_temp_file(datapath, "PTM upload parsed")
 
     @reactive.Effect
     def _enforce_nav_lock():
@@ -7770,6 +8722,8 @@ def server(input, output, session):  # type: ignore[override]
             nav_lock_status.set("User mode: run complete. Navigation unlocked.")
         elif pipeline_running.get():
             nav_lock_status.set("User mode: running dataset processing. Tabs will unlock when processing finishes.")
+        elif str(run_guard_message.get() or "").strip():
+            nav_lock_status.set(str(run_guard_message.get() or "").strip())
         elif protein_blocked or ptm_blocked or metabolite_blocked:
             nav_lock_status.set("User mode: fix input errors, then press Run.")
         elif protein_ok:
@@ -7807,6 +8761,9 @@ def server(input, output, session):  # type: ignore[override]
                 validated_protein_dataset.set(None)
                 validated_ptm_dataset.set(None)
                 validated_metabolite_dataset.set(None)
+                run_guard_message.set("")
+                last_accepted_run_monotonic.set(None)
+                run_attempt_times_monotonic.set([])
                 pipeline_running.set(False)
                 pipeline_ready.set(False)
                 nav_lock_status.set("Demo mode: sample datasets failed to load.")
@@ -7834,6 +8791,9 @@ def server(input, output, session):  # type: ignore[override]
                 protein_validation.set({"status": "Upload a protein file to begin.", "errors": [], "valid": False, "comparisons": []})
                 ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})
                 metabolite_validation.set({"status": "Metabolite upload optional. Provide after protein if available.", "errors": [], "valid": False, "comparisons": []})
+                run_guard_message.set("")
+                last_accepted_run_monotonic.set(None)
+                run_attempt_times_monotonic.set([])
                 pipeline_running.set(False)
                 pipeline_ready.set(False)
                 nav_lock_status.set("User mode: upload and validate files, then press Run to unlock other tabs.")
@@ -8256,6 +9216,13 @@ def server(input, output, session):  # type: ignore[override]
                     ptm_card,
                     metabolite_card,
                     add_card,
+                ),
+                ui.div(
+                    {"class": "input-page-row"},
+                    ui.div(
+                        {"style": "font-size:12px; color:#334155; padding:2px 4px;"},
+                        UPLOAD_LIMIT_GUIDANCE_TEXT,
+                    ),
                 ),
                 ui.div({"class": "input-page-row"}, ui.output_ui("input_protein_preview_guide")),
                 ui.div({"class": "input-page-row input-preview-section"}, ui.output_ui("input_protein_preview")),
@@ -9248,6 +10215,12 @@ def server(input, output, session):  # type: ignore[override]
 
         def build_json():
             settings_override = collect_settings(input, cfg)
+            settings_override["session_workspace_dir"] = str(_current_session_workspace())
+            if DEBUG_FILE_OUTPUT_ENABLED:
+                try:
+                    settings_override["debug_output_dir"] = str(safe_session_path(session, "debug"))
+                except Exception:
+                    settings_override["debug_output_dir"] = ""
             web_simple_pathway = (
                 cfg.get("key") == "web"
                 and str(settings_override.get("pathway_source", "")).lower() in {"kegg", "wikipathways"}
@@ -9284,6 +10257,7 @@ def server(input, output, session):  # type: ignore[override]
                         prot_data = protein_dataset.get()
                         metabolite_data = metabolite_dataset.get()
                         ptm_data = ptm_dataset.get()
+                    cst_state_path = _get_cst_session_state_path(selected_id)
                     cst_payload = load_cst_pathway_payload(
                         selected_id,
                         Path(BASE_DIR),
@@ -9309,6 +10283,7 @@ def server(input, output, session):  # type: ignore[override]
                         use_black_protein_outlines=bool(settings_override.get("use_black_protein_outlines", DEFAULT_SETTINGS.get("use_black_protein_outlines", False))),
                         simple_kegg_mode=bool(settings_override.get("simple_kegg_mode", True)),
                         temporal_mode=bool(settings_override.get("temporal_mode", DEFAULT_SETTINGS.get("temporal_mode", False))),
+                        overlay_state_path=cst_state_path,
                     )
                     if not cst_payload:
                         state["json"].set(None)
@@ -9425,7 +10400,7 @@ def server(input, output, session):  # type: ignore[override]
                             data_override=data_override,
                             settings_override=settings_override,
                             skip_disk_write=True,
-                            debug_write=debug_var,
+                            debug_write=DEBUG_FILE_OUTPUT_ENABLED,
                         )
                     except Exception as exc:
                         print(f"Warning: failed to build seed payload for blank canvas: {exc}")
@@ -9498,13 +10473,13 @@ def server(input, output, session):  # type: ignore[override]
                     data_override=data_override if data_override else None,
                     settings_override=settings_override,
                     skip_disk_write=True,
-                    debug_write=debug_var,
+                    debug_write=DEBUG_FILE_OUTPUT_ENABLED,
                 )
                 generation_error = str(payload.get("_generation_error") or "").strip() if isinstance(payload, dict) else ""
                 if generation_error:
                     if prefix == "web":
-                        _set_load_feedback(generation_error)
-                    state["status"].set(f"Error generating JSON: {generation_error}")
+                        _set_load_feedback("Pathway generation failed.")
+                    state["status"].set("Error generating pathway data.")
                     return
                 show_bg_flag = bool(settings_override.get("show_background_image", False))
                 payload, _ = _attach_pathway_background_image(payload, force=show_bg_flag)
@@ -9537,15 +10512,16 @@ def server(input, output, session):  # type: ignore[override]
                     payload["_custom_layout_applied"] = True
                 else:
                     payload["_custom_layout_applied"] = False
-                _write_preview_json(payload)
+                _write_session_preview_json(payload)
                 state["json"].set(payload)
                 if prefix == "web":
                     _set_load_feedback("")
                 state["status"].set(f"{cfg['label']} pathway generated.")
             except Exception as exc:
                 if prefix == "web":
-                    _set_load_feedback(str(exc))
-                state["status"].set(f"Error generating JSON: {exc}")
+                    _set_load_feedback("Pathway generation failed.")
+                print(f"Warning: pathway JSON generation failed: {exc}")
+                state["status"].set("Error generating pathway data.")
 
         if is_ks_bookmark:
             def _ks_table_rows() -> List[Dict[str, Any]]:
@@ -10820,7 +11796,11 @@ def server(input, output, session):  # type: ignore[override]
                     writer = csv.DictWriter(buffer, fieldnames=columns, extrasaction="ignore")
                     writer.writeheader()
                     for row in rows:
-                        writer.writerow(row)
+                        safe_row = {
+                            key: _neutralize_spreadsheet_formula_cell(row.get(key))
+                            for key in columns
+                        }
+                        writer.writerow(safe_row)
                     _send_custom_message_safe(
                         "download_payload",
                         {
@@ -10939,29 +11919,30 @@ def server(input, output, session):  # type: ignore[override]
             except Exception as exc:
                 print(f"Warning: failed to sync colors from settings for bookmark {prefix}: {exc}")
 
-        @reactive.Effect
-        @reactive.event(input.settings_debug_mode)
-        def _sync_debug_mode():
-            current = state["json"].get()
-            if not current:
-                return
-            try:
-                debug_mode = _to_bool(_get_input_value(input, "settings_debug_mode"), False)
-                payload = copy.deepcopy(current)
-                general_settings = payload.setdefault("general_data", {}).setdefault("settings", {})
-                general_settings["debug_mode"] = debug_mode
-                if is_ks_bookmark:
-                    settings_override = collect_settings(input, cfg)
-                    ctx = _ks_context()
-                    mode = _ks_mode_value()
-                    selection = str(_get_input_value(input, _prefixed_id(prefix, "ks_choice")) or "")
-                    payload["_bookmark_key"] = cfg.get("key", prefix)
-                    payload["_persist_token"] = _ks_stable_persist_token(selection, mode, ctx, settings_override)
-                else:
-                    payload["_persist_token"] = time.time()
-                state["json"].set(payload)
-            except Exception as exc:
-                print(f"Warning: failed to sync debug mode for bookmark {prefix}: {exc}")
+        if DEBUG_UI_ENABLED:
+            @reactive.Effect
+            @reactive.event(input.settings_debug_mode)
+            def _sync_debug_mode():
+                current = state["json"].get()
+                if not current:
+                    return
+                try:
+                    debug_mode = _to_bool(_get_input_value(input, "settings_debug_mode"), False)
+                    payload = copy.deepcopy(current)
+                    general_settings = payload.setdefault("general_data", {}).setdefault("settings", {})
+                    general_settings["debug_mode"] = debug_mode
+                    if is_ks_bookmark:
+                        settings_override = collect_settings(input, cfg)
+                        ctx = _ks_context()
+                        mode = _ks_mode_value()
+                        selection = str(_get_input_value(input, _prefixed_id(prefix, "ks_choice")) or "")
+                        payload["_bookmark_key"] = cfg.get("key", prefix)
+                        payload["_persist_token"] = _ks_stable_persist_token(selection, mode, ctx, settings_override)
+                    else:
+                        payload["_persist_token"] = time.time()
+                    state["json"].set(payload)
+                except Exception as exc:
+                    print(f"Warning: failed to sync debug mode for bookmark {prefix}: {exc}")
 
         @reactive.Effect
         @reactive.event(getattr(input, _prefixed_id(prefix, "spawn_protboxes")))
@@ -11220,28 +12201,54 @@ def server(input, output, session):  # type: ignore[override]
             payload = _get_input_value(input, _prefixed_id(prefix, "cst_save_state"))
             if not payload or not isinstance(payload, dict):
                 return
-            file_path_raw = str(payload.get("file_path") or "").strip()
+            if not PERSISTENT_CST_SAVE_ENABLED:
+                state["status"].set("CST disk persistence is disabled for this deployment.")
+                return
             pathway_id = str(payload.get("pathway_id") or "").strip()
             pathway_name = str(payload.get("pathway_name") or "").strip()
             nodes = list(payload.get("nodes") or [])
             edges = list(payload.get("edges") or [])
             groups = list(payload.get("groups") or [])
             disable_pdf_reader = bool(payload.get("disable_pdf_reader"))
-            if not file_path_raw or not pathway_id:
+            if not pathway_id:
+                return
+
+            catalog_entry = _resolve_cst_catalog_entry(pathway_id)
+            if not catalog_entry:
+                state["status"].set("Unable to save CST pathway edits.")
+                return
+            file_path_raw = str(catalog_entry.get("file_path") or "").strip()
+            if not file_path_raw:
+                state["status"].set("Unable to save CST pathway edits.")
                 return
             file_path = Path(file_path_raw)
+            if not file_path.exists():
+                state["status"].set("Unable to save CST pathway edits.")
+                return
+            resolved_pathway_name = str(pathway_name or catalog_entry.get("name") or file_path.stem).strip()
+
+            session_state_path: Optional[Path] = None
             try:
+                safe_pathway_id = re.sub(r"[^a-z0-9._-]+", "_", str(pathway_id or "").strip().lower())
+                safe_pathway_id = safe_pathway_id.strip("._-") or "cst_pathway"
+                session_state_path = safe_session_path(
+                    session,
+                    f"cst_overlay_state/{safe_pathway_id}.mapkinase.json",
+                )
                 save_cst_overlay_state(
                     file_path,
                     pathway_id=pathway_id,
-                    pathway_name=pathway_name,
+                    pathway_name=resolved_pathway_name,
                     nodes=nodes,
                     edges=edges,
                     groups=groups,
                     disable_pdf_reader=disable_pdf_reader,
+                    state_file_path=session_state_path,
                 )
+                _set_cst_session_state_path(pathway_id, session_state_path)
             except Exception as exc:
-                state["status"].set(f"Failed to save CST pathway edits: {exc}")
+                print(f"Warning: failed to save CST pathway edits for {pathway_id}: {exc}")
+                state["status"].set("Unable to save CST pathway edits.")
                 return
 
             with reactive.isolate():
@@ -11274,6 +12281,7 @@ def server(input, output, session):  # type: ignore[override]
                 use_black_protein_outlines=bool(settings_override.get("use_black_protein_outlines", DEFAULT_SETTINGS.get("use_black_protein_outlines", False))),
                 simple_kegg_mode=bool(settings_override.get("simple_kegg_mode", True)),
                 temporal_mode=bool(settings_override.get("temporal_mode", DEFAULT_SETTINGS.get("temporal_mode", False))),
+                overlay_state_path=session_state_path,
             )
             current_json = dict(state["json"].get() or {})
             if (
@@ -11284,7 +12292,7 @@ def server(input, output, session):  # type: ignore[override]
                 current_json["_cst_payload"] = refreshed
                 current_json["_persist_token"] = time.time()
                 state["json"].set(current_json)
-            state["status"].set(f"Saved CST pathway edits for {pathway_name or file_path.stem}.")
+            state["status"].set(f"Saved CST pathway edits for {resolved_pathway_name}.")
 
         @output(id=_prefixed_id(prefix, "json_summary"))
         @render.text
@@ -11309,12 +12317,7 @@ def server(input, output, session):  # type: ignore[override]
         @output(id=_prefixed_id(prefix, "download_custom_pathway"))
         @render.download(filename=f"{prefix}_custom_pathway.json")
         def download_custom_pathway():
-            export_file = os.path.join(JSON_PREVIEW_DIR, f"{prefix}_custom_pathway_export.json")
             try:
-                if os.path.exists(export_file):
-                    with open(export_file, "rb") as export_fh:
-                        yield export_fh.read()
-                        return
                 data = state["json"].get()
                 if not data:
                     yield json.dumps(
@@ -11326,7 +12329,10 @@ def server(input, output, session):  # type: ignore[override]
                 yield json.dumps(export_payload, indent=2, ensure_ascii=True).encode("utf-8")
             except Exception as exc:
                 print(f"download_custom_pathway error: {exc}")
-                yield json.dumps({"error": str(exc), "schema_version": CUSTOM_LAYOUT_SCHEMA_VERSION}, ensure_ascii=True).encode("utf-8")
+                yield json.dumps(
+                    {"error": "custom pathway export failed", "schema_version": CUSTOM_LAYOUT_SCHEMA_VERSION},
+                    ensure_ascii=True,
+                ).encode("utf-8")
 
         @reactive.Effect
         @reactive.event(getattr(input, _prefixed_id(prefix, "export_custom_pathway")))
@@ -11341,7 +12347,7 @@ def server(input, output, session):  # type: ignore[override]
                     },
                 )
             except Exception as exc:
-                state["status"].set(f"Failed to export custom pathway: {exc}")
+                state["status"].set("Failed to export custom pathway.")
                 print(f"_prepare_custom_export error: {exc}")
                 state["export_pending"].set(False)
                 _send_custom_message(
@@ -11372,19 +12378,29 @@ def server(input, output, session):  # type: ignore[override]
             if not upload:
                 return
             file_info = upload[0]
-            datapath = getattr(file_info, "datapath", None)
-            if datapath is None and isinstance(file_info, dict):
-                datapath = file_info.get("datapath")
-            if not datapath:
-                state["status"].set("Could not locate the uploaded custom pathway file.")
+            upload_temp_path = _extract_upload_datapath(file_info)
+            try:
+                upload_validation = validate_uploaded_file(file_info, expected_role="custom_pathway", session_id=_safe_session_id())
+            except Exception:
+                _cleanup_upload_temp_file(upload_temp_path, "custom pathway import validation exception")
+                state["status"].set("Invalid custom pathway import: file could not be validated.")
                 return
+            if not upload_validation.valid:
+                _cleanup_upload_temp_file(upload_validation.datapath, "invalid custom pathway import validation")
+                state["status"].set(upload_validation.user_message)
+                return
+            datapath = upload_validation.datapath
             try:
                 with open(datapath, "r", encoding="utf-8") as fh:
                     raw_data = json.load(fh)
+                # Custom pathway imports are parsed strictly as JSON data (no code execution).
+                # The sanitized layout stays in reactive memory and is not written to public/static paths.
                 layout = _sanitize_custom_layout(raw_data)
-            except (OSError, json.JSONDecodeError, ValueError) as exc:
-                state["status"].set(f"Failed to import custom pathway: {exc}")
+            except (OSError, json.JSONDecodeError, ValueError):
+                state["status"].set("Invalid custom pathway import: file must be a valid pathway JSON object.")
                 return
+            finally:
+                _cleanup_upload_temp_file(datapath, "custom pathway import parsed")
             state["custom_layout"].set(layout)
             # Apply immediately
             if prefix == "web":
@@ -11432,7 +12448,11 @@ def server(input, output, session):  # type: ignore[override]
         _register_bookmark(cfg)
 
 
-app = App(app_ui, server)
+app = App(
+    app_ui,
+    server,
+    debug=(not IS_PRODUCTION_MODE and env_truthy("MAPKINASE_APP_DEBUG", False)),
+)
 
 
 def _run_uvicorn_app():

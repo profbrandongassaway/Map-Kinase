@@ -1,6 +1,7 @@
 import threading
 import time
 
+from MapKinase_WebApp.auth_gate import maybe_wrap_with_login
 from MapKinase_WebApp.m5_main_ui import (
     GUI_POPUP,
     HOST,
@@ -12,7 +13,7 @@ from MapKinase_WebApp.m5_main_ui import (
 )
 
 
-app = mapkinase_app
+app = maybe_wrap_with_login(mapkinase_app)
 
 
 def _run_uvicorn_app():

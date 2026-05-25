@@ -7,6 +7,8 @@ import time
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import parse_qs, quote
 
+from MapKinase_WebApp.mk_runtime_env import env_truthy
+
 
 LOGIN_PATH = "/__login__"
 LOGOUT_PATH = "/__logout__"
@@ -18,8 +20,6 @@ COOKIE_SECURE = str(os.environ.get("MAPKINASE_AUTH_COOKIE_SECURE", "")).strip().
     "yes",
     "on",
 }
-DEFAULT_LOGIN_USERNAME = "gassawaylab"
-DEFAULT_LOGIN_PASSWORD = "Qs1xULa5XCrB"
 
 
 def _header_lookup(scope) -> Dict[str, str]:
@@ -138,8 +138,8 @@ def _build_html_page(title: str, body: str) -> bytes:
 class LoginGateASGI:
     def __init__(self, inner_app):
         self.inner_app = inner_app
-        self.username = str(os.environ.get("MAPKINASE_LOGIN_USERNAME", DEFAULT_LOGIN_USERNAME)).strip()
-        self.password = os.environ.get("MAPKINASE_LOGIN_PASSWORD", DEFAULT_LOGIN_PASSWORD)
+        self.username = str(os.environ.get("MAPKINASE_LOGIN_USERNAME", "")).strip()
+        self.password = str(os.environ.get("MAPKINASE_LOGIN_PASSWORD", ""))
         if not self.username or not self.password:
             raise RuntimeError(
                 "MAPKINASE_LOGIN_USERNAME and MAPKINASE_LOGIN_PASSWORD must both be set before starting the protected app."
@@ -323,7 +323,7 @@ class LoginGateASGI:
 
 
 def login_enabled() -> bool:
-    return str(os.environ.get("MAPKINASE_ENABLE_LOGIN", "1")).strip().lower() not in {"0", "false", "no", "off"}
+    return env_truthy("MAPKINASE_ENABLE_LOGIN", False)
 
 
 def maybe_wrap_with_login(inner_app):

@@ -100,11 +100,22 @@ def _sanitize_json_payload(value):
 
 
 def _safe_json_dumps(payload):
+    def _escape_for_script_tag(raw_json: str) -> str:
+        # Prevent `</script>` and related HTML parser breakouts when embedding JSON in script tags.
+        return (
+            raw_json
+            .replace("<", "\\u003c")
+            .replace(">", "\\u003e")
+            .replace("&", "\\u0026")
+            .replace("\u2028", "\\u2028")
+            .replace("\u2029", "\\u2029")
+        )
     try:
-        return json.dumps(payload, ensure_ascii=True, allow_nan=False)
+        raw = json.dumps(payload, ensure_ascii=True, allow_nan=False)
     except (TypeError, ValueError):
         cleaned = _sanitize_json_payload(payload)
-        return json.dumps(cleaned, ensure_ascii=True, allow_nan=False)
+        raw = json.dumps(cleaned, ensure_ascii=True, allow_nan=False)
+    return _escape_for_script_tag(raw)
 
 
 def _build_blank_canvas(catalog_info=None):
@@ -2568,6 +2579,64 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 clearTooltipContent();
             }};
             const hoverTooltipsAllowed = () => tooltipsEnabled && !suppressHoverTooltips;
+            const sanitizeTooltipHtml = (rawHtml) => {{
+                const raw = String(rawHtml || '');
+                if (!raw) return '';
+                const template = document.createElement('template');
+                template.innerHTML = raw;
+                const allowed = new Set(['STRONG', 'EM', 'I', 'B', 'U', 'BR', 'SPAN', 'DIV']);
+                const walk = (node) => {{
+                    const children = Array.from(node.childNodes || []);
+                    for (const child of children) {{
+                        if (child.nodeType === Node.ELEMENT_NODE) {{
+                            const tag = String(child.tagName || '').toUpperCase();
+                            if (!allowed.has(tag)) {{
+                                const replacement = document.createTextNode(child.textContent || '');
+                                child.replaceWith(replacement);
+                                continue;
+                            }}
+                            const attrs = Array.from(child.attributes || []);
+                            for (const attr of attrs) {{
+                                child.removeAttribute(attr.name);
+                            }}
+                            walk(child);
+                        }} else if (child.nodeType === Node.COMMENT_NODE) {{
+                            child.remove();
+                        }}
+                    }}
+                }};
+                walk(template.content);
+                return template.innerHTML;
+            }};
+            const sanitizeEditorHtml = (rawHtml) => {{
+                const raw = String(rawHtml || '');
+                if (!raw) return '';
+                const template = document.createElement('template');
+                template.innerHTML = raw;
+                const allowed = new Set(['BR', 'B', 'STRONG', 'I', 'EM', 'U', 'SPAN', 'DIV', 'P', 'SUB', 'SUP']);
+                const walk = (node) => {{
+                    const children = Array.from(node.childNodes || []);
+                    for (const child of children) {{
+                        if (child.nodeType === Node.ELEMENT_NODE) {{
+                            const tag = String(child.tagName || '').toUpperCase();
+                            if (!allowed.has(tag)) {{
+                                const replacement = document.createTextNode(child.textContent || '');
+                                child.replaceWith(replacement);
+                                continue;
+                            }}
+                            const attrs = Array.from(child.attributes || []);
+                            for (const attr of attrs) {{
+                                child.removeAttribute(attr.name);
+                            }}
+                            walk(child);
+                        }} else if (child.nodeType === Node.COMMENT_NODE) {{
+                            child.remove();
+                        }}
+                    }}
+                }};
+                walk(template.content);
+                return template.innerHTML;
+            }};
             const setTooltipContent = (content, useHtml = false) => {{
                 if (!tooltip) return;
                 if (!hoverTooltipsAllowed()) {{
@@ -2575,7 +2644,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     return;
                 }}
                 if (useHtml) {{
-                    tooltip.innerHTML = content || '';
+                    tooltip.innerHTML = sanitizeTooltipHtml(content || '');
                 }} else {{
                     tooltip.textContent = content || '';
                 }}
@@ -3269,7 +3338,7 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
             }};
             const syncTextContentToBlock = (tb, editor) => {{
                 if (!tb || !editor) return tb;
-                tb.html = editor.innerHTML;
+                tb.html = sanitizeEditorHtml(editor.innerHTML);
                 tb.label = editor.textContent || '';
                 tb.text_style = resolveTextStyle(tb);
                 return tb;
@@ -9537,7 +9606,7 @@ function rebuildGroupIndexes() {{
                 editor.className = 'mk-text-editor';
                 editor.setAttribute('data-text-id', id);
                 editor.style.background = isShape ? 'transparent' : textBlock.bgcolor;
-                editor.innerHTML = isShape ? '' : (htmlContent || '');
+                editor.innerHTML = isShape ? '' : sanitizeEditorHtml(htmlContent || '');
                 applyStyleToEditor(editor, style);
                 editor.contentEditable = false;
                 if (isTransparentShape) {{

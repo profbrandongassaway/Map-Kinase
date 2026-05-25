@@ -1,0 +1,15 @@
+# Development and maintenance dependencies.
+# Runtime deployment should install only requirements.txt.
+-r requirements.txt
+
+# Optional utilities used by non-runtime scripts.
+beautifulsoup4==4.14.3
+lxml==6.0.2
+
+# Optional desktop launcher support (M5_DESKTOP_GUI=1).
+PyQt5==5.15.11
+pywebview==6.1
+
+# Optional CST image-analysis helpers (runtime has guarded fallbacks).
+opencv-python>=4.9,<5
+pypdfium2>=4.30,<5
