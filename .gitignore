@@ -390,3 +390,32 @@ tca_pitsa_perseus.py
 other_projects
 .wikipathways_cache
 .kegg_cache
+
+# Python local environments and dependency-audit sandboxes
+.venv*/
+venv/
+env/
+ENV/
+
+# Map-Kinase local runtime/session outputs
+mapkinase_sessions/
+MapKinase_WebApp/mapkinase_sessions/
+MapKinase_WebApp/session_workspaces/
+MapKinase_WebApp/_mapkinase_session_workspace/
+mapkinase_logs/
+m5_terminal_output*.txt
+
+# Generated/user-session artifacts
+MapKinase_WebApp/JSONfiles/latest_preview.json
+MapKinase_WebApp/JSONfiles/*_preview.json
+MapKinase_WebApp/JSONfiles/session_*.json
+MapKinase_WebApp/cache/global_protein_catalog.json
+Intersections_*.txt
+
+# Local copied asset experiments
+MapKinase_WebApp/icons/Logos/* - Copy*
+
+# Deployment validation generated payloads/results
+deployment_validation/generated_uploads/
+deployment_validation/results/
+deployment_validation/url_check_results*.json

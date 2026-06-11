@@ -408,9 +408,9 @@ UPLOAD_ACCEPT_TYPES = [
     "text/plain",
     "text/csv",
 ]
-UPLOAD_LIMIT_GUIDANCE_TEXT = (
-    f"Accepted formats: .csv, .tsv, and tab-delimited .txt. "
-    f"Maximum upload size: {MAX_UPLOAD_SIZE_MB} MB per file; {MAX_TOTAL_UPLOAD_SIZE_MB} MB total per run."
+DATA_USE_WARNING_TEXT = (
+    "Map-Kinase is intended for non-sensitive research data only. Do not upload regulated, confidential, "
+    "identifiable, clinical, FERPA, HIPAA, export-controlled, or otherwise sensitive data."
 )
 # Flip to True to mirror terminal stdout/stderr into TERMINAL_LOG_FILE by default.
 TERMINAL_LOG_DEFAULT = False
@@ -544,7 +544,7 @@ DEBUG_EXPORT_ENABLED = env_truthy(
 
 BUILD_GLOBAL_CATALOG_ON_STARTUP = _env_var_truthy(
     "M5_BUILD_GLOBAL_CATALOG_ON_STARTUP",
-    default=not getattr(sys, "frozen", False),
+    default=False,
 )
 
 
@@ -9210,19 +9210,23 @@ def server(input, output, session):  # type: ignore[override]
                     ),
                 ),
                 ui.div(
+                    {
+                        "class": "input-page-row",
+                        "style": (
+                            "border-left:4px solid #f59e0b; background:#fffbeb; color:#78350f; "
+                            "padding:5px 8px; font-size:11px; font-weight:600; line-height:1.25; "
+                            "max-width:760px; box-sizing:border-box;"
+                        ),
+                    },
+                    DATA_USE_WARNING_TEXT,
+                ),
+                ui.div(
                     {"class": "input-page-row", "style": "display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start;"},
                     data_card,
                     protein_card,
                     ptm_card,
                     metabolite_card,
                     add_card,
-                ),
-                ui.div(
-                    {"class": "input-page-row"},
-                    ui.div(
-                        {"style": "font-size:12px; color:#334155; padding:2px 4px;"},
-                        UPLOAD_LIMIT_GUIDANCE_TEXT,
-                    ),
                 ),
                 ui.div({"class": "input-page-row"}, ui.output_ui("input_protein_preview_guide")),
                 ui.div({"class": "input-page-row input-preview-section"}, ui.output_ui("input_protein_preview")),

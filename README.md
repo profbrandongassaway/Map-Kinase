@@ -16,14 +16,23 @@ MapKinase is a Python Shiny web app for visualizing proteomics, PTM modification
 4. `python MapKinase_WebApp\m5_main_ui.py`
 5. Open `http://127.0.0.1:8004`
 
+## Data use warning
+Map-Kinase is intended for non-sensitive research data only. Do not upload regulated, confidential, identifiable, clinical, FERPA, HIPAA, export-controlled, or otherwise sensitive data.
+
 ## Dependency Files (Deployment Review)
 - Runtime deployment dependencies: `requirements.txt`
 - Development/maintenance dependencies: `requirements-dev.txt` (includes `-r requirements.txt`)
 - Runtime install command: `pip install -r requirements.txt`
 - Dev/test install command: `pip install -r requirements-dev.txt`
-- Recommended Python version for deployment: Python `3.12+`
+- Recommended Python version for deployment: Python `3.12+` (reviewed with Python `3.12.10`)
 
-`requirements.txt` is deployment-focused and pins runtime package versions for reproducible security review.
+`requirements.txt` is deployment-focused and pins runtime package versions for reproducible security review. The most recent dependency security review was completed on `2026-06-11` with:
+
+```powershell
+python -m pip_audit -r requirements.txt
+```
+
+Production `requirements.txt` passed with `No known vulnerabilities found`. Development/maintenance dependencies in `requirements-dev.txt` were audited separately and also passed. See `DEPENDENCY_SECURITY_REVIEW.md` for the OIT-facing remediation table, audit output, and smoke-test evidence.
 
 ## Deployment mode and debug-feature gating
 - Runtime mode defaults to production (`MAPKINASE_ENV=production`).
