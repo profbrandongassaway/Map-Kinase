@@ -1,4 +1,5 @@
 ﻿import atexit
+import ast
 import base64
 import copy
 import io
@@ -835,6 +836,7 @@ def _background_preview_from_settings(
 _SPREADSHEET_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
 _HTML_BR_RE = re.compile(r"(?is)<br\s*/?>")
 _HTML_TAG_RE = re.compile(r"(?is)<[^>]*>")
+_UNIPROT_ACCESSION_RE = re.compile(r"\b(?:[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9][A-Z][A-Z0-9]{2}[0-9])(?:-\d+)?\b", re.IGNORECASE)
 
 
 def _sanitize_layout_text_plain(value: Any, max_chars: int = 4000) -> str:
@@ -859,6 +861,82 @@ def _sanitize_layout_scalar(value: Any, *, max_chars: int = 256) -> Any:
     if isinstance(value, (int, float, bool)) or value is None:
         return value
     return _sanitize_layout_text_plain(value, max_chars=max_chars)
+
+
+def _sanitize_layout_metadata(value: Any, *, max_chars: int = 800, depth: int = 0) -> Any:
+    if isinstance(value, (int, float, bool)) or value is None:
+        return value
+    if isinstance(value, str):
+        return _sanitize_layout_text_plain(value, max_chars=max_chars)
+    if depth >= 3:
+        return _sanitize_layout_text_plain(value, max_chars=max_chars)
+    if isinstance(value, list):
+        return [_sanitize_layout_metadata(item, max_chars=max_chars, depth=depth + 1) for item in value[:200]]
+    if isinstance(value, dict):
+        cleaned: Dict[str, Any] = {}
+        for idx, (key, val) in enumerate(value.items()):
+            if idx >= 200:
+                break
+            clean_key = _sanitize_layout_text_plain(key, max_chars=120)
+            if clean_key:
+                cleaned[clean_key] = _sanitize_layout_metadata(val, max_chars=max_chars, depth=depth + 1)
+        return cleaned
+    return _sanitize_layout_text_plain(value, max_chars=max_chars)
+
+
+def _custom_layout_protbox_uniprots(protbox: Dict[str, Any]) -> List[str]:
+    if not isinstance(protbox, dict):
+        return []
+    raw_values = [
+        protbox.get("selected_uniprot"),
+        protbox.get("proteins"),
+        protbox.get("uniprot_ids"),
+        protbox.get("uniprot"),
+        protbox.get("protein_ids"),
+    ]
+    found: List[str] = []
+    seen = set()
+
+    def _add_candidate(value: Any) -> None:
+        normalized = normalize_uniprot(value)
+        if normalized and normalized not in seen:
+            found.append(normalized)
+            seen.add(normalized)
+
+    def _ingest(value: Any, depth: int = 0) -> None:
+        if value in (None, "") or depth > 4:
+            return
+        if isinstance(value, (list, tuple, set)):
+            for item in value:
+                _ingest(item, depth + 1)
+            return
+        if isinstance(value, dict):
+            for item in value.values():
+                _ingest(item, depth + 1)
+            return
+        text = str(value).strip()
+        if not text:
+            return
+        try:
+            parsed = ast.literal_eval(text)
+        except (ValueError, SyntaxError):
+            parsed = None
+        if parsed is not None and parsed != text and isinstance(parsed, (list, tuple, set, dict, str)):
+            _ingest(parsed, depth + 1)
+            return
+        regex_matches = _UNIPROT_ACCESSION_RE.findall(text)
+        if regex_matches:
+            for match in regex_matches:
+                _add_candidate(match)
+            return
+        for part in re.split(r"[;,\s]+", text):
+            cleaned = part.strip().strip("()[]{}'\"")
+            if cleaned:
+                _add_candidate(cleaned)
+
+    for raw_value in raw_values:
+        _ingest(raw_value)
+    return found
 
 
 def _neutralize_spreadsheet_formula_cell(value: Any) -> Any:
@@ -919,11 +997,11 @@ def _build_custom_layout_export(payload: Dict[str, Any]) -> Dict[str, Any]:
             for key, val in item.items():
                 if key in entry or (extra_keys and key in extra_keys):
                     continue
-                if isinstance(val, (str, int, float, list, dict)):
+                if isinstance(val, (str, int, float, bool, list, dict)):
                     if isinstance(val, str):
                         entry[key] = _sanitize_layout_text_plain(val, max_chars=1200)
                     else:
-                        entry[key] = val
+                        entry[key] = _sanitize_layout_metadata(val, max_chars=1200)
             target.append(entry)
 
     _append_shape_section(
@@ -1016,7 +1094,22 @@ def _sanitize_custom_layout(raw_data: Dict[str, Any]) -> Dict[str, Any]:
                     elif extra in {"text_style", "bgcolor", "fgcolor", "border_color"}:
                         entry[extra] = _sanitize_layout_scalar(item[extra], max_chars=400)
                     else:
-                        entry[extra] = _sanitize_layout_scalar(item[extra], max_chars=800)
+                        entry[extra] = _sanitize_layout_metadata(item[extra], max_chars=800)
+            for key, val in item.items():
+                if key in entry or key in {id_key, "id", "entry_id", "x", "y", "width", "height"}:
+                    continue
+                if val in (None, ""):
+                    continue
+                if not isinstance(val, (str, int, float, bool, list, dict)):
+                    continue
+                if section_name == "text_data" and key == "html":
+                    entry[key] = _sanitize_layout_text_html(val, max_chars=12000)
+                elif key == "label":
+                    entry[key] = _sanitize_layout_text_plain(val, max_chars=800)
+                elif key in {"text_style", "bgcolor", "fgcolor", "border_color"}:
+                    entry[key] = _sanitize_layout_scalar(val, max_chars=400)
+                else:
+                    entry[key] = _sanitize_layout_metadata(val, max_chars=1200)
             if section_name == "text_data":
                 if "html" not in entry:
                     entry["html"] = _sanitize_layout_text_html(item.get("label", ""), max_chars=12000)
@@ -1059,17 +1152,20 @@ def _sanitize_custom_layout(raw_data: Dict[str, Any]) -> Dict[str, Any]:
     return sanitized
 
 
-def _apply_custom_layout(payload: Dict[str, Any], layout: Optional[Dict[str, Any]]) -> None:
+def _apply_custom_layout(payload: Dict[str, Any], layout: Optional[Dict[str, Any]], *, include_missing: bool = False) -> None:
     if not payload or not layout:
         return
 
     def _apply_section(section_name: str, id_key: str, extra_keys: Optional[Sequence[str]] = None) -> None:
-        overrides = {entry[id_key]: entry for entry in layout.get(section_name, []) if entry.get(id_key)}
-        if not overrides:
-            return
-        for item in payload.get(section_name, []):
+        layout_entries = [entry for entry in layout.get(section_name, []) if isinstance(entry, dict) and entry.get(id_key)]
+        overrides = {str(entry[id_key]).strip(): entry for entry in layout_entries if str(entry[id_key]).strip()}
+        existing_ids = set()
+        for item in payload.get(section_name, []) or []:
             entry_id = str(item.get(id_key) or "").strip()
-            if not entry_id or entry_id not in overrides:
+            if not entry_id:
+                continue
+            existing_ids.add(entry_id)
+            if entry_id not in overrides:
                 continue
             override = overrides[entry_id]
             for key in ("x", "y", "width", "height"):
@@ -1084,7 +1180,14 @@ def _apply_custom_layout(payload: Dict[str, Any], layout: Optional[Dict[str, Any
                     elif extra in {"text_style", "bgcolor", "fgcolor", "border_color"}:
                         item[extra] = _sanitize_layout_scalar(override[extra], max_chars=400)
                     else:
-                        item[extra] = _sanitize_layout_scalar(override[extra], max_chars=800)
+                        item[extra] = _sanitize_layout_metadata(override[extra], max_chars=800)
+        if include_missing:
+            target = payload.setdefault(section_name, [])
+            for entry in layout_entries:
+                entry_id = str(entry.get(id_key) or "").strip()
+                if entry_id and entry_id not in existing_ids:
+                    target.append(dict(entry))
+                    existing_ids.add(entry_id)
 
     _apply_section("protbox_data", "protbox_id", extra_keys=("proteins", "uniprot_ids", "uniprot", "protein_ids", "label"))
     _apply_section("compound_data", "compound_id")
@@ -1092,6 +1195,8 @@ def _apply_custom_layout(payload: Dict[str, Any], layout: Optional[Dict[str, Any
 
     if layout.get("arrows") is not None:
         payload["arrows"] = [dict(arrow) for arrow in layout["arrows"]]
+    if include_missing and layout.get("groups") is not None:
+        payload["groups"] = [dict(group) for group in layout["groups"] if isinstance(group, dict)]
 
 
 def _enable_terminal_logging(path: str) -> None:
@@ -1960,6 +2065,10 @@ CUSTOM_STYLES = ui.tags.style(
         min-height: 34px;
         white-space: normal;
     }
+    .input-run-status.is-error {
+        color: #b91c1c;
+        font-weight: 700;
+    }
     .input-sample-download-row { display: inline-flex; align-items: center; gap: 8px; margin-top: 2px; }
     .input-sample-download-btn {
         width: 34px; height: 34px; min-width: 34px; padding: 0; border-radius: 10px;
@@ -2245,6 +2354,7 @@ INPUT_BUSY_SCRIPT = ui.tags.script(
         document.addEventListener("click", function(ev){
             const target = ev && ev.target && ev.target.closest ? ev.target.closest("#input_run_pipeline") : null;
             if (!target) return;
+            if (target.disabled) return;
             forcedBusy = true;
             if (inputTabActive()){
                 showOverlay();
@@ -7742,6 +7852,16 @@ def server(input, output, session):  # type: ignore[override]
         except Exception as exc:
             print(f"Warning: send_custom_message failed: {exc}")
 
+    def _clear_input_busy_state(message: str = "") -> None:
+        _send_custom_message_safe(
+            "set_input_busy_state",
+            {
+                "active": False,
+                "title": "Processing input",
+                "text": message or "Validation finished. Review the input status before running again.",
+            },
+        )
+
     def _apply_outline_width_defaults(protein_headers: Optional[Sequence[str]] = None, ptm_headers: Optional[Sequence[str]] = None) -> None:
         try:
             if protein_headers is not None:
@@ -8472,12 +8592,14 @@ def server(input, output, session):  # type: ignore[override]
         ptm_error = _validation_has_explicit_error(ptm_validation.get())
         metabolite_error = _validation_has_explicit_error(metabolite_validation.get())
         disabled = mode == "demo" or running or (not protein_valid) or protein_error or ptm_error or metabolite_error
+        run_guard_active = bool(str(run_guard_message.get() or "").strip())
         return ui.tags.script(
             f"""
             (function(){{
                 const btn = document.getElementById('input_run_pipeline');
-                if (!btn) return;
-                btn.disabled = {str(disabled).lower()};
+                if (btn) btn.disabled = {str(disabled).lower()};
+                const status = document.querySelector('.input-run-status');
+                if (status) status.classList.toggle('is-error', {str(run_guard_active).lower()});
             }})();
             """
         )
@@ -8486,27 +8608,38 @@ def server(input, output, session):  # type: ignore[override]
     @reactive.event(input.input_run_pipeline)
     def _run_validated_input_pipeline():
         if _current_mode() == "demo":
+            _clear_input_busy_state("Demo mode uses bundled sample data.")
             return
         if pipeline_running.get():
             return
         run_guard_message.set("")
         if not bool(protein_validation.get().get("valid")):
-            _invalidate_user_run("Upload and validate a Protein dataset before running.")
+            msg = "Upload and validate a Protein dataset before running."
+            _invalidate_user_run(msg)
+            _clear_input_busy_state(msg)
             return
         if _validation_has_explicit_error(protein_validation.get()):
-            _invalidate_user_run("Fix the Protein dataset errors before running.")
+            msg = "Fix the Protein dataset errors before running."
+            _invalidate_user_run(msg)
+            _clear_input_busy_state(msg)
             return
         if _validation_has_explicit_error(ptm_validation.get()):
-            _invalidate_user_run("Fix the PTM dataset errors before running.")
+            msg = "Fix the PTM dataset errors before running."
+            _invalidate_user_run(msg)
+            _clear_input_busy_state(msg)
             return
         if _validation_has_explicit_error(metabolite_validation.get()):
-            _invalidate_user_run("Fix the Metabolite dataset errors before running.")
+            msg = "Fix the Metabolite dataset errors before running."
+            _invalidate_user_run(msg)
+            _clear_input_busy_state(msg)
             return
         raw_protein = validated_protein_dataset.get() or {}
         raw_ptm = validated_ptm_dataset.get() or {}
         raw_metabolite = validated_metabolite_dataset.get() or {}
         if not raw_protein or not raw_protein.get("headers"):
-            _invalidate_user_run("Upload and validate a Protein dataset before running.")
+            msg = "Upload and validate a Protein dataset before running."
+            _invalidate_user_run(msg)
+            _clear_input_busy_state(msg)
             return
 
         # H) Apply per-session analysis-run throttling before expensive processing.
@@ -8522,6 +8655,8 @@ def server(input, output, session):  # type: ignore[override]
         run_attempt_times_monotonic.set(updated_attempts)
         if not allow_run:
             run_guard_message.set(throttle_message)
+            nav_lock_status.set(throttle_message)
+            _clear_input_busy_state(throttle_message)
             log_run_guard_event(
                 session_id=_safe_session_id(),
                 reason=throttle_message,
@@ -8536,11 +8671,15 @@ def server(input, output, session):  # type: ignore[override]
         if total_upload_size is None:
             msg = "Upload rejected: one or more uploaded files could not be read."
             run_guard_message.set(msg)
+            nav_lock_status.set(msg)
+            _clear_input_busy_state(msg)
             log_run_guard_event(session_id=_safe_session_id(), reason="uploaded file size missing during run-size validation")
             return
         if not _size_ok:
             msg = f"Upload rejected: combined upload size cannot exceed {MAX_TOTAL_UPLOAD_SIZE_MB} MB per analysis run."
             run_guard_message.set(msg)
+            nav_lock_status.set(msg)
+            _clear_input_busy_state(msg)
             log_run_guard_event(
                 session_id=_safe_session_id(),
                 reason="combined upload size exceeded",
@@ -8718,12 +8857,13 @@ def server(input, output, session):  # type: ignore[override]
         locked = not ready
         if locked and selected not in {"input", "home"}:
             session.send_input_message("bookmark_selector", {"value": "home"})
-        if ready:
+        guard_text = str(run_guard_message.get() or "").strip()
+        if guard_text:
+            nav_lock_status.set(guard_text)
+        elif ready:
             nav_lock_status.set("User mode: run complete. Navigation unlocked.")
         elif pipeline_running.get():
             nav_lock_status.set("User mode: running dataset processing. Tabs will unlock when processing finishes.")
-        elif str(run_guard_message.get() or "").strip():
-            nav_lock_status.set(str(run_guard_message.get() or "").strip())
         elif protein_blocked or ptm_blocked or metabolite_blocked:
             nav_lock_status.set("User mode: fix input errors, then press Run.")
         elif protein_ok:
@@ -9655,6 +9795,93 @@ def server(input, output, session):  # type: ignore[override]
                 )
             return payload
 
+        def _hydrate_custom_layout_from_current_dataset(payload: Dict[str, Any], ctx: Dict[str, Any], settings_override: Dict[str, Any]) -> Dict[str, int]:
+            if not isinstance(payload, dict):
+                return {"boxes_with_ids": 0, "matched_boxes": 0, "matched_proteins": 0}
+            protboxes = payload.get("protbox_data") or []
+            if not isinstance(protboxes, list):
+                return {"boxes_with_ids": 0, "matched_boxes": 0, "matched_proteins": 0}
+            protein_rows_raw = ctx.get("prot_rows_by_uniprot", {}) or {}
+            ptm_rows_raw = ctx.get("ptms_by_uniprot", {}) or {}
+            protein_rows_by_norm: Dict[str, Tuple[str, Dict[str, Any]]] = {}
+            ptm_rows_by_norm: Dict[str, List[Dict[str, Any]]] = {}
+            for uid, row_map in protein_rows_raw.items():
+                norm_uid = normalize_uniprot(uid)
+                if norm_uid and norm_uid not in protein_rows_by_norm:
+                    protein_rows_by_norm[norm_uid] = (str(uid), row_map)
+            for uid, rows in ptm_rows_raw.items():
+                norm_uid = normalize_uniprot(uid)
+                if norm_uid and norm_uid not in ptm_rows_by_norm:
+                    ptm_rows_by_norm[norm_uid] = list(rows or [])
+
+            protein_data: Dict[str, Any] = {}
+            boxes_with_ids = 0
+            matched_boxes = 0
+            matched_proteins = set()
+            ptm_limit = int(settings_override.get("ptm_max_display", DEFAULT_SETTINGS["ptm_max_display"]) or DEFAULT_SETTINGS["ptm_max_display"])
+            if ptm_limit <= 0:
+                ptm_limit = len(PTM_POSITION_PRIORITY)
+            ptm_limit = min(ptm_limit, len(PTM_POSITION_PRIORITY))
+
+            for pb in protboxes:
+                if not isinstance(pb, dict):
+                    continue
+                candidates = _custom_layout_protbox_uniprots(pb)
+                if candidates:
+                    boxes_with_ids += 1
+                matched_ids: List[str] = []
+                for candidate in candidates:
+                    match = protein_rows_by_norm.get(candidate)
+                    if not match:
+                        continue
+                    dataset_uid, protein_row = match
+                    if dataset_uid not in matched_ids:
+                        matched_ids.append(dataset_uid)
+                    if dataset_uid in protein_data:
+                        continue
+                    ptm_entries: Dict[str, Any] = {}
+                    ptm_rows = ptm_rows_by_norm.get(candidate, [])
+                    box_x = float(_coerce_float(pb.get("x")) or 0.0)
+                    box_y = float(_coerce_float(pb.get("y")) or 0.0)
+                    box_width = float(_coerce_float(pb.get("width")) or 46.0)
+                    box_height = float(_coerce_float(pb.get("height")) or 17.0)
+                    for ptm_idx, row_map in enumerate(ptm_rows[:ptm_limit]):
+                        site_label = _clean_site_label(
+                            str(row_map.get(ctx.get("ptm_headers", [None, None])[1] if ctx.get("ptm_headers") else "", "") or "")
+                        )
+                        ptm_key = f"{dataset_uid}_{site_label or (ptm_idx + 1)}"
+                        ptm_entries[ptm_key] = _make_ptm_entry(
+                            row_map,
+                            ptm_key,
+                            PTM_POSITION_PRIORITY[ptm_idx],
+                            box_x,
+                            box_y,
+                            box_width,
+                            box_height,
+                            ctx,
+                            settings_override,
+                            display_label=site_label or None,
+                        )
+                    protein_data[dataset_uid] = _make_protein_entry(dataset_uid, protein_row, ctx, settings_override, ptm_entries)
+                    matched_proteins.add(dataset_uid)
+                if matched_ids:
+                    matched_boxes += 1
+                    pb["proteins"] = matched_ids
+                    pb["selected_uniprot"] = matched_ids[0]
+                    primary_entry = protein_data.get(matched_ids[0]) or {}
+                    pb["backup_label"] = primary_entry.get("label") or pb.get("backup_label") or matched_ids[0]
+                    pb["tooltip"] = primary_entry.get("tooltip") or pb.get("tooltip") or ""
+                    pb["tooltip_html"] = primary_entry.get("tooltip_html") or pb.get("tooltip_html") or ""
+                elif candidates:
+                    pb["proteins"] = candidates
+                    pb["selected_uniprot"] = candidates[0]
+            payload["protein_data"] = protein_data
+            return {
+                "boxes_with_ids": boxes_with_ids,
+                "matched_boxes": matched_boxes,
+                "matched_proteins": len(matched_proteins),
+            }
+
         def _first_fc_value(row_map: Dict[str, Any], columns: List[str]) -> Optional[float]:
             for col in columns:
                 raw = row_map.get(col, "")
@@ -10465,7 +10692,10 @@ def server(input, output, session):  # type: ignore[override]
                     payload["_full_width_canvas"] = True
                 layout_override = _get_custom_layout()
                 if layout_override:
-                    _apply_custom_layout(payload, layout_override)
+                    _apply_custom_layout(payload, layout_override, include_missing=(cfg["key"] == "figure"))
+                    if cfg["key"] == "figure":
+                        match_stats = _hydrate_custom_layout_from_current_dataset(payload, _ks_context(), settings_override)
+                        payload["_custom_layout_dataset_match_stats"] = match_stats
                     payload["_custom_layout_applied"] = True
                 else:
                     payload["_custom_layout_applied"] = False
@@ -10512,7 +10742,10 @@ def server(input, output, session):  # type: ignore[override]
                     payload["_kegg_preview"] = _background_preview_from_settings(settings_override, show=True)
                 layout_override = _get_custom_layout()
                 if layout_override:
-                    _apply_custom_layout(payload, layout_override)
+                    _apply_custom_layout(payload, layout_override, include_missing=(cfg["key"] == "figure"))
+                    if cfg["key"] == "figure":
+                        match_stats = _hydrate_custom_layout_from_current_dataset(payload, _ks_context(), settings_override)
+                        payload["_custom_layout_dataset_match_stats"] = match_stats
                     payload["_custom_layout_applied"] = True
                 else:
                     payload["_custom_layout_applied"] = False
@@ -12412,8 +12645,19 @@ def server(input, output, session):  # type: ignore[override]
                     session.send_input_message(_prefixed_id(prefix, "pathway_id"), {"value": "Custom"})
                 except Exception:
                     pass
-            state["status"].set("Custom pathway imported and applied.")
             build_json()
+            with reactive.isolate():
+                built_payload = state["json"].get()
+            if isinstance(built_payload, dict) and built_payload.get("_custom_layout_applied"):
+                match_stats = built_payload.get("_custom_layout_dataset_match_stats") or {}
+                if isinstance(match_stats, dict) and "matched_boxes" in match_stats:
+                    state["status"].set(
+                        "Custom pathway imported and applied. "
+                        f"Matched {int(match_stats.get('matched_boxes') or 0)} of "
+                        f"{int(match_stats.get('boxes_with_ids') or 0)} protein box(es) to the current dataset."
+                    )
+                else:
+                    state["status"].set("Custom pathway imported and applied.")
 
         if cfg.get("start_blank"):
             build_json()

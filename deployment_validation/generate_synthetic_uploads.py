@@ -44,12 +44,39 @@ def _valid_metabolite_rows(row_count: int) -> str:
     return "\n".join(rows) + "\n"
 
 
-def _write_padded_valid_csv(path: Path, target_size: int) -> None:
-    header = "Uniprot Id,Gene Symbol,C: A,T: Padding\n"
-    base_row = "P12345,GENE1,1.0,"
-    padding_len = max(1, target_size - len(header.encode("utf-8")) - len(base_row.encode("utf-8")) - 1)
-    payload = header + base_row + ("A" * padding_len) + "\n"
-    path.write_text(payload, encoding="utf-8", newline="\n")
+def _write_padded_valid_csv(path: Path, target_size: int, role: str = "protein") -> None:
+    if role == "ptm":
+        header = "Uniprot Id,Site Position,C: A,T: Padding\n"
+    elif role == "metabolite":
+        header = "HMDB_ID,C: A,T: Padding\n"
+    else:
+        header = "Uniprot Id,Gene Symbol,C: A,T: Padding\n"
+    rows = [header]
+    total_size = len(header.encode("utf-8"))
+    max_padding_chars = 1000
+    row_idx = 0
+
+    while total_size < target_size:
+        if role == "ptm":
+            prefix = f"P{10000 + row_idx},{row_idx + 1},0.5,"
+        elif role == "metabolite":
+            prefix = f"HMDB{row_idx:05d},2.0,"
+        else:
+            prefix = f"P{10000 + row_idx},GENE{row_idx},1.0,"
+        min_row_size = len(prefix.encode("utf-8")) + 1
+        remaining = target_size - total_size
+        if remaining < min_row_size:
+            rows[-1] = rows[-1][:-1] + ("A" * remaining) + "\n"
+            total_size += remaining
+            break
+
+        padding_len = min(max_padding_chars, remaining - min_row_size)
+        row = prefix + ("A" * padding_len) + "\n"
+        rows.append(row)
+        total_size += len(row.encode("utf-8"))
+        row_idx += 1
+
+    path.write_text("".join(rows), encoding="utf-8", newline="\n")
 
 
 def main() -> None:
@@ -108,9 +135,16 @@ def main() -> None:
     _write_padded_valid_csv(OUT_DIR / "over_10mb_valid_shape.csv", (10 * MB) + 1)
     files.append(("over_10mb_valid_shape.csv", "valid-looking CSV over default 10 MB per-file limit"))
 
-    for idx in range(1, 5):
-        _write_padded_valid_csv(OUT_DIR / f"combined_under_10mb_{idx}.csv", (8 * MB) + 128)
-        files.append((f"combined_under_10mb_{idx}.csv", "four files together exceed default 30 MB total limit"))
+    combined_test_file_sizes = [
+        (10 * MB) - 20_000,
+        (10 * MB) - 30_000,
+        (10 * MB) - 40_000,
+        (10 * MB) - 50_000,
+    ]
+    for idx, target_size in enumerate(combined_test_file_sizes, start=1):
+        role = "protein" if idx == 1 else "metabolite" if idx == 4 else "ptm"
+        _write_padded_valid_csv(OUT_DIR / f"combined_under_10mb_{idx}.csv", target_size, role=role)
+        files.append((f"combined_under_10mb_{idx}.csv", f"near-10 MB {role} upload-size probe file"))
 
     manifest = {
         "output_dir": str(OUT_DIR),
