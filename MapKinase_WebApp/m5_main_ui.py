@@ -6080,8 +6080,8 @@ def _home_tab() -> ui.nav_panel:
                     "Input Format",
                     "Protein and PTM uploads follow a header-based format.",
                     [
-                        "Protein file core columns: UniProt, GeneSymbol, and one or more comparison columns beginning with C:.",
-                        "PTM file core columns: UniProt, PTM Site, and comparison columns that match the protein comparison headers exactly.",
+                        "Protein files use the first column as the protein ID and the second column as the gene label, followed by one or more comparison columns beginning with C:.",
+                        "PTM files use the first column as the protein ID and the second column as the PTM site, followed by comparison columns that match the protein comparison headers exactly.",
                         "Optional tool-tip columns begin with T:, and optional Dual-Comparison columns begin with O: and should match the related comparison names.",
                         "Accepted upload types: .txt, .tsv, and .csv.",
                     ],
@@ -7368,9 +7368,6 @@ def server(input, output, session):  # type: ignore[override]
         if not headers:
             errors.append("No headers found in metabolite file.")
             return Namespace(valid=False, errors=errors, summary={"rows": 0, "comparisons": 0, "tooltips": 0}, comparisons=[])
-        first_header = headers[0].strip().lower().replace(" ", "_")
-        if first_header != "hmdb_id":
-            errors.append("HMDB ID must be the first column in the metabolite file.")
         fc_columns = [h for h in headers if str(h).startswith("C:")]
         tooltip_columns = [h for h in headers if str(h).startswith("T:")]
         if not fc_columns:
@@ -7521,7 +7518,7 @@ def server(input, output, session):  # type: ignore[override]
                         ),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
-                            "Use the UniProt ID for each protein or PTM row. This must be the first column in the Protein and PTM files.",
+                            "Put the protein identifier for each Protein or PTM row in the first column. The header name can be anything.",
                         ),
                     ),
                     ui.div(
@@ -7533,7 +7530,7 @@ def server(input, output, session):  # type: ignore[override]
                         ),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
-                            "Use the matching gene symbol for each protein entry. This must be the second column in the Protein file.",
+                            "Put the matching gene symbol or display label in the second column of the Protein file. The header name can be anything.",
                         ),
                     ),
                     ui.div(
@@ -7545,7 +7542,7 @@ def server(input, output, session):  # type: ignore[override]
                         ),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
-                            "Use the modified residue position for each PTM entry. This must be the second column in the PTM file.",
+                            "Put the modified residue position for each PTM entry in the second column of the PTM file. The header name can be anything.",
                         ),
                     ),
                     ui.div(
@@ -7569,7 +7566,7 @@ def server(input, output, session):  # type: ignore[override]
                         ),
                         ui.div(
                             {"class": "input-preview-guide-pill-text"},
-                            "Unique identifier from the HMDB used to specify each metabolite (e.g., HMDB0000001). This must be the first column in the metabolite file.",
+                            "Put the HMDB identifier for each metabolite in the first column of the metabolite file. The header name can be anything.",
                         ),
                     ),
                     ui.div(
@@ -12376,18 +12373,10 @@ def server(input, output, session):  # type: ignore[override]
                         (function(){{
                             const overlay = document.getElementById('{_prefixed_id(prefix, "viewer_overlay_panel")}');
                             const editor = document.getElementById('{_prefixed_id(prefix, "viewer_create_panel")}');
-                            const shell = document.querySelector('#{_prefixed_id(prefix, "viewer_card")} .cst-viewer-shell');
-                            const fullscreenBtn = document.getElementById('{_prefixed_id(prefix, "fullscreen_btn")}');
                             if (overlay) {{
                                 overlay.style.display = '';
-                                if (shell && shell !== overlay.parentElement) {{
-                                    shell.appendChild(overlay);
-                                }}
                             }}
                             if (editor) editor.classList.add('is-hidden-for-cst');
-                            if (shell && fullscreenBtn && shell !== fullscreenBtn.parentElement) {{
-                                shell.appendChild(fullscreenBtn);
-                            }}
                         }})();
                         """
                     ),
@@ -12403,18 +12392,10 @@ def server(input, output, session):  # type: ignore[override]
                 (function(){{
                     const overlay = document.getElementById('{_prefixed_id(prefix, "viewer_overlay_panel")}');
                     const editor = document.getElementById('{_prefixed_id(prefix, "viewer_create_panel")}');
-                    const body = document.querySelector('#{_prefixed_id(prefix, "viewer_card")} .pathway-viewer-body');
-                    const fullscreenBtn = document.getElementById('{_prefixed_id(prefix, "fullscreen_btn")}');
                     if (overlay) {{
                         overlay.style.display = '';
-                        if (body && body !== overlay.parentElement) {{
-                            body.appendChild(overlay);
-                        }}
                     }}
                     if (editor) editor.classList.remove('is-hidden-for-cst');
-                    if (body && fullscreenBtn && body !== fullscreenBtn.parentElement) {{
-                        body.insertBefore(fullscreenBtn, body.firstChild);
-                    }}
                 }})();
                 """
             )

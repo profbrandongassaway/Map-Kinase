@@ -54,10 +54,6 @@ def _log_upload_rejection(
     )
 
 
-def _header_key(value: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "", str(value or "").strip().lower())
-
-
 def _is_text_like(payload: bytes) -> bool:
     if not payload:
         return False
@@ -88,33 +84,15 @@ def _validate_role_headers(headers: Sequence[str], expected_role: Optional[str])
     if not headers:
         return "Invalid analysis dataset upload: file could not be parsed as tabular text."
 
-    h1 = _header_key(headers[0]) if len(headers) >= 1 else ""
-    h2 = _header_key(headers[1]) if len(headers) >= 2 else ""
-
-    uniprot_aliases = {"uniprot", "uniprotid", "uniprotkb", "uniprotaccession", "uniprotkbaccession", "accession"}
-    gene_aliases = {"gene", "genesymbol", "symbol", "genesym"}
-    ptm_pos_aliases = {"siteposition", "ptmsite", "modifiedresidueposition", "residueposition", "position"}
-    hmdb_aliases = {"hmdbid", "hmdb"}
-
     if role == "protein":
         if len(headers) < 2:
             return "Invalid analysis dataset upload: protein dataset must include at least two columns."
-        if h1 not in uniprot_aliases:
-            return "Invalid analysis dataset upload: protein dataset first column must be UniProtKB accession."
-        if h2 not in gene_aliases:
-            return "Invalid analysis dataset upload: protein dataset second column must be gene symbol."
     elif role == "ptm":
         if len(headers) < 2:
             return "Invalid analysis dataset upload: PTM dataset must include at least two columns."
-        if h1 not in uniprot_aliases:
-            return "Invalid analysis dataset upload: PTM dataset first column must be UniProtKB accession."
-        if h2 not in ptm_pos_aliases:
-            return "Invalid analysis dataset upload: PTM dataset second column must be modified residue position."
     elif role == "metabolite":
         if len(headers) < 1:
             return "Invalid analysis dataset upload: metabolite dataset must include at least one column."
-        if h1 not in hmdb_aliases:
-            return "Invalid analysis dataset upload: metabolite dataset first column must be HMDB ID."
     return None
 
 
@@ -132,7 +110,7 @@ def validate_uploaded_file(file_info: Any, expected_role: Optional[str] = None, 
       C) per-file size limit
       D) text-vs-binary content checks
       E) tabular parse checks
-      F) role-specific required columns
+      F) role-specific minimum column counts
     """
     raw_name, datapath = _extract_upload_fields(file_info)
     role = str(expected_role or "").strip().lower()
@@ -323,14 +301,14 @@ def validate_protein_file(file_path: str) -> ProteinValidationResult:
     """
     Validate a protein data file according to the expected schema.
     Rules:
-      - Col0: Uniprot ID (required values)
-      - Col1: Gene Symbol (blank values are auto-filled from Uniprot ID)
+      - Col0: protein identifier, normally UniProt ID (required values)
+      - Col1: gene symbol/label (blank values are auto-filled from Col0)
       - Col2+: Comparison columns must start with "C:" (at least one required)
       - Optional outline comparison columns start with "O:" and must match a "C:" header
       - Optional tooltip columns start with "T:"
       - Comparison cells must be numeric (float/int) and non-empty
       - Outline comparison cells must be numeric (float/int) or "NA"
-      - Uniprot/Comparison cells required on every row
+      - Identifier/Comparison cells required on every row
       - Only .txt (tab-delimited) or .csv files are allowed
     Returns a ProteinValidationResult with validity, errors, and summary counts.
     """
@@ -356,7 +334,7 @@ def validate_protein_file(file_path: str) -> ProteinValidationResult:
                 return ProteinValidationResult(False, ["The file is empty."], {}, [])
             row_count = 0
             if len(headers) < 3:
-                errors.append("Header must contain at least 3 columns (Uniprot, Gene Symbol, and one Comparison column).")
+                errors.append("Header must contain at least 3 columns (protein ID, gene symbol/label, and one Comparison column).")
                 return ProteinValidationResult(False, errors, {"rows": row_count, "comparisons": 0, "tooltips": 0}, [])
 
             for idx, header in enumerate(headers):
@@ -395,7 +373,7 @@ def validate_protein_file(file_path: str) -> ProteinValidationResult:
                 uniprot = (row[0] or "").strip()
                 gene_symbol = (row[1] or "").strip()
                 if not uniprot:
-                    errors.append(f"Row {row_idx}, Column 1 (Uniprot ID) is empty.")
+                    errors.append(f"Row {row_idx}, Column 1 (protein ID) is empty.")
                 if not gene_symbol and uniprot:
                     # Allow blank gene symbols by falling back to UniProt ID.
                     row[1] = uniprot
@@ -441,15 +419,15 @@ def validate_ptm_file(file_path: str, required_comparisons: List[str]) -> PTMVal
     """
     Validate a PTM data file.
     Rules:
-      - Col0: Uniprot ID (required values)
-      - Col1: Site Position (required, positive int)
+      - Col0: protein identifier, normally UniProt ID (required values)
+      - Col1: site position (required, positive int)
       - Col2+: Comparison columns must start with "C:" (at least one required)
       - Optional outline comparison columns start with "O:" and must match a "C:" header
       - Optional tooltip columns start with "T:"
       - Comparison cells must be numeric (float/int) and non-empty
       - Outline comparison cells must be numeric (float/int) or "NA"
       - Site position must be an integer > 0
-      - Uniprot/Site/Comparison cells required on every row
+      - Identifier/Site/Comparison cells required on every row
       - File must be .txt (tab) or .csv
       - All required_comparisons (from protein file) must exist in PTM headers (case-sensitive exact match)
     """
@@ -475,7 +453,7 @@ def validate_ptm_file(file_path: str, required_comparisons: List[str]) -> PTMVal
                 return PTMValidationResult(False, ["The file is empty."], {}, [])
             row_count = 0
             if len(headers) < 3:
-                errors.append("Header must contain at least 3 columns (Uniprot, Site Position, and one Comparison column).")
+                errors.append("Header must contain at least 3 columns (protein ID, site position, and one Comparison column).")
                 return PTMValidationResult(False, errors, {"rows": row_count, "comparisons": 0, "tooltips": 0}, [])
 
             for idx, header in enumerate(headers):
@@ -517,7 +495,7 @@ def validate_ptm_file(file_path: str, required_comparisons: List[str]) -> PTMVal
                 uniprot = (row[0] or "").strip()
                 site = (row[1] or "").strip()
                 if not uniprot:
-                    errors.append(f"Row {row_idx}, Column 1 (Uniprot ID) is empty.")
+                    errors.append(f"Row {row_idx}, Column 1 (protein ID) is empty.")
                 if not site:
                     errors.append(f"Row {row_idx}, Column 2 (Site Position) is empty.")
                 else:
