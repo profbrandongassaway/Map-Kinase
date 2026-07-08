@@ -12696,6 +12696,7 @@ _shiny_app = app
 app = Starlette(
     routes=[
         Route("/health", health),
+        Route("/health/", health),
         Mount("/", app=_shiny_app),
     ]
 )

@@ -5,10 +5,7 @@ import os
 from pathlib import Path
 from typing import Optional
 from shiny import App, ui, render, reactive
-from starlette.applications import Starlette
-from starlette.requests import Request
-from starlette.responses import JSONResponse
-from starlette.routing import Mount, Route
+
 try:
     import numpy as _np
 except Exception:
@@ -11850,25 +11847,7 @@ def server(input, output, session):
 
 
 
-
-shiny_app = App(app_ui, server)
-
-
-async def health(request: Request):
-    return JSONResponse({"status": "ok"})
-
-
-app = Starlette(
-    routes=[
-        Route("/health", health),
-        Route("/health/", health),
-        Mount("/", app=shiny_app),
-    ]
-)
-
+app = App(app_ui, server)
 
 if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8080)
-
+    app.run()
