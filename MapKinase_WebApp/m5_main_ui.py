@@ -12734,6 +12734,23 @@ app = App(
     debug=(not IS_PRODUCTION_MODE and env_truthy("MAPKINASE_APP_DEBUG", False)),
 )
 
+# --- Health check wrapper ---
+from starlette.applications import Starlette
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from starlette.routing import Mount, Route
+
+async def health(request: Request):
+    return JSONResponse({"status": "ok"})
+
+_shiny_app = app
+app = Starlette(
+    routes=[
+        Route("/health", health),
+        Route("/health/", health),
+        Mount("/", app=_shiny_app),
+    ]
+)
 
 def _run_uvicorn_app():
     if uvicorn is None:  # pragma: no cover - runtime guard
