@@ -598,6 +598,8 @@ class PathwayProcessor:
         self.hsa_id_column = settings.get('hsa_id_column', 'KEGG_hsa')
         self.prot_uniprot_column = settings.get('prot_uniprot_column', 'Uniprot_ID')
         self.gene_name_column = settings.get('gene_name_column', 'Gene Symbol')
+        protein_match_mode = str(settings.get('protein_match_mode', 'uniprot_id') or 'uniprot_id').strip().lower()
+        self.protein_match_mode = protein_match_mode if protein_match_mode in {'uniprot_id', 'gene_symbol'} else 'uniprot_id'
         self.protein_tooltip_columns = settings.get('protein_tooltip_columns', ['Gene Symbol', 'Uniprot_ID'])
         self.negative_color = settings.get('negative_color', (255, 0, 0))
         self.positive_color = settings.get('positive_color', (0, 0, 255))
@@ -770,8 +772,9 @@ class PathwayProcessor:
                 best_score = candidate_score
         return best_idx if best_idx is not None else row_indexes[0]
 
-    def _build_protein_match_payload(self, protein_token):
-        row_indexes = self._lookup_protein_row_indexes(protein_token)
+    def _build_protein_match_payload(self, protein_token, row_indexes=None):
+        if row_indexes is None:
+            row_indexes = self._lookup_protein_row_indexes(protein_token)
         if not row_indexes:
             return None
         row_idx = self._pick_best_row_index(row_indexes)
@@ -795,6 +798,66 @@ class PathwayProcessor:
             'row_index': row_idx,
             'row': row,
         }
+
+    @staticmethod
+    def _split_pathway_gene_labels(raw_value):
+        if raw_value is None:
+            return []
+        if isinstance(raw_value, (list, tuple, set)):
+            values = raw_value
+        else:
+            values = [raw_value]
+        tokens = []
+        seen = set()
+        for value in values:
+            if value is None:
+                continue
+            for raw_token in re.split(r'[,;|/\s]+', str(value).strip()):
+                token = raw_token.strip().strip('()[]{}')
+                token = re.sub(r'\.{3}$', '', token).strip()
+                if not token or token == '...':
+                    continue
+                normalized = token.upper()
+                if normalized in seen:
+                    continue
+                seen.add(normalized)
+                tokens.append(token)
+        return tokens
+
+    def _pathway_gene_tokens(self, entry):
+        return self._split_pathway_gene_labels(
+            [
+                entry.get('label', ''),
+                entry.get('backup_label', ''),
+                entry.get('first_name', ''),
+            ]
+        )
+
+    def _build_entry_protein_matches(self, entry):
+        if self.protein_match_mode == 'gene_symbol':
+            protein_tokens = self._pathway_gene_tokens(entry)
+            payloads = []
+            seen_rows = set()
+            for protein_token in protein_tokens:
+                row_indexes = self._protein_gene_index.get(str(protein_token).upper(), [])
+                payload = self._build_protein_match_payload(protein_token, row_indexes=row_indexes)
+                if payload is None or payload['row_index'] in seen_rows:
+                    continue
+                seen_rows.add(payload['row_index'])
+                payloads.append(payload)
+            if payloads:
+                return protein_tokens, payloads
+
+        protein_tokens = str(entry.get('name', '') or '').split()
+        payloads = []
+        seen_rows = set()
+        for protein_token in protein_tokens:
+            payload = self._build_protein_match_payload(protein_token)
+            if payload is None or payload['row_index'] in seen_rows:
+                continue
+            seen_rows.add(payload['row_index'])
+            payloads.append(payload)
+        return protein_tokens, payloads
 
     def _choose_metabolite_match(self, matches):
         if not matches:
@@ -930,12 +993,13 @@ class PathwayProcessor:
         b = int((1 - t) * b0 + t * b1)
         return [r, g, b]
 
-    def choose_protein(self, proteins):
-        valid_proteins = []
-        for protein in proteins:
-            payload = self._build_protein_match_payload(protein)
-            if payload is not None:
-                valid_proteins.append(payload)
+    def choose_protein(self, proteins=None, valid_proteins=None):
+        if valid_proteins is None:
+            valid_proteins = []
+            for protein in proteins or []:
+                payload = self._build_protein_match_payload(protein)
+                if payload is not None:
+                    valid_proteins.append(payload)
         if not valid_proteins:
             return None
         try:
@@ -1061,6 +1125,7 @@ class PathwayProcessor:
                     'settings': {
                         'pathway_id': self.settings.get('pathway_id', 'hsa04010'),
                         'pathway_source': self.settings.get('pathway_source', 'kegg'),
+                        'protein_match_mode': self.protein_match_mode,
                         'protein_selection_option': self.settings.get('protein_selection_option', 2),
                         'ptm_selection_option': self.settings.get('ptm_selection_option', 2),
                         'ptm_max_display': self.settings.get('ptm_max_display', 4),
@@ -1489,7 +1554,7 @@ class PathwayProcessor:
                 entry_type = entry.get("type", "")
                 if entry_type != 'prot_box':
                     continue
-                proteins = entry["name"].split()
+                proteins, _ = self._build_entry_protein_matches(entry)
                 self.protein_data_map[entry["id"]] = {
                     'proteins': proteins,
                     'x': entry["x"],
@@ -1504,22 +1569,19 @@ class PathwayProcessor:
             for entry in entries:
                 if entry.get("type", "") != 'prot_box':
                     continue
-                proteins = entry["name"].split()
-                valid_protein_dicts = []
+                proteins, valid_protein_dicts = self._build_entry_protein_matches(entry)
                 uniprot_ids = []
-                for protein in proteins:
-                    protein_payload = self._build_protein_match_payload(protein)
-                    if not protein_payload:
-                        continue
+                retained_protein_dicts = []
+                for protein_payload in valid_protein_dicts:
                     uniprot_id = protein_payload.get('uniprot_id')
                     if not uniprot_id:
                         continue
-                    valid_protein_dicts.append(protein_payload)
+                    retained_protein_dicts.append(protein_payload)
                     uniprot_ids.append(uniprot_id)
                     all_uniprot_ids.add(uniprot_id)
                 protbox_protein_cache[entry["id"]] = {
                     'proteins': proteins,
-                    'valid_protein_dicts': valid_protein_dicts,
+                    'valid_protein_dicts': retained_protein_dicts,
                     'uniprot_ids': uniprot_ids
                 }
             # Prefetch PTM summaries once after collecting all UniProt IDs
@@ -1537,7 +1599,7 @@ class PathwayProcessor:
                 use_original_size = bool(self.settings.get("use_original_protbox_size", True))
                 if valid_protein_dicts:
                     # Determine the chosen (highest priority) protein
-                    chosen_protein = self.choose_protein(proteins)
+                    chosen_protein = self.choose_protein(valid_proteins=valid_protein_dicts)
                     if chosen_protein and chosen_protein['uniprot_id']:
                         chosen_uniprot = chosen_protein['uniprot_id']
                         # Reorder uniprot_ids with chosen first
@@ -1741,7 +1803,7 @@ class PathwayProcessor:
             annotations = protein_dict.get('annotations', [])
             protein_row = protein_dict.get('row')
             protein_in_data = protein_row is not None
-            valid_proteins = [p for p in proteins if self._build_protein_match_payload(p) is not None]
+            valid_proteins = [protein] if protein_in_data else []
             protein_entry = {
                 'label': '',
                 'label_color': [0, 0, 0],
@@ -2424,6 +2486,7 @@ def generate_pathway_json(pathway_id, data, settings, skip_disk_write=False, deb
 DEFAULT_SETTINGS = {
     'pathway_id': 'hsa04010',
     'pathway_source': 'kegg',
+    'protein_match_mode': 'uniprot_id',
     'protein_selection_option': 2,
     'ptm_selection_option': 2,
     'ptm_max_display': 4,

@@ -172,6 +172,17 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
         max_y = max(pb.get('y', 0) + pb.get('height', 0) for pb in protbox_data if pb.get('y') is not None and pb.get('height') is not None) + 50
         max_x = max(max_x, 800)
         max_y = max(max_y, 600)
+    background_size = json_data.get('kegg_bg_size') or {}
+    try:
+        background_width = float(background_size.get('width', 0) or 0)
+        background_height = float(background_size.get('height', 0) or 0)
+    except (TypeError, ValueError):
+        background_width = 0
+        background_height = 0
+    if math.isfinite(background_width) and background_width > 0:
+        max_x = max(max_x, background_width)
+    if math.isfinite(background_height) and background_height > 0:
+        max_y = max(max_y, background_height)
     full_width = bool(json_data.get('_full_width_canvas'))
     if full_width:
         # Ensure ample drawing space so objects are not clipped near the bottom of the viewer.
@@ -317,12 +328,11 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 const canvasEl = getCanvasEl();
                 if (!canvasEl) return;
                 try {{
-                    const inFullscreen = !!(document.fullscreenElement && document.fullscreenElement.contains(canvasEl));
                     if (fullWidthCanvas) {{
                         const nextWidth = Math.max(canvasEl.clientWidth || 0, 1);
                         const nextHeight = Math.max(canvasEl.clientHeight || 0, 1);
                         draw.size(nextWidth, nextHeight);
-                        draw.attr({{ preserveAspectRatio: inFullscreen ? 'none' : 'xMidYMid meet' }});
+                        draw.attr({{ preserveAspectRatio: 'xMidYMid meet' }});
                     }} else {{
                         draw.size({max_x}, {max_y});
                         draw.attr({{ preserveAspectRatio: 'xMidYMid meet' }});
@@ -332,37 +342,6 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                     console.log('svg resize sync failed', resizeErr);
                 }}
             }};
-            try {{
-                window.__mkResizeObservers = window.__mkResizeObservers || {{}};
-                if (window.__mkResizeObservers[exportKey]) {{
-                    try {{ window.__mkResizeObservers[exportKey].disconnect(); }} catch (disconnectErr) {{ /* ignore */ }}
-                }}
-                const canvasEl = getCanvasEl();
-                if (canvasEl && typeof ResizeObserver !== 'undefined') {{
-                    const observer = new ResizeObserver(() => {{
-                        window.requestAnimationFrame(syncSvgCanvasSize);
-                    }});
-                    observer.observe(canvasEl);
-                    window.__mkResizeObservers[exportKey] = observer;
-                }}
-                if (!window.__mkFullscreenResizeBound) {{
-                    window.__mkFullscreenResizeBound = true;
-                    window.addEventListener('resize', () => window.requestAnimationFrame(() => {{
-                        Object.keys(window.__mkViewerControls || {{}}).forEach((key) => {{
-                            const api = window.__mkViewerControls[key];
-                            if (api && typeof api.syncCanvasSize === 'function') api.syncCanvasSize();
-                        }});
-                    }}));
-                    document.addEventListener('fullscreenchange', () => window.requestAnimationFrame(() => {{
-                        Object.keys(window.__mkViewerControls || {{}}).forEach((key) => {{
-                            const api = window.__mkViewerControls[key];
-                            if (api && typeof api.syncCanvasSize === 'function') api.syncCanvasSize();
-                        }});
-                    }}));
-                }}
-            }} catch (observerErr) {{
-                console.log('svg resize observer setup failed', observerErr);
-            }}
             const defaultPtmPositionPriority = ['N1','N3','S1','S3','W1','E1','W2','E2','N2','S2'];
             const ksPtmPositionPriority = ['W1','W2','E1','E2','N1','S1','N2','S2','N3','S3'];
             let ptmPositionPriority = defaultPtmPositionPriority;
@@ -640,6 +619,37 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                 }}
             }};
             const exportKey = bookmarkKey || 'default';
+            try {{
+                window.__mkResizeObservers = window.__mkResizeObservers || {{}};
+                if (window.__mkResizeObservers[exportKey]) {{
+                    try {{ window.__mkResizeObservers[exportKey].disconnect(); }} catch (disconnectErr) {{ /* ignore */ }}
+                }}
+                const canvasEl = getCanvasEl();
+                if (canvasEl && typeof ResizeObserver !== 'undefined') {{
+                    const observer = new ResizeObserver(() => {{
+                        window.requestAnimationFrame(syncSvgCanvasSize);
+                    }});
+                    observer.observe(canvasEl);
+                    window.__mkResizeObservers[exportKey] = observer;
+                }}
+                if (!window.__mkFullscreenResizeBound) {{
+                    window.__mkFullscreenResizeBound = true;
+                    window.addEventListener('resize', () => window.requestAnimationFrame(() => {{
+                        Object.keys(window.__mkViewerControls || {{}}).forEach((key) => {{
+                            const api = window.__mkViewerControls[key];
+                            if (api && typeof api.syncCanvasSize === 'function') api.syncCanvasSize();
+                        }});
+                    }}));
+                    document.addEventListener('fullscreenchange', () => window.requestAnimationFrame(() => {{
+                        Object.keys(window.__mkViewerControls || {{}}).forEach((key) => {{
+                            const api = window.__mkViewerControls[key];
+                            if (api && typeof api.syncCanvasSize === 'function') api.syncCanvasSize();
+                        }});
+                    }}));
+                }}
+            }} catch (observerErr) {{
+                console.log('svg resize observer setup failed', observerErr);
+            }}
             window.__mkExportSnapshotMap = window.__mkExportSnapshotMap || {{}};
             window.__mkExportSnapshotMap[exportKey] = buildExportSnapshot;
             const persistSnapshotToCache = () => {{

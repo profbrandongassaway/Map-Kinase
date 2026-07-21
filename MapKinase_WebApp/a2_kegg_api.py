@@ -49,18 +49,22 @@ class KeggAPI(BasePathwayAPI):
             arrows = []
 
             for entry in root.findall('entry'):
+                graphics = entry.find('graphics')
+                graphics_name = graphics.get('name', '')
                 entry_data = {
                     'id': entry.get('id'),
                     'name': entry.get('name', ''),
                     'type': 'prot_box' if entry.get('type') == 'gene' else entry.get('type', ''),
-                    'x': float(entry.find('graphics').get('x', '0')),
-                    'y': float(entry.find('graphics').get('y', '0')),
-                    'width': float(entry.find('graphics').get('width', '0')),
-                    'height': float(entry.find('graphics').get('height', '0')),
-                    'first_name': entry.find('graphics').get('name', '').split(',')[0].strip(),
-                    'fgcolor': entry.find('graphics').get('fgcolor', '#000000'),
-                    'bgcolor': entry.find('graphics').get('bgcolor', '#FFFFFF'),
-                    'graphics_type': entry.find('graphics').get('type', ''),
+                    'x': float(graphics.get('x', '0')),
+                    'y': float(graphics.get('y', '0')),
+                    'width': float(graphics.get('width', '0')),
+                    'height': float(graphics.get('height', '0')),
+                    'first_name': graphics_name.split(',')[0].strip(),
+                    'label': graphics_name,
+                    'backup_label': graphics_name,
+                    'fgcolor': graphics.get('fgcolor', '#000000'),
+                    'bgcolor': graphics.get('bgcolor', '#FFFFFF'),
+                    'graphics_type': graphics.get('type', ''),
                     'link': entry.get('link', '')
                 }
                 if entry.get('type') == 'group':

@@ -1694,6 +1694,18 @@ def collect_settings(input, cfg: Dict[str, Any]) -> Dict[str, Any]:  # type: ign
     overrides: Dict[str, Any] = {}
     overrides["pathway_id"] = pathway_id
     overrides["pathway_source"] = pathway_source
+    protein_match_mode = str(
+        _get_input_value(input, "settings_protein_match_mode") or "uniprot_id"
+    ).strip().lower()
+    overrides["protein_match_mode"] = (
+        protein_match_mode
+        if (
+            prefix == "web"
+            and pathway_source in {"kegg", "wikipathways"}
+            and protein_match_mode in {"uniprot_id", "gene_symbol"}
+        )
+        else "uniprot_id"
+    )
     overrides["protein_selection_option"] = DEFAULT_SETTINGS["protein_selection_option"]
     overrides["ptm_selection_option"] = DEFAULT_SETTINGS["ptm_selection_option"]
     global_ptm_max = _to_int(_get_input_value(input, "settings_ptm_max_display"), DEFAULT_SETTINGS["ptm_max_display"])
@@ -2217,6 +2229,8 @@ CUSTOM_STYLES = ui.tags.style(
     .pathway-viewer-card:fullscreen .viewer-create-panel { display: block !important; visibility: visible !important; flex: 0 0 auto;
         align-self: stretch; width: 100%; max-width: 100%; min-width: 0; }
     .pathway-viewer-card:fullscreen .pathway-viewer-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: auto; }
+    .pathway-viewer-card .svg-container #svgCanvas > svg { width: 100%; height: 100%; display: block; position: absolute; inset: 0; }
+    .pathway-viewer-card:fullscreen .pathway-viewer-body > .shiny-html-output { width: 100%; min-width: 0; flex: 1 1 auto; }
     .pathway-viewer-card:fullscreen .svg-container { width: 100% !important; min-width: 100% !important; max-width: none !important; flex: 1 1 auto; min-height: 0; overflow: auto; }
     .pathway-viewer-card:fullscreen #svgCanvas { width: 100% !important; max-width: none !important; }
     .pathway-viewer-card:fullscreen .viewer-fullscreen-btn { top: 16px; right: 16px; z-index: 60; }
@@ -4830,7 +4844,11 @@ def _preview_panel(cfg: Dict[str, Any]) -> ui.card:
                 function syncLabel(){{
                     const active = document.fullscreenElement === card;
                     btn.textContent = active ? 'Exit Full Screen' : 'Full Screen';
-                    window.dispatchEvent(new Event('resize'));
+                    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {{
+                        const api = getApi();
+                        if (api && typeof api.syncCanvasSize === 'function') api.syncCanvasSize();
+                        window.dispatchEvent(new Event('resize'));
+                    }}));
                 }}
                 btn.addEventListener('click', async () => {{
                     try {{
@@ -6353,6 +6371,39 @@ app_ui = ui.page_fluid(
                                 ),
                             ),
                             value=DEFAULT_SETTINGS.get("temporal_mode", False),
+                        ),
+                    ),
+                    ui.div(
+                        {"class": "mk-mode-help-row"},
+                        ui.input_radio_buttons(
+                            "settings_protein_match_mode",
+                            ui.TagList(
+                                "Web pathway protein matching",
+                                ui.tags.span(
+                                    {"class": "mk-inline-help-wrap"},
+                                    ui.tags.span(
+                                        {
+                                            "class": "mk-inline-help",
+                                            "aria-label": "Web pathway protein matching help",
+                                            "tabindex": "0",
+                                            "data-help-tooltip-html": (
+                                                "<strong>UniProt ID:</strong> uses the existing pathway identifier matching. "
+                                                "WikiPathways nodes are resolved to UniProt IDs, while KEGG node identifiers use the uploaded KEGG annotation.<br/><br/>"
+                                                "<strong>Gene symbol:</strong> first compares each visible pathway node label with the uploaded Gene Symbol column, ignoring letter case. "
+                                                "When no label in a protein box matches, it falls back to the same identifier/UniProt matching.<br/><br/>"
+                                                "This setting only affects KEGG and WikiPathways loaded in Web Pathways."
+                                            ),
+                                        },
+                                        "i",
+                                    ),
+                                ),
+                            ),
+                            choices={
+                                "uniprot_id": "UniProt ID",
+                                "gene_symbol": "Gene symbol",
+                            },
+                            selected=DEFAULT_SETTINGS.get("protein_match_mode", "uniprot_id"),
+                            inline=True,
                         ),
                     ),
                     ui.input_numeric(
@@ -9003,7 +9054,7 @@ def server(input, output, session):  # type: ignore[override]
             color_hex = _rgb_tuple_to_hex(tuple(int(c) for c in list(stop["color"])[:3]))
             gradient_parts.append(f"{color_hex} {pct:.3f}%")
         style = "background: linear-gradient(90deg, " + ", ".join(gradient_parts) + ");"
-        labels = [f"{float(stop['value']):g}" for stop in sorted(stops, key=lambda item: float(item["value"]), reverse=True)]
+        labels = [f"{float(stop['value']):g}" for stop in sorted(stops, key=lambda item: float(item["value"]))]
         return style, labels
 
     @reactive.Effect
@@ -9026,9 +9077,9 @@ def server(input, output, session):  # type: ignore[override]
         neg_hex = _rgb_tuple_to_hex(preset["neg"])
         pos_hex = _rgb_tuple_to_hex(preset["pos"])
         preset_rows = [
-            {"value": float(DEFAULT_SETTINGS.get("max_positive", 2)), "color": pos_hex},
-            {"value": 0.0, "color": "#ffffff"},
             {"value": float(DEFAULT_SETTINGS.get("max_negative", -2)), "color": neg_hex},
+            {"value": 0.0, "color": "#ffffff"},
+            {"value": float(DEFAULT_SETTINGS.get("max_positive", 2)), "color": pos_hex},
         ]
         try:
             session.send_input_message("settings_negative_color", {"value": neg_hex})
