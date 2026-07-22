@@ -6734,7 +6734,7 @@ def server(input, output, session):  # type: ignore[override]
         ptm_dataset.set(None)
         metabolite_dataset.set(None)
         protein_kegg_warning.set("")
-        _refresh_global_catalog_from_current(reset=True)
+        _reset_global_catalog_from_default()
         _write_debug_dump("user_protein_dataset_debug.txt", {"info": "Processed dataset not generated yet"})
         _write_debug_dump("user_ptm_dataset_debug.txt", {"info": "Processed dataset not generated yet"})
         _update_ks_index(reset=True)
@@ -7660,18 +7660,15 @@ def server(input, output, session):  # type: ignore[override]
             updated["_persist_token"] = time.time()
             state["json"].set(updated)
 
-    def _refresh_global_catalog_from_current(reset: bool = False) -> None:
-        if reset:
-            info = dict(GLOBAL_CATALOG_INFO)
-            global_catalog_info.set(info)
-            _sync_catalog_into_open_payloads(info)
-            return
+    def _reset_global_catalog_from_default() -> None:
+        info = dict(GLOBAL_CATALOG_INFO)
+        global_catalog_info.set(info)
+        _sync_catalog_into_open_payloads(info)
+
+    def _global_catalog_build_inputs() -> Optional[Tuple[Dict[str, Any], Dict[str, Any]]]:
         data_override = collect_data_override()
         if not data_override:
-            info = dict(GLOBAL_CATALOG_INFO)
-            global_catalog_info.set(info)
-            _sync_catalog_into_open_payloads(info)
-            return
+            return None
         species_choice, species_info = _resolve_species(_get_input_value(input, "input_species"))
         protein_cfg = data_override.get("protein", {}) if isinstance(data_override, dict) else {}
         settings_override = {
@@ -7684,22 +7681,34 @@ def server(input, output, session):  # type: ignore[override]
             "protein_tooltip_columns": protein_cfg.get("tooltip_columns", []),
             "hsa_id_column": protein_cfg.get("kegg_column", protein_cfg.get("uniprot_column", "Uniprot_ID")),
         }
+        return data_override, settings_override
+
+    def _apply_global_catalog_payload(payload: Dict[str, Any]) -> None:
+        info = {
+            "path": "",
+            "metadata": payload.get("metadata", {}),
+            "protein_catalog": payload.get("protein_catalog", {}),
+            "scope": "session",
+        }
+        global_catalog_info.set(dict(info))
+        _sync_catalog_into_open_payloads(dict(info))
+
+    async def _refresh_global_catalog_from_current_async() -> None:
+        build_inputs = _global_catalog_build_inputs()
+        if build_inputs is None:
+            _reset_global_catalog_from_default()
+            return
+        data_override, settings_override = build_inputs
         try:
-            payload = build_global_protein_catalog(
+            payload = await asyncio.to_thread(
+                build_global_protein_catalog,
                 data_override=data_override,
                 settings_override=settings_override,
             )
-            info = {
-                "path": "",
-                "metadata": payload.get("metadata", {}),
-                "protein_catalog": payload.get("protein_catalog", {}),
-                "scope": "session",
-            }
         except Exception as exc:
             print(f"Warning: failed to refresh global protein catalog: {exc}")
             return
-        global_catalog_info.set(dict(info))
-        _sync_catalog_into_open_payloads(dict(info))
+        _apply_global_catalog_payload(payload)
 
     def _current_global_catalog_info() -> Dict[str, Any]:
         try:
@@ -7925,7 +7934,7 @@ def server(input, output, session):  # type: ignore[override]
         except Exception as exc:
             print(f"Warning: failed to apply outline width defaults: {exc}")
 
-    def _load_demo_datasets():
+    async def _load_demo_datasets():
         """Load bundled demo protein/PTM files so Demo mode behaves like preloaded uploads."""
         missing = []
         if not os.path.exists(SAMPLE_PROTEIN_FILE):
@@ -7944,7 +7953,7 @@ def server(input, output, session):  # type: ignore[override]
             protein_preview_dataset.set(None)
             ptm_preview_dataset.set(None)
             metabolite_preview_dataset.set(None)
-            _refresh_global_catalog_from_current(reset=True)
+            _reset_global_catalog_from_default()
             pipeline_running.set(False)
             pipeline_ready.set(False)
             nav_lock_status.set("Demo mode: sample files missing. Navigation locked.")
@@ -7966,7 +7975,7 @@ def server(input, output, session):  # type: ignore[override]
                 protein_preview_dataset.set(None)
                 ptm_preview_dataset.set(None)
                 metabolite_preview_dataset.set(None)
-                _refresh_global_catalog_from_current(reset=True)
+                _reset_global_catalog_from_default()
                 pipeline_running.set(False)
                 pipeline_ready.set(False)
                 nav_lock_status.set("Demo mode: sample protein validation failed.")
@@ -8061,7 +8070,7 @@ def server(input, output, session):  # type: ignore[override]
                 "valid": False,
                 "comparisons": [],
             })
-            _refresh_global_catalog_from_current()
+            await _refresh_global_catalog_from_current_async()
             _update_ks_index()
             _refresh_pathway_scores()
             pipeline_running.set(False)
@@ -8079,7 +8088,7 @@ def server(input, output, session):  # type: ignore[override]
             protein_preview_dataset.set(None)
             ptm_preview_dataset.set(None)
             metabolite_preview_dataset.set(None)
-            _refresh_global_catalog_from_current(reset=True)
+            _reset_global_catalog_from_default()
             pipeline_running.set(False)
             pipeline_ready.set(False)
             nav_lock_status.set("Demo mode: sample datasets failed to load.")
@@ -8251,7 +8260,7 @@ def server(input, output, session):  # type: ignore[override]
             protein_upload_size_bytes.set(0)
             ptm_upload_size_bytes.set(0)
             metabolite_upload_size_bytes.set(0)
-            _refresh_global_catalog_from_current(reset=True)
+            _reset_global_catalog_from_default()
             _write_debug_dump("user_protein_dataset_debug.txt", {"info": "No dataset loaded"})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
@@ -8282,7 +8291,7 @@ def server(input, output, session):  # type: ignore[override]
             protein_upload_size_bytes.set(0)
             ptm_upload_size_bytes.set(0)
             metabolite_upload_size_bytes.set(0)
-            _refresh_global_catalog_from_current(reset=True)
+            _reset_global_catalog_from_default()
             _write_debug_dump("user_protein_dataset_debug.txt", {"info": "No dataset loaded"})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
@@ -8307,7 +8316,7 @@ def server(input, output, session):  # type: ignore[override]
             protein_upload_size_bytes.set(0)
             ptm_upload_size_bytes.set(0)
             metabolite_upload_size_bytes.set(0)
-            _refresh_global_catalog_from_current(reset=True)
+            _reset_global_catalog_from_default()
             _write_debug_dump("user_protein_dataset_debug.txt", {"info": "No dataset loaded"})
             protein_kegg_warning.set("")
             _update_ks_index(reset=True)
@@ -8335,7 +8344,7 @@ def server(input, output, session):  # type: ignore[override]
                 metabolite_upload_size_bytes.set(0)
                 ptm_preview_dataset.set(None)
                 metabolite_preview_dataset.set(None)
-                _refresh_global_catalog_from_current(reset=True)
+                _reset_global_catalog_from_default()
                 _write_debug_dump("user_protein_dataset_debug.txt", {"errors": result.errors})
                 protein_kegg_warning.set("")
                 _update_ks_index(reset=True)
@@ -8654,7 +8663,7 @@ def server(input, output, session):  # type: ignore[override]
 
     @reactive.Effect
     @reactive.event(input.input_run_pipeline)
-    def _run_validated_input_pipeline():
+    async def _run_validated_input_pipeline():
         if _current_mode() == "demo":
             _clear_input_busy_state("Demo mode uses bundled sample data.")
             return
@@ -8795,7 +8804,7 @@ def server(input, output, session):  # type: ignore[override]
             metabolite_dataset.set(processed_metabolite)
             _write_debug_dump("user_protein_dataset_debug.txt", processed_protein)
             _write_debug_dump("user_ptm_dataset_debug.txt", processed_ptm or {"info": "No PTM dataset loaded"})
-            _refresh_global_catalog_from_current()
+            await _refresh_global_catalog_from_current_async()
             _update_ks_index()
             _refresh_pathway_scores()
             pipeline_ready.set(True)
@@ -8922,7 +8931,7 @@ def server(input, output, session):  # type: ignore[override]
 
     @reactive.Effect
     @reactive.event(input.input_mode)
-    def _sync_mode_status():
+    async def _sync_mode_status():
         mode = str((_get_input_value(input, "input_mode") or "user")).lower()
         if mode_sync_in_progress.get():
             return
@@ -8936,14 +8945,14 @@ def server(input, output, session):  # type: ignore[override]
                     session.send_input_message("settings_use_black_protein_outlines", {"value": True})
                 except Exception:
                     pass
-                _load_demo_datasets()
+                await _load_demo_datasets()
             except Exception as exc:
                 print(f"Warning: demo mode failed to load sample datasets: {exc}")
                 protein_dataset.set(None)
                 ptm_dataset.set(None)
                 protein_preview_dataset.set(None)
                 ptm_preview_dataset.set(None)
-                _refresh_global_catalog_from_current(reset=True)
+                _reset_global_catalog_from_default()
                 protein_validation.set({"status": "Demo mode failed to load sample protein.", "errors": [str(exc)], "valid": False, "comparisons": []})
                 ptm_validation.set({"status": "Demo mode failed to load sample PTM.", "errors": [str(exc)], "valid": False})
                 validated_protein_dataset.set(None)
@@ -8974,7 +8983,7 @@ def server(input, output, session):  # type: ignore[override]
                 protein_preview_dataset.set(None)
                 ptm_preview_dataset.set(None)
                 metabolite_preview_dataset.set(None)
-                _refresh_global_catalog_from_current(reset=True)
+                _reset_global_catalog_from_default()
                 protein_kegg_warning.set("")
                 protein_validation.set({"status": "Upload a protein file to begin.", "errors": [], "valid": False, "comparisons": []})
                 ptm_validation.set({"status": "PTM upload optional. Provide after protein if available.", "errors": [], "valid": False})

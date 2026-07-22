@@ -555,6 +555,8 @@ class PathwayProcessor:
     def __init__(self, entries, proteomic_data, ptm_datasets, settings, metabolite_data=None, metabolite_config=None):
         self.proteomic_data = proteomic_data
         self.ptm_datasets = {f"ptm_{i}": dataset for i, dataset in enumerate(ptm_datasets)}
+        self._ptm_row_indices = {}
+        self._indexed_ptm_row_count = 0
         self.protein_data_map = {}  # Initialize protein_data_map
         self.current_proteins = {}  # Initialize current_proteins
         for dataset_id, dataset in self.ptm_datasets.items():
@@ -590,6 +592,17 @@ class PathwayProcessor:
                 reg_function_col=reg_function_col,
                 output_col='Phosphosite_Classification'
             )
+            uniprot_col = dataset.get('uniprot_column')
+            if uniprot_col in dataset['data'].columns:
+                grouped_rows = dataset['data'].groupby(
+                    uniprot_col,
+                    sort=False,
+                    dropna=True,
+                ).indices
+                self._ptm_row_indices[dataset_id] = dict(grouped_rows)
+                self._indexed_ptm_row_count += len(dataset['data'])
+            else:
+                self._ptm_row_indices[dataset_id] = {}
         self.settings = settings
         self.protein_selection_option = settings.get('protein_selection_option', 2)
         self.ptm_selection_option = settings.get('ptm_selection_option', 2)
@@ -1031,10 +1044,11 @@ class PathwayProcessor:
     def prioritize_ptm_sites(self, uniprot_id):
         all_ptms = []
         for dataset_id, dataset in self.ptm_datasets.items():
-            uniprot_col = dataset['uniprot_column']
-            fold_change_cols = [col[1] for col in dataset['main_columns']]
             ptm_data = dataset['data']
-            ptm_subset = ptm_data[ptm_data[uniprot_col] == uniprot_id].copy()
+            row_positions = self._ptm_row_indices.get(dataset_id, {}).get(uniprot_id)
+            if row_positions is None or len(row_positions) == 0:
+                continue
+            ptm_subset = ptm_data.iloc[row_positions].copy()
             if ptm_subset.empty:
                 continue
             ptm_subset['dataset_id'] = dataset_id
@@ -1059,14 +1073,12 @@ class PathwayProcessor:
                 combined_ptms[fc] = pd.to_numeric(combined_ptms[fc], errors='coerce')
         try:
             if self.ptm_selection_option == 1:
-                print("Applying PTM selection option 1: Highest absolute fold change")
                 combined_ptms = combined_ptms.sort_values(
                     by=fc_cols,
                     key=lambda x: pd.to_numeric(x, errors="coerce").abs(),
                     ascending=False
                 )
             elif self.ptm_selection_option == 2:
-                print("Applying PTM selection option 2: Prefer modulating phospho PTMs")
                 def sort_key(row):
                     try:
                         dataset_id = row['dataset_id']
@@ -1089,7 +1101,6 @@ class PathwayProcessor:
                 combined_ptms = combined_ptms.sort_values(by='sort_key')
                 combined_ptms = combined_ptms.drop(columns=['sort_key'])
             elif self.ptm_selection_option == 3:
-                print("Applying PTM selection option 3: Modulating phospho and all non-phospho PTMs")
                 combined_ptms = combined_ptms[
                     (combined_ptms['is_phospho'] & combined_ptms['is_modulating']) |
                     (~combined_ptms['is_phospho'])
@@ -1099,7 +1110,6 @@ class PathwayProcessor:
                     key=lambda x: pd.to_numeric(x, errors="coerce").abs(),
                     ascending=False
                 )
-            print(f"Found {len(combined_ptms)} PTM sites")
             return combined_ptms
         except Exception as e:
             print(f"Error prioritizing PTM sites for UniProt ID {uniprot_id}: {str(e)}")
@@ -2280,6 +2290,7 @@ class PathwayProcessor:
     def build_full_protein_catalog(self):
         catalog = {}
         seen = set()
+        proteins_with_ptms = 0
         for _, row in self.proteomic_data.iterrows():
             if self.prot_uniprot_column not in row.index or pd.isna(row[self.prot_uniprot_column]):
                 continue
@@ -2296,13 +2307,16 @@ class PathwayProcessor:
                     annotations.append('')
                 else:
                     annotations.append(str(value))
+            ptm_summary = self._build_ptm_summary(uniprot_id)
+            if ptm_summary:
+                proteins_with_ptms += 1
             protein_entry = {
                 'label': label,
                 'gene_symbol': label,
                 'label_color': [0, 0, 0],
                 'transcriptomic_color': [],
                 'annotations': ','.join(f'\"{ann}\"' for ann in annotations if ann),
-                'PTMs': self._build_ptm_summary(uniprot_id)
+                'PTMs': ptm_summary
             }
             outline_cols = self.outline_columns or []
             use_black_outlines = bool(self.settings.get('use_black_protein_outlines', False))
@@ -2323,6 +2337,11 @@ class PathwayProcessor:
                 elif outline_value is not None:
                     protein_entry[f'outline_color_{idx}'] = self.get_color(outline_value)
             catalog[uniprot_id] = protein_entry
+        _safe_debug_print(
+            "Built protein catalog: "
+            f"proteins={len(catalog)}, proteins_with_ptms={proteins_with_ptms}, "
+            f"indexed_ptm_rows={self._indexed_ptm_row_count}"
+        )
         return catalog
 
     def build_full_metabolite_catalog(self):
