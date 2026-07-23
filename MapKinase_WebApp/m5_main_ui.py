@@ -6601,6 +6601,7 @@ def server(input, output, session):  # type: ignore[override]
     pipeline_running = reactive.Value(False)
     mode_sync_in_progress = reactive.Value(False)
     last_applied_input_mode = reactive.Value(None)
+    demo_species_sync_target = reactive.Value(None)
     run_guard_message = reactive.Value("")
     last_accepted_run_monotonic = reactive.Value(None)
     run_attempt_times_monotonic = reactive.Value([])
@@ -7198,13 +7199,22 @@ def server(input, output, session):  # type: ignore[override]
                 return path
         return ""
 
-    def _refresh_pathway_scores(selected_fc: Optional[str] = None) -> None:
+    def _refresh_pathway_scores(
+        selected_fc: Optional[str] = None,
+        *,
+        species_selection: Optional[str] = None,
+    ) -> None:
         with reactive.isolate():
             protein_ok = bool(protein_validation.get().get("valid"))
             protein_data = protein_dataset.get()
             ptm_ok = bool(ptm_validation.get().get("valid"))
             ptm_data = ptm_dataset.get() if ptm_ok else None
-            _species_choice, species_info = _resolve_species(_get_input_value(input, "input_species"))
+            resolved_species_selection = (
+                species_selection
+                if species_selection is not None
+                else _get_input_value(input, "input_species")
+            )
+            _species_choice, species_info = _resolve_species(resolved_species_selection)
             current_mode = _current_mode()
             significance_mode = str(_get_input_value(input, "web_fisher_sig_mode") or "both").strip().lower()
             if significance_mode not in {"both", "positive", "negative"}:
@@ -7665,11 +7675,18 @@ def server(input, output, session):  # type: ignore[override]
         global_catalog_info.set(info)
         _sync_catalog_into_open_payloads(info)
 
-    def _global_catalog_build_inputs() -> Optional[Tuple[Dict[str, Any], Dict[str, Any]]]:
+    def _global_catalog_build_inputs(
+        species_selection: Optional[str] = None,
+    ) -> Optional[Tuple[Dict[str, Any], Dict[str, Any]]]:
         data_override = collect_data_override()
         if not data_override:
             return None
-        species_choice, species_info = _resolve_species(_get_input_value(input, "input_species"))
+        resolved_species_selection = (
+            species_selection
+            if species_selection is not None
+            else _get_input_value(input, "input_species")
+        )
+        species_choice, species_info = _resolve_species(resolved_species_selection)
         protein_cfg = data_override.get("protein", {}) if isinstance(data_override, dict) else {}
         settings_override = {
             "species": species_choice,
@@ -7693,8 +7710,10 @@ def server(input, output, session):  # type: ignore[override]
         global_catalog_info.set(dict(info))
         _sync_catalog_into_open_payloads(dict(info))
 
-    async def _refresh_global_catalog_from_current_async() -> None:
-        build_inputs = _global_catalog_build_inputs()
+    async def _refresh_global_catalog_from_current_async(
+        species_selection: Optional[str] = None,
+    ) -> None:
+        build_inputs = _global_catalog_build_inputs(species_selection=species_selection)
         if build_inputs is None:
             _reset_global_catalog_from_default()
             return
@@ -7986,7 +8005,12 @@ def server(input, output, session):  # type: ignore[override]
             species_info = SPECIES_CHOICES.get(DEMO_SPECIES, SPECIES_CHOICES.get(DEFAULT_SPECIES, {}))
             current_species = str(_get_input_value(input, "input_species") or "").strip().lower()
             if species_choice and current_species != species_choice:
-                session.send_input_message("input_species", {"value": species_choice})
+                demo_species_sync_target.set(species_choice)
+                try:
+                    session.send_input_message("input_species", {"value": species_choice})
+                except Exception:
+                    demo_species_sync_target.set(None)
+                    raise
             species_code = species_info.get("code", "") or SPECIES_CHOICES.get(DEFAULT_SPECIES, {}).get("code", "hsa")
             print(f"Demo mode: loading sample datasets for species '{species_choice}' code '{species_code}'")
 
@@ -8070,9 +8094,9 @@ def server(input, output, session):  # type: ignore[override]
                 "valid": False,
                 "comparisons": [],
             })
-            await _refresh_global_catalog_from_current_async()
+            await _refresh_global_catalog_from_current_async(species_selection=species_choice)
             _update_ks_index()
-            _refresh_pathway_scores()
+            _refresh_pathway_scores(species_selection=species_choice)
             pipeline_running.set(False)
             pipeline_ready.set(True)
             nav_lock_status.set("Demo mode: sample datasets loaded. Navigation unlocked.")
@@ -8970,6 +8994,7 @@ def server(input, output, session):  # type: ignore[override]
                 mode_sync_in_progress.set(False)
         else:
             try:
+                demo_species_sync_target.set(None)
                 try:
                     session.send_input_message("settings_use_black_protein_outlines", {"value": False})
                 except Exception:
@@ -9005,6 +9030,12 @@ def server(input, output, session):  # type: ignore[override]
     def _refresh_scores_for_species():
         with reactive.isolate():
             protein_ok = bool(protein_validation.get().get("valid"))
+            pending_demo_species = str(demo_species_sync_target.get() or "").strip().lower()
+        if pending_demo_species:
+            demo_species_sync_target.set(None)
+            current_species = str(_get_input_value(input, "input_species") or "").strip().lower()
+            if _current_mode() == "demo" and current_species == pending_demo_species:
+                return
         if protein_ok:
             if _current_mode() == "demo":
                 _refresh_pathway_scores()
