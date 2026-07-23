@@ -43,10 +43,6 @@ WORKDIR /app
 COPY --from=builder /install /usr/local
 COPY --from=builder /app /app
 
-# Support OpenShift's arbitrary, non-root runtime UID.
-RUN chgrp -R 0 /app \
-    && chmod -R g=u /app
-
 USER 1001
 
 EXPOSE 8080
