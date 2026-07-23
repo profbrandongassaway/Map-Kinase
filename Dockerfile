@@ -20,9 +20,12 @@ RUN python -m pip install --prefix=/install -r requirements.txt
 COPY . /app
 
 # Directories that OpenShift can write to
-RUN mkdir -p /app/cache \
-    && chgrp -R 0 /app \
-    && chmod -R g=u /app
+RUN chmod -R a-w /app \
+    && mkdir -p /app/cache \
+    && chgrp -R 0 /app/cache \
+    && chmod -R g=u /app/cache \
+    && chgrp -R 0 /install \
+    && chmod -R g=u /install
 
 ############################
 # Runtime stage
@@ -35,11 +38,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     M5_PORT=8080
 
 WORKDIR /app
-USER root
-
-# Install netcat, matching the dependency from the original image.
-RUN microdnf install -y nmap-ncat \
-    && microdnf clean all
 
 # Copy installed Python packages and application source from builder.
 COPY --from=builder /install /usr/local
@@ -58,5 +56,4 @@ CMD ["python", "-m", "uvicorn", \
     "--host", "0.0.0.0", \
     "--port", "8080", \
     "--log-level", "info", \
-    "--timeout-graceful-shutdown", "30", \
-    "--no-access-log"]
+    "--timeout-graceful-shutdown", "30"]
