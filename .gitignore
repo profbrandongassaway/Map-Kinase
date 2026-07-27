@@ -419,3 +419,27 @@ MapKinase_WebApp/icons/Logos/* - Copy*
 deployment_validation/generated_uploads/
 deployment_validation/results/
 deployment_validation/url_check_results*.json
+
+# ONLY FOR THE GASSAWAY LAB GIT
+
+# Licensed annotation datasets
+/MapKinase_WebApp/annotation_files/Acetylation_site_dataset.gz
+/MapKinase_WebApp/annotation_files/Kinase_Substrate_Dataset.gz
+/MapKinase_WebApp/annotation_files/Phosphorylation_site_dataset.gz
+/MapKinase_WebApp/annotation_files/Regulatory_sites.gz
+/MapKinase_WebApp/annotation_files/Ubiquitination_site_dataset.gz
+/MapKinase_WebApp/annotation_files/uniprot_human_function_annotations.tsv
+
+# Internal test and smoke scripts
+**/test_*.py
+**/*_test.py
+**/*_smoke.py
+**/*smokescreen*.py
+
+# Retain the stored pathway directory structure, but not generated pathway files
+/stored_pathways/kegg/**
+!/stored_pathways/kegg/**/
+!/stored_pathways/kegg/**/.gitkeep
+/stored_pathways/wikipathways/**
+!/stored_pathways/wikipathways/**/
+!/stored_pathways/wikipathways/**/.gitkeep

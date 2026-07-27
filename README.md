@@ -117,3 +117,13 @@ Useful options:
 - `--skip-fetch` to reuse an existing local clone without pulling updates first
 
 After the sync, Map-Kinase will use local cached WikiPathways GPML files automatically, and it will use cached PNG files when available.
+
+## License
+
+The original Map-Kinase source code is distributed under the MIT License.
+See the LICENSE file for details.
+
+Map-Kinase incorporates or accesses pathway and annotation information
+from third-party resources. Those materials are not covered by the
+Map-Kinase MIT License and remain subject to the terms of their
+respective providers.
