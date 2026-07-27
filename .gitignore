@@ -422,6 +422,20 @@ deployment_validation/url_check_results*.json
 
 # ONLY FOR THE GASSAWAY LAB GIT
 
+# Local editor and transient debug artifacts
+/.vscode/
+/tmp_app_*.txt
+/Users*DesktopMapKinase*stored_pathways*cst*.mapkinase.json
+/MapKinase_WebApp/tmp_*
+/MapKinase_WebApp/debug_*.py
+/MapKinase_WebApp/*.ai
+
+# Test and temporary cache outputs
+/MapKinase_WebApp/cache/CST_Pathways_Test*/
+/MapKinase_WebApp/cache/*_test_*
+/MapKinase_WebApp/cache/test_*
+/MapKinase_WebApp/cache/*_tmp.*
+
 # Licensed annotation datasets
 /MapKinase_WebApp/annotation_files/Acetylation_site_dataset.gz
 /MapKinase_WebApp/annotation_files/Kinase_Substrate_Dataset.gz
