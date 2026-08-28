@@ -427,6 +427,10 @@ deployment_validation/url_check_results*.json
 /deployment_validation/DEPLOYMENT_VALIDATION_PLAN.md
 /MapKinase/
 /.github/workflows/
+/MapKinase Demo.spec
+/cache/wikipathways_index_local_cache/
+/deployment_validation/
+/MapKinase_WebApp/3_phosprotnorm_gui_embedded.py
 
 # Keep the two bundled Demo-mode datasets public; all other sample inputs are local-only.
 /sample_input_files/*
