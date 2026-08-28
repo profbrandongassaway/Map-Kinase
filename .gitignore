@@ -426,6 +426,11 @@ deployment_validation/url_check_results*.json
 /DEPENDENCY_SECURITY_REVIEW.md
 /deployment_validation/DEPLOYMENT_VALIDATION_PLAN.md
 
+# Keep the two bundled Demo-mode datasets public; all other sample inputs are local-only.
+/sample_input_files/*
+!/sample_input_files/TCA_protein_for_mapk.txt
+!/sample_input_files/TCA_phospho_for_mapk_singlesite.csv
+
 # Local editor and transient debug artifacts
 /.vscode/
 /tmp_app_*.txt
