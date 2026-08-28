@@ -24,15 +24,15 @@ def _parse_sub_mod_rsd(mod_rsd: str) -> Optional[str]:
 
 def load_kinase_substrate_map(base_dir: str, compressed_file: str = "Kinase_Substrate_Dataset.gz") -> Dict[Tuple[str, str, str], List[Dict[str, str]]]:
     """
-    Load PSP kinase-substrate data from compressed file in annotation_files.
+    Load PSP kinase-substrate data from annotation_files/phosphositeplus_files.
     Returns mapping: (SUB_ACC_ID, site_number, sub_organism_lower) -> list of entries.
     """
     base_path = Path(base_dir)
-    candidates = [base_path / "annotation_files"]
+    candidates = [base_path / "annotation_files" / "phosphositeplus_files"]
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         candidates.extend([
-            Path(sys._MEIPASS) / "MapKinase_WebApp" / "annotation_files",
-            Path(sys._MEIPASS) / "annotation_files",
+            Path(sys._MEIPASS) / "MapKinase_WebApp" / "annotation_files" / "phosphositeplus_files",
+            Path(sys._MEIPASS) / "annotation_files" / "phosphositeplus_files",
         ])
     full_path = None
     for folder in candidates:

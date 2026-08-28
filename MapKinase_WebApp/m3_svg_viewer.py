@@ -647,6 +647,19 @@ def create_pathway_svg(json_data, show_kegg_bg=False):
                         }});
                     }}));
                 }}
+                if (!window.__mkTabViewerRefreshBound) {{
+                    window.__mkTabViewerRefreshBound = true;
+                    const refreshVisibleViewers = () => {{
+                        Object.keys(window.__mkViewerControls || {{}}).forEach((key) => {{
+                            const api = window.__mkViewerControls[key];
+                            if (api && typeof api.refreshLayout === 'function') api.refreshLayout();
+                        }});
+                    }};
+                    document.addEventListener('shown.bs.tab', () => {{
+                        window.requestAnimationFrame(() => window.requestAnimationFrame(refreshVisibleViewers));
+                        window.setTimeout(refreshVisibleViewers, 150);
+                    }});
+                }}
             }} catch (observerErr) {{
                 console.log('svg resize observer setup failed', observerErr);
             }}
@@ -10855,6 +10868,15 @@ function rebuildGroupIndexes() {{
                     syncSvgCanvasSize();
                     return true;
                 }},
+                refreshLayout: () => {{
+                    if (!rootContainer || !rootContainer.isConnected || rootContainer.getClientRects().length === 0) {{
+                        return false;
+                    }}
+                    syncSvgCanvasSize();
+                    applyBackgroundPreview();
+                    applyViewerOverlayState();
+                    return true;
+                }},
                 getViewportCenter: () => Object.assign({{}}, getViewportCenter()),
                 undo: () => {{
                     mkHistory?.undo();
@@ -10943,7 +10965,7 @@ function rebuildGroupIndexes() {{
             console.log('m3: could not expose initializeSvg', e);
         }}
         console.log('m3: scheduling initializeSvg');
-        window.__mkSafeInit = window.__mkSafeInit || function() {{
+        const safeInit = function() {{
             try {{
                 initializeSvg();
             }} catch (err) {{
@@ -10953,8 +10975,9 @@ function rebuildGroupIndexes() {{
                 Shiny?.setInputValue('client_error', {{ label: 'initializeSvg', message: err?.message || String(err), stack: err?.stack || null, time: Date.now() }}, {{ priority: 'event' }});
             }}
         }};
+        window.__mkSafeInit = safeInit;
         // Increase delay slightly to allow assets to load
-        setTimeout(window.__mkSafeInit, 1500);
+        setTimeout(safeInit, 1500);
         </script>
     """
     return ui.div(

@@ -29,16 +29,27 @@ class KeggAPI(BasePathwayAPI):
         return str(file_path)
 
     def download_pathway_image(self, pathway_id):
-        url = f"https://rest.kegg.jp/get/{pathway_id}/image"
-        response = requests.get(url)
-        response.raise_for_status()
         species_folder = _derive_species_folder(pathway_id)
         base_dir = Path(__file__).resolve().parent.parent / "stored_pathways" / "kegg" / species_folder
         base_dir.mkdir(parents=True, exist_ok=True)
         file_path = base_dir / f"{pathway_id}.png"
+
+        if file_path.exists() and file_path.stat().st_size > 0:
+            try:
+                image = Image.open(file_path)
+                image.load()
+                return image
+            except OSError:
+                pass
+
+        url = f"https://rest.kegg.jp/get/{pathway_id}/image"
+        response = requests.get(url)
+        response.raise_for_status()
         with file_path.open("wb") as fh:
             fh.write(response.content)
-        return Image.open(file_path)
+        image = Image.open(file_path)
+        image.load()
+        return image
 
     def parse_pathway(self, file_path):
         try:

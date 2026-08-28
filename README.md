@@ -43,11 +43,14 @@ Production `requirements.txt` passed with `No known vulnerabilities found`. Deve
   - Debug SVG export is disabled unless explicitly enabled.
   - Debug file output, terminal file logging, and persistent CST save remain opt-in via environment variables.
 
-## Required PSP annotations
-To run the PTM annotation features properly, download the PhosphoSitePlus datasets from `https://www.phosphosite.org/staticDownloads` and place the compressed files (do not unzip) in `MapKinase_WebApp\annotation_files\`:
-- `Phosphorylation_site_dataset.gz`
+## PhosphoSitePlus annotations
+Download the PhosphoSitePlus datasets from `https://www.phosphosite.org/staticDownloads` and place the compressed files (do not unzip) in `MapKinase_WebApp\annotation_files\phosphositeplus_files\`.
+
+The current runtime annotation loaders use:
 - `Regulatory_sites.gz`
 - `Kinase_Substrate_Dataset.gz`
+
+Other PhosphoSitePlus datasets can remain in the same directory for future annotation loaders.
 
 ## Input file formats
 Protein data (CSV/TSV):
@@ -117,6 +120,27 @@ Useful options:
 - `--skip-fetch` to reuse an existing local clone without pulling updates first
 
 After the sync, Map-Kinase will use local cached WikiPathways GPML files automatically, and it will use cached PNG files when available.
+
+## KEGG REST cache sync
+To preload KEGG KGML and PNG pathway files for selected organisms, run:
+
+```powershell
+python MapKinase_WebApp\sync_kegg_rest_cache.py --org hsa --org mmu --pretty
+```
+
+The sync writes runtime-ready files to `stored_pathways\kegg\<org>\`. Valid
+existing files are reused automatically.
+
+Useful options:
+- `--max-pathways 25` to process at most 25 pathways per organism
+- `--refresh` to redownload files already present in the cache
+- `--no-images` to download KGML without pathway PNG files
+- `--request-interval 0.5` to use a slower request rate
+
+KEGG REST access is restricted to academic users. The sync runs serially and
+defaults to 0.4 seconds between requests to remain below KEGG's limit of three
+requests per second. Generated KEGG pathway files remain subject to KEGG's
+terms and are not covered by the Map-Kinase MIT License.
 
 ## License
 

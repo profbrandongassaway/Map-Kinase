@@ -21,15 +21,15 @@ def _parse_mod_rsd(mod_rsd: str) -> Optional[str]:
 
 def load_regulatory_sites(base_dir: str, compressed_file: str = "Regulatory_sites.gz") -> Dict[Tuple[str, str, str], Dict[str, str]]:
     """
-    Load PSP regulatory site data from the compressed file in annotation_files.
+    Load PSP regulatory site data from annotation_files/phosphositeplus_files.
     Returns mapping: (ACC_ID, site_number, organism_lower) -> row dict.
     """
     base_path = Path(base_dir)
-    candidates = [base_path / "annotation_files"]
+    candidates = [base_path / "annotation_files" / "phosphositeplus_files"]
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         candidates.extend([
-            Path(sys._MEIPASS) / "MapKinase_WebApp" / "annotation_files",
-            Path(sys._MEIPASS) / "annotation_files",
+            Path(sys._MEIPASS) / "MapKinase_WebApp" / "annotation_files" / "phosphositeplus_files",
+            Path(sys._MEIPASS) / "annotation_files" / "phosphositeplus_files",
         ])
     full_path = None
     for folder in candidates:
